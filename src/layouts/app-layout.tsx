@@ -19,6 +19,7 @@ import {
   Zap,
   Activity,
   Languages,
+  Plus,
 } from 'lucide-react'
 
 const protocolIcon: Record<string, string> = {
@@ -168,8 +169,17 @@ export function AppLayout() {
                 })}
 
                 {tasks.length === 0 && (
-                  <div className="px-2 py-1.5 text-[10px] text-text-dim">
-                    {t('nav.noTasks')}
+                  <div className="px-2 py-1.5">
+                    <div className="text-[10px] text-text-dim">{t('nav.noTasks')}</div>
+                    {isAdmin && (
+                      <NavLink
+                        to="/tasks"
+                        className="mt-1 flex items-center gap-1 text-[10px] text-accent hover:text-accent/80 transition-colors"
+                      >
+                        <Plus className="w-3 h-3" />
+                        {t('tasks.createTask')}
+                      </NavLink>
+                    )}
                   </div>
                 )}
               </div>
