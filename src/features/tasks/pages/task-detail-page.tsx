@@ -229,27 +229,28 @@ export default function TaskDetailPage() {
 
           {isAdmin && (
             <div className="flex items-center gap-2 mb-4">
-              <Select value={selectedAgentUuid} onValueChange={(val) => setSelectedAgentUuid(val ?? '')}>
-                <SelectTrigger className="flex-1">
-                  <SelectValue placeholder={t('tasks.selectAgent')}>
-                    {(value: string | null) => {
-                      if (!value) return t('tasks.selectAgent')
-                      const agent = availableAgents.find((a) => a.agent_uuid === value)
-                      return agent?.agent_name ?? t('tasks.selectAgent')
-                    }}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {availableAgents.map((agent) => (
-                    <SelectItem key={agent.agent_uuid} value={agent.agent_uuid}>
-                      {agent.agent_name}
-                    </SelectItem>
-                  ))}
-                  {availableAgents.length === 0 && (
-                    <div className="px-2 py-1.5 text-xs text-text-muted">{t('tasks.noAvailableAgents')}</div>
-                  )}
-                </SelectContent>
-              </Select>
+              {availableAgents.length === 0 ? (
+                <p className="flex-1 text-xs text-text-dim py-2">{t('tasks.noAvailableAgents')}</p>
+              ) : (
+                <Select value={selectedAgentUuid} onValueChange={(val) => setSelectedAgentUuid(val ?? '')}>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder={t('tasks.selectAgent')}>
+                      {(value: string | null) => {
+                        if (!value) return t('tasks.selectAgent')
+                        const agent = availableAgents.find((a) => a.agent_uuid === value)
+                        return agent?.agent_name ?? t('tasks.selectAgent')
+                      }}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableAgents.map((agent) => (
+                      <SelectItem key={agent.agent_uuid} value={agent.agent_uuid}>
+                        {agent.agent_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
               <Button
                 onClick={handleAssign}
                 disabled={!selectedAgentUuid || assignAgents.isPending}
