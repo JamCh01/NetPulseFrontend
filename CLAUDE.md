@@ -85,3 +85,27 @@ npm run generate:api # Regenerate API client from OpenAPI
 - Use `as` casts on `JSON.parse` results at trust boundaries -- validate at runtime
 - Pass unused params to hooks that don't forward them to the API
 - Duplicate constants across files -- check `src/lib/constants.ts` first
+
+## Deployment
+
+### Build & Artifacts
+- `npm run build` outputs to `dist/` (static SPA, no SSR)
+- `VITE_API_BASE_URL` is baked in at build time -- empty string = same-origin (API proxy handles routing)
+- All `VITE_*` env vars are embedded in the JS bundle at build time, not read at runtime
+
+### Docker
+- `Dockerfile` -- two-stage build: `node:22-alpine` (build) + `nginx:alpine` (serve)
+- `nginx.conf` -- SPA fallback + `/api/` reverse proxy to `http://backend:8000` + gzip + asset caching
+- `.dockerignore` -- excludes node_modules, dist, .env, test artifacts
+- Build arg: `docker build --build-arg VITE_API_BASE_URL=... -t netpulse-frontend .`
+
+### Key Deployment Requirements
+1. **SPA fallback** -- all non-file routes must return `index.html` (React Router handles client-side routing)
+2. **API proxy** -- `/api/*` must reach the FastAPI backend. In Docker, nginx proxies to `http://backend:8000`. Without Docker, configure your reverse proxy accordingly.
+3. **HTTPS** -- required in production for secure token handling
+4. **No server-side rendering** -- this is a pure client-side SPA, no Node.js server needed in production
+
+### When Modifying Deployment Files
+- `nginx.conf` -- if backend service name or port changes, update `proxy_pass`
+- `Dockerfile` -- if Node.js version changes, update the base image
+- `.env.example` -- keep in sync with any new `VITE_*` variables

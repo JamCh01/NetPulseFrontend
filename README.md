@@ -113,3 +113,77 @@ Manual additions to `types.gen.ts` and `sdk.gen.ts` (e.g., `user_uuid`, `is_dele
 ## i18n
 
 Supports English (`en`) and Chinese (`zh`). Language is auto-detected from the browser and can be toggled in the sidebar. Translation files are in `src/i18n/locales/`.
+
+## Deployment
+
+### Production Build
+
+```bash
+npm run build
+```
+
+Output is in `dist/`. This is a pure static SPA -- serve it with any static file server (Nginx, Caddy, S3+CloudFront, etc.). All routes must fall back to `index.html` for client-side routing to work.
+
+### Docker
+
+```bash
+# Build image
+docker build -t netpulse-frontend .
+
+# Run (backend at http://backend:8000)
+docker run -d -p 80:80 netpulse-frontend
+```
+
+The Dockerfile uses a two-stage build:
+1. **Build stage** -- `node:22-alpine`, runs `npm ci && npm run build`
+2. **Serve stage** -- `nginx:alpine`, serves `dist/` with SPA fallback + API reverse proxy
+
+#### Build-time Variables
+
+Pass `VITE_API_BASE_URL` at build time if the API is not same-origin:
+
+```bash
+docker build --build-arg VITE_API_BASE_URL=https://api.example.com -t netpulse-frontend .
+```
+
+### Docker Compose
+
+Example with backend:
+
+```yaml
+services:
+  backend:
+    image: netpulse-backend
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+```
+
+### Nginx Configuration
+
+The included `nginx.conf` handles:
+- **SPA fallback** -- `try_files $uri $uri/ /index.html`
+- **API reverse proxy** -- `/api/` proxied to `http://backend:8000`
+- **Static asset caching** -- `/assets/` cached for 1 year with `immutable`
+- **Gzip compression** -- enabled for text/JS/CSS/JSON/SVG
+
+To customize the backend upstream, edit the `proxy_pass` directive in `nginx.conf` or use environment variable substitution with `envsubst`.
+
+### Manual Deployment (without Docker)
+
+```bash
+npm run build
+# Copy dist/ to your web server's document root
+# Configure your web server for SPA fallback and API proxy
+```
+
+Key requirements for any deployment:
+1. **SPA fallback** -- All non-file routes must serve `index.html`
+2. **API proxy** -- `/api/*` must be proxied to the backend (or set `VITE_API_BASE_URL` at build time for cross-origin)
+3. **HTTPS** -- Required in production for secure cookie/token handling
