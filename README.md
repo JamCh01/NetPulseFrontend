@@ -81,8 +81,8 @@ src/
 | `/login` | Public | Login |
 | `/register` | Public | Register (subscriber only) |
 | `/dashboard` | Auth | Stats overview + mini charts |
-| `/tasks` | Auth | Task list + create |
-| `/tasks/:taskUuid` | Auth | Task detail + agent assignment |
+| `/tasks` | Auth | Task list + create/edit/delete (admin) |
+| `/tasks/:taskUuid` | Auth | Task detail + agent assignment (admin) |
 | `/alerts` | Auth | Alert rules CRUD + enable/disable |
 | `/webhooks` | Auth | Webhooks CRUD + template + headers |
 | `/agents` | Admin | Agent list + create (with platform) |
@@ -108,11 +108,30 @@ Manual additions to `types.gen.ts` and `sdk.gen.ts` (e.g., `user_uuid`, `is_dele
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `VITE_API_BASE_URL` | (empty, uses proxy) | API base URL. Empty = same-origin (Vite proxy in dev). |
+| `VITE_API_BASE_URL` | (empty) | API base URL. Must be empty when SDK paths already include `/api/v1`. |
+
+> **Important:** The auto-generated SDK paths already contain `/api/v1/...`. Setting `VITE_API_BASE_URL=/api/v1` will cause double-prefix requests (`/api/v1/api/v1/...`). Leave it empty for same-origin deployments with nginx proxy.
 
 ## i18n
 
 Supports English (`en`) and Chinese (`zh`). Language is auto-detected from the browser and can be toggled in the sidebar. Translation files are in `src/i18n/locales/`.
+
+## Timezone Handling
+
+The backend and all agents use **UTC** exclusively. The frontend converts UTC to the user's local timezone for display:
+
+- **ISO strings** (`created_at`) -- `new Date(iso)` auto-converts UTC to local time
+- **Unix timestamps** (`MonitoringDataPoint.timestamp`) -- seconds from backend, multiplied by 1000 for JS/ECharts milliseconds
+
+All date/time formatting goes through shared helpers in `src/lib/format.ts`:
+
+| Function | Usage | Example Output |
+|----------|-------|----------------|
+| `formatDate(iso, lang)` | List pages (date only) | "Jan 1, 2026" / "2026年1月1日" |
+| `formatDateTime(iso, lang)` | Detail pages, deliveries | "Jan 1, 2026, 14:30" |
+| `formatChartTime(tsMs)` | Chart tooltips | "2026-01-01 14:30" |
+
+ECharts time axis (`xAxis.type = 'time'`) handles axis label formatting automatically using the browser's local timezone.
 
 ## Deployment
 

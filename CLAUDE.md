@@ -77,6 +77,17 @@ npm run generate:api # Regenerate API client from OpenAPI
 - `DELETE` = permanent soft-delete (hidden from list, cannot recover)
 - Both webhooks and alert rules follow this pattern
 
+### Timezone & Date Formatting
+- Backend and agents use **UTC** exclusively
+- `new Date()` auto-converts UTC ISO strings and Unix timestamps to local timezone -- no manual offset needed
+- **All date/time display must use helpers from `src/lib/format.ts`:**
+  - `formatDate(iso, lang)` -- date only, for list pages
+  - `formatDateTime(iso, lang)` -- date+time, for detail pages and deliveries
+  - `formatChartTime(tsMs)` -- `YYYY-MM-DD HH:mm` for chart tooltips
+- Never use bare `new Date().toLocaleString()` -- always pass locale via `i18n.language`
+- `MonitoringDataPoint.timestamp` is Unix seconds from backend; multiply by 1000 for JS Date / ECharts
+- ECharts `xAxis.type = 'time'` auto-formats axis labels in local timezone
+
 ## Do NOT
 
 - Import from `src/test/` in production code
@@ -85,12 +96,14 @@ npm run generate:api # Regenerate API client from OpenAPI
 - Use `as` casts on `JSON.parse` results at trust boundaries -- validate at runtime
 - Pass unused params to hooks that don't forward them to the API
 - Duplicate constants across files -- check `src/lib/constants.ts` first
+- Use bare `new Date().toLocaleString()` without locale -- use `formatDate`/`formatDateTime` from `src/lib/format.ts`
+- Set `VITE_API_BASE_URL=/api/v1` -- SDK paths already include the prefix
 
 ## Deployment
 
 ### Build & Artifacts
 - `npm run build` outputs to `dist/` (static SPA, no SSR)
-- `VITE_API_BASE_URL` is baked in at build time -- empty string = same-origin (API proxy handles routing)
+- `VITE_API_BASE_URL` is baked in at build time -- **must be empty** when SDK paths include `/api/v1` (setting `/api/v1` causes double-prefix `/api/v1/api/v1/...`)
 - All `VITE_*` env vars are embedded in the JS bundle at build time, not read at runtime
 
 ### Docker
