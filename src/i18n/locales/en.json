@@ -178,6 +178,7 @@
     "dialogTitle": "Create Alert Rule",
     "dialogDesc": "Set up a new alert rule for a monitoring task.",
     "selectTask": "Select a task...",
+    "noTasksAvailable": "No tasks available. Please create a task first.",
     "metricType": "Metric Type",
     "latency": "Latency",
     "jitter": "Jitter",

@@ -178,6 +178,7 @@
     "dialogTitle": "创建告警规则",
     "dialogDesc": "为监控任务设置新的告警规则。",
     "selectTask": "选择任务...",
+    "noTasksAvailable": "暂无可用任务，请先创建监控任务。",
     "metricType": "指标类型",
     "latency": "延迟",
     "jitter": "抖动",

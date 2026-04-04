@@ -315,24 +315,20 @@ export default function AlertsPage() {
             </div>
             <div>
               <Label className="text-xs text-text-secondary mb-1.5">{t('alerts.task')}</Label>
-              {tasks.length === 0 ? (
-                <p className="text-xs text-text-dim py-2">{t('tasks.noTasks')}</p>
-              ) : (
-                <Select value={taskUuid} onValueChange={(val) => setTaskUuid(val ?? '')}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder={t('alerts.selectTask')}>
-                      {(value: string | null) => value ? getTaskName(value) : t('alerts.selectTask')}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {tasks.map((task) => (
-                      <SelectItem key={task.task_uuid} value={task.task_uuid}>
-                        {task.task_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
+              <Select value={taskUuid} onValueChange={(val) => setTaskUuid(val ?? '')}>
+                <SelectTrigger className="w-full" disabled={tasks.length === 0}>
+                  <SelectValue placeholder={tasks.length === 0 ? t('alerts.noTasksAvailable') : t('alerts.selectTask')}>
+                    {(value: string | null) => value ? getTaskName(value) : (tasks.length === 0 ? t('alerts.noTasksAvailable') : t('alerts.selectTask'))}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {tasks.map((task) => (
+                    <SelectItem key={task.task_uuid} value={task.task_uuid}>
+                      {task.task_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label className="text-xs text-text-secondary mb-1.5">{t('alerts.metricType')}</Label>
