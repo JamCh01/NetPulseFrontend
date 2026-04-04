@@ -94,6 +94,20 @@ src/
 - **subscriber** -- Can manage own alert rules and webhooks. Sees only own resources.
 - **admin** -- Full access. Sees all resources with owner column. Can manage agents, tasks, users, and change passwords.
 
+## Agent-Task Assignment
+
+Agents and tasks can be linked from multiple entry points:
+
+| Entry Point | Action |
+|-------------|--------|
+| Task detail page (`/tasks/:uuid`) | Toggle agents on/off with one click (CheckableList) |
+| Agent detail page (`/agents/:uuid`) | Assign/remove tasks via dropdown + list |
+| Task creation dialog | Optionally select agents to assign immediately |
+| Agent creation dialog | Optionally select tasks to assign immediately |
+| Task list page | "Manage Agents" button opens quick-assign dialog |
+
+The backend API supports bulk assignment: `POST /tasks/{task_uuid}/assign` with `{ agent_uuids: string[] }`. Cache invalidation is bidirectional -- changes from either side refresh both task and agent queries.
+
 ## API Client
 
 The API client is auto-generated from the backend's OpenAPI spec:

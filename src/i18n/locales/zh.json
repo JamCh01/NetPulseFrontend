@@ -133,7 +133,12 @@
     "enableAgent": "启用",
     "disableAgentConfirm": "确定要禁用 {{name}} 吗？该探针将停止接收任务。",
     "enableAgentConfirm": "确定要启用 {{name}} 吗？该探针将重新开始接收任务。",
-    "failedToUpdate": "更新探针失败。"
+    "failedToUpdate": "更新探针失败。",
+    "assignedTasks": "已分配任务",
+    "noTasksAssigned": "此探针尚未分配任务。",
+    "selectTask": "选择任务...",
+    "noAvailableTasks": "无可用任务",
+    "assignTasksOptional": "分配任务（可选）"
   },
   "tasks": {
     "title": "监控任务",
@@ -169,7 +174,10 @@
     "editTask": "编辑任务",
     "editTaskDesc": "修改监控任务设置。",
     "deleteTask": "删除任务",
-    "deleteConfirm": "确定要删除 {{name}} 吗？此操作无法撤销。"
+    "deleteConfirm": "确定要删除 {{name}} 吗？此操作无法撤销。",
+    "assignAgentsOptional": "分配探针（可选）",
+    "manageAgents": "管理探针",
+    "manageAgentsDesc": "切换分配到此任务的探针。"
   },
   "alerts": {
     "title": "告警规则",

@@ -11,13 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { CheckableList } from '@/components/ui/checkable-list'
 import type { TaskResponse, AgentResponse } from '@/api/generated/types.gen'
 import { PROTOCOL_COLORS } from '@/lib/constants'
 
@@ -41,12 +35,9 @@ export default function TaskDetailPage() {
   const [editName, setEditName] = useState('')
   const [editTarget, setEditTarget] = useState('')
   const [editInterval, setEditInterval] = useState('')
-  const [selectedAgentUuid, setSelectedAgentUuid] = useState('')
+  const [pendingIds, setPendingIds] = useState<Set<string>>(new Set())
 
   const assignedUuids = new Set(taskAgents.map((a) => a.agent_uuid))
-  const availableAgents = allAgents.filter(
-    (a) => !assignedUuids.has(a.agent_uuid) && a.status !== 'disabled',
-  )
 
   const startEditing = () => {
     if (!task) return
@@ -71,17 +62,15 @@ export default function TaskDetailPage() {
     )
   }
 
-  const handleAssign = () => {
-    if (!taskUuid || !selectedAgentUuid) return
-    assignAgents.mutate(
-      { taskUuid, data: { agent_uuids: [selectedAgentUuid] } },
-      { onSuccess: () => setSelectedAgentUuid('') },
-    )
-  }
-
-  const handleUnassign = (agentUuid: string) => {
+  const handleToggleAgent = (agentUuid: string) => {
     if (!taskUuid) return
-    unassignAgent.mutate({ taskUuid, agentUuid })
+    setPendingIds((prev) => new Set([...prev, agentUuid]))
+    const cleanup = () => setPendingIds((prev) => { const n = new Set(prev); n.delete(agentUuid); return n })
+    if (assignedUuids.has(agentUuid)) {
+      unassignAgent.mutate({ taskUuid, agentUuid }, { onSettled: cleanup })
+    } else {
+      assignAgents.mutate({ taskUuid, data: { agent_uuids: [agentUuid] } }, { onSettled: cleanup })
+    }
   }
 
   if (taskLoading) {
@@ -228,42 +217,26 @@ export default function TaskDetailPage() {
         <div className="glass-light rounded-xl p-6">
           <h2 className="text-sm font-medium text-text-muted uppercase tracking-wider mb-4">{t('tasks.assignedAgents')}</h2>
 
-          {isAdmin && (
-            <div className="flex items-center gap-2 mb-4">
-              <Select value={selectedAgentUuid} onValueChange={(val) => setSelectedAgentUuid(val ?? '')}>
-                <SelectTrigger className="flex-1" disabled={availableAgents.length === 0}>
-                  <SelectValue placeholder={availableAgents.length === 0 ? t('tasks.noAvailableAgents') : t('tasks.selectAgent')}>
-                    {(value: string | null) => {
-                      if (!value) return availableAgents.length === 0 ? t('tasks.noAvailableAgents') : t('tasks.selectAgent')
-                      const agent = availableAgents.find((a) => a.agent_uuid === value)
-                      return agent?.agent_name ?? t('tasks.selectAgent')
-                    }}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {availableAgents.map((agent) => (
-                    <SelectItem key={agent.agent_uuid} value={agent.agent_uuid}>
-                      {agent.agent_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button
-                onClick={handleAssign}
-                disabled={!selectedAgentUuid || assignAgents.isPending}
-                className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none shrink-0"
-              >
-                {t('common.assign')}
-              </Button>
-            </div>
-          )}
-
           {agentsLoading ? (
             <div className="space-y-2">
               {Array.from({ length: 3 }, (_, i) => (
                 <Skeleton key={i} className="h-10 w-full" />
               ))}
             </div>
+          ) : isAdmin ? (
+            <CheckableList
+              items={allAgents
+                .filter((a) => a.status !== 'disabled')
+                .map((a) => ({
+                  id: a.agent_uuid,
+                  label: a.agent_name,
+                  sublabel: a.status,
+                  disabled: pendingIds.has(a.agent_uuid),
+                }))}
+              selectedIds={assignedUuids}
+              onToggle={handleToggleAgent}
+              emptyMessage={t('tasks.noAvailableAgents')}
+            />
           ) : taskAgents.length === 0 ? (
             <p className="text-text-muted text-sm">{t('tasks.noAgentsAssigned')}</p>
           ) : (
@@ -271,27 +244,14 @@ export default function TaskDetailPage() {
               {taskAgents.map((agent) => (
                 <div
                   key={agent.agent_uuid}
-                  className="flex items-center justify-between py-2 px-3 rounded-lg bg-white/5 border border-white/5"
+                  className="flex items-center gap-2 py-2 px-3 rounded-lg bg-white/5 border border-white/5"
                 >
-                  <div className="flex items-center gap-2">
-                    <div
-                      className={`w-2 h-2 rounded-full ${
-                        agent.status === 'online' ? 'bg-green-500' : 'bg-gray-500'
-                      }`}
-                    />
-                    <span className="text-sm text-text-primary">{agent.agent_name}</span>
-                  </div>
-                  {isAdmin && (
-                    <Button
-                      variant="ghost"
-                      size="xs"
-                      onClick={() => handleUnassign(agent.agent_uuid)}
-                      disabled={unassignAgent.isPending}
-                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                    >
-                      {t('common.remove')}
-                    </Button>
-                  )}
+                  <div
+                    className={`w-2 h-2 rounded-full ${
+                      agent.status === 'online' ? 'bg-green-500' : 'bg-gray-500'
+                    }`}
+                  />
+                  <span className="text-sm text-text-primary">{agent.agent_name}</span>
                 </div>
               ))}
             </div>

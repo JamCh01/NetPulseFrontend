@@ -2,12 +2,22 @@ import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { useAgent, useUpdateAgent, useDisableAgent } from '@/api/hooks/use-agents'
+import { useAgentTasks, useAssignTasksFromAgent, useUnassignTaskFromAgent } from '@/api/hooks/use-agent-tasks'
+import { useTasks } from '@/api/hooks/use-tasks'
 import { formatDateTime } from '@/lib/format'
+import { useAuthStore } from '@/stores/auth-store'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import {
   Dialog,
   DialogContent,
@@ -16,8 +26,8 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
-import type { AgentResponse } from '@/api/generated/types.gen'
-import { AGENT_STATUS_COLORS } from '@/lib/constants'
+import type { AgentResponse, TaskResponse } from '@/api/generated/types.gen'
+import { AGENT_STATUS_COLORS, PROTOCOL_COLORS } from '@/lib/constants'
 import { GeoCascader } from '@/features/agents/components/geo-cascader'
 
 function parseTag(tag: string): { key: string; value: string } {
@@ -35,11 +45,23 @@ export default function AgentDetailPage() {
   const disableAgent = useDisableAgent()
 
   const agent = data as AgentResponse | undefined
+  const isAdmin = useAuthStore((s) => s.isAdmin())
+
+  const { data: agentTasksData, isLoading: tasksLoading } = useAgentTasks(agentUuid ?? '')
+  const { data: allTasksData } = useTasks()
+  const assignTasks = useAssignTasksFromAgent()
+  const unassignTask = useUnassignTaskFromAgent()
+
+  const agentTasks = (agentTasksData ?? []) as TaskResponse[]
+  const allTasks = (allTasksData ?? []) as TaskResponse[]
+  const assignedTaskUuids = new Set(agentTasks.map((tk) => tk.task_uuid))
+  const availableTasks = allTasks.filter((tk) => !assignedTaskUuids.has(tk.task_uuid) && tk.is_active)
 
   const [editing, setEditing] = useState(false)
   const [editName, setEditName] = useState('')
   const [editTags, setEditTags] = useState<Record<string, string>>({})
   const [disableOpen, setDisableOpen] = useState(false)
+  const [selectedTaskUuid, setSelectedTaskUuid] = useState('')
 
   const startEditing = () => {
     if (!agent) return
@@ -70,6 +92,19 @@ export default function AgentDetailPage() {
         navigate('/agents')
       },
     })
+  }
+
+  const handleAssignTask = () => {
+    if (!agentUuid || !selectedTaskUuid) return
+    assignTasks.mutate(
+      { taskUuid: selectedTaskUuid, agentUuid, data: { agent_uuids: [agentUuid] } },
+      { onSuccess: () => setSelectedTaskUuid('') },
+    )
+  }
+
+  const handleUnassignTask = (taskUuid: string) => {
+    if (!agentUuid) return
+    unassignTask.mutate({ taskUuid, agentUuid })
   }
 
   if (isLoading) {
@@ -217,6 +252,77 @@ export default function AgentDetailPage() {
                 <p className="text-text-muted text-sm">{t('agents.noTags')}</p>
               )}
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* Assigned Tasks */}
+      <div className="glass-light rounded-xl p-6 mt-4">
+        <h2 className="text-sm font-medium text-text-muted uppercase tracking-wider mb-4">{t('agents.assignedTasks')}</h2>
+
+        {isAdmin && (
+          <div className="flex items-center gap-2 mb-4">
+            <Select value={selectedTaskUuid} onValueChange={(val) => setSelectedTaskUuid(val ?? '')}>
+              <SelectTrigger className="flex-1" disabled={availableTasks.length === 0}>
+                <SelectValue placeholder={availableTasks.length === 0 ? t('agents.noAvailableTasks') : t('agents.selectTask')}>
+                  {(value: string | null) => {
+                    if (!value) return availableTasks.length === 0 ? t('agents.noAvailableTasks') : t('agents.selectTask')
+                    const tk = availableTasks.find((t) => t.task_uuid === value)
+                    return tk?.task_name ?? t('agents.selectTask')
+                  }}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {availableTasks.map((tk) => (
+                  <SelectItem key={tk.task_uuid} value={tk.task_uuid}>
+                    {tk.task_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              onClick={handleAssignTask}
+              disabled={!selectedTaskUuid || assignTasks.isPending}
+              className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none shrink-0"
+            >
+              {t('common.assign')}
+            </Button>
+          </div>
+        )}
+
+        {tasksLoading ? (
+          <div className="space-y-2">
+            {Array.from({ length: 2 }, (_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+          </div>
+        ) : agentTasks.length === 0 ? (
+          <p className="text-text-muted text-sm">{t('agents.noTasksAssigned')}</p>
+        ) : (
+          <div className="space-y-2">
+            {agentTasks.map((tk) => (
+              <div
+                key={tk.task_uuid}
+                className="flex items-center justify-between py-2 px-3 rounded-lg bg-white/5 border border-white/5"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-text-primary font-medium">{tk.task_name}</span>
+                  <Badge className={`border text-[10px] uppercase ${PROTOCOL_COLORS[tk.protocol] ?? ''}`}>
+                    {tk.protocol}
+                  </Badge>
+                  <span className="text-xs text-text-muted font-[family-name:var(--font-mono)]">{tk.target}</span>
+                </div>
+                {isAdmin && (
+                  <Button
+                    variant="ghost"
+                    size="xs"
+                    onClick={() => handleUnassignTask(tk.task_uuid)}
+                    disabled={unassignTask.isPending}
+                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                  >
+                    {t('common.remove')}
+                  </Button>
+                )}
+              </div>
+            ))}
           </div>
         )}
       </div>

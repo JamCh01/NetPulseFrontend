@@ -16,6 +16,7 @@ export const agentKeys = {
   list: (params?: { skip?: number; limit?: number; tags?: string[] }) =>
     [...agentKeys.all, 'list', params] as const,
   detail: (uuid: string) => [...agentKeys.all, 'detail', uuid] as const,
+  tasks: (agentUuid: string) => [...agentKeys.all, 'tasks', agentUuid] as const,
 }
 
 export const taskKeys = {

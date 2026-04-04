@@ -133,7 +133,7 @@ export function buildSmokePingOption({
       backgroundColor: theme.tooltipBg,
       borderColor: theme.tooltipBorder,
       textStyle: { color: theme.tooltipTextColor },
-      formatter: createTooltipFormatter(dataIndex, agentName) as never,
+      formatter: createTooltipFormatter(dataIndex, agentName, theme) as never,
     },
     dataZoom: [
       {

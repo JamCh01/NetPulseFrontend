@@ -11,6 +11,8 @@ export interface ChartThemeConfig {
   tooltipBg: string
   tooltipBorder: string
   tooltipTextColor: string
+  tooltipLabelColor: string   // muted label text inside tooltip HTML
+  tooltipValueColor: string   // primary value text inside tooltip HTML
   backgroundColor: string
 }
 
@@ -30,6 +32,8 @@ export const darkTheme: ChartThemeConfig = {
   tooltipBg: 'rgba(6, 12, 24, 0.95)',
   tooltipBorder: 'rgba(0, 255, 200, 0.1)',
   tooltipTextColor: '#d1d5db',
+  tooltipLabelColor: '#9ca3af',
+  tooltipValueColor: '#fff',
   backgroundColor: 'transparent',
 }
 
@@ -49,6 +53,8 @@ export const lightTheme: ChartThemeConfig = {
   tooltipBg: 'rgba(255, 255, 255, 0.95)',
   tooltipBorder: 'rgba(0, 0, 0, 0.1)',
   tooltipTextColor: '#1f2937',
+  tooltipLabelColor: '#6b7280',
+  tooltipValueColor: '#111827',
   backgroundColor: 'transparent',
 }
 

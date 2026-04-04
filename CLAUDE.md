@@ -45,6 +45,17 @@ npm run generate:api # Regenerate API client from OpenAPI
 - Use `useAuthStore((s) => s.isAdmin())` (call inside selector, returns boolean)
 - Do NOT use `useAuthStore((s) => s.isAdmin)()` (returns function, defeats Zustand optimization)
 
+### Agent-Task Assignment
+- Assignment is **bidirectional**: manage from task detail page OR agent detail page
+- Task detail page uses `CheckableList` for one-click toggle (assign/unassign)
+- Agent detail page has "Assigned Tasks" panel with Select dropdown + task list
+- Creation dialogs (task + agent) include optional multi-select for immediate assignment
+- Task list page has "Manage Agents" quick-assign dialog per row
+- API: `POST /tasks/{task_uuid}/assign` with `{ agent_uuids: string[] }` (bulk)
+- Hooks: `src/api/hooks/use-task-assignments.ts` (task-side), `src/api/hooks/use-agent-tasks.ts` (agent-side)
+- Cache invalidation is cross-directional: task-side mutations invalidate `agentKeys.all` and vice versa
+- Reusable `CheckableList` component at `src/components/ui/checkable-list.tsx`
+
 ### i18n
 - Every user-facing string must use `t('namespace.key')`
 - Both `en.json` and `zh.json` must be updated together
@@ -55,6 +66,8 @@ npm run generate:api # Regenerate API client from OpenAPI
 - Never concatenate Tailwind classes dynamically (e.g., `color + '/60'`) -- Tailwind can't extract them
 - Use pre-defined class maps instead (see `protocolIconDim` pattern in layouts)
 - Shared color maps: `PROTOCOL_COLORS`, `AGENT_STATUS_COLORS` in `src/lib/constants.ts`
+- Chart tooltip HTML must use theme-aware colors from `ChartThemeConfig` (not hardcoded `#fff` / `#d1d5db`)
+- `tooltipLabelColor` for muted labels, `tooltipValueColor` for data values -- adapts to light/dark theme
 
 ### Forms
 - Populate edit forms in the click handler (not `useEffect` on derived objects)

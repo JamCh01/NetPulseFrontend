@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { useAgents, useCreateAgent, useDisableAgent, useUpdateAgent } from '@/api/hooks/use-agents'
+import { useTasks } from '@/api/hooks/use-tasks'
+import { useAssignAgents } from '@/api/hooks/use-task-assignments'
 import {
   Table,
   TableBody,
@@ -30,8 +32,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
+import { CheckableList } from '@/components/ui/checkable-list'
 import { GeoCascader } from '@/features/agents/components/geo-cascader'
-import type { AgentResponse } from '@/api/generated/types.gen'
+import type { AgentResponse, TaskResponse } from '@/api/generated/types.gen'
 import { AGENT_STATUS_COLORS } from '@/lib/constants'
 import { formatDate } from '@/lib/format'
 
@@ -51,6 +54,8 @@ export default function AgentsPage() {
   const createAgent = useCreateAgent()
   const disableAgent = useDisableAgent()
   const updateAgent = useUpdateAgent()
+  const { data: allTasksData } = useTasks()
+  const assignAgentsHook = useAssignAgents()
 
   const [createOpen, setCreateOpen] = useState(false)
   const [disableUuid, setDisableUuid] = useState<string | null>(null)
@@ -60,6 +65,7 @@ export default function AgentsPage() {
   const [city, setCity] = useState('')
   const [isp, setIsp] = useState('')
   const [platform, setPlatform] = useState('')
+  const [selectedTaskUuids, setSelectedTaskUuids] = useState<Set<string>>(new Set())
 
   // Success dialog state
   const [successDialogOpen, setSuccessDialogOpen] = useState(false)
@@ -69,6 +75,7 @@ export default function AgentsPage() {
   const [copiedCmd, setCopiedCmd] = useState(false)
 
   const agents = (data ?? []) as AgentResponse[]
+  const allTasks = (allTasksData ?? []) as TaskResponse[]
   const disableTarget = disableUuid ? agents.find((a) => a.agent_uuid === disableUuid) : null
 
   const handleToggle = () => {
@@ -92,6 +99,7 @@ export default function AgentsPage() {
     setCity('')
     setIsp('')
     setPlatform('')
+    setSelectedTaskUuids(new Set())
   }
 
   const handleCreate = (e: React.FormEvent) => {
@@ -108,11 +116,19 @@ export default function AgentsPage() {
         onSuccess: (result) => {
           setCreateOpen(false)
           resetForm()
-          const res = result as { access_key?: string; install_command?: string } | undefined
+          const res = result as { agent_uuid?: string; access_key?: string; install_command?: string } | undefined
           if (res?.access_key) {
             setCreatedAccessKey(res.access_key)
             setCreatedInstallCommand(res.install_command ?? '')
             setSuccessDialogOpen(true)
+          }
+          if (res?.agent_uuid && selectedTaskUuids.size > 0) {
+            for (const taskUuid of selectedTaskUuids) {
+              assignAgentsHook.mutate({
+                taskUuid,
+                data: { agent_uuids: [res.agent_uuid] },
+              })
+            }
           }
         },
       },
@@ -287,6 +303,28 @@ export default function AgentsPage() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div>
+              <Label className="text-xs text-text-secondary mb-1.5">{t('agents.assignTasksOptional')}</Label>
+              <CheckableList
+                items={allTasks
+                  .filter((task) => task.is_active)
+                  .map((task) => ({
+                    id: task.task_uuid,
+                    label: task.task_name,
+                    sublabel: `${task.protocol.toUpperCase()} - ${task.target}`,
+                  }))}
+                selectedIds={selectedTaskUuids}
+                onToggle={(id) => {
+                  setSelectedTaskUuids((prev) => {
+                    const next = new Set(prev)
+                    if (next.has(id)) next.delete(id)
+                    else next.add(id)
+                    return next
+                  })
+                }}
+                emptyMessage={t('agents.noAvailableTasks')}
+              />
             </div>
             <DialogFooter>
               <Button

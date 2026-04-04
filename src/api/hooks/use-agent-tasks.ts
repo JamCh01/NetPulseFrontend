@@ -1,29 +1,38 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { taskKeys, agentKeys } from './keys'
+import { agentKeys, taskKeys } from './keys'
 import {
-  getTaskAgentsEndpointApiV1TasksTaskUuidAgentsGet,
+  getAgentTasksApiV1AgentsAgentUuidTasksGet,
   assignTaskEndpointApiV1TasksTaskUuidAssignPost,
   unassignTaskEndpointApiV1TasksTaskUuidAgentsAgentUuidDelete,
 } from '@/api/generated/sdk.gen'
 import type { AgentTaskAssign } from '@/api/generated/types.gen'
 
-export function useTaskAgents(taskUuid: string) {
+export function useAgentTasks(agentUuid: string) {
   return useQuery({
-    queryKey: taskKeys.agents(taskUuid),
+    queryKey: agentKeys.tasks(agentUuid),
     queryFn: async () => {
-      const { data, error } = await getTaskAgentsEndpointApiV1TasksTaskUuidAgentsGet({ path: { task_uuid: taskUuid } })
+      const { data, error } = await getAgentTasksApiV1AgentsAgentUuidTasksGet({
+        path: { agent_uuid: agentUuid },
+      })
       if (error) throw error
       return data
     },
-    enabled: !!taskUuid,
+    enabled: !!agentUuid,
   })
 }
 
-export function useAssignAgents() {
+export function useAssignTasksFromAgent() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async ({ taskUuid, data: body }: { taskUuid: string; data: AgentTaskAssign }) => {
+    mutationFn: async ({
+      taskUuid,
+      data: body,
+    }: {
+      taskUuid: string
+      agentUuid: string
+      data: AgentTaskAssign
+    }) => {
       const { data, error } = await assignTaskEndpointApiV1TasksTaskUuidAssignPost({
         path: { task_uuid: taskUuid },
         body,
@@ -33,12 +42,12 @@ export function useAssignAgents() {
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: taskKeys.agents(variables.taskUuid) })
-      queryClient.invalidateQueries({ queryKey: agentKeys.all })
+      queryClient.invalidateQueries({ queryKey: agentKeys.tasks(variables.agentUuid) })
     },
   })
 }
 
-export function useUnassignAgent() {
+export function useUnassignTaskFromAgent() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async ({ taskUuid, agentUuid }: { taskUuid: string; agentUuid: string }) => {
@@ -50,7 +59,7 @@ export function useUnassignAgent() {
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: taskKeys.agents(variables.taskUuid) })
-      queryClient.invalidateQueries({ queryKey: agentKeys.all })
+      queryClient.invalidateQueries({ queryKey: agentKeys.tasks(variables.agentUuid) })
     },
   })
 }

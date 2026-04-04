@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { useTasks, useCreateTask, useUpdateTask, useDisableTask } from '@/api/hooks/use-tasks'
+import { useAgents } from '@/api/hooks/use-agents'
+import { useAssignAgents } from '@/api/hooks/use-task-assignments'
 import { useAuthStore } from '@/stores/auth-store'
 import {
   Table,
@@ -31,7 +33,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
-import type { TaskResponse, ProtocolEnum } from '@/api/generated/types.gen'
+import { CheckableList } from '@/components/ui/checkable-list'
+import { AssignAgentsDialog } from '@/features/tasks/components/assign-agents-dialog'
+import type { TaskResponse, ProtocolEnum, AgentResponse } from '@/api/generated/types.gen'
 import { PROTOCOL_COLORS } from '@/lib/constants'
 
 export default function TasksPage() {
@@ -42,8 +46,11 @@ export default function TasksPage() {
   const createTask = useCreateTask()
   const updateTask = useUpdateTask()
   const disableTask = useDisableTask()
+  const { data: allAgentsData } = useAgents()
+  const assignAgents = useAssignAgents()
 
   const tasks = (data ?? []) as TaskResponse[]
+  const allAgents = (allAgentsData ?? []) as AgentResponse[]
 
   // Create dialog
   const [createOpen, setCreateOpen] = useState(false)
@@ -52,6 +59,7 @@ export default function TasksPage() {
   const [target, setTarget] = useState('')
   const [port, setPort] = useState('')
   const [interval, setInterval_] = useState('60')
+  const [selectedAgentUuids, setSelectedAgentUuids] = useState<Set<string>>(new Set())
 
   // Edit dialog
   const [editUuid, setEditUuid] = useState<string | null>(null)
@@ -65,12 +73,16 @@ export default function TasksPage() {
   const [deleteUuid, setDeleteUuid] = useState<string | null>(null)
   const deleteTarget = deleteUuid ? tasks.find((t) => t.task_uuid === deleteUuid) : null
 
+  // Assign agents dialog
+  const [assignDialogTaskUuid, setAssignDialogTaskUuid] = useState<string | null>(null)
+
   const resetCreateForm = () => {
     setTaskName('')
     setProtocol('icmp')
     setTarget('')
     setPort('')
     setInterval_('60')
+    setSelectedAgentUuids(new Set())
   }
 
   const openEditDialog = (task: TaskResponse) => {
@@ -92,9 +104,16 @@ export default function TasksPage() {
         interval: Number(interval),
       },
       {
-        onSuccess: () => {
+        onSuccess: (result) => {
           setCreateOpen(false)
           resetCreateForm()
+          const res = result as TaskResponse | undefined
+          if (res?.task_uuid && selectedAgentUuids.size > 0) {
+            assignAgents.mutate({
+              taskUuid: res.task_uuid,
+              data: { agent_uuids: Array.from(selectedAgentUuids) },
+            })
+          }
         },
       },
     )
@@ -204,12 +223,17 @@ export default function TasksPage() {
                       </Button>
                       {isAdmin && (
                         <>
-                          <Button variant="ghost" size="sm" className="text-xs h-7 px-2 text-text-muted hover:text-text-primary"
+                          <Button variant="ghost" size="sm" className="text-xs h-7 px-2 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
                             onClick={() => navigate(`/tasks/${task.task_uuid}`)}
                           >
                             {t('tasks.manageTask')}
                           </Button>
-                          <Button variant="ghost" size="sm" className="text-xs h-7 px-2 text-text-muted hover:text-text-primary"
+                          <Button variant="ghost" size="sm" className="text-xs h-7 px-2 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
+                            onClick={() => setAssignDialogTaskUuid(task.task_uuid)}
+                          >
+                            {t('tasks.manageAgents')}
+                          </Button>
+                          <Button variant="ghost" size="sm" className="text-xs h-7 px-2 text-blue-400 hover:text-blue-300 hover:bg-blue-500/10"
                             onClick={() => openEditDialog(task)}
                           >
                             {t('common.edit')}
@@ -296,6 +320,30 @@ export default function TasksPage() {
                 />
               </div>
             </div>
+            {isAdmin && (
+              <div>
+                <Label className="text-xs text-text-secondary mb-1.5">{t('tasks.assignAgentsOptional')}</Label>
+                <CheckableList
+                  items={allAgents
+                    .filter((a) => a.status !== 'disabled')
+                    .map((a) => ({
+                      id: a.agent_uuid,
+                      label: a.agent_name,
+                      sublabel: a.tags.find((tg) => tg.startsWith('city:'))?.slice(5) ?? '',
+                    }))}
+                  selectedIds={selectedAgentUuids}
+                  onToggle={(id) => {
+                    setSelectedAgentUuids((prev) => {
+                      const next = new Set(prev)
+                      if (next.has(id)) next.delete(id)
+                      else next.add(id)
+                      return next
+                    })
+                  }}
+                  emptyMessage={t('tasks.noAvailableAgents')}
+                />
+              </div>
+            )}
             <DialogFooter>
               <Button
                 type="submit"
@@ -373,6 +421,12 @@ export default function TasksPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Assign Agents Dialog */}
+      <AssignAgentsDialog
+        taskUuid={assignDialogTaskUuid}
+        onClose={() => setAssignDialogTaskUuid(null)}
+      />
     </div>
   )
 }

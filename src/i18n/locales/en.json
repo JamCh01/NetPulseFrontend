@@ -133,7 +133,12 @@
     "enableAgent": "Enable",
     "disableAgentConfirm": "Are you sure you want to disable {{name}}? This agent will stop receiving tasks.",
     "enableAgentConfirm": "Are you sure you want to enable {{name}}? This agent will start receiving tasks again.",
-    "failedToUpdate": "Failed to update agent."
+    "failedToUpdate": "Failed to update agent.",
+    "assignedTasks": "Assigned Tasks",
+    "noTasksAssigned": "No tasks assigned to this agent.",
+    "selectTask": "Select a task...",
+    "noAvailableTasks": "No available tasks",
+    "assignTasksOptional": "Assign Tasks (optional)"
   },
   "tasks": {
     "title": "Tasks",
@@ -169,7 +174,10 @@
     "editTask": "Edit Task",
     "editTaskDesc": "Modify the monitoring task settings.",
     "deleteTask": "Delete Task",
-    "deleteConfirm": "Are you sure you want to delete {{name}}? This action cannot be undone."
+    "deleteConfirm": "Are you sure you want to delete {{name}}? This action cannot be undone.",
+    "assignAgentsOptional": "Assign Agents (optional)",
+    "manageAgents": "Manage Agents",
+    "manageAgentsDesc": "Toggle agents assigned to this task."
   },
   "alerts": {
     "title": "Alert Rules",

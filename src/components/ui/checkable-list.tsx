@@ -1,0 +1,54 @@
+import { Check } from 'lucide-react'
+
+export interface CheckableListItem {
+  id: string
+  label: string
+  sublabel?: string
+  disabled?: boolean
+}
+
+interface CheckableListProps {
+  items: readonly CheckableListItem[]
+  selectedIds: ReadonlySet<string>
+  onToggle: (id: string) => void
+  emptyMessage?: string
+}
+
+export function CheckableList({ items, selectedIds, onToggle, emptyMessage }: CheckableListProps) {
+  if (items.length === 0) {
+    return (
+      <p className="text-text-muted text-xs py-3 text-center">{emptyMessage ?? 'No items'}</p>
+    )
+  }
+
+  return (
+    <div role="listbox" aria-multiselectable="true" className="max-h-48 overflow-y-auto space-y-1">
+      {items.map((item) => {
+        const selected = selectedIds.has(item.id)
+        return (
+          <button
+            key={item.id}
+            type="button"
+            role="option"
+            aria-selected={selected}
+            disabled={item.disabled}
+            onClick={() => onToggle(item.id)}
+            className={`w-full flex items-center justify-between gap-2 rounded-lg py-2 px-3 text-left text-xs transition-colors border ${
+              selected
+                ? 'border-emerald-500/30 bg-emerald-500/10'
+                : 'border-white/5 bg-white/5 hover:bg-white/10'
+            } ${item.disabled ? 'opacity-50 pointer-events-none' : ''}`}
+          >
+            <div className="min-w-0">
+              <div className="text-text-primary font-medium truncate">{item.label}</div>
+              {item.sublabel && (
+                <div className="text-text-muted text-[10px] truncate">{item.sublabel}</div>
+              )}
+            </div>
+            {selected && <Check className="size-3.5 text-emerald-400 shrink-0" />}
+          </button>
+        )
+      })}
+    </div>
+  )
+}

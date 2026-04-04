@@ -169,6 +169,10 @@ export function buildMultiAgentOption(
 
         const rtt = (v: number) => v.toFixed(1)
 
+        const labelColor = theme.tooltipLabelColor
+        const valueColor = theme.tooltipValueColor
+        const nameColor = theme.tooltipTextColor
+
         // Collect visible agents' data
         const rows: Array<{ name: string; color: string; point: MonitoringDataPoint }> = []
         for (const agent of agentIndexes) {
@@ -185,11 +189,11 @@ export function buildMultiAgentOption(
 
         // Compact table layout: header row + one row per agent
         const mono = "font-family:'JetBrains Mono',monospace;font-weight:500;text-align:right"
-        const th = "color:#6b7280;font-size:9px;text-align:right;padding:0 4px"
+        const th = `color:${labelColor};font-size:9px;text-align:right;padding:0 4px`
         const td = `font-size:10px;${mono};padding:1px 4px`
 
         let html = `<div style="font-family:'Inter',sans-serif;font-size:11px;line-height:1.4">`
-        html += `<div style="color:#9ca3af;margin-bottom:4px">${timeStr}</div>`
+        html += `<div style="color:${labelColor};margin-bottom:4px">${timeStr}</div>`
         html += `<table style="border-collapse:collapse;width:100%">`
         html += `<tr><td style="${th}"></td><td style="${th}">Med</td><td style="${th}">Avg</td><td style="${th}">Min</td><td style="${th}">Max</td><td style="${th}">P95</td><td style="${th}">P99</td><td style="${th}">Loss</td></tr>`
 
@@ -197,13 +201,13 @@ export function buildMultiAgentOption(
           const p = row.point
           const lc = p.packet_loss_pct > 0 ? '#ff3250' : '#4ade80'
           html += `<tr>`
-          html += `<td style="padding:1px 4px;white-space:nowrap"><span style="display:inline-block;width:8px;height:2px;border-radius:1px;background:${row.color};vertical-align:middle;margin-right:4px"></span><span style="color:#d1d5db;font-size:10px">${row.name}</span></td>`
+          html += `<td style="padding:1px 4px;white-space:nowrap"><span style="display:inline-block;width:8px;height:2px;border-radius:1px;background:${row.color};vertical-align:middle;margin-right:4px"></span><span style="color:${nameColor};font-size:10px">${row.name}</span></td>`
           html += `<td style="${td};color:${row.color}">${rtt(p.median_rtt)}</td>`
-          html += `<td style="${td};color:#fff">${rtt(p.avg_rtt)}</td>`
-          html += `<td style="${td};color:#fff">${rtt(p.min_rtt)}</td>`
-          html += `<td style="${td};color:#fff">${rtt(p.max_rtt)}</td>`
-          html += `<td style="${td};color:#fff">${rtt(p.p95_rtt)}</td>`
-          html += `<td style="${td};color:#fff">${rtt(p.p99_rtt)}</td>`
+          html += `<td style="${td};color:${valueColor}">${rtt(p.avg_rtt)}</td>`
+          html += `<td style="${td};color:${valueColor}">${rtt(p.min_rtt)}</td>`
+          html += `<td style="${td};color:${valueColor}">${rtt(p.max_rtt)}</td>`
+          html += `<td style="${td};color:${valueColor}">${rtt(p.p95_rtt)}</td>`
+          html += `<td style="${td};color:${valueColor}">${rtt(p.p99_rtt)}</td>`
           html += `<td style="${td};color:${lc}">${p.packet_loss_pct.toFixed(1)}%</td>`
           html += `</tr>`
         }
