@@ -52,7 +52,10 @@ export default function AgentDetailPage() {
   const assignTasks = useAssignTasksFromAgent()
   const unassignTask = useUnassignTaskFromAgent()
 
-  const agentTasks = (agentTasksData ?? []) as TaskResponse[]
+  const agentTasksRaw = agentTasksData as { tasks?: TaskResponse[] } | TaskResponse[] | undefined
+  const agentTasks: TaskResponse[] = Array.isArray(agentTasksRaw)
+    ? agentTasksRaw
+    : (agentTasksRaw?.tasks ?? [])
   const allTasks = (allTasksData ?? []) as TaskResponse[]
   const assignedTaskUuids = new Set(agentTasks.map((tk) => tk.task_uuid))
   const availableTasks = allTasks.filter((tk) => !assignedTaskUuids.has(tk.task_uuid) && tk.is_active)
