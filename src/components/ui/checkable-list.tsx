@@ -17,7 +17,7 @@ interface CheckableListProps {
 export function CheckableList({ items, selectedIds, onToggle, emptyMessage }: CheckableListProps) {
   if (items.length === 0) {
     return (
-      <p className="text-text-muted text-xs py-3 text-center">{emptyMessage ?? 'No items'}</p>
+      <p className="text-muted-foreground text-xs py-3 text-center">{emptyMessage ?? 'No items'}</p>
     )
   }
 
@@ -36,13 +36,13 @@ export function CheckableList({ items, selectedIds, onToggle, emptyMessage }: Ch
             className={`w-full flex items-center justify-between gap-2 rounded-lg py-2 px-3 text-left text-xs transition-colors border ${
               selected
                 ? 'border-emerald-500/30 bg-emerald-500/10'
-                : 'border-white/5 bg-white/5 hover:bg-white/10'
+                : 'border-border bg-muted/50 hover:bg-muted'
             } ${item.disabled ? 'opacity-50 pointer-events-none' : ''}`}
           >
             <div className="min-w-0">
-              <div className="text-text-primary font-medium truncate">{item.label}</div>
+              <div className="text-foreground font-medium truncate">{item.label}</div>
               {item.sublabel && (
-                <div className="text-text-muted text-[10px] truncate">{item.sublabel}</div>
+                <div className="text-muted-foreground text-[10px] truncate">{item.sublabel}</div>
               )}
             </div>
             {selected && <Check className="size-3.5 text-emerald-400 shrink-0" />}

@@ -301,7 +301,7 @@ export default function AgentDetailPage() {
             {agentTasks.map((tk) => (
               <div
                 key={tk.task_uuid}
-                className="flex items-center justify-between py-2 px-3 rounded-lg bg-white/5 border border-white/5"
+                className="flex items-center justify-between py-2 px-3 rounded-lg bg-muted/50 border border-border"
               >
                 <div className="flex items-center gap-3">
                   <span className="text-sm text-text-primary font-medium">{tk.task_name}</span>
