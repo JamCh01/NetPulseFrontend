@@ -36,11 +36,12 @@ import { AGENT_STATUS_COLORS } from '@/lib/constants'
 import { formatDate } from '@/lib/format'
 
 const PLATFORM_OPTIONS = [
-  { value: 'linux-amd64', labelKey: 'agents.platformLinuxAmd64' },
-  { value: 'linux-arm64', labelKey: 'agents.platformLinuxArm64' },
-  { value: 'darwin-amd64', labelKey: 'agents.platformDarwinAmd64' },
-  { value: 'darwin-arm64', labelKey: 'agents.platformDarwinArm64' },
-  { value: 'windows-amd64', labelKey: 'agents.platformWindowsAmd64' },
+  { value: 'x86_64-linux-musl', labelKey: 'agents.platformLinuxAmd64' },
+  { value: 'aarch64-linux-musl', labelKey: 'agents.platformLinuxArm64' },
+  { value: 'x86_64-macos', labelKey: 'agents.platformDarwinAmd64' },
+  { value: 'aarch64-macos', labelKey: 'agents.platformDarwinArm64' },
+  { value: 'x86_64-windows', labelKey: 'agents.platformWindowsAmd64' },
+  { value: 'aarch64-windows', labelKey: 'agents.platformWindowsArm64' },
 ] as const
 
 export default function AgentsPage() {

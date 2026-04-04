@@ -123,6 +123,7 @@
     "platformDarwinAmd64": "macOS (Intel)",
     "platformDarwinArm64": "macOS (Apple Silicon)",
     "platformWindowsAmd64": "Windows (x86_64)",
+    "platformWindowsArm64": "Windows (ARM64)",
     "detail": "Agent Detail",
     "failedToLoadDetail": "Failed to load agent details.",
     "backToAgents": "Back to Agents",

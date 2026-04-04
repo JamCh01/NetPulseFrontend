@@ -123,6 +123,7 @@
     "platformDarwinAmd64": "macOS (Intel)",
     "platformDarwinArm64": "macOS (Apple Silicon)",
     "platformWindowsAmd64": "Windows (x86_64)",
+    "platformWindowsArm64": "Windows (ARM64)",
     "detail": "探针详情",
     "failedToLoadDetail": "加载探针详情失败。",
     "backToAgents": "返回探针列表",
