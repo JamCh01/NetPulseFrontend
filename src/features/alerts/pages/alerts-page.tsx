@@ -1,15 +1,537 @@
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useAlertRules, useCreateAlertRule, useUpdateAlertRule, useDisableAlertRule } from '@/api/hooks/use-alerts'
+import { useTasks } from '@/api/hooks/use-tasks'
+import { useUsers } from '@/api/hooks/use-users'
+import { useAuthStore } from '@/stores/auth-store'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Skeleton } from '@/components/ui/skeleton'
+import type { AlertRuleResponse, TaskResponse, UserResponse, MetricTypeEnum, OperatorEnum } from '@/api/generated/types.gen'
+
+const METRIC_COLORS: Record<string, string> = {
+  latency: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30',
+  jitter: 'bg-purple-500/15 text-purple-400 border-purple-500/30',
+  packet_loss: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
+}
+
+const OPERATOR_LABELS: Record<string, string> = {
+  gt: '>',
+  lt: '<',
+  gte: '>=',
+  lte: '<=',
+}
+
 export default function AlertsPage() {
+  const { t } = useTranslation()
+  const isAdmin = useAuthStore((s) => s.isAdmin())
+  const currentUserUuid = useAuthStore((s) => s.user?.uuid)
+  const { data, isLoading, error } = useAlertRules()
+  const { data: tasksData, isLoading: tasksLoading } = useTasks()
+  const { data: usersData } = useUsers(isAdmin ? {} : undefined)
+  const createAlertRule = useCreateAlertRule()
+  const updateAlertRule = useUpdateAlertRule()
+  const disableAlertRule = useDisableAlertRule()
+
+  const rules = (data ?? []) as AlertRuleResponse[]
+  const tasks = (tasksData ?? []) as TaskResponse[]
+  const users = (usersData ?? []) as UserResponse[]
+
+  // Create dialog state
+  const [createOpen, setCreateOpen] = useState(false)
+  const [ruleName, setRuleName] = useState('')
+  const [taskUuid, setTaskUuid] = useState('')
+  const [metricType, setMetricType] = useState<MetricTypeEnum>('latency')
+  const [operator, setOperator] = useState<OperatorEnum>('gt')
+  const [threshold, setThreshold] = useState('')
+  const [mCount, setMCount] = useState('3')
+  const [nCount, setNCount] = useState('5')
+
+  // Edit dialog state
+  const [editUuid, setEditUuid] = useState<string | null>(null)
+  const editTarget = editUuid ? rules.find((r) => r.rule_uuid === editUuid) : null
+  const [editRuleName, setEditRuleName] = useState('')
+  const [editMetricType, setEditMetricType] = useState<MetricTypeEnum>('latency')
+  const [editOperator, setEditOperator] = useState<OperatorEnum>('gt')
+  const [editThreshold, setEditThreshold] = useState('')
+  const [editMCount, setEditMCount] = useState('3')
+  const [editNCount, setEditNCount] = useState('5')
+
+  // Delete dialog state
+  const [deleteUuid, setDeleteUuid] = useState<string | null>(null)
+
+  const openEditDialog = (rule: AlertRuleResponse) => {
+    setEditRuleName(rule.rule_name)
+    setEditMetricType(rule.metric_type as MetricTypeEnum)
+    setEditOperator(rule.operator as OperatorEnum)
+    setEditThreshold(String(rule.threshold))
+    setEditMCount(String(rule.m_count))
+    setEditNCount(String(rule.n_count))
+    setEditUuid(rule.rule_uuid)
+  }
+
+  const resetCreateForm = () => {
+    setRuleName('')
+    setTaskUuid('')
+    setMetricType('latency')
+    setOperator('gt')
+    setThreshold('')
+    setMCount('3')
+    setNCount('5')
+  }
+
+  const handleCreate = (e: React.FormEvent) => {
+    e.preventDefault()
+    createAlertRule.mutate(
+      {
+        rule_name: ruleName,
+        task_uuid: taskUuid,
+        metric_type: metricType,
+        operator,
+        threshold: Number(threshold),
+        m_count: Number(mCount),
+        n_count: Number(nCount),
+      },
+      {
+        onSuccess: () => {
+          setCreateOpen(false)
+          resetCreateForm()
+        },
+      },
+    )
+  }
+
+  const handleEdit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editUuid) return
+    updateAlertRule.mutate(
+      {
+        uuid: editUuid,
+        data: {
+          rule_name: editRuleName,
+          operator: editOperator,
+          threshold: Number(editThreshold),
+          m_count: Number(editMCount),
+          n_count: Number(editNCount),
+        },
+      },
+      {
+        onSuccess: () => setEditUuid(null),
+      },
+    )
+  }
+
+  const handleToggleActive = (rule: AlertRuleResponse) => {
+    updateAlertRule.mutate({
+      uuid: rule.rule_uuid,
+      data: { is_active: !rule.is_active },
+    })
+  }
+
+  const handleDelete = () => {
+    if (!deleteUuid) return
+    disableAlertRule.mutate(deleteUuid, {
+      onSuccess: () => setDeleteUuid(null),
+    })
+  }
+
+  const getTaskName = (uuid: string): string => {
+    if (tasksLoading) return '...'
+    const found = tasks.find((task) => task.task_uuid === uuid)
+    return found?.task_name ?? t('alerts.unknownTask')
+  }
+
+  const getUserName = (uuid: string): string => {
+    const found = users.find((u) => u.user_uuid === uuid)
+    return found?.username ?? uuid.slice(0, 8)
+  }
+
+  const canManageRule = (rule: AlertRuleResponse): boolean => {
+    if (isAdmin) return true
+    return rule.user_uuid === currentUserUuid
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-text-primary">Alert Rules</h1>
-        <button className="text-sm font-medium bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 px-4 py-2 rounded-lg transition-colors">
-          Create Rule
-        </button>
+        <h1 className="text-2xl font-bold text-text-primary">{t('alerts.title')}</h1>
+        <Button
+          className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none"
+          onClick={() => setCreateOpen(true)}
+        >
+          {t('alerts.createRule')}
+        </Button>
       </div>
-      <div className="glass-light rounded-xl p-6">
-        <p className="text-text-muted text-sm">Alert rules will be implemented here.</p>
+
+      <div className="glass-light rounded-xl p-1">
+        {isLoading ? (
+          <div className="p-6 space-y-3">
+            {Array.from({ length: 5 }, (_, i) => (
+              <Skeleton key={i} className="h-10 w-full" />
+            ))}
+          </div>
+        ) : error ? (
+          <div className="p-6 text-center">
+            <p className="text-red-400 text-sm">{t('alerts.failedToLoad')}</p>
+          </div>
+        ) : rules.length === 0 ? (
+          <div className="p-6 text-center">
+            <p className="text-text-muted text-sm">{t('alerts.noRules')}</p>
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow className="border-white/5 hover:bg-transparent">
+                <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('alerts.ruleName')}</TableHead>
+                <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('alerts.task')}</TableHead>
+                <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('alerts.metric')}</TableHead>
+                <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('alerts.condition')}</TableHead>
+                <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('alerts.mnStrategy')}</TableHead>
+                <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('common.status')}</TableHead>
+                {isAdmin && (
+                  <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('common.owner')}</TableHead>
+                )}
+                <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('common.actions')}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rules.map((rule) => (
+                <TableRow key={rule.rule_uuid} className="border-white/5 hover:bg-white/5">
+                  <TableCell className="text-text-primary font-medium">
+                    {rule.rule_name}
+                  </TableCell>
+                  <TableCell className="text-text-secondary text-sm">
+                    {getTaskName(rule.task_uuid)}
+                  </TableCell>
+                  <TableCell>
+                    <Badge className={`border text-xs ${METRIC_COLORS[rule.metric_type] ?? ''}`}>
+                      {rule.metric_type.replace('_', ' ')}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-text-secondary text-sm font-[family-name:var(--font-mono)]">
+                    {OPERATOR_LABELS[rule.operator] ?? rule.operator} {rule.threshold}
+                  </TableCell>
+                  <TableCell className="text-text-secondary text-sm font-[family-name:var(--font-mono)]">
+                    {rule.m_count}/{rule.n_count}
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      className={`border text-xs ${
+                        rule.is_active
+                          ? 'bg-green-500/15 text-green-400 border-green-500/30'
+                          : 'bg-gray-500/15 text-gray-400 border-gray-500/30'
+                      }`}
+                    >
+                      {rule.is_active ? t('common.active') : t('common.inactive')}
+                    </Badge>
+                  </TableCell>
+                  {isAdmin && (
+                    <TableCell className="text-text-secondary text-xs">
+                      {getUserName(rule.user_uuid)}
+                    </TableCell>
+                  )}
+                  <TableCell>
+                    {canManageRule(rule) && (
+                      <div className="flex items-center gap-1">
+                        {rule.is_active && (
+                          <Button
+                            variant="ghost"
+                            size="xs"
+                            onClick={() => openEditDialog(rule)}
+                            className="text-text-muted hover:text-text-primary"
+                          >
+                            {t('common.edit')}
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="xs"
+                          onClick={() => handleToggleActive(rule)}
+                          className="text-text-muted hover:text-text-primary"
+                        >
+                          {rule.is_active ? t('common.disable') : t('common.enable')}
+                        </Button>
+                        {rule.is_active && (
+                          <Button
+                            variant="ghost"
+                            size="xs"
+                            onClick={() => setDeleteUuid(rule.rule_uuid)}
+                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                          >
+                            {t('common.delete')}
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
       </div>
+
+      {/* Create Rule Dialog */}
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t('alerts.dialogTitle')}</DialogTitle>
+            <DialogDescription>{t('alerts.dialogDesc')}</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleCreate} className="space-y-4 mt-2">
+            <div>
+              <Label className="text-xs text-text-secondary mb-1.5">{t('alerts.ruleName')}</Label>
+              <Input
+                value={ruleName}
+                onChange={(e) => setRuleName(e.target.value)}
+                placeholder={t('alerts.ruleNamePlaceholder')}
+                required
+              />
+            </div>
+            <div>
+              <Label className="text-xs text-text-secondary mb-1.5">{t('alerts.task')}</Label>
+              <Select value={taskUuid} onValueChange={(val) => setTaskUuid(val ?? '')}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={t('alerts.selectTask')}>
+                    {(value: string | null) => value ? getTaskName(value) : t('alerts.selectTask')}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {tasks.map((task) => (
+                    <SelectItem key={task.task_uuid} value={task.task_uuid}>
+                      {task.task_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs text-text-secondary mb-1.5">{t('alerts.metricType')}</Label>
+              <Select value={metricType} onValueChange={(v) => setMetricType(v as MetricTypeEnum)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="latency">{t('alerts.latency')}</SelectItem>
+                  <SelectItem value="jitter">{t('alerts.jitter')}</SelectItem>
+                  <SelectItem value="packet_loss">{t('alerts.packetLoss')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs text-text-secondary mb-1.5">{t('alerts.operator')}</Label>
+                <Select value={operator} onValueChange={(v) => setOperator(v as OperatorEnum)}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="gt">{t('alerts.gt')}</SelectItem>
+                    <SelectItem value="lt">{t('alerts.lt')}</SelectItem>
+                    <SelectItem value="gte">{t('alerts.gte')}</SelectItem>
+                    <SelectItem value="lte">{t('alerts.lte')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs text-text-secondary mb-1.5">{t('alerts.threshold')}</Label>
+                <Input
+                  type="number"
+                  value={threshold}
+                  onChange={(e) => setThreshold(e.target.value)}
+                  placeholder={t('alerts.thresholdPlaceholder')}
+                  required
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs text-text-secondary mb-1.5">{t('alerts.mTriggers')}</Label>
+                <Input
+                  type="number"
+                  value={mCount}
+                  onChange={(e) => setMCount(e.target.value)}
+                  min="1"
+                  required
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-text-secondary mb-1.5">{t('alerts.nWindow')}</Label>
+                <Input
+                  type="number"
+                  value={nCount}
+                  onChange={(e) => setNCount(e.target.value)}
+                  min="1"
+                  required
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="submit"
+                disabled={createAlertRule.isPending || !taskUuid || !ruleName.trim()}
+                className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none"
+              >
+                {createAlertRule.isPending ? t('common.creating') : t('alerts.createRule')}
+              </Button>
+            </DialogFooter>
+            {createAlertRule.isError && (
+              <p className="text-red-400 text-xs mt-2">{t('alerts.createFailed')}</p>
+            )}
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Rule Dialog */}
+      <Dialog open={editUuid !== null} onOpenChange={(open) => { if (!open) setEditUuid(null) }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t('alerts.editRule')}</DialogTitle>
+            <DialogDescription>{t('alerts.editRuleDesc')}</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleEdit} className="space-y-4 mt-2">
+            <div>
+              <Label className="text-xs text-text-secondary mb-1.5">{t('alerts.ruleName')}</Label>
+              <Input
+                value={editRuleName}
+                onChange={(e) => setEditRuleName(e.target.value)}
+                placeholder={t('alerts.ruleNamePlaceholder')}
+                required
+              />
+            </div>
+            <div>
+              <Label className="text-xs text-text-secondary mb-1.5">{t('alerts.task')}</Label>
+              <Input
+                value={editTarget ? getTaskName(editTarget.task_uuid) : ''}
+                disabled
+                className="opacity-60"
+              />
+            </div>
+            <div>
+              <Label className="text-xs text-text-secondary mb-1.5">{t('alerts.metricType')}</Label>
+              <Input
+                value={editMetricType.replace('_', ' ')}
+                disabled
+                className="opacity-60 capitalize"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs text-text-secondary mb-1.5">{t('alerts.operator')}</Label>
+                <Select value={editOperator} onValueChange={(v) => setEditOperator(v as OperatorEnum)}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="gt">{t('alerts.gt')}</SelectItem>
+                    <SelectItem value="lt">{t('alerts.lt')}</SelectItem>
+                    <SelectItem value="gte">{t('alerts.gte')}</SelectItem>
+                    <SelectItem value="lte">{t('alerts.lte')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs text-text-secondary mb-1.5">{t('alerts.threshold')}</Label>
+                <Input
+                  type="number"
+                  value={editThreshold}
+                  onChange={(e) => setEditThreshold(e.target.value)}
+                  placeholder={t('alerts.thresholdPlaceholder')}
+                  required
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs text-text-secondary mb-1.5">{t('alerts.mTriggers')}</Label>
+                <Input
+                  type="number"
+                  value={editMCount}
+                  onChange={(e) => setEditMCount(e.target.value)}
+                  min="1"
+                  required
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-text-secondary mb-1.5">{t('alerts.nWindow')}</Label>
+                <Input
+                  type="number"
+                  value={editNCount}
+                  onChange={(e) => setEditNCount(e.target.value)}
+                  min="1"
+                  required
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="submit"
+                disabled={updateAlertRule.isPending || !editRuleName.trim()}
+                className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none"
+              >
+                {updateAlertRule.isPending ? t('alerts.updatingRule') : t('alerts.updateRule')}
+              </Button>
+            </DialogFooter>
+            {updateAlertRule.isError && (
+              <p className="text-red-400 text-xs mt-2">{t('alerts.updateFailed')}</p>
+            )}
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteUuid !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeleteUuid(null)
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('alerts.deleteRule')}</DialogTitle>
+            <DialogDescription>
+              {t('alerts.deleteConfirm')}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteUuid(null)}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={disableAlertRule.isPending}
+            >
+              {disableAlertRule.isPending ? t('common.deleting') : t('common.delete')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

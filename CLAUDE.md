@@ -1,0 +1,87 @@
+# CLAUDE.md
+
+Project-specific instructions for Claude Code when working on the NetPulse Frontend.
+
+## Project Overview
+
+NetPulse Frontend -- a React SPA for network monitoring. Backend is a Python FastAPI service at `http://127.0.0.1:8000`.
+
+## Quick Reference
+
+```bash
+npm run dev          # Start dev server (localhost:5173, proxies /api to :8000)
+npm run build        # tsc -b && vite build
+npm run test         # vitest run
+npm run generate:api # Regenerate API client from OpenAPI
+```
+
+## Architecture
+
+- **Vite 8** SPA (NOT Next.js -- no SSR, no `"use client"` directives)
+- **React Router 7** for routing (`src/router.tsx`)
+- **TanStack Query** for all server state (hooks in `src/api/hooks/`)
+- **Zustand** for client state (auth + theme stores in `src/stores/`)
+- **shadcn/ui** components built on **@base-ui/react** (NOT Radix UI)
+- **ECharts** for SmokePing-style monitoring charts
+- **i18next** with `en.json` and `zh.json` -- all user-facing text must use `t()` keys
+
+## Key Conventions
+
+### File Organization
+- Feature-based: `src/features/{feature}/pages/`, `components/`, `lib/`
+- Shared UI: `src/components/ui/` (shadcn primitives)
+- Shared utilities: `src/lib/` (jwt.ts, format.ts, constants.ts)
+- API hooks: `src/api/hooks/use-{resource}.ts`
+- Query keys: `src/api/hooks/keys.ts`
+
+### API Types
+- Auto-generated types in `src/api/generated/types.gen.ts` -- some fields are manually added (e.g., `user_uuid`, `is_deleted`, `platform`, `AlertRuleUpdate`, `UserChangePassword`)
+- After regenerating with `npm run generate:api`, re-apply manual additions
+- Custom shared types go in `src/api/types.ts` (e.g., `DashboardStats`)
+- Agent endpoints return `unknown` from OpenAPI -- pages cast with `as`
+
+### State Management
+- Auth: `useAuthStore` (Zustand) -- tokens in localStorage, JWT decoded with `src/lib/jwt.ts`
+- Use `useAuthStore((s) => s.isAdmin())` (call inside selector, returns boolean)
+- Do NOT use `useAuthStore((s) => s.isAdmin)()` (returns function, defeats Zustand optimization)
+
+### i18n
+- Every user-facing string must use `t('namespace.key')`
+- Both `en.json` and `zh.json` must be updated together
+- Never hardcode English strings in JSX
+
+### Styling
+- Tailwind CSS 4 with design tokens defined in `src/index.css`
+- Never concatenate Tailwind classes dynamically (e.g., `color + '/60'`) -- Tailwind can't extract them
+- Use pre-defined class maps instead (see `protocolIconDim` pattern in layouts)
+- Shared color maps: `PROTOCOL_COLORS`, `AGENT_STATUS_COLORS` in `src/lib/constants.ts`
+
+### Forms
+- Populate edit forms in the click handler (not `useEffect` on derived objects)
+- Use functional `setState((prev) => ...)` in callbacks to avoid stale closures
+- Dynamic lists must use stable unique IDs as React keys (not array index)
+
+### Error Handling
+- Wrap `navigator.clipboard.writeText()` in try/catch
+- API hooks throw on error -- pages show error state from `isError`
+- JWT decode returns `null` on failure (never throws)
+
+### Roles & Permissions
+- `subscriber`: sees own webhooks/alerts only, full CRUD on own resources
+- `admin`: sees all resources with owner column, can manage agents/tasks/users
+- Admin-only routes: `/agents`, `/users` (wrapped in `<AdminGuard>`)
+- Webhook/alert actions gated by `canManageRule()`/`canManageWebhook()` (owner or admin)
+
+### DELETE vs PATCH Semantics
+- `PATCH is_active=false` = temporary disable (stays in list, can re-enable)
+- `DELETE` = permanent soft-delete (hidden from list, cannot recover)
+- Both webhooks and alert rules follow this pattern
+
+## Do NOT
+
+- Import from `src/test/` in production code
+- Use `next-themes` or `"use client"` (this is a Vite SPA)
+- Add `sonner` Toaster without a proper theme provider
+- Use `as` casts on `JSON.parse` results at trust boundaries -- validate at runtime
+- Pass unused params to hooks that don't forward them to the API
+- Duplicate constants across files -- check `src/lib/constants.ts` first

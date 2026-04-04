@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router'
 import { lazy, Suspense } from 'react'
 import { AppLayout } from '@/layouts/app-layout'
 import { AuthLayout } from '@/layouts/auth-layout'
+import { PublicLayout } from '@/layouts/public-layout'
 import { AuthGuard } from '@/features/auth/components/auth-guard'
 import { AdminGuard } from '@/features/auth/components/admin-guard'
 
@@ -18,6 +19,7 @@ const AgentDetailPage = lazy(() => import('@/features/agents/pages/agent-detail-
 const AlertsPage = lazy(() => import('@/features/alerts/pages/alerts-page'))
 const WebhooksPage = lazy(() => import('@/features/webhooks/pages/webhooks-page'))
 const UsersPage = lazy(() => import('@/features/users/pages/users-page'))
+const MonitoringIndexPage = lazy(() => import('@/features/monitoring/pages/monitoring-index-page'))
 const MonitoringDetailPage = lazy(() => import('@/features/monitoring/pages/monitoring-detail-page'))
 
 function PageLoader() {
@@ -32,10 +34,16 @@ export function AppRouter() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Routes>
-        {/* Public routes */}
+        {/* Auth routes */}
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+        </Route>
+
+        {/* Public monitoring routes (no login required) */}
+        <Route element={<PublicLayout />}>
+          <Route path="/monitoring" element={<MonitoringIndexPage />} />
+          <Route path="/monitoring/:taskUuid" element={<MonitoringDetailPage />} />
         </Route>
 
         {/* Protected routes */}
@@ -44,7 +52,6 @@ export function AppRouter() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/tasks" element={<TasksPage />} />
             <Route path="/tasks/:taskUuid" element={<TaskDetailPage />} />
-            <Route path="/monitoring/:taskUuid" element={<MonitoringDetailPage />} />
             <Route path="/alerts" element={<AlertsPage />} />
             <Route path="/webhooks" element={<WebhooksPage />} />
 
@@ -57,9 +64,9 @@ export function AppRouter() {
           </Route>
         </Route>
 
-        {/* Redirect root to dashboard */}
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        {/* Default redirect to public monitoring */}
+        <Route path="/" element={<Navigate to="/monitoring" replace />} />
+        <Route path="*" element={<Navigate to="/monitoring" replace />} />
       </Routes>
     </Suspense>
   )

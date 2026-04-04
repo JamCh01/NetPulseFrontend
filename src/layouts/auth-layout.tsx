@@ -1,6 +1,9 @@
 import { Outlet } from 'react-router'
+import { useTranslation } from 'react-i18next'
 
 export function AuthLayout() {
+  const { t } = useTranslation()
+
   return (
     <div className="min-h-screen gradient-bg grid-pattern flex items-center justify-center p-6">
       <div className="w-full max-w-md">
@@ -11,7 +14,7 @@ export function AuthLayout() {
               <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
-          <span className="text-xl font-bold text-text-primary tracking-tight">NetPulse</span>
+          <span className="text-xl font-bold text-text-primary tracking-tight">{t('nav.brand')}</span>
         </div>
 
         {/* Form container */}

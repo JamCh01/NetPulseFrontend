@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { decodeJwt, isTokenExpired } from '@/lib/jwt'
 
 interface AuthUser {
   uuid: string
@@ -6,33 +7,65 @@ interface AuthUser {
   role: 'admin' | 'subscriber'
 }
 
+function parseAuthUser(json: string): AuthUser | null {
+  try {
+    const parsed: unknown = JSON.parse(json)
+    if (
+      typeof parsed === 'object' && parsed !== null &&
+      'uuid' in parsed && typeof (parsed as Record<string, unknown>).uuid === 'string' &&
+      'username' in parsed && typeof (parsed as Record<string, unknown>).username === 'string' &&
+      'role' in parsed && ((parsed as Record<string, unknown>).role === 'admin' || (parsed as Record<string, unknown>).role === 'subscriber')
+    ) {
+      return parsed as AuthUser
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
 interface AuthState {
   accessToken: string | null
   refreshToken: string | null
   user: AuthUser | null
+  initialized: boolean
   setTokens: (access: string, refresh: string) => void
   setUser: (user: AuthUser | null) => void
   logout: () => void
   isAuthenticated: () => boolean
   isAdmin: () => boolean
+  initFromStorage: () => Promise<void>
 }
 
 const REFRESH_TOKEN_KEY = 'netpulse_refresh_token'
+const ACCESS_TOKEN_KEY = 'netpulse_access_token'
+const USER_KEY = 'netpulse_user'
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   accessToken: null,
   refreshToken: localStorage.getItem(REFRESH_TOKEN_KEY),
   user: null,
+  initialized: false,
 
   setTokens: (access, refresh) => {
     localStorage.setItem(REFRESH_TOKEN_KEY, refresh)
+    localStorage.setItem(ACCESS_TOKEN_KEY, access)
     set({ accessToken: access, refreshToken: refresh })
   },
 
-  setUser: (user) => set({ user }),
+  setUser: (user) => {
+    if (user) {
+      localStorage.setItem(USER_KEY, JSON.stringify(user))
+    } else {
+      localStorage.removeItem(USER_KEY)
+    }
+    set({ user })
+  },
 
   logout: () => {
     localStorage.removeItem(REFRESH_TOKEN_KEY)
+    localStorage.removeItem(ACCESS_TOKEN_KEY)
+    localStorage.removeItem(USER_KEY)
     set({ accessToken: null, refreshToken: null, user: null })
   },
 
@@ -44,5 +77,65 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isAdmin: () => {
     const state = get()
     return state.user?.role === 'admin'
+  },
+
+  /**
+   * Restore session from localStorage on app startup.
+   * If accessToken is still valid, use it directly.
+   * If expired but refreshToken exists, attempt a refresh.
+   */
+  initFromStorage: async () => {
+    const storedAccess = localStorage.getItem(ACCESS_TOKEN_KEY)
+    const storedRefresh = localStorage.getItem(REFRESH_TOKEN_KEY)
+    const storedUser = localStorage.getItem(USER_KEY)
+
+    // Try to restore from stored access token
+    if (storedAccess && storedUser && !isTokenExpired(storedAccess)) {
+      const user = parseAuthUser(storedUser)
+      if (user) {
+        set({ accessToken: storedAccess, refreshToken: storedRefresh, user, initialized: true })
+        return
+      }
+    }
+
+    // Access token expired or missing — try refresh
+    if (storedRefresh) {
+      try {
+        const res = await fetch('/api/v1/auth/refresh', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refresh_token: storedRefresh }),
+        })
+        if (res.ok) {
+          const data = await res.json()
+          const payload = decodeJwt(data.access_token)
+          if (payload) {
+            const user: AuthUser = {
+              uuid: payload.sub,
+              username: storedUser ? (parseAuthUser(storedUser)?.username ?? 'user') : 'user',
+              role: payload.role,
+            }
+            localStorage.setItem(ACCESS_TOKEN_KEY, data.access_token)
+            localStorage.setItem(REFRESH_TOKEN_KEY, data.refresh_token)
+            localStorage.setItem(USER_KEY, JSON.stringify(user))
+            set({
+              accessToken: data.access_token,
+              refreshToken: data.refresh_token,
+              user,
+              initialized: true,
+            })
+            return
+          }
+        }
+      } catch {
+        // refresh failed, fall through to logout
+      }
+    }
+
+    // Nothing worked — clear everything
+    localStorage.removeItem(ACCESS_TOKEN_KEY)
+    localStorage.removeItem(REFRESH_TOKEN_KEY)
+    localStorage.removeItem(USER_KEY)
+    set({ accessToken: null, refreshToken: null, user: null, initialized: true })
   },
 }))

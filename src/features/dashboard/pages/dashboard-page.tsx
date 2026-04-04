@@ -1,27 +1,69 @@
+import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useDashboardStats } from '@/api/hooks/use-dashboard'
+import { useTasks } from '@/api/hooks/use-tasks'
+import { useMonitoringData } from '@/api/hooks/use-monitoring'
+import { StatsCards } from '../components/stats-cards'
+import { MiniSmokePingChart } from '../components/mini-smokeping-chart'
+import type { DashboardStats } from '@/api/types'
+import type { TaskResponse } from '@/api/generated/types.gen'
+
+function MiniChartWithData({ task }: { task: TaskResponse }) {
+  const now = useMemo(() => Date.now(), [])
+  const timeRange = useMemo(() => ({ start: now - 24 * 60 * 60 * 1000, end: now }), [now])
+
+  const { data: monitoringData, isLoading } = useMonitoringData(
+    task.task_uuid,
+    undefined,
+    timeRange,
+  )
+
+  return (
+    <MiniSmokePingChart
+      taskUuid={task.task_uuid}
+      taskName={task.task_name}
+      protocol={task.protocol}
+      target={task.target}
+      data={monitoringData?.data}
+      isLoading={isLoading}
+    />
+  )
+}
+
 export default function DashboardPage() {
+  const { t } = useTranslation()
+  const { data: statsRaw, isLoading: statsLoading } = useDashboardStats()
+  const { data: tasksRaw, isLoading: tasksLoading } = useTasks({ is_active: true })
+
+  // Cast dashboard stats which comes as generic object
+  const stats = statsRaw as DashboardStats | undefined
+  const tasks = (tasksRaw ?? []) as TaskResponse[]
+
   return (
     <div>
-      <h1 className="text-2xl font-bold text-text-primary mb-6">Dashboard</h1>
+      <h1 className="text-2xl font-bold text-text-primary mb-6">{t('dashboard.title')}</h1>
 
-      {/* Stats cards placeholder */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        {['Online', 'Offline', 'Active Tasks', 'Alerts'].map((label) => (
-          <div key={label} className="glass-light rounded-xl p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span className="text-[10px] text-text-muted uppercase tracking-wider font-medium">{label}</span>
-            </div>
-            <div className="text-2xl font-bold text-text-primary font-mono">--</div>
-            <div className="text-[10px] text-text-dim mt-0.5">Loading...</div>
-          </div>
-        ))}
+      {/* Stats cards */}
+      <div className="mb-6">
+        <StatsCards stats={stats} isLoading={statsLoading} />
       </div>
 
-      {/* Mini chart grid placeholder */}
+      {/* Mini chart grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {Array.from({ length: 6 }, (_, i) => (
-          <div key={i} className="glass-light rounded-xl p-4 h-40 animate-pulse" />
-        ))}
+        {tasksLoading ? (
+          Array.from({ length: 6 }, (_, i) => (
+            <div key={i} className="glass-light rounded-xl p-3 h-[140px] animate-pulse" />
+          ))
+        ) : tasks.length === 0 ? (
+          <div className="col-span-full glass-light rounded-xl p-8 text-center">
+            <p className="text-text-muted text-sm">{t('dashboard.noActiveTasks')}</p>
+            <p className="text-text-dim text-xs mt-1">{t('dashboard.createTaskHint')}</p>
+          </div>
+        ) : (
+          tasks.map((task) => (
+            <MiniChartWithData key={task.task_uuid} task={task} />
+          ))
+        )}
       </div>
     </div>
   )
