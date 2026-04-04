@@ -165,7 +165,11 @@
     "noAgentsAssigned": "No agents assigned to this task.",
     "failedToUpdate": "Failed to update task.",
     "viewMonitoring": "View Monitoring",
-    "manageTask": "Manage Task"
+    "manageTask": "Manage Task",
+    "editTask": "Edit Task",
+    "editTaskDesc": "Modify the monitoring task settings.",
+    "deleteTask": "Delete Task",
+    "deleteConfirm": "Are you sure you want to delete {{name}}? This action cannot be undone."
   },
   "alerts": {
     "title": "Alert Rules",

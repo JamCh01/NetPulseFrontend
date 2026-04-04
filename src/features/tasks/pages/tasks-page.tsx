@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useTranslation } from 'react-i18next'
-import { useTasks, useCreateTask } from '@/api/hooks/use-tasks'
+import { useTasks, useCreateTask, useUpdateTask, useDisableTask } from '@/api/hooks/use-tasks'
 import { useAuthStore } from '@/stores/auth-store'
 import {
   Table,
@@ -40,7 +40,12 @@ export default function TasksPage() {
   const isAdmin = useAuthStore((s) => s.isAdmin())
   const { data, isLoading, error } = useTasks()
   const createTask = useCreateTask()
+  const updateTask = useUpdateTask()
+  const disableTask = useDisableTask()
 
+  const tasks = (data ?? []) as TaskResponse[]
+
+  // Create dialog
   const [createOpen, setCreateOpen] = useState(false)
   const [taskName, setTaskName] = useState('')
   const [protocol, setProtocol] = useState<ProtocolEnum>('icmp')
@@ -48,14 +53,32 @@ export default function TasksPage() {
   const [port, setPort] = useState('')
   const [interval, setInterval_] = useState('60')
 
-  const tasks = (data ?? []) as TaskResponse[]
+  // Edit dialog
+  const [editUuid, setEditUuid] = useState<string | null>(null)
+  const editTarget_ = editUuid ? tasks.find((t) => t.task_uuid === editUuid) : null
+  const [editName, setEditName] = useState('')
+  const [editTargetVal, setEditTargetVal] = useState('')
+  const [editInterval, setEditInterval] = useState('')
+  const [editPacketCount, setEditPacketCount] = useState('')
 
-  const resetForm = () => {
+  // Delete dialog
+  const [deleteUuid, setDeleteUuid] = useState<string | null>(null)
+  const deleteTarget = deleteUuid ? tasks.find((t) => t.task_uuid === deleteUuid) : null
+
+  const resetCreateForm = () => {
     setTaskName('')
     setProtocol('icmp')
     setTarget('')
     setPort('')
     setInterval_('60')
+  }
+
+  const openEditDialog = (task: TaskResponse) => {
+    setEditName(task.task_name)
+    setEditTargetVal(task.target)
+    setEditInterval(String(task.interval))
+    setEditPacketCount(String(task.packet_count))
+    setEditUuid(task.task_uuid)
   }
 
   const handleCreate = (e: React.FormEvent) => {
@@ -71,10 +94,36 @@ export default function TasksPage() {
       {
         onSuccess: () => {
           setCreateOpen(false)
-          resetForm()
+          resetCreateForm()
         },
       },
     )
+  }
+
+  const handleEdit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editUuid) return
+    updateTask.mutate(
+      {
+        uuid: editUuid,
+        data: {
+          task_name: editName,
+          target: editTargetVal,
+          interval: Number(editInterval),
+          packet_count: Number(editPacketCount),
+        },
+      },
+      { onSuccess: () => setEditUuid(null) },
+    )
+  }
+
+  const handleToggleActive = (task: TaskResponse) => {
+    updateTask.mutate({ uuid: task.task_uuid, data: { is_active: !task.is_active } })
+  }
+
+  const handleDelete = () => {
+    if (!deleteUuid) return
+    disableTask.mutate(deleteUuid, { onSuccess: () => setDeleteUuid(null) })
   }
 
   return (
@@ -116,15 +165,12 @@ export default function TasksPage() {
                 <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('tasks.port')}</TableHead>
                 <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('tasks.interval')}</TableHead>
                 <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('common.status')}</TableHead>
+                <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('common.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {tasks.map((task) => (
-                <TableRow
-                  key={task.task_uuid}
-                  className="border-white/5 cursor-pointer hover:bg-white/5"
-                  onClick={() => navigate(`/monitoring/${task.task_uuid}`)}
-                >
+                <TableRow key={task.task_uuid} className="border-white/5 hover:bg-white/5">
                   <TableCell className="text-text-primary font-medium">{task.task_name}</TableCell>
                   <TableCell>
                     <Badge className={`border text-xs uppercase ${PROTOCOL_COLORS[task.protocol] ?? ''}`}>
@@ -148,6 +194,39 @@ export default function TasksPage() {
                     >
                       {task.is_active ? t('common.active') : t('common.inactive')}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      <Button variant="ghost" size="sm" className="text-xs h-7 px-2 text-text-muted hover:text-text-primary"
+                        onClick={() => navigate(`/monitoring/${task.task_uuid}`)}
+                      >
+                        {t('tasks.viewMonitoring')}
+                      </Button>
+                      {isAdmin && (
+                        <>
+                          <Button variant="ghost" size="sm" className="text-xs h-7 px-2 text-text-muted hover:text-text-primary"
+                            onClick={() => navigate(`/tasks/${task.task_uuid}`)}
+                          >
+                            {t('tasks.manageTask')}
+                          </Button>
+                          <Button variant="ghost" size="sm" className="text-xs h-7 px-2 text-text-muted hover:text-text-primary"
+                            onClick={() => openEditDialog(task)}
+                          >
+                            {t('common.edit')}
+                          </Button>
+                          <Button variant="ghost" size="sm" className="text-xs h-7 px-2 text-text-muted hover:text-text-primary"
+                            onClick={() => handleToggleActive(task)}
+                          >
+                            {task.is_active ? t('common.disable') : t('common.enable')}
+                          </Button>
+                          <Button variant="ghost" size="sm" className="text-xs h-7 px-2 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                            onClick={() => setDeleteUuid(task.task_uuid)}
+                          >
+                            {t('common.delete')}
+                          </Button>
+                        </>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -230,6 +309,68 @@ export default function TasksPage() {
               <p className="text-red-400 text-xs mt-2">{t('tasks.createFailed')}</p>
             )}
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Task Dialog */}
+      <Dialog open={editUuid !== null} onOpenChange={(open) => { if (!open) setEditUuid(null) }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t('tasks.editTask')}</DialogTitle>
+            <DialogDescription>{t('tasks.editTaskDesc')}</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleEdit} className="space-y-4 mt-2">
+            <div>
+              <Label className="text-xs text-text-secondary mb-1.5">{t('tasks.taskName')}</Label>
+              <Input value={editName} onChange={(e) => setEditName(e.target.value)} required />
+            </div>
+            <div>
+              <Label className="text-xs text-text-secondary mb-1.5">{t('tasks.protocol')}</Label>
+              <Input value={editTarget_?.protocol?.toUpperCase() ?? ''} disabled className="opacity-60" />
+            </div>
+            <div>
+              <Label className="text-xs text-text-secondary mb-1.5">{t('tasks.target')}</Label>
+              <Input value={editTargetVal} onChange={(e) => setEditTargetVal(e.target.value)} required />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs text-text-secondary mb-1.5">{t('tasks.intervalSeconds')}</Label>
+                <Input type="number" value={editInterval} onChange={(e) => setEditInterval(e.target.value)} min="10" required />
+              </div>
+              <div>
+                <Label className="text-xs text-text-secondary mb-1.5">{t('tasks.packetCount')}</Label>
+                <Input type="number" value={editPacketCount} onChange={(e) => setEditPacketCount(e.target.value)} min="1" required />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="submit"
+                disabled={updateTask.isPending}
+                className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none"
+              >
+                {updateTask.isPending ? t('common.saving') : t('common.save')}
+              </Button>
+            </DialogFooter>
+            {updateTask.isError && (
+              <p className="text-red-400 text-xs mt-2">{t('tasks.failedToUpdate')}</p>
+            )}
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation */}
+      <Dialog open={deleteUuid !== null} onOpenChange={(open) => { if (!open) setDeleteUuid(null) }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('tasks.deleteTask')}</DialogTitle>
+            <DialogDescription>{t('tasks.deleteConfirm', { name: deleteTarget?.task_name ?? '' })}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteUuid(null)}>{t('common.cancel')}</Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={disableTask.isPending}>
+              {disableTask.isPending ? t('common.deleting') : t('common.delete')}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

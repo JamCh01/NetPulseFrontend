@@ -165,7 +165,11 @@
     "noAgentsAssigned": "此任务尚未分配探针。",
     "failedToUpdate": "更新任务失败。",
     "viewMonitoring": "查看监控",
-    "manageTask": "管理任务"
+    "manageTask": "管理任务",
+    "editTask": "编辑任务",
+    "editTaskDesc": "修改监控任务设置。",
+    "deleteTask": "删除任务",
+    "deleteConfirm": "确定要删除 {{name}} 吗？此操作无法撤销。"
   },
   "alerts": {
     "title": "告警规则",
