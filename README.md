@@ -101,12 +101,12 @@ Agents and tasks can be linked from multiple entry points:
 | Entry Point | Action |
 |-------------|--------|
 | Task detail page (`/tasks/:uuid`) | Toggle agents on/off with one click (CheckableList) |
-| Agent detail page (`/agents/:uuid`) | Assign/remove tasks via dropdown + list |
+| Agent detail page (`/agents/:uuid`) | Dual-panel batch add/remove tasks (CheckableList) |
 | Task creation dialog | Optionally select agents to assign immediately |
 | Agent creation dialog | Optionally select tasks to assign immediately |
 | Task list page | "Manage Agents" button opens quick-assign dialog |
 
-The backend API supports bulk assignment: `POST /tasks/{task_uuid}/assign` with `{ agent_uuids: string[] }`. Cache invalidation is bidirectional -- changes from either side refresh both task and agent queries.
+The backend API supports bulk assignment: `POST /tasks/{task_uuid}/assign` with `{ agent_uuids: string[] }`. Cache invalidation is bidirectional -- changes from either side refresh both task and agent queries. Note: `GET /agents/{agent_uuid}/tasks` returns a nested `{ agent_uuid, tasks: [...] }` object, not a flat array.
 
 ## API Client
 

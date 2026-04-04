@@ -48,13 +48,14 @@ npm run generate:api # Regenerate API client from OpenAPI
 ### Agent-Task Assignment
 - Assignment is **bidirectional**: manage from task detail page OR agent detail page
 - Task detail page uses `CheckableList` for one-click toggle (assign/unassign)
-- Agent detail page has "Assigned Tasks" panel with Select dropdown + task list
+- Agent detail page uses dual-panel `CheckableList` layout: left for batch-add, right for batch-remove
 - Creation dialogs (task + agent) include optional multi-select for immediate assignment
 - Task list page has "Manage Agents" quick-assign dialog per row
 - API: `POST /tasks/{task_uuid}/assign` with `{ agent_uuids: string[] }` (bulk)
+- `GET /agents/{agent_uuid}/tasks` returns `{ agent_uuid, tasks: TaskResponse[] }` (nested, not flat array)
 - Hooks: `src/api/hooks/use-task-assignments.ts` (task-side), `src/api/hooks/use-agent-tasks.ts` (agent-side)
 - Cache invalidation is cross-directional: task-side mutations invalidate `agentKeys.all` and vice versa
-- Reusable `CheckableList` component at `src/components/ui/checkable-list.tsx`
+- Reusable `CheckableList` component at `src/components/ui/checkable-list.tsx` (supports `maxHeight` prop)
 
 ### i18n
 - Every user-facing string must use `t('namespace.key')`
