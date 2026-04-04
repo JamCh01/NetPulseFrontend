@@ -12,9 +12,10 @@ interface CheckableListProps {
   selectedIds: ReadonlySet<string>
   onToggle: (id: string) => void
   emptyMessage?: string
+  maxHeight?: string
 }
 
-export function CheckableList({ items, selectedIds, onToggle, emptyMessage }: CheckableListProps) {
+export function CheckableList({ items, selectedIds, onToggle, emptyMessage, maxHeight = 'max-h-48' }: CheckableListProps) {
   if (items.length === 0) {
     return (
       <p className="text-muted-foreground text-xs py-3 text-center">{emptyMessage ?? 'No items'}</p>
@@ -22,7 +23,7 @@ export function CheckableList({ items, selectedIds, onToggle, emptyMessage }: Ch
   }
 
   return (
-    <div role="listbox" aria-multiselectable="true" className="max-h-48 overflow-y-auto space-y-1">
+    <div role="listbox" aria-multiselectable="true" className={`${maxHeight} overflow-y-auto space-y-1`}>
       {items.map((item) => {
         const selected = selectedIds.has(item.id)
         return (

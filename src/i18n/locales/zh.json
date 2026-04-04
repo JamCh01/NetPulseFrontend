@@ -138,7 +138,10 @@
     "noTasksAssigned": "此探针尚未分配任务。",
     "selectTask": "选择任务...",
     "noAvailableTasks": "无可用任务",
-    "assignTasksOptional": "分配任务（可选）"
+    "assignTasksOptional": "分配任务（可选）",
+    "availableTasks": "可用任务",
+    "addSelected": "添加 ({{count}})",
+    "removeSelected": "移除 ({{count}})"
   },
   "tasks": {
     "title": "监控任务",

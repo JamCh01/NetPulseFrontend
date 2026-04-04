@@ -138,7 +138,10 @@
     "noTasksAssigned": "No tasks assigned to this agent.",
     "selectTask": "Select a task...",
     "noAvailableTasks": "No available tasks",
-    "assignTasksOptional": "Assign Tasks (optional)"
+    "assignTasksOptional": "Assign Tasks (optional)",
+    "availableTasks": "Available Tasks",
+    "addSelected": "Add ({{count}})",
+    "removeSelected": "Remove ({{count}})"
   },
   "tasks": {
     "title": "Tasks",
