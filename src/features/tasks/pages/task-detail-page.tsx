@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { useTask, useUpdateTask } from '@/api/hooks/use-tasks'
 import { useTaskAgents, useAssignAgents, useUnassignAgent } from '@/api/hooks/use-task-assignments'
+import { formatDateTime } from '@/lib/format'
 import { useAgents } from '@/api/hooks/use-agents'
 import { useAuthStore } from '@/stores/auth-store'
 import { Button } from '@/components/ui/button'
@@ -23,7 +24,7 @@ import { PROTOCOL_COLORS } from '@/lib/constants'
 export default function TaskDetailPage() {
   const { taskUuid } = useParams()
   const navigate = useNavigate()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const isAdmin = useAuthStore((s) => s.isAdmin())
   const { data: taskData, isLoading: taskLoading, error: taskError } = useTask(taskUuid ?? '')
   const { data: taskAgentsData, isLoading: agentsLoading } = useTaskAgents(taskUuid ?? '')
@@ -216,7 +217,7 @@ export default function TaskDetailPage() {
               <div>
                 <dt className="text-xs text-text-muted">{t('common.createdAt')}</dt>
                 <dd className="text-sm text-text-secondary font-[family-name:var(--font-mono)]">
-                  {new Date(task.created_at).toLocaleString()}
+                  {formatDateTime(task.created_at, i18n.language)}
                 </dd>
               </div>
             </dl>

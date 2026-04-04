@@ -10,6 +10,7 @@ import {
   useRetryDelivery,
 } from '@/api/hooks/use-webhooks'
 import { useUsers } from '@/api/hooks/use-users'
+import { formatDateTime } from '@/lib/format'
 import { useAuthStore } from '@/stores/auth-store'
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -321,7 +322,7 @@ export default function WebhooksPage() {
 }
 
 function DeliveriesTable({ webhookUuid }: { webhookUuid: string }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { data, isLoading } = useWebhookDeliveries(webhookUuid)
   const retryDelivery = useRetryDelivery()
   const deliveries = (data ?? []) as WebhookDeliveryResponse[]
@@ -366,7 +367,7 @@ function DeliveriesTable({ webhookUuid }: { webhookUuid: string }) {
               </TableCell>
               <TableCell className="text-text-secondary text-xs font-mono">{d.attempt}</TableCell>
               <TableCell className="text-text-secondary text-xs font-mono">
-                {new Date(d.created_at).toLocaleString()}
+                {formatDateTime(d.created_at, i18n.language)}
               </TableCell>
               <TableCell>
                 {d.status === 'failed' && (

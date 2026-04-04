@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { useAgent, useUpdateAgent, useDisableAgent } from '@/api/hooks/use-agents'
+import { formatDateTime } from '@/lib/format'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -28,7 +29,7 @@ function parseTag(tag: string): { key: string; value: string } {
 export default function AgentDetailPage() {
   const { agentUuid } = useParams()
   const navigate = useNavigate()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { data, isLoading, error } = useAgent(agentUuid ?? '')
   const updateAgent = useUpdateAgent()
   const disableAgent = useDisableAgent()
@@ -191,7 +192,7 @@ export default function AgentDetailPage() {
               <div>
                 <dt className="text-xs text-text-muted">{t('common.createdAt')}</dt>
                 <dd className="text-sm text-text-secondary font-[family-name:var(--font-mono)]">
-                  {new Date(agent.created_at).toLocaleString()}
+                  {formatDateTime(agent.created_at, i18n.language)}
                 </dd>
               </div>
             </dl>

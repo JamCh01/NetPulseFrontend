@@ -3,6 +3,7 @@ import type { MonitoringDataPoint } from '@/api/generated/types.gen'
 import type { ChartThemeConfig } from './chart-theme'
 import { getAgentColor } from './agent-colors'
 import { buildDataIndex } from './tooltip-formatter'
+import { formatChartTime } from '@/lib/format'
 
 export interface AgentSeriesData {
   agentUuid: string
@@ -164,9 +165,7 @@ export function buildMultiAgentOption(
         )
 
         const ts = rawItems[0].axisValue
-        const d = new Date(ts)
-        const pad = (n: number) => String(n).padStart(2, '0')
-        const timeStr = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
+        const timeStr = formatChartTime(ts)
 
         const rtt = (v: number) => v.toFixed(1)
 

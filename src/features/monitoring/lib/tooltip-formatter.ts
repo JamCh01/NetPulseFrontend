@@ -4,12 +4,7 @@
  */
 
 import type { MonitoringDataPoint } from '@/api/generated/types.gen'
-
-function formatTime(ts: number): string {
-  const d = new Date(ts)
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
-}
+import { formatChartTime } from '@/lib/format'
 
 function rtt(val: number | undefined): string {
   if (val === undefined || val === null) return '--'
@@ -43,7 +38,7 @@ export function createTooltipFormatter(
     if (items.length === 0) return ''
 
     const ts = items[0].axisValue
-    const timeStr = formatTime(ts)
+    const timeStr = formatChartTime(ts)
 
     // Find the closest data point (exact match or nearest)
     let point = dataIndex.get(ts)
