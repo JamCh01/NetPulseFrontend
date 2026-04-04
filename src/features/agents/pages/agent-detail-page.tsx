@@ -267,8 +267,8 @@ export default function AgentDetailPage() {
                 <SelectValue placeholder={availableTasks.length === 0 ? t('agents.noAvailableTasks') : t('agents.selectTask')}>
                   {(value: string | null) => {
                     if (!value) return availableTasks.length === 0 ? t('agents.noAvailableTasks') : t('agents.selectTask')
-                    const tk = availableTasks.find((t) => t.task_uuid === value)
-                    return tk?.task_name ?? t('agents.selectTask')
+                    const found = availableTasks.find((task) => task.task_uuid === value)
+                    return found?.task_name ?? t('agents.selectTask')
                   }}
                 </SelectValue>
               </SelectTrigger>
