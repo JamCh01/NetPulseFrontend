@@ -70,6 +70,14 @@ npm run generate:api # Regenerate API client from OpenAPI
 - Chart tooltip HTML must use theme-aware colors from `ChartThemeConfig` (not hardcoded `#fff` / `#d1d5db`)
 - `tooltipLabelColor` for muted labels, `tooltipValueColor` for data values -- adapts to light/dark theme
 
+### Charts
+- Two display styles: `'smoke'` (straight segments, default) and `'basic'` (smooth curves)
+- Style toggle in monitoring detail page (`monitoring.chartStyleBasic` / `monitoring.chartStyleSmoke` in i18n)
+- Gaps > 5 minutes show as visual breaks (null values inserted at midpoint)
+- `MAX_GAP_MS = 5 * 60 * 1000` defines the gap threshold
+- `connectNulls: false` ensures ECharts doesn't connect across gaps
+- Both single-agent and multi-agent charts support the same features
+
 ### Forms
 - Populate edit forms in the click handler (not `useEffect` on derived objects)
 - Use functional `setState((prev) => ...)` in callbacks to avoid stale closures

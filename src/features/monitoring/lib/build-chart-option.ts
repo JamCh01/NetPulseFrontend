@@ -4,11 +4,14 @@ import type { ChartBandData } from './transform-chart-data'
 import type { ChartThemeConfig } from './chart-theme'
 import { buildDataIndex, createTooltipFormatter } from './tooltip-formatter'
 
+type ChartStyle = 'basic' | 'smoke'
+
 interface BuildOptionParams {
   data: ChartBandData
   theme: ChartThemeConfig
   agentName?: string
   rawPoints: MonitoringDataPoint[]
+  chartStyle?: ChartStyle
 }
 
 /**
@@ -19,6 +22,7 @@ export function buildSmokePingOption({
   theme,
   agentName,
   rawPoints,
+  chartStyle = 'smoke',
 }: BuildOptionParams): EChartsOption {
   if (data.timestamps.length === 0) {
     return { title: { text: 'No data', left: 'center', top: 'center', textStyle: { color: theme.axisLabelColor, fontSize: 14 } } }
@@ -41,9 +45,13 @@ export function buildSmokePingOption({
       symbol: 'none',
       lineStyle: { opacity: 0, width: 0 },
       areaStyle: { opacity: 0 },
-      data: data.timestamps.map((ts, i) => [ts, cfg.band.lower[i]]),
+      data: data.timestamps.map((ts, i) => {
+        const val = cfg.band.lower[i]
+        return val === null ? [ts, null] : [ts, val]
+      }),
       silent: true,
       z: 1,
+      connectNulls: false,
     })
     series.push({
       name: `${cfg.name.split('_')[1]}_delta`,
@@ -52,9 +60,13 @@ export function buildSmokePingOption({
       symbol: 'none',
       lineStyle: { opacity: 0, width: 0 },
       areaStyle: { color: cfg.color },
-      data: data.timestamps.map((ts, i) => [ts, cfg.band.delta[i]]),
+      data: data.timestamps.map((ts, i) => {
+        const val = cfg.band.delta[i]
+        return val === null ? [ts, null] : [ts, val]
+      }),
       silent: true,
       z: 1,
+      connectNulls: false,
     })
   }
 
@@ -66,7 +78,8 @@ export function buildSmokePingOption({
   series.push({
     name: 'Median',
     type: 'line',
-    smooth: true,
+    smooth: chartStyle === 'basic',
+    step: false,
     symbol: 'circle',
     symbolSize: 3,
     showSymbol: false,
@@ -78,8 +91,12 @@ export function buildSmokePingOption({
       shadowBlur: 8,
     },
     itemStyle: { color: theme.medianColor },
-    data: data.timestamps.map((ts, i) => [ts, data.medianLine[i]]),
+    data: data.timestamps.map((ts, i) => {
+      const val = data.medianLine[i]
+      return val === null ? [ts, null] : [ts, val]
+    }),
     z: 10,
+    connectNulls: false,
     markArea: markAreaData.length > 0 ? { silent: true, data: markAreaData as never } : undefined,
   })
 

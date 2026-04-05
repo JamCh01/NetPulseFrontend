@@ -15,6 +15,22 @@ NetPulse is a network monitoring platform (SmokePing-style). This is the React f
 - **Vitest** + **Testing Library** + **MSW** (testing)
 - **@hey-api/openapi-ts** (API client generation)
 
+## Chart Features
+
+### SmokePing-style Charts
+
+The monitoring charts support two display styles, toggleable in the monitoring detail page:
+
+- **Smoke (default)**: Straight line segments between data points (classic SmokePing style)
+- **Basic**: Smooth curve interpolation between points
+
+### Data Gap Handling
+
+Charts automatically detect and display breaks in data:
+- Gaps > 5 minutes are shown as visual breaks in the line
+- No smoothing across missing data intervals
+- Null values are inserted at gap midpoints to create clean breaks
+
 ## Getting Started
 
 ```bash

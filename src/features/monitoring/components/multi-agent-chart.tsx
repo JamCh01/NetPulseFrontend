@@ -5,11 +5,14 @@ import { useChartTheme } from '../lib/chart-theme'
 import { buildMultiAgentOption, type AgentSeriesData } from '../lib/build-multi-agent-option'
 import { Skeleton } from '@/components/ui/skeleton'
 
+type ChartStyle = 'basic' | 'smoke'
+
 export interface MultiAgentChartProps {
   agentSeries: AgentSeriesData[]
   isLoading?: boolean
   error?: Error | null
   height?: number
+  chartStyle?: ChartStyle
 }
 
 function MultiAgentChartInner({
@@ -17,13 +20,14 @@ function MultiAgentChartInner({
   isLoading = false,
   error = null,
   height = 400,
+  chartStyle = 'smoke',
 }: MultiAgentChartProps) {
   const { t } = useTranslation()
   const theme = useChartTheme()
 
   const option = useMemo(
-    () => buildMultiAgentOption(agentSeries, theme),
-    [agentSeries, theme],
+    () => buildMultiAgentOption(agentSeries, theme, chartStyle),
+    [agentSeries, theme, chartStyle],
   )
 
   if (isLoading) {

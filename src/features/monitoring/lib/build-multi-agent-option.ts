@@ -2,13 +2,61 @@ import type { EChartsOption } from 'echarts'
 import type { MonitoringDataPoint } from '@/api/generated/types.gen'
 import type { ChartThemeConfig } from './chart-theme'
 import { getAgentColor } from './agent-colors'
-import { buildDataIndex } from './tooltip-formatter'
 import { formatChartTime } from '@/lib/format'
 
 export interface AgentSeriesData {
   agentUuid: string
   agentName: string
   data: MonitoringDataPoint[]
+}
+
+type ChartStyle = 'basic' | 'smoke'
+
+// Maximum gap between data points before we show a break in the chart (5 minutes)
+const MAX_GAP_MS = 5 * 60 * 1000
+
+interface ProcessedAgentData {
+  timestamps: number[]
+  min: (number | null)[]
+  max: (number | null)[]
+  median: (number | null)[]
+  rawPoints: Map<number, MonitoringDataPoint>
+}
+
+/**
+ * Insert null values into data arrays where there are time gaps > MAX_GAP_MS.
+ */
+function processAgentData(points: MonitoringDataPoint[]): ProcessedAgentData {
+  const timestamps: number[] = []
+  const min: (number | null)[] = []
+  const max: (number | null)[] = []
+  const median: (number | null)[] = []
+  const rawPoints = new Map<number, MonitoringDataPoint>()
+
+  for (let i = 0; i < points.length; i++) {
+    const p = points[i]
+    const ts = p.timestamp * 1000
+
+    // Check if there's a gap from the previous point
+    if (i > 0) {
+      const prevTs = points[i - 1].timestamp * 1000
+      if (ts - prevTs > MAX_GAP_MS) {
+        const midTs = prevTs + (ts - prevTs) / 2
+        timestamps.push(midTs)
+        min.push(null)
+        max.push(null)
+        median.push(null)
+      }
+    }
+
+    timestamps.push(ts)
+    min.push(p.min_rtt)
+    max.push(p.max_rtt)
+    median.push(p.median_rtt)
+    rawPoints.set(ts, p)
+  }
+
+  return { timestamps, min, max, median, rawPoints }
 }
 
 /**
@@ -19,6 +67,7 @@ export interface AgentSeriesData {
 export function buildMultiAgentOption(
   agentSeries: AgentSeriesData[],
   theme: ChartThemeConfig,
+  chartStyle: ChartStyle = 'smoke',
 ): EChartsOption {
   const nonEmpty = agentSeries.filter((s) => s.data.length > 0)
 
@@ -34,11 +83,17 @@ export function buildMultiAgentOption(
   }
 
   const series: NonNullable<EChartsOption['series']> = []
+  const processedAgents: Array<{
+    agent: AgentSeriesData
+    color: ReturnType<typeof getAgentColor>
+    processed: ProcessedAgentData
+  }> = []
 
   for (let i = 0; i < nonEmpty.length; i++) {
     const agent = nonEmpty[i]
     const color = getAgentColor(i)
-    const timestamps = agent.data.map((p) => p.timestamp * 1000)
+    const processed = processAgentData(agent.data)
+    processedAgents.push({ agent, color, processed })
 
     // Band area (min → max) — subtle fill per agent
     series.push({
@@ -48,9 +103,13 @@ export function buildMultiAgentOption(
       symbol: 'none',
       lineStyle: { opacity: 0, width: 0 },
       areaStyle: { opacity: 0 },
-      data: timestamps.map((ts, j) => [ts, agent.data[j].min_rtt]),
+      data: processed.timestamps.map((ts, j) => {
+        const val = processed.min[j]
+        return val === null ? [ts, null] : [ts, val]
+      }),
       silent: true,
       z: 1,
+      connectNulls: false,
     })
     series.push({
       name: `${agent.agentName}_band`,
@@ -59,16 +118,25 @@ export function buildMultiAgentOption(
       symbol: 'none',
       lineStyle: { opacity: 0, width: 0 },
       areaStyle: { color: color.bg },
-      data: timestamps.map((ts, j) => [ts, Math.max(0, agent.data[j].max_rtt - agent.data[j].min_rtt)]),
+      data: processed.timestamps.map((ts, j) => {
+        const minVal = processed.min[j]
+        const maxVal = processed.max[j]
+        if (minVal === null || maxVal === null) {
+          return [ts, null]
+        }
+        return [ts, Math.max(0, maxVal - minVal)]
+      }),
       silent: true,
       z: 1,
+      connectNulls: false,
     })
 
     // Median line — the main visible line per agent
     series.push({
       name: agent.agentName,
       type: 'line',
-      smooth: true,
+      smooth: chartStyle === 'basic',
+      step: false,
       symbol: 'circle',
       symbolSize: 3,
       showSymbol: false,
@@ -80,16 +148,20 @@ export function buildMultiAgentOption(
         shadowBlur: 6,
       },
       itemStyle: { color: color.line },
-      data: timestamps.map((ts, j) => [ts, agent.data[j].median_rtt]),
+      data: processed.timestamps.map((ts, j) => {
+        const val = processed.median[j]
+        return val === null ? [ts, null] : [ts, val]
+      }),
       z: 10 + i,
+      connectNulls: false,
     })
   }
 
   // Build per-agent data indexes for tooltip lookup
-  const agentIndexes = nonEmpty.map((agent, i) => ({
-    name: agent.agentName,
+  const agentIndexes = processedAgents.map((pa, i) => ({
+    name: pa.agent.agentName,
     color: getAgentColor(i).line,
-    index: buildDataIndex(agent.data),
+    index: pa.processed.rawPoints,
   }))
 
   return {
@@ -106,8 +178,8 @@ export function buildMultiAgentOption(
       itemGap: 16,
       // Only show agent median lines in legend, not band/loss series
       selector: false,
-      data: nonEmpty.map((a, i) => ({
-        name: a.agentName,
+      data: processedAgents.map((pa, i) => ({
+        name: pa.agent.agentName,
         itemStyle: { color: getAgentColor(i).line },
       })),
     },

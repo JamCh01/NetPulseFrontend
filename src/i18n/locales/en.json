@@ -346,6 +346,9 @@
     "selectTask": "Select a task to view monitoring data",
     "raw": "Raw",
     "hourly": "Hourly",
-    "daily": "Daily"
+    "daily": "Daily",
+    "chartStyle": "Chart Style",
+    "chartStyleBasic": "Basic (smooth)",
+    "chartStyleSmoke": "SmokePing (segments)"
   }
 }

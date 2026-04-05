@@ -7,12 +7,15 @@ import { useChartTheme } from '../lib/chart-theme'
 import { buildSmokePingOption } from '../lib/build-chart-option'
 import { Skeleton } from '@/components/ui/skeleton'
 
+type ChartStyle = 'basic' | 'smoke'
+
 export interface SmokePingChartProps {
   data?: MonitoringDataPoint[]
   isLoading?: boolean
   error?: Error | null
   agentName?: string
   height?: number
+  chartStyle?: ChartStyle
 }
 
 function SmokePingChartInner({
@@ -21,6 +24,7 @@ function SmokePingChartInner({
   isLoading = false,
   error = null,
   agentName,
+  chartStyle = 'smoke',
 }: SmokePingChartProps) {
   const { t } = useTranslation()
   const theme = useChartTheme()
@@ -28,8 +32,8 @@ function SmokePingChartInner({
   const chartOption = useMemo(() => {
     if (!data || data.length === 0) return null
     const bandData = transformToChartData(data)
-    return buildSmokePingOption({ data: bandData, theme, agentName, rawPoints: data })
-  }, [data, theme, agentName])
+    return buildSmokePingOption({ data: bandData, theme, agentName, rawPoints: data, chartStyle })
+  }, [data, theme, agentName, chartStyle])
 
   if (isLoading) {
     return (

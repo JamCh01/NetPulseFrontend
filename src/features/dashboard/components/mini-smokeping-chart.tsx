@@ -38,7 +38,15 @@ function MiniSmokePingChartInner({
     if (!data || data.length === 0) return null
 
     const chartData = transformToChartData(data)
-    const lastMedian = chartData.medianLine[chartData.medianLine.length - 1]
+    // Find the last non-null median value
+    let lastMedian: number | null = null
+    for (let i = chartData.medianLine.length - 1; i >= 0; i--) {
+      const val = chartData.medianLine[i]
+      if (val !== null) {
+        lastMedian = val
+        break
+      }
+    }
     const lastLoss = data[data.length - 1]?.packet_loss_pct ?? 0
 
     return {
@@ -56,8 +64,12 @@ function MiniSmokePingChartInner({
             symbol: 'none',
             lineStyle: { opacity: 0 },
             areaStyle: { opacity: 0 },
-            data: chartData.timestamps.map((ts, i) => [ts, chartData.bands.minToAvg.lower[i]]),
+            data: chartData.timestamps.map((ts, i) => {
+              const val = chartData.bands.minToAvg.lower[i]
+              return val === null ? [ts, null] : [ts, val]
+            }),
             silent: true,
+            connectNulls: false,
           },
           {
             type: 'line',
@@ -67,19 +79,30 @@ function MiniSmokePingChartInner({
             areaStyle: { color: theme.bandColors[3] },
             data: chartData.timestamps.map((ts, i) => {
               const min = chartData.bands.minToAvg.lower[i]
-              const maxVal = chartData.bands.p99ToMax.lower[i] + chartData.bands.p99ToMax.delta[i]
+              const p99 = chartData.bands.p99ToMax.lower[i]
+              const delta = chartData.bands.p99ToMax.delta[i]
+              if (min === null || p99 === null || delta === null) {
+                return [ts, null]
+              }
+              const maxVal = p99 + delta
               return [ts, Math.max(0, maxVal - min)]
             }),
             silent: true,
+            connectNulls: false,
           },
           // Median line
           {
             type: 'line',
-            smooth: true,
+            smooth: false,
+            step: false,
             symbol: 'none',
             lineStyle: { color: theme.medianColor, width: 1.5 },
-            data: chartData.timestamps.map((ts, i) => [ts, chartData.medianLine[i]]),
+            data: chartData.timestamps.map((ts, i) => {
+              const val = chartData.medianLine[i]
+              return val === null ? [ts, null] : [ts, val]
+            }),
             silent: true,
+            connectNulls: false,
           },
         ],
       },

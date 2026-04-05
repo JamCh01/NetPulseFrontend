@@ -346,6 +346,9 @@
     "selectTask": "选择一个任务查看监控数据",
     "raw": "原始",
     "hourly": "小时",
-    "daily": "每日"
+    "daily": "每日",
+    "chartStyle": "图表样式",
+    "chartStyleBasic": "基础（平滑）",
+    "chartStyleSmoke": "SmokePing（线段）"
   }
 }

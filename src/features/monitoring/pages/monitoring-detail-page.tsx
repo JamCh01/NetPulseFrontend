@@ -53,6 +53,8 @@ function computeStats(data: MonitoringDataPoint[]) {
   }
 }
 
+type ChartStyle = 'basic' | 'smoke'
+
 export default function MonitoringDetailPage() {
   const { t } = useTranslation()
   const { taskUuid } = useParams()
@@ -65,6 +67,7 @@ export default function MonitoringDetailPage() {
   const taskAgents = (taskAgentsData ?? []) as AgentResponse[]
 
   const [selectedAgentUuid, setSelectedAgentUuid] = useState<string>('')
+  const [chartStyle, setChartStyle] = useState<ChartStyle>('smoke')
 
   const now = useMemo(() => Date.now(), [])
   const [timeRange, setTimeRange] = useState<{ start: number; end: number; granularity: 'raw' | 'hourly' | 'daily' }>({
@@ -186,6 +189,21 @@ export default function MonitoringDetailPage() {
             </SelectContent>
           </Select>
         </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-text-muted">{t('monitoring.chartStyle')}:</span>
+          <Select
+            value={chartStyle}
+            onValueChange={(val) => setChartStyle(val as ChartStyle)}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="basic">{t('monitoring.chartStyleBasic')}</SelectItem>
+              <SelectItem value="smoke">{t('monitoring.chartStyleSmoke')}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Chart */}
@@ -195,6 +213,7 @@ export default function MonitoringDetailPage() {
           isLoading={multiLoading}
           error={multiError}
           height={400}
+          chartStyle={chartStyle}
         />
       ) : (
         <SmokePingChart
@@ -203,6 +222,7 @@ export default function MonitoringDetailPage() {
           error={singleError as Error | null}
           agentName={taskAgents.find((a) => a.agent_uuid === selectedAgentUuid)?.agent_name}
           height={400}
+          chartStyle={chartStyle}
         />
       )}
 
