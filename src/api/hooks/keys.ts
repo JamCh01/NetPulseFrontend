@@ -89,3 +89,9 @@ export const groupKeys = {
     [...groupKeys.all, 'list', params] as const,
   detail: (uuid: string) => [...groupKeys.all, 'detail', uuid] as const,
 }
+
+export const releaseKeys = {
+  all: ['releases'] as const,
+  list: (platform?: string | null) => [...releaseKeys.all, 'list', platform] as const,
+  detail: (uuid: string) => [...releaseKeys.all, 'detail', uuid] as const,
+}

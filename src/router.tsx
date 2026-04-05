@@ -16,6 +16,7 @@ const TasksPage = lazy(() => import('@/features/tasks/pages/tasks-page'))
 const TaskDetailPage = lazy(() => import('@/features/tasks/pages/task-detail-page'))
 const AgentsPage = lazy(() => import('@/features/agents/pages/agents-page'))
 const AgentDetailPage = lazy(() => import('@/features/agents/pages/agent-detail-page'))
+const ReleasesPage = lazy(() => import('@/features/agents/pages/releases-page'))
 const AlertsPage = lazy(() => import('@/features/alerts/pages/alerts-page'))
 const WebhooksPage = lazy(() => import('@/features/webhooks/pages/webhooks-page'))
 const AlertEventsPage = lazy(() => import('@/features/alerts/pages/alert-events-page'))
@@ -64,6 +65,7 @@ export function AppRouter() {
             {/* Admin-only routes */}
             <Route element={<AdminGuard />}>
               <Route path="/agents" element={<AgentsPage />} />
+              <Route path="/agents/releases" element={<ReleasesPage />} />
               <Route path="/agents/:agentUuid" element={<AgentDetailPage />} />
               <Route path="/users" element={<UsersPage />} />
               <Route path="/audit" element={<AuditPage />} />

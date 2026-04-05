@@ -10,3 +10,12 @@ export const AGENT_STATUS_COLORS: Record<string, string> = {
   offline: 'bg-gray-500/15 text-gray-400 border-gray-500/30',
   disabled: 'bg-red-500/15 text-red-400 border-red-500/30',
 }
+
+export const PLATFORM_OPTIONS = [
+  { value: 'x86_64-linux-musl', labelKey: 'agents.platformLinuxAmd64' },
+  { value: 'aarch64-linux-musl', labelKey: 'agents.platformLinuxArm64' },
+  { value: 'x86_64-macos', labelKey: 'agents.platformDarwinAmd64' },
+  { value: 'aarch64-macos', labelKey: 'agents.platformDarwinArm64' },
+  { value: 'x86_64-windows', labelKey: 'agents.platformWindowsAmd64' },
+  { value: 'aarch64-windows', labelKey: 'agents.platformWindowsArm64' },
+] as const

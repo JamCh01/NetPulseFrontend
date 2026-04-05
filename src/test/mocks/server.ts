@@ -10,6 +10,7 @@ import { dashboardHandlers } from './handlers/dashboard'
 import { groupHandlers } from './handlers/groups'
 import { auditHandlers } from './handlers/audit'
 import { healthHandlers } from './handlers/health'
+import { releaseHandlers } from './handlers/releases'
 
 export const server = setupServer(
   ...authHandlers,
@@ -23,4 +24,5 @@ export const server = setupServer(
   ...groupHandlers,
   ...auditHandlers,
   ...healthHandlers,
+  ...releaseHandlers,
 )

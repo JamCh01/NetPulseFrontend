@@ -7,6 +7,7 @@ import type {
   AlertEventResponse,
   WebhookResponse,
   GroupResponse,
+  ReleaseResponse,
   TokenResponse,
 } from '@/api/generated/types.gen'
 import type { DashboardStats } from '@/api/types'
@@ -181,6 +182,21 @@ export function createMockAuditLog(overrides?: Partial<MockAuditLog>): MockAudit
     resource_uuid: uuid(),
     details: { agent_name: 'test-agent' },
     ip_address: '127.0.0.1',
+    created_at: '2026-01-01T00:00:00Z',
+    ...overrides,
+  }
+}
+
+export function createMockRelease(overrides?: Partial<ReleaseResponse>): ReleaseResponse {
+  return {
+    release_uuid: uuid(),
+    version: '1.0.0',
+    platform: 'x86_64-linux-musl',
+    filename: `netpulse-agent-x86_64-linux-musl-v1.0.0`,
+    file_size: 10485760,
+    sha256: 'abc123def456',
+    release_notes: null,
+    is_latest: true,
     created_at: '2026-01-01T00:00:00Z',
     ...overrides,
   }

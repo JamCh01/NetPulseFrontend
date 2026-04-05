@@ -36,17 +36,8 @@ import { CheckableList } from '@/components/ui/checkable-list'
 import { Pagination } from '@/components/ui/pagination'
 import { GeoCascader } from '@/features/agents/components/geo-cascader'
 import type { AgentResponse, TaskResponse, PlatformEnum } from '@/api/generated/types.gen'
-import { AGENT_STATUS_COLORS } from '@/lib/constants'
+import { AGENT_STATUS_COLORS, PLATFORM_OPTIONS } from '@/lib/constants'
 import { formatDate } from '@/lib/format'
-
-const PLATFORM_OPTIONS = [
-  { value: 'x86_64-linux-musl', labelKey: 'agents.platformLinuxAmd64' },
-  { value: 'aarch64-linux-musl', labelKey: 'agents.platformLinuxArm64' },
-  { value: 'x86_64-macos', labelKey: 'agents.platformDarwinAmd64' },
-  { value: 'aarch64-macos', labelKey: 'agents.platformDarwinArm64' },
-  { value: 'x86_64-windows', labelKey: 'agents.platformWindowsAmd64' },
-  { value: 'aarch64-windows', labelKey: 'agents.platformWindowsArm64' },
-] as const
 
 const PAGE_SIZE = 50
 
@@ -160,12 +151,20 @@ export default function AgentsPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-text-primary">{t('agents.title')}</h1>
-        <Button
-          className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none"
-          onClick={() => setCreateOpen(true)}
-        >
-          {t('agents.createAgent')}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => navigate('/agents/releases')}
+          >
+            {t('agents.releases')}
+          </Button>
+          <Button
+            className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none"
+            onClick={() => setCreateOpen(true)}
+          >
+            {t('agents.createAgent')}
+          </Button>
+        </div>
       </div>
 
       <div className="glass-light rounded-xl p-1">
@@ -189,6 +188,8 @@ export default function AgentsPage() {
               <TableRow className="border-white/5 hover:bg-transparent">
                 <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('common.name')}</TableHead>
                 <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('agents.tags')}</TableHead>
+                <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('agents.version')}</TableHead>
+                <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('agents.platform')}</TableHead>
                 <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('common.status')}</TableHead>
                 <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('common.createdAt')}</TableHead>
                 <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('common.actions')}</TableHead>
@@ -213,6 +214,16 @@ export default function AgentsPage() {
                         </span>
                       ))}
                     </div>
+                  </TableCell>
+                  <TableCell className="text-text-secondary text-xs font-mono">
+                    {agent.agent_version ?? '-'}
+                  </TableCell>
+                  <TableCell className="text-text-secondary text-xs">
+                    {agent.platform
+                      ? (PLATFORM_OPTIONS.find((p) => p.value === agent.platform)
+                          ? t(PLATFORM_OPTIONS.find((p) => p.value === agent.platform)!.labelKey)
+                          : agent.platform)
+                      : '-'}
                   </TableCell>
                   <TableCell>
                     <Badge

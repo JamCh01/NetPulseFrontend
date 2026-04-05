@@ -233,6 +233,18 @@ export default function AgentDetailPage() {
                   {formatDateTime(agent.created_at, i18n.language)}
                 </dd>
               </div>
+              <div>
+                <dt className="text-xs text-text-muted">{t('agents.version')}</dt>
+                <dd className="text-sm text-text-secondary font-[family-name:var(--font-mono)]">
+                  {agent.agent_version ?? t('common.na')}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs text-text-muted">{t('agents.platform')}</dt>
+                <dd className="text-sm text-text-secondary">
+                  {agent.platform ?? t('common.na')}
+                </dd>
+              </div>
             </dl>
           )}
         </div>
