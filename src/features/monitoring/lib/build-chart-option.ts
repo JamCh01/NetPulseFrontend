@@ -79,7 +79,7 @@ export function buildSmokePingOption({
     name: 'Median',
     type: 'line',
     smooth: chartStyle === 'basic',
-    step: false,
+    step: chartStyle === 'smoke' ? 'middle' : false,
     symbol: 'circle',
     symbolSize: 3,
     showSymbol: false,

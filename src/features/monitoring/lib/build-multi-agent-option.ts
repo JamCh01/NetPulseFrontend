@@ -136,7 +136,7 @@ export function buildMultiAgentOption(
       name: agent.agentName,
       type: 'line',
       smooth: chartStyle === 'basic',
-      step: false,
+      step: chartStyle === 'smoke' ? 'middle' : false,
       symbol: 'circle',
       symbolSize: 3,
       showSymbol: false,

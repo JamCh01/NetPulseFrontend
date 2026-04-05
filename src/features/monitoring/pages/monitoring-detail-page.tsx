@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { ToggleSwitch } from '@/components/ui/toggle-switch'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores/auth-store'
@@ -68,6 +69,7 @@ export default function MonitoringDetailPage() {
 
   const [selectedAgentUuid, setSelectedAgentUuid] = useState<string>('')
   const [chartStyle, setChartStyle] = useState<ChartStyle>('smoke')
+  const isSmokeStyle = chartStyle === 'smoke'
 
   const now = useMemo(() => Date.now(), [])
   const [timeRange, setTimeRange] = useState<{ start: number; end: number; granularity: 'raw' | 'hourly' | 'daily' }>({
@@ -189,21 +191,12 @@ export default function MonitoringDetailPage() {
             </SelectContent>
           </Select>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-text-muted">{t('monitoring.chartStyle')}:</span>
-          <Select
-            value={chartStyle}
-            onValueChange={(val) => setChartStyle(val as ChartStyle)}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="basic">{t('monitoring.chartStyleBasic')}</SelectItem>
-              <SelectItem value="smoke">{t('monitoring.chartStyleSmoke')}</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <ToggleSwitch
+          checked={isSmokeStyle}
+          onChange={(checked) => setChartStyle(checked ? 'smoke' : 'basic')}
+          labelLeft={t('monitoring.chartStyleBasic')}
+          labelRight={t('monitoring.chartStyleSmoke')}
+        />
       </div>
 
       {/* Chart */}
