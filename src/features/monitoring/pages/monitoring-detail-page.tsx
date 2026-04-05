@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useNavigate } from 'react-router'
 import { useTask } from '@/api/hooks/use-tasks'
@@ -71,7 +71,7 @@ export default function MonitoringDetailPage() {
   const [chartStyle, setChartStyle] = useState<ChartStyle>('smoke')
   const isSmokeStyle = chartStyle === 'smoke'
 
-  const now = useMemo(() => Date.now(), [])
+  const [now] = useState(() => Date.now())
   const [timeRange, setTimeRange] = useState<{ start: number; end: number; granularity: 'raw' | 'hourly' | 'daily' }>({
     start: now - INITIAL_DURATION_MS,
     end: now,
@@ -152,6 +152,13 @@ export default function MonitoringDetailPage() {
           <span className="text-sm text-text-secondary font-[family-name:var(--font-mono)]">
             {task.target}{task.port ? `:${task.port}` : ''}
           </span>
+          <Button
+            variant="outline"
+            className="text-sm"
+            onClick={() => navigate(`/monitoring/${task.task_uuid}/mtr`)}
+          >
+            MTR
+          </Button>
           {isAdmin && (
             <Button
               className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none text-sm"

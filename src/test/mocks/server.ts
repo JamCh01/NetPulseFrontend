@@ -7,6 +7,9 @@ import { alertHandlers } from './handlers/alerts'
 import { webhookHandlers } from './handlers/webhooks'
 import { userHandlers } from './handlers/users'
 import { dashboardHandlers } from './handlers/dashboard'
+import { groupHandlers } from './handlers/groups'
+import { auditHandlers } from './handlers/audit'
+import { healthHandlers } from './handlers/health'
 
 export const server = setupServer(
   ...authHandlers,
@@ -17,4 +20,7 @@ export const server = setupServer(
   ...webhookHandlers,
   ...userHandlers,
   ...dashboardHandlers,
+  ...groupHandlers,
+  ...auditHandlers,
+  ...healthHandlers,
 )

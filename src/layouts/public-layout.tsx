@@ -36,8 +36,8 @@ export function PublicLayout() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated())
   const [tasksExpanded, setTasksExpanded] = useState(true)
 
-  const { data: tasksData } = useTasks()
-  const tasks = (tasksData ?? []) as TaskResponse[]
+  const { data: tasksData } = useTasks({ limit: 200 })
+  const tasks = ((tasksData as { items?: TaskResponse[] })?.items ?? []) as TaskResponse[]
 
   return (
     <div className="min-h-screen gradient-bg grid-pattern flex">

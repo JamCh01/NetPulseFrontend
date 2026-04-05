@@ -18,9 +18,13 @@ const AgentsPage = lazy(() => import('@/features/agents/pages/agents-page'))
 const AgentDetailPage = lazy(() => import('@/features/agents/pages/agent-detail-page'))
 const AlertsPage = lazy(() => import('@/features/alerts/pages/alerts-page'))
 const WebhooksPage = lazy(() => import('@/features/webhooks/pages/webhooks-page'))
+const AlertEventsPage = lazy(() => import('@/features/alerts/pages/alert-events-page'))
 const UsersPage = lazy(() => import('@/features/users/pages/users-page'))
+const AuditPage = lazy(() => import('@/features/audit/pages/audit-page'))
+const GroupsPage = lazy(() => import('@/features/groups/pages/groups-page'))
 const MonitoringIndexPage = lazy(() => import('@/features/monitoring/pages/monitoring-index-page'))
 const MonitoringDetailPage = lazy(() => import('@/features/monitoring/pages/monitoring-detail-page'))
+const MtrDetailPage = lazy(() => import('@/features/monitoring/pages/mtr-detail-page'))
 
 function PageLoader() {
   return (
@@ -44,6 +48,7 @@ export function AppRouter() {
         <Route element={<PublicLayout />}>
           <Route path="/monitoring" element={<MonitoringIndexPage />} />
           <Route path="/monitoring/:taskUuid" element={<MonitoringDetailPage />} />
+          <Route path="/monitoring/:taskUuid/mtr" element={<MtrDetailPage />} />
         </Route>
 
         {/* Protected routes */}
@@ -53,6 +58,7 @@ export function AppRouter() {
             <Route path="/tasks" element={<TasksPage />} />
             <Route path="/tasks/:taskUuid" element={<TaskDetailPage />} />
             <Route path="/alerts" element={<AlertsPage />} />
+            <Route path="/alerts/events" element={<AlertEventsPage />} />
             <Route path="/webhooks" element={<WebhooksPage />} />
 
             {/* Admin-only routes */}
@@ -60,6 +66,8 @@ export function AppRouter() {
               <Route path="/agents" element={<AgentsPage />} />
               <Route path="/agents/:agentUuid" element={<AgentDetailPage />} />
               <Route path="/users" element={<UsersPage />} />
+              <Route path="/audit" element={<AuditPage />} />
+              <Route path="/groups" element={<GroupsPage />} />
             </Route>
           </Route>
         </Route>

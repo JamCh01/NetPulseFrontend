@@ -30,23 +30,30 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
-import type { UserResponse } from '@/api/generated/types.gen'
+import { Pagination } from '@/components/ui/pagination'
+import type { UserResponse, PaginatedResponseUserResponse } from '@/api/generated/types.gen'
 
 const ROLE_COLORS: Record<string, string> = {
   admin: 'bg-purple-500/15 text-purple-400 border-purple-500/30',
   subscriber: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30',
 }
 
+const PAGE_SIZE = 20
+
 export default function UsersPage() {
   const { t, i18n } = useTranslation()
   const [roleFilter, setRoleFilter] = useState<string>('')
+  const [page, setPage] = useState(1)
   const { data, isLoading, error } = useUsers(
-    roleFilter ? { role: roleFilter } : undefined,
+    roleFilter
+      ? { role: roleFilter, skip: (page - 1) * PAGE_SIZE, limit: PAGE_SIZE }
+      : { skip: (page - 1) * PAGE_SIZE, limit: PAGE_SIZE },
   )
   const disableUser = useDisableUser()
   const changePassword = useChangePassword()
 
-  const users = (data ?? []) as UserResponse[]
+  const users = ((data as PaginatedResponseUserResponse)?.items ?? []) as UserResponse[]
+  const totalPages = Math.ceil(((data as PaginatedResponseUserResponse)?.total ?? 0) / PAGE_SIZE)
 
   // Disable dialog
   const [disableUuid, setDisableUuid] = useState<string | null>(null)
@@ -104,7 +111,7 @@ export default function UsersPage() {
           <span className="text-xs text-text-muted">{t('users.filterByRole')}</span>
           <Select
             value={roleFilter}
-            onValueChange={(val) => setRoleFilter(val ?? '')}
+            onValueChange={(val) => { setRoleFilter(val ?? ''); setPage(1) }}
           >
             <SelectTrigger>
               <SelectValue placeholder={t('users.allRoles')} />
@@ -197,6 +204,8 @@ export default function UsersPage() {
           </Table>
         )}
       </div>
+
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} disabled={isLoading} />
 
       {/* Disable Confirmation Dialog */}
       <Dialog

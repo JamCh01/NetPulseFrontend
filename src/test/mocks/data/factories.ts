@@ -4,7 +4,9 @@ import type {
   TaskResponse,
   MonitoringDataPoint,
   AlertRuleResponse,
+  AlertEventResponse,
   WebhookResponse,
+  GroupResponse,
   TokenResponse,
 } from '@/api/generated/types.gen'
 import type { DashboardStats } from '@/api/types'
@@ -15,6 +17,10 @@ let counter = 0
 function uuid() {
   counter++
   return `00000000-0000-0000-0000-${String(counter).padStart(12, '0')}`
+}
+
+export function paginate<T>(items: T[], skip = 0, limit = 50) {
+  return { items, total: items.length, skip, limit }
 }
 
 export function createMockUser(overrides?: Partial<UserResponse>): UserResponse {
@@ -50,6 +56,10 @@ export function createMockTask(overrides?: Partial<TaskResponse>): TaskResponse 
     interval: 60,
     packet_count: 20,
     timeout: 5,
+    max_hops: null,
+    loss_threshold: null,
+    cooldown_secs: null,
+    max_retries: null,
     is_active: true,
     created_at: '2026-01-01T00:00:00Z',
     ...overrides,
@@ -121,6 +131,57 @@ export function createMockTokenResponse(overrides?: Partial<TokenResponse>): Tok
     access_token: 'mock-access-token',
     refresh_token: 'mock-refresh-token',
     token_type: 'bearer',
+    ...overrides,
+  }
+}
+
+export function createMockAlertEvent(overrides?: Partial<AlertEventResponse>): AlertEventResponse {
+  return {
+    event_uuid: uuid(),
+    rule_uuid: uuid(),
+    agent_uuid: uuid(),
+    task_uuid: uuid(),
+    triggered_value: 150.3,
+    status: 'firing',
+    triggered_at: '2026-01-01T12:00:00Z',
+    resolved_at: null,
+    ...overrides,
+  }
+}
+
+export function createMockGroup(overrides?: Partial<GroupResponse>): GroupResponse {
+  return {
+    group_uuid: uuid(),
+    group_name: `group-${counter}`,
+    description: null,
+    created_at: '2026-01-01T00:00:00Z',
+    ...overrides,
+  }
+}
+
+export interface MockAuditLog {
+  log_uuid: string
+  actor_uuid: string | null
+  actor_role: string
+  action: string
+  resource_type: string
+  resource_uuid: string | null
+  details: Record<string, unknown>
+  ip_address: string
+  created_at: string
+}
+
+export function createMockAuditLog(overrides?: Partial<MockAuditLog>): MockAuditLog {
+  return {
+    log_uuid: uuid(),
+    actor_uuid: uuid(),
+    actor_role: 'admin',
+    action: 'agent.create',
+    resource_type: 'agent',
+    resource_uuid: uuid(),
+    details: { agent_name: 'test-agent' },
+    ip_address: '127.0.0.1',
+    created_at: '2026-01-01T00:00:00Z',
     ...overrides,
   }
 }

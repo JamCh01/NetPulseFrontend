@@ -37,13 +37,42 @@ export function configureApiClient() {
     return request
   })
 
-  // Response interceptor: handle 401 with token refresh
+  // Response interceptor: handle 429 rate limiting and 401 with token refresh
   client.interceptors.response.use(async (response, request) => {
+    // Handle 429 rate limiting
+    if (response.status === 429) {
+      const url = new URL(request.url, window.location.origin)
+      if (url.pathname.includes('/auth/refresh')) {
+        const retryCount = (request as Request & { _retryCount?: number })._retryCount ?? 0
+        if (retryCount < 2) {
+          await new Promise((resolve) => setTimeout(resolve, 5000))
+          const retryRequest = request.clone() as Request & { _retryCount?: number }
+          retryRequest._retryCount = retryCount + 1
+          return fetch(retryRequest)
+        }
+        // All retries exhausted — fall through to 401 handler below
+      } else {
+        return response
+      }
+    }
+
     if (response.status !== 401) return response
 
     // Don't try to refresh on auth endpoints
     const url = new URL(request.url, window.location.origin)
     if (url.pathname.includes('/auth/')) return response
+
+    // Check for revoked token — don't attempt refresh
+    try {
+      const body = await response.clone().json()
+      if (body?.detail === 'Token has been revoked') {
+        useAuthStore.getState().logout()
+        window.location.href = '/login'
+        return response
+      }
+    } catch {
+      // If we can't parse the body, proceed with normal refresh flow
+    }
 
     // Use mutex to prevent concurrent refresh attempts
     if (!isRefreshing) {

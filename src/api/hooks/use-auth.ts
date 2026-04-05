@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query'
 import {
   loginRouteApiV1AuthLoginPost,
+  logoutRouteApiV1AuthLogoutPost,
   registerRouteApiV1AuthRegisterPost,
 } from '@/api/generated/sdk.gen'
 import { useAuthStore } from '@/stores/auth-store'
@@ -31,6 +32,26 @@ export function useLogin() {
           role: payload.role,
         })
       }
+    },
+  })
+}
+
+export function useLogout() {
+  const logout = useAuthStore((s) => s.logout)
+
+  return useMutation({
+    mutationFn: async () => {
+      const refreshToken = useAuthStore.getState().refreshToken
+      try {
+        await logoutRouteApiV1AuthLogoutPost({
+          body: refreshToken ? { refresh_token: refreshToken } : undefined,
+        })
+      } catch {
+        // Ignore errors — we always clear local state
+      }
+    },
+    onSettled: () => {
+      logout()
     },
   })
 }

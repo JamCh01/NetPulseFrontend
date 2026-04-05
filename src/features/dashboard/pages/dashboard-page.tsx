@@ -1,16 +1,17 @@
-import { useMemo } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDashboardStats } from '@/api/hooks/use-dashboard'
 import { useTasks } from '@/api/hooks/use-tasks'
 import { useMonitoringData } from '@/api/hooks/use-monitoring'
 import { StatsCards } from '../components/stats-cards'
+import { HealthCard } from '../components/health-card'
 import { MiniSmokePingChart } from '../components/mini-smokeping-chart'
 import type { DashboardStats } from '@/api/types'
-import type { TaskResponse } from '@/api/generated/types.gen'
+import type { TaskResponse, PaginatedResponseTaskResponse } from '@/api/generated/types.gen'
 
 function MiniChartWithData({ task }: { task: TaskResponse }) {
-  const now = useMemo(() => Date.now(), [])
-  const timeRange = useMemo(() => ({ start: now - 24 * 60 * 60 * 1000, end: now }), [now])
+  const [now] = useState(() => Date.now())
+  const [timeRange] = useState(() => ({ start: now - 24 * 60 * 60 * 1000, end: now }))
 
   const { data: monitoringData, isLoading } = useMonitoringData(
     task.task_uuid,
@@ -33,11 +34,11 @@ function MiniChartWithData({ task }: { task: TaskResponse }) {
 export default function DashboardPage() {
   const { t } = useTranslation()
   const { data: statsRaw, isLoading: statsLoading } = useDashboardStats()
-  const { data: tasksRaw, isLoading: tasksLoading } = useTasks({ is_active: true })
+  const { data: tasksRaw, isLoading: tasksLoading } = useTasks({ is_active: true, limit: 200 })
 
   // Cast dashboard stats which comes as generic object
   const stats = statsRaw as DashboardStats | undefined
-  const tasks = (tasksRaw ?? []) as TaskResponse[]
+  const tasks = ((tasksRaw as PaginatedResponseTaskResponse)?.items ?? []) as TaskResponse[]
 
   return (
     <div>
@@ -46,6 +47,11 @@ export default function DashboardPage() {
       {/* Stats cards */}
       <div className="mb-6">
         <StatsCards stats={stats} isLoading={statsLoading} />
+      </div>
+
+      {/* Health card */}
+      <div className="mb-6">
+        <HealthCard />
       </div>
 
       {/* Mini chart grid */}

@@ -33,8 +33,9 @@ import {
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CheckableList } from '@/components/ui/checkable-list'
+import { Pagination } from '@/components/ui/pagination'
 import { GeoCascader } from '@/features/agents/components/geo-cascader'
-import type { AgentResponse, TaskResponse } from '@/api/generated/types.gen'
+import type { AgentResponse, TaskResponse, PlatformEnum } from '@/api/generated/types.gen'
 import { AGENT_STATUS_COLORS } from '@/lib/constants'
 import { formatDate } from '@/lib/format'
 
@@ -47,14 +48,17 @@ const PLATFORM_OPTIONS = [
   { value: 'aarch64-windows', labelKey: 'agents.platformWindowsArm64' },
 ] as const
 
+const PAGE_SIZE = 50
+
 export default function AgentsPage() {
   const navigate = useNavigate()
   const { t, i18n } = useTranslation()
-  const { data, isLoading, error } = useAgents()
+  const [page, setPage] = useState(1)
+  const { data, isLoading, error } = useAgents({ skip: (page - 1) * PAGE_SIZE, limit: PAGE_SIZE })
   const createAgent = useCreateAgent()
   const disableAgent = useDisableAgent()
   const updateAgent = useUpdateAgent()
-  const { data: allTasksData } = useTasks()
+  const { data: allTasksData } = useTasks({ limit: 200 })
   const assignAgentsHook = useAssignAgents()
 
   const [createOpen, setCreateOpen] = useState(false)
@@ -64,7 +68,7 @@ export default function AgentsPage() {
   const [country, setCountry] = useState('')
   const [city, setCity] = useState('')
   const [isp, setIsp] = useState('')
-  const [platform, setPlatform] = useState('')
+  const [platform, setPlatform] = useState<PlatformEnum | ''>('')
   const [selectedTaskUuids, setSelectedTaskUuids] = useState<Set<string>>(new Set())
 
   // Success dialog state
@@ -74,8 +78,9 @@ export default function AgentsPage() {
   const [copiedKey, setCopiedKey] = useState(false)
   const [copiedCmd, setCopiedCmd] = useState(false)
 
-  const agents = (data ?? []) as AgentResponse[]
-  const allTasks = (allTasksData ?? []) as TaskResponse[]
+  const agents = ((data as { items?: AgentResponse[] })?.items ?? []) as AgentResponse[]
+  const totalPages = Math.ceil(((data as { total?: number })?.total ?? 0) / PAGE_SIZE)
+  const allTasks = ((allTasksData as { items?: TaskResponse[] })?.items ?? []) as TaskResponse[]
   const disableTarget = disableUuid ? agents.find((a) => a.agent_uuid === disableUuid) : null
 
   const handleToggle = () => {
@@ -111,7 +116,7 @@ export default function AgentsPage() {
       `isp:${isp}`,
     ]
     createAgent.mutate(
-      { agent_name: agentName, tags, platform: platform || null },
+      { agent_name: agentName, tags, platform: (platform as PlatformEnum) || null },
       {
         onSuccess: (result) => {
           setCreateOpen(false)
@@ -246,6 +251,8 @@ export default function AgentsPage() {
           </Table>
         )}
       </div>
+
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} disabled={isLoading} />
 
       {/* Create Agent Dialog */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>

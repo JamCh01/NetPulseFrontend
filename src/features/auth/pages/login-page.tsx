@@ -6,6 +6,7 @@ import { useLogin } from '@/api/hooks/use-auth'
 export default function LoginPage() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [cooldown, setCooldown] = useState(false)
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -13,6 +14,7 @@ export default function LoginPage() {
   const registeredSuccess = searchParams.get('registered') === 'true'
 
   function getErrorMessage(error: unknown): string {
+    if (error && typeof error === 'object' && 'status' in error && (error as { status: number }).status === 429) return t('auth.loginRateLimited')
     if (error && typeof error === 'object' && 'detail' in error) {
       const detail = (error as { detail: unknown }).detail
       if (typeof detail === 'string') return detail
@@ -26,6 +28,8 @@ export default function LoginPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    setCooldown(true)
+    setTimeout(() => setCooldown(false), 3000)
     login.mutate(
       { username, password },
       {
@@ -74,7 +78,7 @@ export default function LoginPage() {
         </div>
         <button
           type="submit"
-          disabled={login.isPending}
+          disabled={cooldown || login.isPending}
           className="w-full py-2.5 rounded-lg bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {login.isPending ? t('auth.signingIn') : t('auth.signInBtn')}

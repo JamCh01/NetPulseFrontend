@@ -1,23 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { isReservedHeader } from '@/features/webhooks/lib/constants'
+import { isReservedHeader, createEntry, type KeyValueEntry } from '@/features/webhooks/lib/constants'
 import { X, Plus } from 'lucide-react'
-
-let nextId = 0
-function genId() {
-  return `kv-${++nextId}`
-}
-
-export interface KeyValueEntry {
-  id: string
-  key: string
-  value: string
-}
-
-export function createEntry(key = '', value = ''): KeyValueEntry {
-  return { id: genId(), key, value }
-}
 
 interface KeyValueEditorProps {
   value: KeyValueEntry[]

@@ -1,9 +1,9 @@
 import { http, HttpResponse } from 'msw'
-import { createMockWebhook } from '@/test/mocks/data/factories'
+import { createMockWebhook, paginate } from '@/test/mocks/data/factories'
 
 export const webhookHandlers = [
   http.get('*/api/v1/webhooks/', () => {
-    return HttpResponse.json([createMockWebhook()])
+    return HttpResponse.json(paginate([createMockWebhook()]))
   }),
 
   http.get('*/api/v1/webhooks/:webhookUuid', () => {

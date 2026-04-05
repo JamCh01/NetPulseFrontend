@@ -22,14 +22,14 @@ export default function TaskDetailPage() {
   const isAdmin = useAuthStore((s) => s.isAdmin())
   const { data: taskData, isLoading: taskLoading, error: taskError } = useTask(taskUuid ?? '')
   const { data: taskAgentsData, isLoading: agentsLoading } = useTaskAgents(taskUuid ?? '')
-  const { data: allAgentsData } = useAgents()
+  const { data: allAgentsData } = useAgents({ limit: 200 })
   const updateTask = useUpdateTask()
   const assignAgents = useAssignAgents()
   const unassignAgent = useUnassignAgent()
 
   const task = taskData as TaskResponse | undefined
   const taskAgents = (taskAgentsData ?? []) as AgentResponse[]
-  const allAgents = (allAgentsData ?? []) as AgentResponse[]
+  const allAgents = ((allAgentsData as { items?: AgentResponse[] })?.items ?? []) as AgentResponse[]
 
   const [editing, setEditing] = useState(false)
   const [editName, setEditName] = useState('')

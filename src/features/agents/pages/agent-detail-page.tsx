@@ -42,7 +42,7 @@ export default function AgentDetailPage() {
   const isAdmin = useAuthStore((s) => s.isAdmin())
 
   const { data: agentTasksData, isLoading: tasksLoading } = useAgentTasks(agentUuid ?? '')
-  const { data: allTasksData } = useTasks()
+  const { data: allTasksData } = useTasks({ limit: 200 })
   const assignTasks = useAssignTasksFromAgent()
   const unassignTask = useUnassignTaskFromAgent()
 
@@ -50,7 +50,7 @@ export default function AgentDetailPage() {
   const agentTasks: TaskResponse[] = Array.isArray(agentTasksRaw)
     ? agentTasksRaw
     : (agentTasksRaw?.tasks ?? [])
-  const allTasks = (allTasksData ?? []) as TaskResponse[]
+  const allTasks = ((allTasksData as { items?: TaskResponse[] })?.items ?? []) as TaskResponse[]
   const assignedTaskUuids = new Set(agentTasks.map((tk) => tk.task_uuid))
   const availableTasks = allTasks.filter((tk) => !assignedTaskUuids.has(tk.task_uuid) && tk.is_active)
 

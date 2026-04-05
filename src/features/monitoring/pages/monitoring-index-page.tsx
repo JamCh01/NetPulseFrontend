@@ -15,8 +15,8 @@ const protocolBadge: Record<string, { bg: string; text: string }> = {
 export default function MonitoringIndexPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { data, isLoading } = useTasks()
-  const tasks = (data ?? []) as TaskResponse[]
+  const { data, isLoading } = useTasks({ limit: 200 })
+  const tasks = ((data as { items?: TaskResponse[] })?.items ?? []) as TaskResponse[]
 
   return (
     <div>

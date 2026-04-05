@@ -1,9 +1,9 @@
 import { http, HttpResponse } from 'msw'
-import { createMockAgent } from '@/test/mocks/data/factories'
+import { createMockAgent, paginate } from '@/test/mocks/data/factories'
 
 export const agentHandlers = [
   http.get('*/api/v1/agents/', () => {
-    return HttpResponse.json([createMockAgent(), createMockAgent({ status: 'offline' })])
+    return HttpResponse.json(paginate([createMockAgent(), createMockAgent({ status: 'offline' })]))
   }),
 
   http.get('*/api/v1/agents/:agentUuid', () => {

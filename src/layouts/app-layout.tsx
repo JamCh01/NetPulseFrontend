@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/stores/auth-store'
+import { useLogout } from '@/api/hooks/use-auth'
 import { useTasks } from '@/api/hooks/use-tasks'
 import { cn } from '@/lib/utils'
 import type { TaskResponse } from '@/api/generated/types.gen'
@@ -20,6 +21,9 @@ import {
   Activity,
   Languages,
   Plus,
+  ScrollText,
+  BellRing,
+  FolderOpen,
 } from 'lucide-react'
 
 const protocolIcon: Record<string, string> = {
@@ -49,26 +53,32 @@ export function AppLayout() {
   const { t, i18n } = useTranslation()
   const user = useAuthStore((s) => s.user)
   const isAdmin = useAuthStore((s) => s.isAdmin())
-  const logout = useAuthStore((s) => s.logout)
   const navigate = useNavigate()
+  const logoutMutation = useLogout()
   const location = useLocation()
 
-  const { data: tasksData } = useTasks()
-  const tasks = (tasksData ?? []) as TaskResponse[]
+  const { data: tasksData } = useTasks({ limit: 200 })
+  const tasks = ((tasksData as { items?: TaskResponse[] })?.items ?? []) as TaskResponse[]
 
   const staticNavItems: NavItem[] = [
     { label: t('nav.agents'), path: '/agents', icon: <Radio className="w-4 h-4" />, adminOnly: true },
     { label: t('nav.alerts'), path: '/alerts', icon: <Bell className="w-4 h-4" /> },
+    { label: t('nav.alertEvents'), path: '/alerts/events', icon: <BellRing className="w-4 h-4" /> },
     { label: t('nav.webhooks'), path: '/webhooks', icon: <Link2 className="w-4 h-4" /> },
   ]
 
   const adminNavItems: NavItem[] = [
     { label: t('nav.users'), path: '/users', icon: <Users className="w-4 h-4" />, adminOnly: true },
+    { label: t('nav.audit'), path: '/audit', icon: <ScrollText className="w-4 h-4" />, adminOnly: true },
+    { label: t('nav.groups'), path: '/groups', icon: <FolderOpen className="w-4 h-4" />, adminOnly: true },
   ]
 
   const handleLogout = () => {
-    logout()
-    navigate('/login')
+    logoutMutation.mutate(undefined, {
+      onSettled: () => {
+        navigate('/login')
+      },
+    })
   }
 
   const visibleNav = staticNavItems.filter((item) => !item.adminOnly || isAdmin)

@@ -36,6 +36,13 @@ export const monitoringKeys = {
     end: number
     granularity: string
   }) => [...monitoringKeys.all, 'query', params] as const,
+  mtrList: (params: {
+    task_uuid: string
+    agent_uuid?: string | null
+    start: number
+    end: number
+  }) => [...monitoringKeys.all, 'mtr', 'list', params] as const,
+  mtrDetail: (result_uuid: string) => [...monitoringKeys.all, 'mtr', 'detail', result_uuid] as const,
 }
 
 export const dashboardKeys = {
@@ -56,4 +63,29 @@ export const webhookKeys = {
   list: (params?: { skip?: number; limit?: number }) =>
     [...webhookKeys.all, 'list', params] as const,
   detail: (uuid: string) => [...webhookKeys.all, 'detail', uuid] as const,
+}
+
+export const healthKeys = {
+  all: ['health'] as const,
+  status: () => [...healthKeys.all, 'status'] as const,
+}
+
+export const auditKeys = {
+  all: ['audit'] as const,
+  list: (params?: { skip?: number; limit?: number; actor_uuid?: string | null; resource_type?: string | null; action?: string | null }) =>
+    [...auditKeys.all, 'list', params] as const,
+}
+
+export const alertEventKeys = {
+  all: ['alertEvents'] as const,
+  list: (params?: { skip?: number; limit?: number; rule_uuid?: string | null; task_uuid?: string | null; status?: string | null }) =>
+    [...alertEventKeys.all, 'list', params] as const,
+  detail: (uuid: string) => [...alertEventKeys.all, 'detail', uuid] as const,
+}
+
+export const groupKeys = {
+  all: ['groups'] as const,
+  list: (params?: { skip?: number; limit?: number }) =>
+    [...groupKeys.all, 'list', params] as const,
+  detail: (uuid: string) => [...groupKeys.all, 'detail', uuid] as const,
 }

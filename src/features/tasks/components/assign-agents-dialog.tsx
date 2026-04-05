@@ -18,13 +18,13 @@ interface AssignAgentsDialogProps {
 export function AssignAgentsDialog({ taskUuid, onClose }: AssignAgentsDialogProps) {
   const { t } = useTranslation()
   const { data: taskAgentsData, isLoading } = useTaskAgents(taskUuid ?? '')
-  const { data: allAgentsData } = useAgents()
+  const { data: allAgentsData } = useAgents({ limit: 200 })
   const assignAgents = useAssignAgents()
   const unassignAgent = useUnassignAgent()
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set())
 
   const taskAgents = (taskAgentsData ?? []) as AgentResponse[]
-  const allAgents = (allAgentsData ?? []) as AgentResponse[]
+  const allAgents = ((allAgentsData as { items?: AgentResponse[] })?.items ?? []) as AgentResponse[]
   const assignedUuids = new Set(taskAgents.map((a) => a.agent_uuid))
 
   const handleToggle = (agentUuid: string) => {

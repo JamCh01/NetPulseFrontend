@@ -67,3 +67,14 @@ export const RESERVED_HEADERS: readonly string[] = RESERVED_HEADERS_LOWER
 export function isReservedHeader(key: string): boolean {
   return RESERVED_HEADERS_LOWER.includes(key.toLowerCase().trim() as typeof RESERVED_HEADERS_LOWER[number])
 }
+
+export interface KeyValueEntry {
+  id: string
+  key: string
+  value: string
+}
+
+let nextId = 0
+export function createEntry(key = '', value = ''): KeyValueEntry {
+  return { id: `kv-${++nextId}`, key, value }
+}

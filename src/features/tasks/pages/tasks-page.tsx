@@ -34,23 +34,28 @@ import {
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CheckableList } from '@/components/ui/checkable-list'
+import { Pagination } from '@/components/ui/pagination'
 import { AssignAgentsDialog } from '@/features/tasks/components/assign-agents-dialog'
-import type { TaskResponse, ProtocolEnum, AgentResponse } from '@/api/generated/types.gen'
+import type { TaskResponse, ProtocolEnum, AgentResponse, PaginatedResponseTaskResponse } from '@/api/generated/types.gen'
 import { PROTOCOL_COLORS } from '@/lib/constants'
+
+const PAGE_SIZE = 50
 
 export default function TasksPage() {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const isAdmin = useAuthStore((s) => s.isAdmin())
-  const { data, isLoading, error } = useTasks()
+  const [page, setPage] = useState(1)
+  const { data, isLoading, error } = useTasks({ skip: (page - 1) * PAGE_SIZE, limit: PAGE_SIZE })
   const createTask = useCreateTask()
   const updateTask = useUpdateTask()
   const disableTask = useDisableTask()
-  const { data: allAgentsData } = useAgents()
+  const { data: allAgentsData } = useAgents({ limit: 200 })
   const assignAgents = useAssignAgents()
 
-  const tasks = (data ?? []) as TaskResponse[]
-  const allAgents = (allAgentsData ?? []) as AgentResponse[]
+  const tasks = ((data as PaginatedResponseTaskResponse)?.items ?? []) as TaskResponse[]
+  const totalPages = Math.ceil(((data as PaginatedResponseTaskResponse)?.total ?? 0) / PAGE_SIZE)
+  const allAgents = ((allAgentsData as { items?: AgentResponse[] })?.items ?? []) as AgentResponse[]
 
   // Create dialog
   const [createOpen, setCreateOpen] = useState(false)
@@ -258,6 +263,8 @@ export default function TasksPage() {
           </Table>
         )}
       </div>
+
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} disabled={isLoading} />
 
       {/* Create Task Dialog */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>

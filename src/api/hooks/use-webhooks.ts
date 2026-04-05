@@ -14,11 +14,11 @@ import {
 } from '@/api/generated/sdk.gen'
 import type { WebhookCreate, WebhookUpdate } from '@/api/generated/types.gen'
 
-export function useWebhooks() {
+export function useWebhooks(params?: { skip?: number; limit?: number }) {
   return useQuery({
-    queryKey: webhookKeys.list(),
+    queryKey: webhookKeys.list(params),
     queryFn: async () => {
-      const { data, error } = await listWebhooksEndpointApiV1WebhooksGet()
+      const { data, error } = await listWebhooksEndpointApiV1WebhooksGet({ query: params })
       if (error) throw error
       return data
     },
@@ -103,11 +103,11 @@ export function useRotateSecret() {
   })
 }
 
-export function useWebhookDeliveries(webhookUuid: string) {
+export function useWebhookDeliveries(webhookUuid: string, params?: { skip?: number; limit?: number }) {
   return useQuery({
-    queryKey: [...webhookKeys.detail(webhookUuid), 'deliveries'] as const,
+    queryKey: [...webhookKeys.detail(webhookUuid), 'deliveries', params] as const,
     queryFn: async () => {
-      const { data, error } = await listDeliveriesEndpointApiV1WebhooksWebhookUuidDeliveriesGet({ path: { webhook_uuid: webhookUuid } })
+      const { data, error } = await listDeliveriesEndpointApiV1WebhooksWebhookUuidDeliveriesGet({ path: { webhook_uuid: webhookUuid }, query: params })
       if (error) throw error
       return data
     },

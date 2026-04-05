@@ -71,13 +71,15 @@ src/
   components/ui/        # Shared UI primitives (shadcn/ui)
   features/
     auth/               # Login, register, guards (AuthGuard, AdminGuard)
-    dashboard/          # Dashboard with stats cards + mini charts
+    dashboard/          # Dashboard with stats cards + mini charts + health status
     tasks/              # Task CRUD + detail page
     agents/             # Agent CRUD + detail + geo-cascader
-    alerts/             # Alert rule CRUD with enable/disable toggle
-    webhooks/           # Webhook CRUD + template variables + custom headers
+    alerts/             # Alert rule CRUD + alert events list
+    webhooks/           # Webhook CRUD + template variables + custom headers + deliveries
     users/              # User management + password change (admin)
-    monitoring/         # Public SmokePing charts (single + multi-agent)
+    groups/             # Group CRUD (admin)
+    audit/              # Audit logs viewer (admin)
+    monitoring/         # Public SmokePing charts (single + multi-agent) + MTR
   i18n/                 # i18next config + en.json / zh.json
   layouts/              # AppLayout (auth), AuthLayout, PublicLayout
   lib/                  # Shared utilities (jwt, format, constants)
@@ -93,22 +95,51 @@ src/
 | Path | Access | Page |
 |------|--------|------|
 | `/monitoring` | Public | Task selection grid |
-| `/monitoring/:taskUuid` | Public | SmokePing chart |
+| `/monitoring/:taskUuid` | Public | SmokePing chart (single + multi-agent) |
+| `/monitoring/:taskUuid/mtr` | Public | MTR traceroute timeline + hop detail |
 | `/login` | Public | Login |
 | `/register` | Public | Register (subscriber only) |
-| `/dashboard` | Auth | Stats overview + mini charts |
+| `/dashboard` | Auth | Stats overview + mini charts + system health |
 | `/tasks` | Auth | Task list + create/edit/delete (admin) |
 | `/tasks/:taskUuid` | Auth | Task detail + agent assignment (admin) |
 | `/alerts` | Auth | Alert rules CRUD + enable/disable |
-| `/webhooks` | Auth | Webhooks CRUD + template + headers |
+| `/alerts/events` | Auth | Alert events list (firing/resolved, per-agent) |
+| `/webhooks` | Auth | Webhooks CRUD + template + headers + deliveries |
 | `/agents` | Admin | Agent list + create (with platform) |
 | `/agents/:agentUuid` | Admin | Agent detail + edit |
 | `/users` | Admin | User management + password change |
+| `/groups` | Admin | Group CRUD (cascade delete) |
+| `/audit` | Admin | Audit logs with filters |
 
 ## Roles
 
-- **subscriber** -- Can manage own alert rules and webhooks. Sees only own resources.
-- **admin** -- Full access. Sees all resources with owner column. Can manage agents, tasks, users, and change passwords.
+- **subscriber** -- Can manage own alert rules and webhooks. Sees only own resources. Can view alert events for own rules.
+- **admin** -- Full access. Sees all resources with owner column. Can manage agents, tasks, users, groups, and view audit logs.
+
+## Pagination
+
+All list endpoints return paginated responses:
+
+```json
+{ "items": [...], "total": 142, "skip": 0, "limit": 50 }
+```
+
+Every list page includes pagination controls (prev/next). The shared `<Pagination>` component is at `src/components/ui/pagination.tsx`. Sidebar task lists and dropdown selectors use `limit: 200` to fetch all items without pagination UI.
+
+## Authentication & Security
+
+### Rate Limiting
+Login (10/min) and register (5/min) endpoints are rate-limited. The frontend shows localized error messages on 429 responses and disables the submit button for 3 seconds after each attempt.
+
+### Token Lifecycle
+- **Login** returns access + refresh tokens stored in localStorage
+- **Token refresh** is handled automatically by the response interceptor with a mutex to prevent concurrent refresh attempts
+- **Logout** calls `POST /auth/logout` to revoke tokens server-side, then clears local state
+- **Revoked tokens** trigger immediate logout (no refresh attempt) when the backend returns `"Token has been revoked"`
+
+## System Health
+
+The dashboard displays a health card showing component-level status for PostgreSQL, Redis, NATS, and VictoriaMetrics. Status is polled every 30 seconds. The backend returns `200` (all ok) or `503` (degraded) with per-component status.
 
 ## Agent-Task Assignment
 

@@ -5,11 +5,13 @@ import { useRegister } from '@/api/hooks/use-auth'
 
 export default function RegisterPage() {
   const [form, setForm] = useState({ username: '', email: '', password: '' })
+  const [cooldown, setCooldown] = useState(false)
   const { t } = useTranslation()
   const navigate = useNavigate()
   const register = useRegister()
 
   function getErrorMessage(error: unknown): string {
+    if (error && typeof error === 'object' && 'status' in error && (error as { status: number }).status === 429) return t('auth.registerRateLimited')
     if (error && typeof error === 'object' && 'detail' in error) {
       const detail = (error as { detail: unknown }).detail
       if (typeof detail === 'string') return detail
@@ -23,6 +25,8 @@ export default function RegisterPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    setCooldown(true)
+    setTimeout(() => setCooldown(false), 3000)
     register.mutate(
       { username: form.username, email: form.email, password: form.password, role: 'subscriber' },
       {
@@ -81,7 +85,7 @@ export default function RegisterPage() {
         </div>
         <button
           type="submit"
-          disabled={register.isPending}
+          disabled={cooldown || register.isPending}
           className="w-full py-2.5 rounded-lg bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {register.isPending ? t('auth.creatingAccount') : t('auth.createAccountBtn')}

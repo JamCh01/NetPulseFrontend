@@ -29,7 +29,7 @@ npm run generate:api # Regenerate API client from OpenAPI
 
 ### File Organization
 - Feature-based: `src/features/{feature}/pages/`, `components/`, `lib/`
-- Shared UI: `src/components/ui/` (shadcn primitives)
+- Shared UI: `src/components/ui/` (shadcn primitives + Pagination)
 - Shared utilities: `src/lib/` (jwt.ts, format.ts, constants.ts)
 - API hooks: `src/api/hooks/use-{resource}.ts`
 - Query keys: `src/api/hooks/keys.ts`
@@ -89,15 +89,58 @@ npm run generate:api # Regenerate API client from OpenAPI
 - JWT decode returns `null` on failure (never throws)
 
 ### Roles & Permissions
-- `subscriber`: sees own webhooks/alerts only, full CRUD on own resources
-- `admin`: sees all resources with owner column, can manage agents/tasks/users
-- Admin-only routes: `/agents`, `/users` (wrapped in `<AdminGuard>`)
+- `subscriber`: sees own webhooks/alerts only, full CRUD on own resources, can view own alert events
+- `admin`: sees all resources with owner column, can manage agents/tasks/users/groups, view audit logs
+- Admin-only routes: `/agents`, `/users`, `/groups`, `/audit` (wrapped in `<AdminGuard>`)
 - Webhook/alert actions gated by `canManageRule()`/`canManageWebhook()` (owner or admin)
 
 ### DELETE vs PATCH Semantics
 - `PATCH is_active=false` = temporary disable (stays in list, can re-enable)
 - `DELETE` = permanent soft-delete (hidden from list, cannot recover)
 - Both webhooks and alert rules follow this pattern
+- Exception: Group `DELETE` is a **hard delete** with cascade (removes UserGroup + GroupTask associations)
+
+### Pagination
+- All list endpoints return `{ items: T[], total: number, skip: number, limit: number }`
+- List pages use `useState` for `page`, compute `skip = (page - 1) * PAGE_SIZE`
+- Extract items: `((data as PaginatedResponseXxx)?.items ?? []) as Xxx[]`
+- Shared `<Pagination>` component at `src/components/ui/pagination.tsx`
+- Sidebar/dropdown consumers pass `{ limit: 200 }` and extract `.items` without pagination UI
+- Reset page to 1 when filters change
+
+### Authentication & Rate Limiting
+- Login (10/min) and register (5/min) are rate-limited; 429 shows localized error + 3s button cooldown
+- `POST /auth/logout` revokes tokens server-side; frontend always clears local state regardless of API result
+- Response interceptor detects `"Token has been revoked"` in 401 responses and skips refresh
+- Token refresh uses mutex pattern to prevent concurrent refresh attempts
+- Refresh token rotation: each refresh returns a new refresh token; old one is automatically replaced via `setTokens()`
+
+### Alert Events
+- `GET /alerts/events/` returns paginated `AlertEventResponse` with `agent_uuid` field
+- Events are per-agent: same rule can fire for multiple agents simultaneously
+- Hooks: `src/api/hooks/use-alert-events.ts` (`useAlertEvents`, `useAlertEvent`)
+- Page at `/alerts/events` with rule/task/status filters
+
+### Groups
+- `GET/POST /users/groups/`, `GET/PATCH/DELETE /users/groups/{uuid}`
+- Hooks: `src/api/hooks/use-groups.ts` (full CRUD)
+- Page at `/groups` (admin only)
+- Delete is **hard delete** with cascade — requires strong confirmation
+
+### Audit Logs
+- `GET /audit/logs` (admin only) with `actor_uuid`, `resource_type`, `action` filters
+- Hook: `src/api/hooks/use-audit.ts` (`useAuditLogs`)
+- Page at `/audit` with expandable JSON details column
+
+### System Health
+- `GET /health` returns `{ status: 'ok'|'degraded', components: { postgres, redis, nats, victoriametrics } }`
+- Hook: `src/api/hooks/use-health.ts` (`useHealth`) with 30s polling
+- Displayed as a card on the dashboard page
+
+### Webhook Delivery Retry
+- `WebhookDeliveryResponse` includes `next_retry_at` (nullable datetime)
+- Deliveries table shows: attempt as "N/5", next retry time, "Waiting for retry" status
+- Webhooks with `consecutive_failures >= 100` show "Auto-disabled" badge
 
 ### Timezone & Date Formatting
 - Backend and agents use **UTC** exclusively

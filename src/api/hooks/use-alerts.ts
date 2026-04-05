@@ -10,11 +10,11 @@ import {
 } from '@/api/generated/sdk.gen'
 import type { AlertRuleCreate, AlertRuleUpdate } from '@/api/generated/types.gen'
 
-export function useAlertRules() {
+export function useAlertRules(params?: { skip?: number; limit?: number }) {
   return useQuery({
-    queryKey: alertKeys.rules(),
+    queryKey: alertKeys.ruleList(params),
     queryFn: async () => {
-      const { data, error } = await listRulesEndpointApiV1AlertsRulesGet()
+      const { data, error } = await listRulesEndpointApiV1AlertsRulesGet({ query: params })
       if (error) throw error
       return data
     },

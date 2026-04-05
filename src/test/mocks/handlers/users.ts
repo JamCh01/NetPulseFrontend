@@ -1,9 +1,9 @@
 import { http, HttpResponse } from 'msw'
-import { createMockUser } from '@/test/mocks/data/factories'
+import { createMockUser, paginate } from '@/test/mocks/data/factories'
 
 export const userHandlers = [
   http.get('*/api/v1/users/', () => {
-    return HttpResponse.json([createMockUser({ role: 'admin' }), createMockUser()])
+    return HttpResponse.json(paginate([createMockUser({ role: 'admin' }), createMockUser()]))
   }),
 
   http.get('*/api/v1/users/:userUuid', () => {

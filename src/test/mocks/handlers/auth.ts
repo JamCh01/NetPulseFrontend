@@ -13,4 +13,8 @@ export const authHandlers = [
   http.post('*/api/v1/auth/refresh', () => {
     return HttpResponse.json(createMockTokenResponse())
   }),
+
+  http.post('*/api/v1/auth/logout', () => {
+    return new HttpResponse(null, { status: 204 })
+  }),
 ]

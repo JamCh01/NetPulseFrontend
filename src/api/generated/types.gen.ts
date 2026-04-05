@@ -16,10 +16,7 @@ export type AgentCreate = {
      * Tags
      */
     tags: Array<string>;
-    /**
-     * Platform
-     */
-    platform?: string | null;
+    platform?: PlatformEnum | null;
 };
 
 /**
@@ -34,6 +31,14 @@ export type AgentRegisterRequest = {
      * Access Key
      */
     access_key: string;
+    /**
+     * Platform
+     */
+    platform?: string | null;
+    /**
+     * Agent Version
+     */
+    agent_version?: string | null;
 };
 
 /**
@@ -75,6 +80,14 @@ export type AgentResponse = {
      */
     status: string;
     /**
+     * Agent Version
+     */
+    agent_version?: string | null;
+    /**
+     * Platform
+     */
+    platform?: string | null;
+    /**
      * Created At
      */
     created_at: string;
@@ -106,6 +119,44 @@ export type AgentUpdate = {
      * Status
      */
     status?: string | null;
+};
+
+/**
+ * AlertEventResponse
+ */
+export type AlertEventResponse = {
+    /**
+     * Event Uuid
+     */
+    event_uuid: string;
+    /**
+     * Rule Uuid
+     */
+    rule_uuid: string;
+    /**
+     * Agent Uuid
+     */
+    agent_uuid: string;
+    /**
+     * Task Uuid
+     */
+    task_uuid: string;
+    /**
+     * Triggered Value
+     */
+    triggered_value: number;
+    /**
+     * Status
+     */
+    status: string;
+    /**
+     * Triggered At
+     */
+    triggered_at: string;
+    /**
+     * Resolved At
+     */
+    resolved_at: string | null;
 };
 
 /**
@@ -206,9 +257,6 @@ export type AlertRuleUpdate = {
      * Threshold
      */
     threshold?: number | null;
-    /**
-     * Operator
-     */
     operator?: OperatorEnum | null;
     /**
      * M Count
@@ -225,9 +273,81 @@ export type AlertRuleUpdate = {
 };
 
 /**
+ * Body_upload_release_api_v1_agents_releases_upload_post
+ */
+export type BodyUploadReleaseApiV1AgentsReleasesUploadPost = {
+    /**
+     * File
+     */
+    file: Blob | File;
+    /**
+     * Version
+     */
+    version: string;
+    /**
+     * Platform
+     */
+    platform: string;
+    /**
+     * Release Notes
+     */
+    release_notes?: string | null;
+};
+
+/**
  * GranularityEnum
  */
 export type GranularityEnum = 'raw' | 'hourly' | 'daily';
+
+/**
+ * GroupCreate
+ */
+export type GroupCreate = {
+    /**
+     * Group Name
+     */
+    group_name: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+};
+
+/**
+ * GroupResponse
+ */
+export type GroupResponse = {
+    /**
+     * Group Uuid
+     */
+    group_uuid: string;
+    /**
+     * Group Name
+     */
+    group_name: string;
+    /**
+     * Description
+     */
+    description: string | null;
+    /**
+     * Created At
+     */
+    created_at: string;
+};
+
+/**
+ * GroupUpdate
+ */
+export type GroupUpdate = {
+    /**
+     * Group Name
+     */
+    group_name?: string | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+};
 
 /**
  * HTTPValidationError
@@ -251,6 +371,32 @@ export type HeartbeatRequest = {
      * Task Count
      */
     task_count: number;
+    /**
+     * Agent Version
+     */
+    agent_version?: string | null;
+};
+
+/**
+ * LatestReleaseResponse
+ */
+export type LatestReleaseResponse = {
+    /**
+     * Version
+     */
+    version: string;
+    /**
+     * Sha256
+     */
+    sha256: string;
+    /**
+     * Download Url
+     */
+    download_url: string;
+    /**
+     * Release Notes
+     */
+    release_notes: string | null;
 };
 
 /**
@@ -265,6 +411,16 @@ export type LoginRequest = {
      * Password
      */
     password: string;
+};
+
+/**
+ * LogoutRequest
+ */
+export type LogoutRequest = {
+    /**
+     * Refresh Token
+     */
+    refresh_token?: string | null;
 };
 
 /**
@@ -356,14 +512,305 @@ export type MonitoringResponse = {
 };
 
 /**
+ * MtrHopDetail
+ */
+export type MtrHopDetail = {
+    /**
+     * Hop
+     */
+    hop: number;
+    /**
+     * Ip
+     */
+    ip: string;
+    /**
+     * Hostname
+     */
+    hostname?: string | null;
+    /**
+     * Avg Rtt
+     */
+    avg_rtt: number;
+    /**
+     * Min Rtt
+     */
+    min_rtt: number;
+    /**
+     * Max Rtt
+     */
+    max_rtt: number;
+    /**
+     * Packet Loss Pct
+     */
+    packet_loss_pct: number;
+    /**
+     * Sent
+     */
+    sent?: number | null;
+    /**
+     * Received
+     */
+    received?: number | null;
+    /**
+     * Asn
+     */
+    asn?: number | null;
+    /**
+     * Ptr
+     */
+    ptr?: string | null;
+};
+
+/**
+ * MtrResultDetail
+ */
+export type MtrResultDetail = {
+    /**
+     * Result Uuid
+     */
+    result_uuid: string;
+    /**
+     * Task Uuid
+     */
+    task_uuid: string;
+    /**
+     * Agent Uuid
+     */
+    agent_uuid: string;
+    /**
+     * Timestamp
+     */
+    timestamp: string;
+    /**
+     * Target Reached
+     */
+    target_reached: boolean;
+    /**
+     * Total Hops
+     */
+    total_hops: number;
+    /**
+     * Hops
+     */
+    hops: Array<MtrHopDetail>;
+};
+
+/**
+ * MtrResultListResponse
+ */
+export type MtrResultListResponse = {
+    /**
+     * Task Uuid
+     */
+    task_uuid: string;
+    /**
+     * Agent Uuid
+     */
+    agent_uuid: string | null;
+    /**
+     * Results
+     */
+    results: Array<MtrResultSummary>;
+};
+
+/**
+ * MtrResultSummary
+ */
+export type MtrResultSummary = {
+    /**
+     * Result Uuid
+     */
+    result_uuid: string;
+    /**
+     * Task Uuid
+     */
+    task_uuid: string;
+    /**
+     * Agent Uuid
+     */
+    agent_uuid: string;
+    /**
+     * Timestamp
+     */
+    timestamp: string;
+    /**
+     * Target Reached
+     */
+    target_reached: boolean;
+    /**
+     * Total Hops
+     */
+    total_hops: number;
+};
+
+/**
  * OperatorEnum
  */
 export type OperatorEnum = 'gt' | 'lt' | 'gte' | 'lte';
 
 /**
+ * PaginatedResponse[AlertEventResponse]
+ */
+export type PaginatedResponseAlertEventResponse = {
+    /**
+     * Items
+     */
+    items: Array<AlertEventResponse>;
+    /**
+     * Total
+     */
+    total: number;
+    /**
+     * Skip
+     */
+    skip: number;
+    /**
+     * Limit
+     */
+    limit: number;
+};
+
+/**
+ * PaginatedResponse[AlertRuleResponse]
+ */
+export type PaginatedResponseAlertRuleResponse = {
+    /**
+     * Items
+     */
+    items: Array<AlertRuleResponse>;
+    /**
+     * Total
+     */
+    total: number;
+    /**
+     * Skip
+     */
+    skip: number;
+    /**
+     * Limit
+     */
+    limit: number;
+};
+
+/**
+ * PaginatedResponse[GroupResponse]
+ */
+export type PaginatedResponseGroupResponse = {
+    /**
+     * Items
+     */
+    items: Array<GroupResponse>;
+    /**
+     * Total
+     */
+    total: number;
+    /**
+     * Skip
+     */
+    skip: number;
+    /**
+     * Limit
+     */
+    limit: number;
+};
+
+/**
+ * PaginatedResponse[TaskResponse]
+ */
+export type PaginatedResponseTaskResponse = {
+    /**
+     * Items
+     */
+    items: Array<TaskResponse>;
+    /**
+     * Total
+     */
+    total: number;
+    /**
+     * Skip
+     */
+    skip: number;
+    /**
+     * Limit
+     */
+    limit: number;
+};
+
+/**
+ * PaginatedResponse[UserResponse]
+ */
+export type PaginatedResponseUserResponse = {
+    /**
+     * Items
+     */
+    items: Array<UserResponse>;
+    /**
+     * Total
+     */
+    total: number;
+    /**
+     * Skip
+     */
+    skip: number;
+    /**
+     * Limit
+     */
+    limit: number;
+};
+
+/**
+ * PaginatedResponse[WebhookDeliveryResponse]
+ */
+export type PaginatedResponseWebhookDeliveryResponse = {
+    /**
+     * Items
+     */
+    items: Array<WebhookDeliveryResponse>;
+    /**
+     * Total
+     */
+    total: number;
+    /**
+     * Skip
+     */
+    skip: number;
+    /**
+     * Limit
+     */
+    limit: number;
+};
+
+/**
+ * PaginatedResponse[WebhookResponse]
+ */
+export type PaginatedResponseWebhookResponse = {
+    /**
+     * Items
+     */
+    items: Array<WebhookResponse>;
+    /**
+     * Total
+     */
+    total: number;
+    /**
+     * Skip
+     */
+    skip: number;
+    /**
+     * Limit
+     */
+    limit: number;
+};
+
+/**
+ * PlatformEnum
+ */
+export type PlatformEnum = 'x86_64-linux-musl' | 'aarch64-linux-musl' | 'x86_64-macos' | 'aarch64-macos' | 'x86_64-windows' | 'aarch64-windows';
+
+/**
  * ProtocolEnum
  */
-export type ProtocolEnum = 'icmp' | 'tcp' | 'udp' | 'http';
+export type ProtocolEnum = 'icmp' | 'tcp' | 'udp' | 'http' | 'mtr';
 
 /**
  * RefreshRequest
@@ -373,6 +820,58 @@ export type RefreshRequest = {
      * Refresh Token
      */
     refresh_token: string;
+};
+
+/**
+ * ReleaseListResponse
+ */
+export type ReleaseListResponse = {
+    /**
+     * Releases
+     */
+    releases: Array<ReleaseResponse>;
+};
+
+/**
+ * ReleaseResponse
+ */
+export type ReleaseResponse = {
+    /**
+     * Release Uuid
+     */
+    release_uuid: string;
+    /**
+     * Version
+     */
+    version: string;
+    /**
+     * Platform
+     */
+    platform: string;
+    /**
+     * Filename
+     */
+    filename: string;
+    /**
+     * File Size
+     */
+    file_size: number;
+    /**
+     * Sha256
+     */
+    sha256: string;
+    /**
+     * Release Notes
+     */
+    release_notes: string | null;
+    /**
+     * Is Latest
+     */
+    is_latest: boolean;
+    /**
+     * Created At
+     */
+    created_at: string;
 };
 
 /**
@@ -404,6 +903,22 @@ export type TaskCreate = {
      * Timeout
      */
     timeout?: number;
+    /**
+     * Max Hops
+     */
+    max_hops?: number | null;
+    /**
+     * Loss Threshold
+     */
+    loss_threshold?: number | null;
+    /**
+     * Cooldown Secs
+     */
+    cooldown_secs?: number | null;
+    /**
+     * Max Retries
+     */
+    max_retries?: number | null;
 };
 
 /**
@@ -443,6 +958,22 @@ export type TaskResponse = {
      */
     timeout: number;
     /**
+     * Max Hops
+     */
+    max_hops: number | null;
+    /**
+     * Loss Threshold
+     */
+    loss_threshold: number | null;
+    /**
+     * Cooldown Secs
+     */
+    cooldown_secs: number | null;
+    /**
+     * Max Retries
+     */
+    max_retries: number | null;
+    /**
      * Is Active
      */
     is_active: boolean;
@@ -476,6 +1007,22 @@ export type TaskUpdate = {
      * Is Active
      */
     is_active?: boolean | null;
+    /**
+     * Max Hops
+     */
+    max_hops?: number | null;
+    /**
+     * Loss Threshold
+     */
+    loss_threshold?: number | null;
+    /**
+     * Cooldown Secs
+     */
+    cooldown_secs?: number | null;
+    /**
+     * Max Retries
+     */
+    max_retries?: number | null;
 };
 
 /**
@@ -927,6 +1474,40 @@ export type RefreshRouteApiV1AuthRefreshPostResponses = {
 
 export type RefreshRouteApiV1AuthRefreshPostResponse = RefreshRouteApiV1AuthRefreshPostResponses[keyof RefreshRouteApiV1AuthRefreshPostResponses];
 
+export type LogoutRouteApiV1AuthLogoutPostData = {
+    /**
+     * Data
+     */
+    body?: LogoutRequest | null;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/logout';
+};
+
+export type LogoutRouteApiV1AuthLogoutPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type LogoutRouteApiV1AuthLogoutPostError = LogoutRouteApiV1AuthLogoutPostErrors[keyof LogoutRouteApiV1AuthLogoutPostErrors];
+
+export type LogoutRouteApiV1AuthLogoutPostResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type LogoutRouteApiV1AuthLogoutPostResponse = LogoutRouteApiV1AuthLogoutPostResponses[keyof LogoutRouteApiV1AuthLogoutPostResponses];
+
 export type ListUsersRouteApiV1UsersGetData = {
     body?: never;
     headers?: {
@@ -964,11 +1545,9 @@ export type ListUsersRouteApiV1UsersGetError = ListUsersRouteApiV1UsersGetErrors
 
 export type ListUsersRouteApiV1UsersGetResponses = {
     /**
-     * Response List Users Route Api V1 Users  Get
-     *
      * Successful Response
      */
-    200: Array<UserResponse>;
+    200: PaginatedResponseUserResponse;
 };
 
 export type ListUsersRouteApiV1UsersGetResponse = ListUsersRouteApiV1UsersGetResponses[keyof ListUsersRouteApiV1UsersGetResponses];
@@ -1191,6 +1770,227 @@ export type AddToGroupRouteApiV1UsersUserUuidGroupsGroupUuidPostResponses = {
      * Successful Response
      */
     201: unknown;
+};
+
+export type ListGroupsRouteApiV1UsersGroupsGetData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string;
+    };
+    path?: never;
+    query?: {
+        /**
+         * Skip
+         */
+        skip?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/v1/users/groups/';
+};
+
+export type ListGroupsRouteApiV1UsersGroupsGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListGroupsRouteApiV1UsersGroupsGetError = ListGroupsRouteApiV1UsersGroupsGetErrors[keyof ListGroupsRouteApiV1UsersGroupsGetErrors];
+
+export type ListGroupsRouteApiV1UsersGroupsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: PaginatedResponseGroupResponse;
+};
+
+export type ListGroupsRouteApiV1UsersGroupsGetResponse = ListGroupsRouteApiV1UsersGroupsGetResponses[keyof ListGroupsRouteApiV1UsersGroupsGetResponses];
+
+export type CreateGroupRouteApiV1UsersGroupsPostData = {
+    body: GroupCreate;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/users/groups/';
+};
+
+export type CreateGroupRouteApiV1UsersGroupsPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateGroupRouteApiV1UsersGroupsPostError = CreateGroupRouteApiV1UsersGroupsPostErrors[keyof CreateGroupRouteApiV1UsersGroupsPostErrors];
+
+export type CreateGroupRouteApiV1UsersGroupsPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: GroupResponse;
+};
+
+export type CreateGroupRouteApiV1UsersGroupsPostResponse = CreateGroupRouteApiV1UsersGroupsPostResponses[keyof CreateGroupRouteApiV1UsersGroupsPostResponses];
+
+export type DeleteGroupRouteApiV1UsersGroupsGroupUuidDeleteData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string;
+    };
+    path: {
+        /**
+         * Group Uuid
+         */
+        group_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/users/groups/{group_uuid}';
+};
+
+export type DeleteGroupRouteApiV1UsersGroupsGroupUuidDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteGroupRouteApiV1UsersGroupsGroupUuidDeleteError = DeleteGroupRouteApiV1UsersGroupsGroupUuidDeleteErrors[keyof DeleteGroupRouteApiV1UsersGroupsGroupUuidDeleteErrors];
+
+export type DeleteGroupRouteApiV1UsersGroupsGroupUuidDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type DeleteGroupRouteApiV1UsersGroupsGroupUuidDeleteResponse = DeleteGroupRouteApiV1UsersGroupsGroupUuidDeleteResponses[keyof DeleteGroupRouteApiV1UsersGroupsGroupUuidDeleteResponses];
+
+export type GetGroupRouteApiV1UsersGroupsGroupUuidGetData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string;
+    };
+    path: {
+        /**
+         * Group Uuid
+         */
+        group_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/users/groups/{group_uuid}';
+};
+
+export type GetGroupRouteApiV1UsersGroupsGroupUuidGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetGroupRouteApiV1UsersGroupsGroupUuidGetError = GetGroupRouteApiV1UsersGroupsGroupUuidGetErrors[keyof GetGroupRouteApiV1UsersGroupsGroupUuidGetErrors];
+
+export type GetGroupRouteApiV1UsersGroupsGroupUuidGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: GroupResponse;
+};
+
+export type GetGroupRouteApiV1UsersGroupsGroupUuidGetResponse = GetGroupRouteApiV1UsersGroupsGroupUuidGetResponses[keyof GetGroupRouteApiV1UsersGroupsGroupUuidGetResponses];
+
+export type UpdateGroupRouteApiV1UsersGroupsGroupUuidPatchData = {
+    body: GroupUpdate;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string;
+    };
+    path: {
+        /**
+         * Group Uuid
+         */
+        group_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/users/groups/{group_uuid}';
+};
+
+export type UpdateGroupRouteApiV1UsersGroupsGroupUuidPatchErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateGroupRouteApiV1UsersGroupsGroupUuidPatchError = UpdateGroupRouteApiV1UsersGroupsGroupUuidPatchErrors[keyof UpdateGroupRouteApiV1UsersGroupsGroupUuidPatchErrors];
+
+export type UpdateGroupRouteApiV1UsersGroupsGroupUuidPatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: GroupResponse;
+};
+
+export type UpdateGroupRouteApiV1UsersGroupsGroupUuidPatchResponse = UpdateGroupRouteApiV1UsersGroupsGroupUuidPatchResponses[keyof UpdateGroupRouteApiV1UsersGroupsGroupUuidPatchResponses];
+
+export type ListDownloadsApiV1AgentsDownloadGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/agents/download/';
+};
+
+export type ListDownloadsApiV1AgentsDownloadGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type DownloadAgentApiV1AgentsDownloadFilenameGetData = {
+    body?: never;
+    path: {
+        /**
+         * Filename
+         */
+        filename: string;
+    };
+    query?: never;
+    url: '/api/v1/agents/download/{filename}';
+};
+
+export type DownloadAgentApiV1AgentsDownloadFilenameGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DownloadAgentApiV1AgentsDownloadFilenameGetError = DownloadAgentApiV1AgentsDownloadFilenameGetErrors[keyof DownloadAgentApiV1AgentsDownloadFilenameGetErrors];
+
+export type DownloadAgentApiV1AgentsDownloadFilenameGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
 };
 
 export type ListAgentsApiV1AgentsGetData = {
@@ -1447,6 +2247,207 @@ export type RecordHeartbeatApiV1AgentsAgentUuidHeartbeatPostResponses = {
     200: unknown;
 };
 
+export type UploadReleaseApiV1AgentsReleasesUploadPostData = {
+    body: BodyUploadReleaseApiV1AgentsReleasesUploadPost;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/agents/releases/upload';
+};
+
+export type UploadReleaseApiV1AgentsReleasesUploadPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UploadReleaseApiV1AgentsReleasesUploadPostError = UploadReleaseApiV1AgentsReleasesUploadPostErrors[keyof UploadReleaseApiV1AgentsReleasesUploadPostErrors];
+
+export type UploadReleaseApiV1AgentsReleasesUploadPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: ReleaseResponse;
+};
+
+export type UploadReleaseApiV1AgentsReleasesUploadPostResponse = UploadReleaseApiV1AgentsReleasesUploadPostResponses[keyof UploadReleaseApiV1AgentsReleasesUploadPostResponses];
+
+export type ListReleasesApiV1AgentsReleasesGetData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string;
+    };
+    path?: never;
+    query?: {
+        /**
+         * Platform
+         */
+        platform?: string | null;
+    };
+    url: '/api/v1/agents/releases/';
+};
+
+export type ListReleasesApiV1AgentsReleasesGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListReleasesApiV1AgentsReleasesGetError = ListReleasesApiV1AgentsReleasesGetErrors[keyof ListReleasesApiV1AgentsReleasesGetErrors];
+
+export type ListReleasesApiV1AgentsReleasesGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: ReleaseListResponse;
+};
+
+export type ListReleasesApiV1AgentsReleasesGetResponse = ListReleasesApiV1AgentsReleasesGetResponses[keyof ListReleasesApiV1AgentsReleasesGetResponses];
+
+export type GetLatestReleaseApiV1AgentsReleasesLatestPlatformGetData = {
+    body?: never;
+    path: {
+        /**
+         * Platform
+         */
+        platform: string;
+    };
+    query?: never;
+    url: '/api/v1/agents/releases/latest/{platform}';
+};
+
+export type GetLatestReleaseApiV1AgentsReleasesLatestPlatformGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetLatestReleaseApiV1AgentsReleasesLatestPlatformGetError = GetLatestReleaseApiV1AgentsReleasesLatestPlatformGetErrors[keyof GetLatestReleaseApiV1AgentsReleasesLatestPlatformGetErrors];
+
+export type GetLatestReleaseApiV1AgentsReleasesLatestPlatformGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: LatestReleaseResponse;
+};
+
+export type GetLatestReleaseApiV1AgentsReleasesLatestPlatformGetResponse = GetLatestReleaseApiV1AgentsReleasesLatestPlatformGetResponses[keyof GetLatestReleaseApiV1AgentsReleasesLatestPlatformGetResponses];
+
+export type DeleteReleaseApiV1AgentsReleasesReleaseUuidDeleteData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string;
+    };
+    path: {
+        /**
+         * Release Uuid
+         */
+        release_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/agents/releases/{release_uuid}';
+};
+
+export type DeleteReleaseApiV1AgentsReleasesReleaseUuidDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteReleaseApiV1AgentsReleasesReleaseUuidDeleteError = DeleteReleaseApiV1AgentsReleasesReleaseUuidDeleteErrors[keyof DeleteReleaseApiV1AgentsReleasesReleaseUuidDeleteErrors];
+
+export type DeleteReleaseApiV1AgentsReleasesReleaseUuidDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type GetReleaseApiV1AgentsReleasesReleaseUuidGetData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string;
+    };
+    path: {
+        /**
+         * Release Uuid
+         */
+        release_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/agents/releases/{release_uuid}';
+};
+
+export type GetReleaseApiV1AgentsReleasesReleaseUuidGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetReleaseApiV1AgentsReleasesReleaseUuidGetError = GetReleaseApiV1AgentsReleasesReleaseUuidGetErrors[keyof GetReleaseApiV1AgentsReleasesReleaseUuidGetErrors];
+
+export type GetReleaseApiV1AgentsReleasesReleaseUuidGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: ReleaseResponse;
+};
+
+export type GetReleaseApiV1AgentsReleasesReleaseUuidGetResponse = GetReleaseApiV1AgentsReleasesReleaseUuidGetResponses[keyof GetReleaseApiV1AgentsReleasesReleaseUuidGetResponses];
+
+export type PushUpdateApiV1AgentsReleasesReleaseUuidPushPostData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string;
+    };
+    path: {
+        /**
+         * Release Uuid
+         */
+        release_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/agents/releases/{release_uuid}/push';
+};
+
+export type PushUpdateApiV1AgentsReleasesReleaseUuidPushPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PushUpdateApiV1AgentsReleasesReleaseUuidPushPostError = PushUpdateApiV1AgentsReleasesReleaseUuidPushPostErrors[keyof PushUpdateApiV1AgentsReleasesReleaseUuidPushPostErrors];
+
+export type PushUpdateApiV1AgentsReleasesReleaseUuidPushPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
 export type ListTasksEndpointApiV1TasksGetData = {
     body?: never;
     path?: never;
@@ -1478,11 +2479,9 @@ export type ListTasksEndpointApiV1TasksGetError = ListTasksEndpointApiV1TasksGet
 
 export type ListTasksEndpointApiV1TasksGetResponses = {
     /**
-     * Response List Tasks Endpoint Api V1 Tasks  Get
-     *
      * Successful Response
      */
-    200: Array<TaskResponse>;
+    200: PaginatedResponseTaskResponse;
 };
 
 export type ListTasksEndpointApiV1TasksGetResponse = ListTasksEndpointApiV1TasksGetResponses[keyof ListTasksEndpointApiV1TasksGetResponses];
@@ -1732,12 +2731,6 @@ export type UnassignTaskEndpointApiV1TasksTaskUuidAgentsAgentUuidDeleteResponse 
 
 export type MonitoringQueryApiV1MonitoringQueryPostData = {
     body: MonitoringQuery;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
     path?: never;
     query?: never;
     url: '/api/v1/monitoring/query';
@@ -1763,25 +2756,10 @@ export type MonitoringQueryApiV1MonitoringQueryPostResponse = MonitoringQueryApi
 
 export type DashboardStatsApiV1DashboardStatsGetData = {
     body?: never;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
     path?: never;
     query?: never;
     url: '/api/v1/dashboard/stats';
 };
-
-export type DashboardStatsApiV1DashboardStatsGetErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type DashboardStatsApiV1DashboardStatsGetError = DashboardStatsApiV1DashboardStatsGetErrors[keyof DashboardStatsApiV1DashboardStatsGetErrors];
 
 export type DashboardStatsApiV1DashboardStatsGetResponses = {
     /**
@@ -1796,6 +2774,78 @@ export type DashboardStatsApiV1DashboardStatsGetResponses = {
 
 export type DashboardStatsApiV1DashboardStatsGetResponse = DashboardStatsApiV1DashboardStatsGetResponses[keyof DashboardStatsApiV1DashboardStatsGetResponses];
 
+export type MtrListResultsApiV1MonitoringMtrGetData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Task Uuid
+         */
+        task_uuid: string;
+        /**
+         * Agent Uuid
+         */
+        agent_uuid?: string | null;
+        /**
+         * Start
+         */
+        start: number;
+        /**
+         * End
+         */
+        end: number;
+    };
+    url: '/api/v1/monitoring/mtr';
+};
+
+export type MtrListResultsApiV1MonitoringMtrGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type MtrListResultsApiV1MonitoringMtrGetError = MtrListResultsApiV1MonitoringMtrGetErrors[keyof MtrListResultsApiV1MonitoringMtrGetErrors];
+
+export type MtrListResultsApiV1MonitoringMtrGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: MtrResultListResponse;
+};
+
+export type MtrListResultsApiV1MonitoringMtrGetResponse = MtrListResultsApiV1MonitoringMtrGetResponses[keyof MtrListResultsApiV1MonitoringMtrGetResponses];
+
+export type MtrGetResultApiV1MonitoringMtrResultUuidGetData = {
+    body?: never;
+    path: {
+        /**
+         * Result Uuid
+         */
+        result_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/monitoring/mtr/{result_uuid}';
+};
+
+export type MtrGetResultApiV1MonitoringMtrResultUuidGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type MtrGetResultApiV1MonitoringMtrResultUuidGetError = MtrGetResultApiV1MonitoringMtrResultUuidGetErrors[keyof MtrGetResultApiV1MonitoringMtrResultUuidGetErrors];
+
+export type MtrGetResultApiV1MonitoringMtrResultUuidGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: MtrResultDetail;
+};
+
+export type MtrGetResultApiV1MonitoringMtrResultUuidGetResponse = MtrGetResultApiV1MonitoringMtrResultUuidGetResponses[keyof MtrGetResultApiV1MonitoringMtrResultUuidGetResponses];
+
 export type ListRulesEndpointApiV1AlertsRulesGetData = {
     body?: never;
     headers?: {
@@ -1805,7 +2855,16 @@ export type ListRulesEndpointApiV1AlertsRulesGetData = {
         authorization?: string;
     };
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Skip
+         */
+        skip?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
     url: '/api/v1/alerts/rules/';
 };
 
@@ -1820,11 +2879,9 @@ export type ListRulesEndpointApiV1AlertsRulesGetError = ListRulesEndpointApiV1Al
 
 export type ListRulesEndpointApiV1AlertsRulesGetResponses = {
     /**
-     * Response List Rules Endpoint Api V1 Alerts Rules  Get
-     *
      * Successful Response
      */
-    200: Array<AlertRuleResponse>;
+    200: PaginatedResponseAlertRuleResponse;
 };
 
 export type ListRulesEndpointApiV1AlertsRulesGetResponse = ListRulesEndpointApiV1AlertsRulesGetResponses[keyof ListRulesEndpointApiV1AlertsRulesGetResponses];
@@ -1968,6 +3025,94 @@ export type UpdateRuleEndpointApiV1AlertsRulesRuleUuidPatchResponses = {
 
 export type UpdateRuleEndpointApiV1AlertsRulesRuleUuidPatchResponse = UpdateRuleEndpointApiV1AlertsRulesRuleUuidPatchResponses[keyof UpdateRuleEndpointApiV1AlertsRulesRuleUuidPatchResponses];
 
+export type ListEventsEndpointApiV1AlertsEventsGetData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string;
+    };
+    path?: never;
+    query?: {
+        /**
+         * Rule Uuid
+         */
+        rule_uuid?: string | null;
+        /**
+         * Task Uuid
+         */
+        task_uuid?: string | null;
+        /**
+         * Status
+         */
+        status?: string | null;
+        /**
+         * Skip
+         */
+        skip?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/v1/alerts/events/';
+};
+
+export type ListEventsEndpointApiV1AlertsEventsGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListEventsEndpointApiV1AlertsEventsGetError = ListEventsEndpointApiV1AlertsEventsGetErrors[keyof ListEventsEndpointApiV1AlertsEventsGetErrors];
+
+export type ListEventsEndpointApiV1AlertsEventsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: PaginatedResponseAlertEventResponse;
+};
+
+export type ListEventsEndpointApiV1AlertsEventsGetResponse = ListEventsEndpointApiV1AlertsEventsGetResponses[keyof ListEventsEndpointApiV1AlertsEventsGetResponses];
+
+export type GetEventEndpointApiV1AlertsEventsEventUuidGetData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string;
+    };
+    path: {
+        /**
+         * Event Uuid
+         */
+        event_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/alerts/events/{event_uuid}';
+};
+
+export type GetEventEndpointApiV1AlertsEventsEventUuidGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetEventEndpointApiV1AlertsEventsEventUuidGetError = GetEventEndpointApiV1AlertsEventsEventUuidGetErrors[keyof GetEventEndpointApiV1AlertsEventsEventUuidGetErrors];
+
+export type GetEventEndpointApiV1AlertsEventsEventUuidGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: AlertEventResponse;
+};
+
+export type GetEventEndpointApiV1AlertsEventsEventUuidGetResponse = GetEventEndpointApiV1AlertsEventsEventUuidGetResponses[keyof GetEventEndpointApiV1AlertsEventsEventUuidGetResponses];
+
 export type ListWebhooksEndpointApiV1WebhooksGetData = {
     body?: never;
     headers?: {
@@ -1977,7 +3122,16 @@ export type ListWebhooksEndpointApiV1WebhooksGetData = {
         authorization?: string;
     };
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Skip
+         */
+        skip?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
     url: '/api/v1/webhooks/';
 };
 
@@ -1992,11 +3146,9 @@ export type ListWebhooksEndpointApiV1WebhooksGetError = ListWebhooksEndpointApiV
 
 export type ListWebhooksEndpointApiV1WebhooksGetResponses = {
     /**
-     * Response List Webhooks Endpoint Api V1 Webhooks  Get
-     *
      * Successful Response
      */
-    200: Array<WebhookResponse>;
+    200: PaginatedResponseWebhookResponse;
 };
 
 export type ListWebhooksEndpointApiV1WebhooksGetResponse = ListWebhooksEndpointApiV1WebhooksGetResponses[keyof ListWebhooksEndpointApiV1WebhooksGetResponses];
@@ -2250,11 +3402,9 @@ export type ListDeliveriesEndpointApiV1WebhooksWebhookUuidDeliveriesGetError = L
 
 export type ListDeliveriesEndpointApiV1WebhooksWebhookUuidDeliveriesGetResponses = {
     /**
-     * Response List Deliveries Endpoint Api V1 Webhooks  Webhook Uuid  Deliveries Get
-     *
      * Successful Response
      */
-    200: Array<WebhookDeliveryResponse>;
+    200: PaginatedResponseWebhookDeliveryResponse;
 };
 
 export type ListDeliveriesEndpointApiV1WebhooksWebhookUuidDeliveriesGetResponse = ListDeliveriesEndpointApiV1WebhooksWebhookUuidDeliveriesGetResponses[keyof ListDeliveriesEndpointApiV1WebhooksWebhookUuidDeliveriesGetResponses];
@@ -2298,6 +3448,56 @@ export type RetryDeliveryEndpointApiV1WebhooksWebhookUuidDeliveriesDeliveryUuidR
 };
 
 export type RetryDeliveryEndpointApiV1WebhooksWebhookUuidDeliveriesDeliveryUuidRetryPostResponse = RetryDeliveryEndpointApiV1WebhooksWebhookUuidDeliveriesDeliveryUuidRetryPostResponses[keyof RetryDeliveryEndpointApiV1WebhooksWebhookUuidDeliveriesDeliveryUuidRetryPostResponses];
+
+export type ListAuditLogsApiV1AuditLogsGetData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string;
+    };
+    path?: never;
+    query?: {
+        /**
+         * Actor Uuid
+         */
+        actor_uuid?: string | null;
+        /**
+         * Resource Type
+         */
+        resource_type?: string | null;
+        /**
+         * Action
+         */
+        action?: string | null;
+        /**
+         * Skip
+         */
+        skip?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/v1/audit/logs';
+};
+
+export type ListAuditLogsApiV1AuditLogsGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListAuditLogsApiV1AuditLogsGetError = ListAuditLogsApiV1AuditLogsGetErrors[keyof ListAuditLogsApiV1AuditLogsGetErrors];
+
+export type ListAuditLogsApiV1AuditLogsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
 
 export type HealthHealthGetData = {
     body?: never;

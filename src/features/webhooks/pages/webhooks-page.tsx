@@ -21,8 +21,9 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Pagination } from '@/components/ui/pagination'
 import { WebhookFormDialog } from '@/features/webhooks/components/webhook-form-dialog'
-import type { WebhookResponse, WebhookDeliveryResponse, UserResponse } from '@/api/generated/types.gen'
+import type { WebhookResponse, WebhookDeliveryResponse, UserResponse, PaginatedResponseWebhookResponse, PaginatedResponseWebhookDeliveryResponse, PaginatedResponseUserResponse } from '@/api/generated/types.gen'
 
 const STATUS_COLORS: Record<string, string> = {
   success: 'bg-green-500/15 text-green-400 border-green-500/30',
@@ -30,19 +31,23 @@ const STATUS_COLORS: Record<string, string> = {
   pending: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
 }
 
+const PAGE_SIZE = 50
+
 export default function WebhooksPage() {
   const { t } = useTranslation()
   const isAdmin = useAuthStore((s) => s.isAdmin())
   const currentUserUuid = useAuthStore((s) => s.user?.uuid)
-  const { data, isLoading, error } = useWebhooks()
-  const { data: usersData } = useUsers(isAdmin ? {} : undefined)
+  const [page, setPage] = useState(1)
+  const { data, isLoading, error } = useWebhooks({ skip: (page - 1) * PAGE_SIZE, limit: PAGE_SIZE })
+  const { data: usersData } = useUsers(isAdmin ? { limit: 200 } : undefined)
   const deleteWebhook = useDeleteWebhook()
   const updateWebhook = useUpdateWebhook()
   const testWebhook = useTestWebhook()
   const rotateSecret = useRotateSecret()
 
-  const webhooks = (data ?? []) as WebhookResponse[]
-  const users = (usersData ?? []) as UserResponse[]
+  const webhooks = ((data as PaginatedResponseWebhookResponse)?.items ?? []) as WebhookResponse[]
+  const totalPages = Math.ceil(((data as PaginatedResponseWebhookResponse)?.total ?? 0) / PAGE_SIZE)
+  const users = ((usersData as PaginatedResponseUserResponse)?.items ?? []) as UserResponse[]
 
   // Create dialog
   const [createOpen, setCreateOpen] = useState(false)
@@ -185,6 +190,11 @@ export default function WebhooksPage() {
                     <span className={`text-xs font-mono ${wh.consecutive_failures > 0 ? 'text-red-400' : 'text-text-dim'}`}>
                       {wh.consecutive_failures}
                     </span>
+                    {wh.consecutive_failures >= 100 && (
+                      <Badge className="ml-1 border text-[9px] bg-amber-500/15 text-amber-400 border-amber-500/30">
+                        {t('webhooks.autoDisabled')}
+                      </Badge>
+                    )}
                   </TableCell>
                   {isAdmin && (
                     <TableCell className="text-text-secondary text-xs">
@@ -236,6 +246,8 @@ export default function WebhooksPage() {
           </Table>
         )}
       </div>
+
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} disabled={isLoading} />
 
       {/* Create Dialog */}
       <WebhookFormDialog
@@ -321,11 +333,15 @@ export default function WebhooksPage() {
   )
 }
 
+const DELIVERIES_PAGE_SIZE = 50
+
 function DeliveriesTable({ webhookUuid }: { webhookUuid: string }) {
   const { t, i18n } = useTranslation()
-  const { data, isLoading } = useWebhookDeliveries(webhookUuid)
+  const [deliveryPage, setDeliveryPage] = useState(1)
+  const { data, isLoading } = useWebhookDeliveries(webhookUuid, { skip: (deliveryPage - 1) * DELIVERIES_PAGE_SIZE, limit: DELIVERIES_PAGE_SIZE })
   const retryDelivery = useRetryDelivery()
-  const deliveries = (data ?? []) as WebhookDeliveryResponse[]
+  const deliveries = ((data as PaginatedResponseWebhookDeliveryResponse)?.items ?? []) as WebhookDeliveryResponse[]
+  const deliveryTotalPages = Math.ceil(((data as PaginatedResponseWebhookDeliveryResponse)?.total ?? 0) / DELIVERIES_PAGE_SIZE)
 
   if (isLoading) {
     return <div className="space-y-2">{Array.from({ length: 3 }, (_, i) => <Skeleton key={i} className="h-8 w-full" />)}</div>
@@ -336,7 +352,8 @@ function DeliveriesTable({ webhookUuid }: { webhookUuid: string }) {
   }
 
   return (
-    <Table>
+    <>
+      <Table>
       <TableHeader>
         <TableRow className="border-white/5 hover:bg-transparent">
           <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('webhooks.eventType')}</TableHead>
@@ -344,6 +361,7 @@ function DeliveriesTable({ webhookUuid }: { webhookUuid: string }) {
           <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('webhooks.responseStatus')}</TableHead>
           <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('webhooks.responseTime')}</TableHead>
           <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('webhooks.attempt')}</TableHead>
+          <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('webhooks.nextRetry')}</TableHead>
           <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('common.createdAt')}</TableHead>
           <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('common.actions')}</TableHead>
         </TableRow>
@@ -365,24 +383,36 @@ function DeliveriesTable({ webhookUuid }: { webhookUuid: string }) {
               <TableCell className="text-text-secondary text-xs font-mono">
                 {d.response_time_ms != null ? `${d.response_time_ms}ms` : '-'}
               </TableCell>
-              <TableCell className="text-text-secondary text-xs font-mono">{d.attempt}</TableCell>
+              <TableCell className="text-text-secondary text-xs font-mono">{d.attempt} / 5</TableCell>
+              <TableCell className="text-text-secondary text-xs font-mono">
+                {(d as WebhookDeliveryResponse & { next_retry_at?: string | null }).next_retry_at && d.status === 'failed'
+                  ? formatDateTime((d as WebhookDeliveryResponse & { next_retry_at?: string | null }).next_retry_at!, i18n.language)
+                  : '-'
+                }
+              </TableCell>
               <TableCell className="text-text-secondary text-xs font-mono">
                 {formatDateTime(d.created_at, i18n.language)}
               </TableCell>
               <TableCell>
                 {d.status === 'failed' && (
-                  <Button variant="ghost" size="sm" className="text-xs h-7 px-2 text-amber-400 hover:text-amber-300"
-                    onClick={() => retryDelivery.mutate({ webhookUuid, deliveryUuid: d.delivery_uuid })}
-                    disabled={retryDelivery.isPending}
-                  >
-                    {retryDelivery.isPending ? t('webhooks.retrying') : t('webhooks.retry')}
-                  </Button>
+                  (d as WebhookDeliveryResponse & { next_retry_at?: string | null }).next_retry_at ? (
+                    <span className="text-[10px] text-amber-400">{t('webhooks.waitingRetry')}</span>
+                  ) : (
+                    <Button variant="ghost" size="sm" className="text-xs h-7 px-2 text-amber-400 hover:text-amber-300"
+                      onClick={() => retryDelivery.mutate({ webhookUuid, deliveryUuid: d.delivery_uuid })}
+                      disabled={retryDelivery.isPending}
+                    >
+                      {retryDelivery.isPending ? t('webhooks.retrying') : t('webhooks.retry')}
+                    </Button>
+                  )
                 )}
               </TableCell>
             </TableRow>
           )
         })}
       </TableBody>
-    </Table>
+      </Table>
+      <Pagination page={deliveryPage} totalPages={deliveryTotalPages} onPageChange={setDeliveryPage} disabled={isLoading} />
+    </>
   )
 }

@@ -32,7 +32,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
-import type { AlertRuleResponse, TaskResponse, UserResponse, MetricTypeEnum, OperatorEnum } from '@/api/generated/types.gen'
+import { Pagination } from '@/components/ui/pagination'
+import type { AlertRuleResponse, TaskResponse, UserResponse, MetricTypeEnum, OperatorEnum, PaginatedResponseAlertRuleResponse, PaginatedResponseTaskResponse, PaginatedResponseUserResponse } from '@/api/generated/types.gen'
 
 const METRIC_COLORS: Record<string, string> = {
   latency: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30',
@@ -47,20 +48,24 @@ const OPERATOR_LABELS: Record<string, string> = {
   lte: '<=',
 }
 
+const PAGE_SIZE = 50
+
 export default function AlertsPage() {
   const { t } = useTranslation()
   const isAdmin = useAuthStore((s) => s.isAdmin())
   const currentUserUuid = useAuthStore((s) => s.user?.uuid)
-  const { data, isLoading, error } = useAlertRules()
-  const { data: tasksData, isLoading: tasksLoading } = useTasks()
-  const { data: usersData } = useUsers(isAdmin ? {} : undefined)
+  const [page, setPage] = useState(1)
+  const { data, isLoading, error } = useAlertRules({ skip: (page - 1) * PAGE_SIZE, limit: PAGE_SIZE })
+  const { data: tasksData, isLoading: tasksLoading } = useTasks({ limit: 200 })
+  const { data: usersData } = useUsers(isAdmin ? { limit: 200 } : undefined)
   const createAlertRule = useCreateAlertRule()
   const updateAlertRule = useUpdateAlertRule()
   const disableAlertRule = useDisableAlertRule()
 
-  const rules = (data ?? []) as AlertRuleResponse[]
-  const tasks = (tasksData ?? []) as TaskResponse[]
-  const users = (usersData ?? []) as UserResponse[]
+  const rules = ((data as PaginatedResponseAlertRuleResponse)?.items ?? []) as AlertRuleResponse[]
+  const totalPages = Math.ceil(((data as PaginatedResponseAlertRuleResponse)?.total ?? 0) / PAGE_SIZE)
+  const tasks = ((tasksData as PaginatedResponseTaskResponse)?.items ?? []) as TaskResponse[]
+  const users = ((usersData as PaginatedResponseUserResponse)?.items ?? []) as UserResponse[]
 
   // Create dialog state
   const [createOpen, setCreateOpen] = useState(false)
@@ -295,6 +300,8 @@ export default function AlertsPage() {
           </Table>
         )}
       </div>
+
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} disabled={isLoading} />
 
       {/* Create Rule Dialog */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
