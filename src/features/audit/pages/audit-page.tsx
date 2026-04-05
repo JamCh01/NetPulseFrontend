@@ -48,7 +48,7 @@ export default function AuditPage() {
     resource_type: resourceTypeFilter,
     action: actionFilter || null,
   })
-  const { data: usersData } = useUsers({ limit: 200 })
+  const { data: usersData } = useUsers({ limit: 100 })
 
   const paginatedData = data as { items?: AuditLog[]; total?: number } | undefined
   const logs = (paginatedData?.items ?? []) as AuditLog[]

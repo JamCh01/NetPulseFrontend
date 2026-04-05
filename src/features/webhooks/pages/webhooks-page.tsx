@@ -39,7 +39,7 @@ export default function WebhooksPage() {
   const currentUserUuid = useAuthStore((s) => s.user?.uuid)
   const [page, setPage] = useState(1)
   const { data, isLoading, error } = useWebhooks({ skip: (page - 1) * PAGE_SIZE, limit: PAGE_SIZE })
-  const { data: usersData } = useUsers(isAdmin ? { limit: 200 } : undefined)
+  const { data: usersData } = useUsers(isAdmin ? { limit: 100 } : undefined)
   const deleteWebhook = useDeleteWebhook()
   const updateWebhook = useUpdateWebhook()
   const testWebhook = useTestWebhook()

@@ -57,7 +57,7 @@ export default function AlertsPage() {
   const [page, setPage] = useState(1)
   const { data, isLoading, error } = useAlertRules({ skip: (page - 1) * PAGE_SIZE, limit: PAGE_SIZE })
   const { data: tasksData, isLoading: tasksLoading } = useTasks({ limit: 200 })
-  const { data: usersData } = useUsers(isAdmin ? { limit: 200 } : undefined)
+  const { data: usersData } = useUsers(isAdmin ? { limit: 100 } : undefined)
   const createAlertRule = useCreateAlertRule()
   const updateAlertRule = useUpdateAlertRule()
   const disableAlertRule = useDisableAlertRule()
