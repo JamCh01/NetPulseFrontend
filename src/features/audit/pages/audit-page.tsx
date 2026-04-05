@@ -20,11 +20,12 @@ import { Pagination } from '@/components/ui/pagination'
 import type { UserResponse } from '@/api/generated/types.gen'
 
 interface AuditLog {
-  audit_log_uuid: string
-  actor_uuid: string
+  log_uuid: string
+  actor_uuid: string | null
+  actor_role: string
   action: string
   resource_type: string
-  resource_uuid: string
+  resource_uuid: string | null
   ip_address: string | null
   details: Record<string, unknown> | null
   created_at: string
@@ -58,7 +59,8 @@ export default function AuditPage() {
 
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
 
-  const getUserName = (uuid: string): string => {
+  const getUserName = (uuid: string | null): string => {
+    if (!uuid) return '-'
     const found = users.find((u) => u.user_uuid === uuid)
     return found?.username ?? uuid.slice(0, 8)
   }
@@ -166,7 +168,7 @@ export default function AuditPage() {
             </TableHeader>
             <TableBody>
               {logs.map((log) => (
-                <TableRow key={log.audit_log_uuid} className="border-white/5 hover:bg-white/5">
+                <TableRow key={log.log_uuid} className="border-white/5 hover:bg-white/5">
                   <TableCell className="text-text-primary font-medium text-xs">{log.action}</TableCell>
                   <TableCell className="text-text-secondary text-xs">{log.resource_type}</TableCell>
                   <TableCell className="text-text-secondary text-xs">{getUserName(log.actor_uuid)}</TableCell>
@@ -178,11 +180,11 @@ export default function AuditPage() {
                           variant="ghost"
                           size="sm"
                           className="text-xs h-7 px-2 text-text-muted hover:text-text-primary"
-                          onClick={() => toggleDetails(log.audit_log_uuid)}
+                          onClick={() => toggleDetails(log.log_uuid)}
                         >
-                          {expandedRows.has(log.audit_log_uuid) ? t('audit.hideDetails') : t('audit.showDetails')}
+                          {expandedRows.has(log.log_uuid) ? t('audit.hideDetails') : t('audit.showDetails')}
                         </Button>
-                        {expandedRows.has(log.audit_log_uuid) && (
+                        {expandedRows.has(log.log_uuid) && (
                           <pre className="mt-2 p-2 rounded-lg bg-white/5 border border-white/10 text-xs text-text-secondary font-mono overflow-x-auto max-w-md">
                             {JSON.stringify(log.details, null, 2)}
                           </pre>
