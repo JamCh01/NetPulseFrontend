@@ -15,21 +15,30 @@ NetPulse is a network monitoring platform (SmokePing-style). This is the React f
 - **Vitest** + **Testing Library** + **MSW** (testing)
 - **@hey-api/openapi-ts** (API client generation)
 
-## Chart Features
+## Core Features
 
-### SmokePing-style Charts
+### 🚀 Real-time WebSocket Monitoring
+Monitoring charts feature zero-refresh updates using **WebSocket** push. 
+- **Direct Cache Patching**: When new data points arrive via WS, they are directly patched into the TanStack Query cache.
+- **Visual Continuity**: Charts draw new segments instantly without making extra HTTP requests.
+- **De-duplication**: Automatic timestamp-based de-duplication and sorting for data integrity.
 
-The monitoring charts support two display styles, toggleable in the monitoring detail page:
+### 📈 Intelligent Charts
+- **SmokePing-style**: Supports both segment (Smoke) and smooth (Basic) interpolation styles.
+- **Gap Detection**: Automatically visualizes data gaps > 5 minutes as line breaks.
+- **Time Range Sync**: Global time range selector on the dashboard linked to all mini-charts.
+- **Data Export**: Support exporting monitoring data to **CSV** or **JSON** for offline analysis.
 
-- **Smoke (default)**: Straight line segments between data points (classic SmokePing style)
-- **Basic**: Smooth curve interpolation between points
+### 🛡️ Security & Management
+- **User Self-Service**: Users can change their own passwords via the header dropdown menu.
+- **System Health**: Detailed real-time status page for core middleware (PostgreSQL, Redis, NATS, VictoriaMetrics).
+- **Admin Audit**: Comprehensive audit log viewer with filtering capabilities.
+- **Webhook Integration**: Flexible alert notifications with template variables and delivery history.
 
-### Data Gap Handling
-
-Charts automatically detect and display breaks in data:
-- Gaps > 5 minutes are shown as visual breaks in the line
-- No smoothing across missing data intervals
-- Null values are inserted at gap midpoints to create clean breaks
+### 📱 Responsive Experience
+- **Mobile Optimized**: Adaptive layout with a slide-out hamburger menu and backdrop blur.
+- **Smart Tables**: Wide data tables gracefully degrade to vertical card streams on small screens.
+- **Adaptive Charts**: Auto-resizing charts with simplified grids and responsive legends.
 
 ## Getting Started
 
@@ -44,8 +53,6 @@ cp .env.example .env
 npm run dev
 ```
 
-The dev server runs at `http://localhost:5173` and proxies API requests to the backend at `http://127.0.0.1:8000`.
-
 ## Scripts
 
 | Command | Description |
@@ -55,8 +62,6 @@ The dev server runs at `http://localhost:5173` and proxies API requests to the b
 | `npm run preview` | Preview production build locally |
 | `npm run lint` | Run ESLint |
 | `npm run test` | Run tests once |
-| `npm run test:watch` | Run tests in watch mode |
-| `npm run test:coverage` | Run tests with coverage report |
 | `npm run generate:api` | Regenerate API client from OpenAPI spec |
 
 ## Project Structure
@@ -65,29 +70,19 @@ The dev server runs at `http://localhost:5173` and proxies API requests to the b
 src/
   api/
     generated/          # Auto-generated API client (openapi-ts)
-    hooks/              # TanStack Query hooks (use-agents, use-alerts, etc.)
+    hooks/              # TanStack Query hooks (use-agents, use-alerts, use-monitoring-ws, etc.)
     client.ts           # API client config (interceptors, token refresh)
-    types.ts            # Shared API types not in OpenAPI (DashboardStats)
   components/ui/        # Shared UI primitives (shadcn/ui)
   features/
-    auth/               # Login, register, guards (AuthGuard, AdminGuard)
-    dashboard/          # Dashboard with stats cards + mini charts + health status
-    tasks/              # Task CRUD + detail page
-    agents/             # Agent CRUD + detail + geo-cascader
-    alerts/             # Alert rule CRUD + alert events list
-    webhooks/           # Webhook CRUD + template variables + custom headers + deliveries
-    users/              # User management + password change (admin)
-    groups/             # Group CRUD (admin)
-    audit/              # Audit logs viewer (admin)
-    monitoring/         # Public SmokePing charts (single + multi-agent) + MTR
-  i18n/                 # i18next config + en.json / zh.json
-  layouts/              # AppLayout (auth), AuthLayout, PublicLayout
-  lib/                  # Shared utilities (jwt, format, constants)
+    auth/               # Login, register, password change dialog
+    dashboard/          # Dashboard stats + time range + system health card
+    tasks/              # Task CRUD + agent assignment
+    agents/             # Agent management + release management
+    alerts/             # Alert rules + Webhook assignment
+    webhooks/           # Webhook management + deliveries
+    monitoring/         # SmokePing charts + MTR + export logic
+  layouts/              # Responsive AppLayout with mobile menu
   stores/               # Zustand stores (auth, theme)
-  test/                 # Test setup, MSW handlers, mock factories
-  router.tsx            # Route definitions
-  App.tsx               # Root component (QueryClient + Router)
-  main.tsx              # Entry point
 ```
 
 ## Route Map
@@ -95,175 +90,43 @@ src/
 | Path | Access | Page |
 |------|--------|------|
 | `/monitoring` | Public | Task selection grid |
-| `/monitoring/:taskUuid` | Public | SmokePing chart (single + multi-agent) |
-| `/monitoring/:taskUuid/mtr` | Public | MTR traceroute timeline + hop detail |
+| `/monitoring/:taskUuid` | Public | SmokePing chart + Data Export |
+| `/monitoring/:taskUuid/mtr` | Public | MTR traceroute timeline |
 | `/login` | Public | Login |
-| `/register` | Public | Register (subscriber only) |
-| `/dashboard` | Auth | Stats overview + mini charts + system health |
-| `/tasks` | Auth | Task list + create/edit/delete (admin) |
-| `/tasks/:taskUuid` | Auth | Task detail + agent assignment (admin) |
-| `/alerts` | Auth | Alert rules CRUD + enable/disable |
-| `/alerts/events` | Auth | Alert events list (firing/resolved, per-agent) |
-| `/webhooks` | Auth | Webhooks CRUD + template + headers + deliveries |
-| `/agents` | Admin | Agent list + create (with platform) |
-| `/agents/:agentUuid` | Admin | Agent detail + edit |
-| `/users` | Admin | User management + password change |
-| `/groups` | Admin | Group CRUD (cascade delete) |
-| `/audit` | Admin | Audit logs with filters |
-
-## Roles
-
-- **subscriber** -- Can manage own alert rules and webhooks. Sees only own resources. Can view alert events for own rules.
-- **admin** -- Full access. Sees all resources with owner column. Can manage agents, tasks, users, groups, and view audit logs.
-
-## Pagination
-
-All list endpoints return paginated responses:
-
-```json
-{ "items": [...], "total": 142, "skip": 0, "limit": 50 }
-```
-
-Every list page includes pagination controls (prev/next). The shared `<Pagination>` component is at `src/components/ui/pagination.tsx`. Sidebar task lists and dropdown selectors use `limit: 200` to fetch all items without pagination UI.
-
-## Authentication & Security
-
-### Rate Limiting
-Login (10/min) and register (5/min) endpoints are rate-limited. The frontend shows localized error messages on 429 responses and disables the submit button for 3 seconds after each attempt.
-
-### Token Lifecycle
-- **Login** returns access + refresh tokens stored in localStorage
-- **Token refresh** is handled automatically by the response interceptor with a mutex to prevent concurrent refresh attempts
-- **Logout** calls `POST /auth/logout` to revoke tokens server-side, then clears local state
-- **Revoked tokens** trigger immediate logout (no refresh attempt) when the backend returns `"Token has been revoked"`
-
-## System Health
-
-The dashboard displays a health card showing component-level status for PostgreSQL, Redis, NATS, and VictoriaMetrics. Status is polled every 30 seconds. The backend returns `200` (all ok) or `503` (degraded) with per-component status.
-
-## Agent-Task Assignment
-
-Agents and tasks can be linked from multiple entry points:
-
-| Entry Point | Action |
-|-------------|--------|
-| Task detail page (`/tasks/:uuid`) | Toggle agents on/off with one click (CheckableList) |
-| Agent detail page (`/agents/:uuid`) | Dual-panel batch add/remove tasks (CheckableList) |
-| Task creation dialog | Optionally select agents to assign immediately |
-| Agent creation dialog | Optionally select tasks to assign immediately |
-| Task list page | "Manage Agents" button opens quick-assign dialog |
-
-The backend API supports bulk assignment: `POST /tasks/{task_uuid}/assign` with `{ agent_uuids: string[] }`. Cache invalidation is bidirectional -- changes from either side refresh both task and agent queries. Note: `GET /agents/{agent_uuid}/tasks` returns a nested `{ agent_uuid, tasks: [...] }` object, not a flat array.
-
-## API Client
-
-The API client is auto-generated from the backend's OpenAPI spec:
-
-```bash
-npm run generate:api
-```
-
-Manual additions to `types.gen.ts` and `sdk.gen.ts` (e.g., `user_uuid`, `is_deleted`, `AlertRuleUpdate`, password change endpoint) are documented inline.
+| `/dashboard` | Auth | Stats overview + Time Range Selector |
+| `/system/health` | Admin | Middleware detailed health status |
+| `/alerts` | Auth | Alert rules with Webhook assignments |
+| `/users` | Admin | User management + Reset password |
+| `/agents/releases` | Admin | Agent version & upgrade management |
 
 ## Environment Variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `VITE_API_BASE_URL` | (empty) | API base URL. Must be empty when SDK paths already include `/api/v1`. |
-
-> **Important:** The auto-generated SDK paths already contain `/api/v1/...`. Setting `VITE_API_BASE_URL=/api/v1` will cause double-prefix requests (`/api/v1/api/v1/...`). Leave it empty for same-origin deployments with nginx proxy.
-
-## i18n
-
-Supports English (`en`) and Chinese (`zh`). Language is auto-detected from the browser and can be toggled in the sidebar. Translation files are in `src/i18n/locales/`.
-
-## Timezone Handling
-
-The backend and all agents use **UTC** exclusively. The frontend converts UTC to the user's local timezone for display:
-
-- **ISO strings** (`created_at`) -- `new Date(iso)` auto-converts UTC to local time
-- **Unix timestamps** (`MonitoringDataPoint.timestamp`) -- seconds from backend, multiplied by 1000 for JS/ECharts milliseconds
-
-All date/time formatting goes through shared helpers in `src/lib/format.ts`:
-
-| Function | Usage | Example Output |
-|----------|-------|----------------|
-| `formatDate(iso, lang)` | List pages (date only) | "Jan 1, 2026" / "2026年1月1日" |
-| `formatDateTime(iso, lang)` | Detail pages, deliveries | "Jan 1, 2026, 14:30" |
-| `formatChartTime(tsMs)` | Chart tooltips | "2026-01-01 14:30" |
-
-ECharts time axis (`xAxis.type = 'time'`) handles axis label formatting automatically using the browser's local timezone.
+| `VITE_API_BASE_URL` | (empty) | API base URL. Leave empty for same-origin proxy. |
 
 ## Deployment
 
-### Production Build
+### Manual Deployment (Nginx)
 
-```bash
-npm run build
+The project is built using `npm run build` and produces static files in `dist/`.
+
+**WebSocket Nginx Configuration:**
+To support real-time monitoring, ensure your Nginx config includes the following Upgrade headers:
+
+```nginx
+location /api/ {
+    proxy_pass http://127.0.0.1:8000;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_read_timeout 86400s;
+}
 ```
-
-Output is in `dist/`. This is a pure static SPA -- serve it with any static file server (Nginx, Caddy, S3+CloudFront, etc.). All routes must fall back to `index.html` for client-side routing to work.
 
 ### Docker
 
 ```bash
-# Build image
 docker build -t netpulse-frontend .
-
-# Run (backend at http://backend:8000)
 docker run -d -p 80:80 netpulse-frontend
 ```
-
-The Dockerfile uses a two-stage build:
-1. **Build stage** -- `node:22-alpine`, runs `npm ci && npm run build`
-2. **Serve stage** -- `nginx:alpine`, serves `dist/` with SPA fallback + API reverse proxy
-
-#### Build-time Variables
-
-Pass `VITE_API_BASE_URL` at build time if the API is not same-origin:
-
-```bash
-docker build --build-arg VITE_API_BASE_URL=https://api.example.com -t netpulse-frontend .
-```
-
-### Docker Compose
-
-Example with backend:
-
-```yaml
-services:
-  backend:
-    image: netpulse-backend
-    ports:
-      - "8000:8000"
-
-  frontend:
-    build: ./frontend
-    ports:
-      - "80:80"
-    depends_on:
-      - backend
-```
-
-### Nginx Configuration
-
-The included `nginx.conf` handles:
-- **SPA fallback** -- `try_files $uri $uri/ /index.html`
-- **API reverse proxy** -- `/api/` proxied to `http://backend:8000`
-- **Static asset caching** -- `/assets/` cached for 1 year with `immutable`
-- **Gzip compression** -- enabled for text/JS/CSS/JSON/SVG
-
-To customize the backend upstream, edit the `proxy_pass` directive in `nginx.conf` or use environment variable substitution with `envsubst`.
-
-### Manual Deployment (without Docker)
-
-```bash
-npm run build
-# Copy dist/ to your web server's document root
-# Configure your web server for SPA fallback and API proxy
-```
-
-Key requirements for any deployment:
-1. **SPA fallback** -- All non-file routes must serve `index.html`
-2. **API proxy** -- `/api/*` must be proxied to the backend (or set `VITE_API_BASE_URL` at build time for cross-origin)
-3. **HTTPS** -- Required in production for secure cookie/token handling
