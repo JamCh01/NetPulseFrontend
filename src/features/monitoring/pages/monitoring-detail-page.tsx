@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useNavigate } from 'react-router'
+import { Download, ChevronDown } from 'lucide-react'
 import { useTask } from '@/api/hooks/use-tasks'
 import { useTaskAgents } from '@/api/hooks/use-task-assignments'
 import { useMonitoringData, useMultiAgentMonitoringData } from '@/api/hooks/use-monitoring'
@@ -16,6 +17,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { ToggleSwitch } from '@/components/ui/toggle-switch'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
@@ -101,6 +108,52 @@ export default function MonitoringDetailPage() {
     { start: timeRange.start, end: timeRange.end },
   )
 
+  const handleExportCsv = useCallback(() => {
+    if (!task) return
+
+    let csv = ''
+    const filename = `netpulse_${task.task_name}_${new Date().toISOString().slice(0, 10)}.csv`
+
+    if (isAllAgents) {
+      csv = 'Timestamp,Agent,Median (ms),Avg (ms),Min (ms),Max (ms),P95 (ms),P99 (ms),Loss (%)\n'
+      for (const series of agentSeries) {
+        for (const p of series.data) {
+          csv += `${p.timestamp},"${series.agentName}",${p.median_rtt.toFixed(2)},${p.avg_rtt.toFixed(2)},${p.min_rtt.toFixed(2)},${p.max_rtt.toFixed(2)},${p.p95_rtt.toFixed(2)},${p.p99_rtt.toFixed(2)},${p.packet_loss_pct.toFixed(2)}\n`
+        }
+      }
+    } else {
+      const agent = taskAgents.find(a => a.agent_uuid === selectedAgentUuid)
+      const data = singleMonitoringData?.data ?? []
+      csv = 'Timestamp,Agent,Median (ms),Avg (ms),Min (ms),Max (ms),P95 (ms),P99 (ms),Loss (%)\n'
+      for (const p of data) {
+        csv += `${p.timestamp},"${agent?.agent_name ?? 'Unknown'}",${p.median_rtt.toFixed(2)},${p.avg_rtt.toFixed(2)},${p.min_rtt.toFixed(2)},${p.max_rtt.toFixed(2)},${p.p95_rtt.toFixed(2)},${p.p99_rtt.toFixed(2)},${p.packet_loss_pct.toFixed(2)}\n`
+      }
+    }
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = filename
+    link.click()
+    URL.revokeObjectURL(link.href)
+  }, [task, isAllAgents, agentSeries, singleMonitoringData, selectedAgentUuid, taskAgents])
+
+  const handleExportJson = useCallback(() => {
+    if (!task) return
+    const filename = `netpulse_${task.task_name}_${new Date().toISOString().slice(0, 10)}.json`
+    const data = isAllAgents ? agentSeries : {
+      agentName: taskAgents.find(a => a.agent_uuid === selectedAgentUuid)?.agent_name,
+      data: singleMonitoringData?.data ?? []
+    }
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = filename
+    link.click()
+    URL.revokeObjectURL(link.href)
+  }, [task, isAllAgents, agentSeries, singleMonitoringData, selectedAgentUuid, taskAgents])
+
   const handleTimeRangeChange = useCallback(
     (range: { start: number; end: number; granularity: 'raw' | 'hourly' | 'daily' }) => {
       setTimeRange(range)
@@ -152,6 +205,23 @@ export default function MonitoringDetailPage() {
           <span className="text-sm text-text-secondary font-[family-name:var(--font-mono)]">
             {task.target}{task.port ? `:${task.port}` : ''}
           </span>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex h-9 items-center gap-2 rounded-md border border-input bg-transparent px-3 text-sm font-medium shadow-sm hover:bg-white/5 hover:text-accent-foreground transition-colors outline-none cursor-pointer">
+              <Download className="w-4 h-4" />
+              <span className="hidden sm:inline">{t('monitoring.export')}</span>
+              <ChevronDown className="w-3 h-3 text-text-dim" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuItem onClick={handleExportCsv} className="cursor-pointer">
+                {t('monitoring.exportCsv')}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleExportJson} className="cursor-pointer">
+                {t('monitoring.exportJson')}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           <Button
             variant="outline"
             className="text-sm"
@@ -229,7 +299,8 @@ export default function MonitoringDetailPage() {
       {/* Per-agent stats table */}
       {isAllAgents && agentSeries.length > 0 && (
         <div className="mt-4 glass-light rounded-xl overflow-hidden">
-          <table className="w-full">
+          {/* Desktop Table */}
+          <table className="hidden md:table w-full">
             <thead>
               <tr className="border-b border-white/5">
                 <th className="text-left px-4 py-2.5 text-[10px] text-text-muted uppercase tracking-wider font-medium">{t('monitoring.agent')}</th>
@@ -289,12 +360,55 @@ export default function MonitoringDetailPage() {
               })}
             </tbody>
           </table>
+
+          {/* Mobile Card List */}
+          <div className="md:hidden flex flex-col divide-y divide-white/5">
+            {agentSeries.map((agent, i) => {
+              const color = getAgentColor(i)
+              const stats = computeStats(agent.data)
+              if (!stats) return null
+
+              return (
+                <div key={agent.agentUuid} className="p-4 flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="w-3 h-[3px] rounded-full shrink-0"
+                        style={{ backgroundColor: color.line }}
+                      />
+                      <span className="text-sm text-text-primary font-medium">{agent.agentName}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="flex flex-col items-end">
+                        <span className="text-[10px] text-text-muted">{t('monitoring.median')}</span>
+                        <span className="text-xs font-mono font-medium" style={{ color: color.line }}>
+                          {stats.median.toFixed(1)}ms
+                        </span>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <span className="text-[10px] text-text-muted">{t('monitoring.loss')}</span>
+                        <span className={`text-xs font-mono font-medium ${stats.loss > 0 ? 'text-red-400' : 'text-green-400'}`}>
+                          {stats.loss.toFixed(1)}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-4 gap-2">
+                    <MobileStatItem label={t('monitoring.avg')} value={`${stats.avg.toFixed(1)}ms`} />
+                    <MobileStatItem label={t('monitoring.min')} value={`${stats.min.toFixed(1)}ms`} />
+                    <MobileStatItem label={t('monitoring.max')} value={`${stats.max.toFixed(1)}ms`} />
+                    <MobileStatItem label={t('monitoring.points')} value={String(stats.points)} />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         </div>
       )}
 
       {/* Single agent stats */}
       {!isAllAgents && singleMonitoringData?.data && singleMonitoringData.data.length > 0 && (
-        <div className="flex items-center gap-6 mt-4 glass-light rounded-xl px-4 py-3">
+        <div className="flex flex-wrap items-center gap-4 sm:gap-6 mt-4 glass-light rounded-xl px-4 py-3">
           {(() => {
             const stats = computeStats(singleMonitoringData.data)
             if (!stats) return null
@@ -327,6 +441,15 @@ function StatItem({ label, value, color }: { label: string; value: string; color
       <span className={`text-[10px] font-[family-name:var(--font-mono)] font-medium ${color ?? 'text-text-primary'}`}>
         {value}
       </span>
+    </div>
+  )
+}
+
+function MobileStatItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex flex-col items-center bg-white/5 rounded-md py-1.5">
+      <span className="text-[9px] text-text-muted">{label}</span>
+      <span className="text-[10px] font-mono text-text-secondary mt-0.5">{value}</span>
     </div>
   )
 }

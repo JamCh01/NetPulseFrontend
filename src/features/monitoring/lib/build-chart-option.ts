@@ -108,11 +108,11 @@ export function buildSmokePingOption({
     animation: true,
     animationDuration: 600,
     grid: {
-      left: 56,
+      left: 8,
       right: 16,
       top: 16,
-      bottom: 32,
-      containLabel: false,
+      bottom: 24,
+      containLabel: true,
     },
     xAxis: {
       type: 'time',

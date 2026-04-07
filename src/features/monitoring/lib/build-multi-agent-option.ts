@@ -184,11 +184,11 @@ export function buildMultiAgentOption(
       })),
     },
     grid: {
-      left: 56,
+      left: 8,
       right: 16,
       top: 16,
-      bottom: 40,
-      containLabel: false,
+      bottom: 48,
+      containLabel: true,
     },
     xAxis: {
       type: 'time',

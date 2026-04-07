@@ -1,6 +1,8 @@
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router'
 import { useHealth } from '@/api/hooks/use-health'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ChevronRight } from 'lucide-react'
 
 const COMPONENT_KEYS = ['postgres', 'redis', 'nats', 'victoriametrics'] as const
 
@@ -9,7 +11,7 @@ export function HealthCard() {
   const { data, isLoading, isError } = useHealth()
 
   if (isLoading) {
-    return <Skeleton className="h-24 w-full" />
+    return <Skeleton className="h-24 w-full rounded-xl" />
   }
 
   if (isError || !data) {
@@ -24,16 +26,21 @@ export function HealthCard() {
   const isOk = health.status === 'ok'
 
   return (
-    <div className="glass-light rounded-xl p-4">
+    <div className="glass-light rounded-xl p-4 relative group">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-xs font-medium text-text-muted uppercase tracking-wider">{t('health.title')}</h3>
+        <Link to="/system/health" className="flex items-center gap-1 group/title">
+          <h3 className="text-xs font-medium text-text-muted uppercase tracking-wider group-hover/title:text-text-primary transition-colors">
+            {t('health.title')}
+          </h3>
+          <ChevronRight className="w-3 h-3 text-text-dim group-hover/title:text-accent transition-all group-hover/title:translate-x-0.5 opacity-0 group-hover/title:opacity-100" />
+        </Link>
         <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
           isOk ? 'bg-green-500/15 text-green-400' : 'bg-amber-500/15 text-amber-400'
         }`}>
           {isOk ? t('health.ok') : t('health.degraded')}
         </span>
       </div>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {COMPONENT_KEYS.map((key) => {
           const status = health.components?.[key] ?? 'error'
           const isComponentOk = status === 'ok'

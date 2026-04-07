@@ -23,6 +23,7 @@ const AlertEventsPage = lazy(() => import('@/features/alerts/pages/alert-events-
 const UsersPage = lazy(() => import('@/features/users/pages/users-page'))
 const AuditPage = lazy(() => import('@/features/audit/pages/audit-page'))
 const GroupsPage = lazy(() => import('@/features/groups/pages/groups-page'))
+const HealthPage = lazy(() => import('@/features/dashboard/pages/health-page'))
 const MonitoringIndexPage = lazy(() => import('@/features/monitoring/pages/monitoring-index-page'))
 const MonitoringDetailPage = lazy(() => import('@/features/monitoring/pages/monitoring-detail-page'))
 const MtrDetailPage = lazy(() => import('@/features/monitoring/pages/mtr-detail-page'))
@@ -70,6 +71,7 @@ export function AppRouter() {
               <Route path="/users" element={<UsersPage />} />
               <Route path="/audit" element={<AuditPage />} />
               <Route path="/groups" element={<GroupsPage />} />
+              <Route path="/system/health" element={<HealthPage />} />
             </Route>
           </Route>
         </Route>

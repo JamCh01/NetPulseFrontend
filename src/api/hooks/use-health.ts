@@ -1,12 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 import { healthKeys } from './keys'
-import { healthHealthGet } from '@/api/generated/sdk.gen'
+import { healthApiV1HealthGet } from '@/api/generated/sdk.gen'
 
 export function useHealth() {
   return useQuery({
     queryKey: healthKeys.status(),
     queryFn: async () => {
-      const { data, error } = await healthHealthGet()
+      const { data, error } = await healthApiV1HealthGet()
       if (error) throw error
       return data
     },

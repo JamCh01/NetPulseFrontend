@@ -1,6 +1,6 @@
 import { useQuery, useQueries } from '@tanstack/react-query'
 import { monitoringKeys } from './keys'
-import { monitoringQueryApiV1MonitoringQueryPost } from '@/api/generated/sdk.gen'
+import { monitoringQueryApiV1MonitoringQueryGet } from '@/api/generated/sdk.gen'
 import type { GranularityEnum, AgentResponse } from '@/api/generated/types.gen'
 
 interface TimeRange {
@@ -62,10 +62,10 @@ export function useMonitoringData(
       granularity: config.granularity,
     }),
     queryFn: async () => {
-      const { data, error } = await monitoringQueryApiV1MonitoringQueryPost({
-        body: {
+      const { data, error } = await monitoringQueryApiV1MonitoringQueryGet({
+        query: {
           task_uuid: taskUuid,
-          agent_uuid: agentUuid ?? null,
+          agent_uuid: agentUuid ?? undefined,
           start: startSec,
           end: endSec,
           granularity: config.granularity,
@@ -105,8 +105,8 @@ export function useMultiAgentMonitoringData(
         granularity: config.granularity,
       }),
       queryFn: async () => {
-        const { data, error } = await monitoringQueryApiV1MonitoringQueryPost({
-          body: {
+        const { data, error } = await monitoringQueryApiV1MonitoringQueryGet({
+          query: {
             task_uuid: taskUuid,
             agent_uuid: agent.agent_uuid,
             start: startSec,

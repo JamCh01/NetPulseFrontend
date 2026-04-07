@@ -14,7 +14,7 @@ export function useAgentTasks(agentUuid: string) {
     queryFn: async () => {
       const { data, error } = await getAgentTasksApiV1AgentsAgentUuidTasksGet({
         path: { agent_uuid: agentUuid },
-      })
+      } as any)
       if (error) throw error
       return data
     },

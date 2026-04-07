@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDashboardStats } from '@/api/hooks/use-dashboard'
 import { useTasks } from '@/api/hooks/use-tasks'
@@ -6,13 +6,13 @@ import { useMonitoringData } from '@/api/hooks/use-monitoring'
 import { StatsCards } from '../components/stats-cards'
 import { HealthCard } from '../components/health-card'
 import { MiniSmokePingChart } from '../components/mini-smokeping-chart'
+import { TimeRangeSelector } from '@/features/monitoring/components/time-range-selector'
 import type { DashboardStats } from '@/api/types'
 import type { TaskResponse, PaginatedResponseTaskResponse } from '@/api/generated/types.gen'
 
-function MiniChartWithData({ task }: { task: TaskResponse }) {
-  const [now] = useState(() => Date.now())
-  const [timeRange] = useState(() => ({ start: now - 24 * 60 * 60 * 1000, end: now }))
+const INITIAL_DURATION_MS = 24 * 60 * 60 * 1000
 
+function MiniChartWithData({ task, timeRange }: { task: TaskResponse, timeRange: { start: number, end: number, granularity: 'raw' | 'hourly' | 'daily' } }) {
   const { data: monitoringData, isLoading } = useMonitoringData(
     task.task_uuid,
     undefined,
@@ -36,13 +36,30 @@ export default function DashboardPage() {
   const { data: statsRaw, isLoading: statsLoading } = useDashboardStats()
   const { data: tasksRaw, isLoading: tasksLoading } = useTasks({ is_active: true, limit: 200 })
 
+  const [now] = useState(() => Date.now())
+  const [timeRange, setTimeRange] = useState<{ start: number; end: number; granularity: 'raw' | 'hourly' | 'daily' }>({
+    start: now - INITIAL_DURATION_MS,
+    end: now,
+    granularity: 'raw',
+  })
+
+  const handleTimeRangeChange = useCallback(
+    (range: { start: number; end: number; granularity: 'raw' | 'hourly' | 'daily' }) => {
+      setTimeRange(range)
+    },
+    [],
+  )
+
   // Cast dashboard stats which comes as generic object
   const stats = statsRaw as DashboardStats | undefined
   const tasks = ((tasksRaw as PaginatedResponseTaskResponse)?.items ?? []) as TaskResponse[]
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-text-primary mb-6">{t('dashboard.title')}</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <h1 className="text-2xl font-bold text-text-primary">{t('dashboard.title')}</h1>
+        <TimeRangeSelector value={timeRange} onChange={handleTimeRangeChange} />
+      </div>
 
       {/* Stats cards */}
       <div className="mb-6">
@@ -67,7 +84,7 @@ export default function DashboardPage() {
           </div>
         ) : (
           tasks.map((task) => (
-            <MiniChartWithData key={task.task_uuid} task={task} />
+            <MiniChartWithData key={task.task_uuid} task={task} timeRange={timeRange} />
           ))
         )}
       </div>

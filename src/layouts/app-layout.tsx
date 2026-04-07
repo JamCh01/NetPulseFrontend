@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/stores/auth-store'
@@ -24,7 +24,21 @@ import {
   ScrollText,
   BellRing,
   FolderOpen,
+  User as UserIcon,
+  Menu,
+  X,
 } from 'lucide-react'
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+
+import { ChangePasswordDialog } from '@/features/auth/components/change-password-dialog'
 
 const protocolIcon: Record<string, string> = {
   icmp: 'text-cyan-400',
@@ -49,13 +63,20 @@ interface NavItem {
 
 export function AppLayout() {
   const [collapsed, setCollapsed] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [tasksExpanded, setTasksExpanded] = useState(true)
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false)
   const { t, i18n } = useTranslation()
   const user = useAuthStore((s) => s.user)
   const isAdmin = useAuthStore((s) => s.isAdmin())
   const navigate = useNavigate()
   const logoutMutation = useLogout()
   const location = useLocation()
+
+  // Close mobile menu on navigation
+  useEffect(() => {
+    setMobileMenuOpen(false)
+  }, [location.pathname])
 
   const { data: tasksData } = useTasks({ limit: 200 })
   const tasks = ((tasksData as { items?: TaskResponse[] })?.items ?? []) as TaskResponse[]
@@ -71,6 +92,7 @@ export function AppLayout() {
     { label: t('nav.users'), path: '/users', icon: <Users className="w-4 h-4" />, adminOnly: true },
     { label: t('nav.audit'), path: '/audit', icon: <ScrollText className="w-4 h-4" />, adminOnly: true },
     { label: t('nav.groups'), path: '/groups', icon: <FolderOpen className="w-4 h-4" />, adminOnly: true },
+    { label: t('nav.systemHealth'), path: '/system/health', icon: <Activity className="w-4 h-4" />, adminOnly: true },
   ]
 
   const handleLogout = () => {
@@ -88,21 +110,37 @@ export function AppLayout() {
 
   return (
     <div className="min-h-screen gradient-bg grid-pattern flex">
+      {/* Mobile overlay */}
+      {mobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed top-0 left-0 h-screen glass flex flex-col z-40 transition-all duration-300',
-          collapsed ? 'w-(--sidebar-collapsed-width)' : 'w-(--sidebar-width)'
+          'fixed top-0 left-0 h-screen glass flex flex-col z-50 transition-transform duration-300',
+          collapsed ? 'w-(--sidebar-collapsed-width)' : 'w-(--sidebar-width)',
+          !mobileMenuOpen && '-translate-x-full md:translate-x-0'
         )}
       >
         {/* Logo */}
-        <div className="flex items-center gap-2 px-4 h-16 border-b border-white/5">
+        <div className="flex items-center gap-2 px-4 h-14 border-b border-white/5 relative">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center shrink-0">
             <Zap className="w-4 h-4 text-gray-950" />
           </div>
           {!collapsed && (
             <span className="text-sm font-bold text-text-primary tracking-tight">{t('nav.brand')}</span>
           )}
+          {/* Close button for mobile */}
+          <button 
+            className="absolute right-3 p-1.5 md:hidden text-text-muted hover:text-text-primary"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
         {/* Nav items */}
@@ -261,10 +299,10 @@ export function AppLayout() {
           </button>
         </div>
 
-        {/* Collapse toggle */}
+        {/* Collapse toggle (desktop only) */}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="absolute -right-3 top-20 w-6 h-6 rounded-full glass flex items-center justify-center text-text-muted hover:text-text-secondary transition-colors"
+          className="absolute -right-3 top-20 w-6 h-6 rounded-full glass hidden md:flex items-center justify-center text-text-muted hover:text-text-secondary transition-colors"
         >
           <ChevronLeft className={cn('w-3 h-3 transition-transform', collapsed && 'rotate-180')} />
         </button>
@@ -273,35 +311,64 @@ export function AppLayout() {
       {/* Main content */}
       <main
         className={cn(
-          'flex-1 transition-all duration-300',
-          collapsed ? 'ml-(--sidebar-collapsed-width)' : 'ml-(--sidebar-width)'
+          'flex-1 transition-all duration-300 w-full',
+          collapsed ? 'md:ml-(--sidebar-collapsed-width)' : 'md:ml-(--sidebar-width)'
         )}
       >
         {/* Header */}
-        <header className="nav-blur sticky top-0 z-30 h-14 flex items-center justify-between px-6">
-          <div />
+        <header className="nav-blur sticky top-0 z-30 h-14 flex items-center justify-between px-4 md:px-6">
+          <div className="flex items-center gap-3">
+            <button 
+              className="p-1.5 md:hidden text-text-muted hover:text-text-primary rounded-md hover:bg-white/5"
+              onClick={() => setMobileMenuOpen(true)}
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+          </div>
           <div className="flex items-center gap-4">
             {user && (
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-text-muted">{user.username}</span>
-                <span className={cn(
-                  'text-[10px] px-2 py-0.5 rounded-full font-medium',
-                  user.role === 'admin'
-                    ? 'bg-accent-dim text-accent'
-                    : 'bg-secondary-dim text-secondary'
-                )}>
-                  {user.role}
-                </span>
-              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger className="flex items-center gap-2 outline-none hover:bg-white/5 py-1 px-2 rounded-lg transition-colors cursor-pointer border border-transparent hover:border-white/10">
+                  <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
+                    <UserIcon className="w-3.5 h-3.5 text-accent" />
+                  </div>
+                  <div className="hidden sm:flex flex-col items-start">
+                    <span className="text-xs font-medium text-text-primary leading-tight">{user.username}</span>
+                    <span className="text-[10px] text-text-muted leading-tight capitalize">{user.role}</span>
+                  </div>
+                  <ChevronDown className="w-3 h-3 text-text-dim ml-1" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none text-text-primary">{user.username}</p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="cursor-pointer" onClick={() => setPasswordDialogOpen(true)}>
+                    {t('users.changePassword') || 'Change Password'}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="cursor-pointer text-red-400 focus:text-red-400 focus:bg-red-500/10" onClick={handleLogout}>
+                    <LogOut className="w-4 h-4 mr-2" />
+                    {t('common.logout') || 'Log out'}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
         </header>
 
         {/* Page content */}
-        <div className="p-6">
+        <div className="p-4 md:p-6 max-w-full overflow-x-hidden">
           <Outlet />
         </div>
       </main>
+
+      <ChangePasswordDialog
+        open={passwordDialogOpen}
+        onOpenChange={setPasswordDialogOpen}
+      />
     </div>
   )
 }
