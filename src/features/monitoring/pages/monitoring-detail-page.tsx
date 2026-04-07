@@ -5,6 +5,7 @@ import { Download, ChevronDown } from 'lucide-react'
 import { useTask } from '@/api/hooks/use-tasks'
 import { useTaskAgents } from '@/api/hooks/use-task-assignments'
 import { useMonitoringData, useMultiAgentMonitoringData } from '@/api/hooks/use-monitoring'
+import { useMonitoringWebSocket } from '@/api/hooks/use-monitoring-ws'
 import { SmokePingChart } from '@/features/monitoring/components/smokeping-chart'
 import { MultiAgentChart } from '@/features/monitoring/components/multi-agent-chart'
 import { TimeRangeSelector } from '@/features/monitoring/components/time-range-selector'
@@ -107,6 +108,13 @@ export default function MonitoringDetailPage() {
     isAllAgents ? taskAgents : [],
     { start: timeRange.start, end: timeRange.end },
   )
+
+  // Enable real-time updates via WebSocket
+  useMonitoringWebSocket({
+    taskUuid: taskUuid ?? '',
+    agentUuid: selectedAgentUuid || undefined,
+    enabled: !!taskUuid && timeRange.granularity === 'raw', // Only real-time for raw granularity
+  })
 
   const handleExportCsv = useCallback(() => {
     if (!task) return
