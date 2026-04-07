@@ -53,6 +53,14 @@ export function useMonitoringData(
   const startSec = Math.floor(timeRange.start / 1000)
   const endSec = Math.floor(timeRange.end / 1000)
 
+  console.debug('[useMonitoringData]', {
+    taskUuid,
+    agentUuid,
+    spanHours: (timeRange.end - timeRange.start) / (1000 * 60 * 60),
+    granularity: config.granularity,
+    refetchInterval: config.refetchInterval,
+  })
+
   return useQuery({
     queryKey: monitoringKeys.query({
       task_uuid: taskUuid,
@@ -62,6 +70,7 @@ export function useMonitoringData(
       granularity: config.granularity,
     }),
     queryFn: async () => {
+      console.debug('[useMonitoringData] Fetching from API...')
       const { data, error } = await monitoringQueryApiV1MonitoringQueryGet({
         query: {
           task_uuid: taskUuid,
@@ -72,8 +81,12 @@ export function useMonitoringData(
         },
       })
       if (error) {
+        console.error('[useMonitoringData] API error:', error)
         throw error
       }
+      console.debug('[useMonitoringData] API response:', {
+        dataPoints: data?.data?.length,
+      })
       return data
     },
     enabled: !!taskUuid,

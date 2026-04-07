@@ -22,26 +22,35 @@ export function useMonitoringWebSocket({ taskUuid, agentUuid, enabled = true }: 
   const reconnectTimeoutRef = useRef<number | null>(null)
 
   useEffect(() => {
-    if (!enabled || !taskUuid) return
+    if (!enabled || !taskUuid) {
+      console.debug('[WS] Not connecting, enabled:', enabled, 'taskUuid:', taskUuid)
+      return
+    }
 
     const connect = () => {
       let wsUrl = ''
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-      
+
       if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
         wsUrl = `${protocol}//localhost:8000/api/v1/monitoring/ws`
       } else {
         wsUrl = `${protocol}//${window.location.host}/api/v1/monitoring/ws`
       }
-      
+
+      console.debug('[WS] Connecting to:', wsUrl)
       const ws = new WebSocket(wsUrl)
       socketRef.current = ws
 
       ws.onopen = () => {
+        console.debug('[WS] Connected, subscribing to task:', taskUuid, 'agent:', agentUuid)
         ws.send(JSON.stringify({
           task_uuid: taskUuid,
           agent_uuid: agentUuid || null
         }))
+      }
+
+      ws.onerror = (error) => {
+        console.error('[WS] Connection error:', error)
       }
 
       ws.onmessage = (event) => {

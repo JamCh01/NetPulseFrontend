@@ -113,7 +113,14 @@ export default function MonitoringDetailPage() {
   useMonitoringWebSocket({
     taskUuid: taskUuid ?? '',
     agentUuid: selectedAgentUuid || undefined,
-    enabled: !!taskUuid, // Enable for all time ranges that have active polling
+    enabled: !!taskUuid, // Enable for all time ranges
+  })
+
+  // Debug: Log time range and WebSocket status
+  console.debug('[MonitoringPage] timeRange:', {
+    spanHours: (timeRange.end - timeRange.start) / (1000 * 60 * 60),
+    granularity: timeRange.granularity,
+    enabled: !!taskUuid,
   })
 
   const handleExportCsv = useCallback(() => {
