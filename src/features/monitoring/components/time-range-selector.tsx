@@ -23,7 +23,7 @@ interface PresetConfig {
 const PRESETS: readonly PresetConfig[] = [
   { label: '1h', durationMs: 60 * 60 * 1000, granularity: 'raw' },
   { label: '6h', durationMs: 6 * 60 * 60 * 1000, granularity: 'raw' },
-  { label: '24h', durationMs: 24 * 60 * 60 * 1000, granularity: 'hourly' },
+  { label: '24h', durationMs: 24 * 60 * 60 * 1000, granularity: 'raw' },
   { label: '7d', durationMs: 7 * 24 * 60 * 60 * 1000, granularity: 'hourly' },
   { label: '30d', durationMs: 30 * 24 * 60 * 60 * 1000, granularity: 'daily' },
   { label: '1y', durationMs: 365 * 24 * 60 * 60 * 1000, granularity: 'daily' },

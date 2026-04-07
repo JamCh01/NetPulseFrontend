@@ -47,7 +47,10 @@ export function useMonitoringWebSocket({ taskUuid, agentUuid, enabled = true }: 
       ws.onmessage = (event) => {
         try {
           const message: WsPushMessage = JSON.parse(event.data)
+          console.debug('[WS] Received message:', { taskUuid: message.task_uuid, agentUuid: message.agent_uuid, points: message.data?.length })
+
           if (message.data && message.data.length > 0) {
+            let updatedCount = 0
             queryClient.setQueriesData<MonitoringResponse>(
               {
                 queryKey: monitoringKeys.all,
@@ -58,7 +61,7 @@ export function useMonitoringWebSocket({ taskUuid, agentUuid, enabled = true }: 
 
                   const filters = key[2] || {}
                   if (filters.task_uuid !== taskUuid) return false
-                  
+
                   if (message.agent_uuid) {
                     return filters.agent_uuid === message.agent_uuid
                   } else {
@@ -67,19 +70,41 @@ export function useMonitoringWebSocket({ taskUuid, agentUuid, enabled = true }: 
                 }
               },
               (oldData) => {
-                if (!oldData || !oldData.data) return oldData
+                if (!oldData || !oldData.data) {
+                  console.debug('[WS] No existing data, creating new')
+                  return { ...oldData, data: message.data } as MonitoringResponse
+                }
 
                 const existingTimestamps = new Set(oldData.data.map((p: MonitoringDataPoint) => p.timestamp))
                 const newUniquePoints = message.data.filter((p: MonitoringDataPoint) => !existingTimestamps.has(p.timestamp))
+                const updatedPoints = message.data.filter((p: MonitoringDataPoint) => existingTimestamps.has(p.timestamp))
 
-                if (newUniquePoints.length === 0) return oldData
+                if (newUniquePoints.length === 0 && updatedPoints.length === 0) {
+                  console.debug('[WS] No new or updated points')
+                  return oldData
+                }
+
+                updatedCount += newUniquePoints.length + updatedPoints.length
+
+                const mergedData = [...oldData.data]
+                for (const point of message.data) {
+                  const idx = mergedData.findIndex(p => p.timestamp === point.timestamp)
+                  if (idx >= 0) {
+                    mergedData[idx] = point
+                  } else {
+                    mergedData.push(point)
+                  }
+                }
+
+                console.debug('[WS] Updated cache:', { added: newUniquePoints.length, updated: updatedPoints.length, total: mergedData.length })
 
                 return {
                   ...oldData,
-                  data: [...oldData.data, ...newUniquePoints].sort((a, b) => a.timestamp - b.timestamp)
+                  data: mergedData.sort((a, b) => a.timestamp - b.timestamp)
                 }
               }
             )
+            console.debug('[WS] Cache update complete, updated queries:', updatedCount)
           }
         } catch (err) {
           console.error('[WS] Cache patch failed', err)

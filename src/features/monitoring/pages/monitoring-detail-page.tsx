@@ -113,7 +113,7 @@ export default function MonitoringDetailPage() {
   useMonitoringWebSocket({
     taskUuid: taskUuid ?? '',
     agentUuid: selectedAgentUuid || undefined,
-    enabled: !!taskUuid && timeRange.granularity === 'raw', // Only real-time for raw granularity
+    enabled: !!taskUuid, // Enable for all time ranges that have active polling
   })
 
   const handleExportCsv = useCallback(() => {
