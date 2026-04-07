@@ -78,10 +78,9 @@ export default function MonitoringDetailPage() {
   const [chartStyle, setChartStyle] = useState<ChartStyle>('smoke')
   const isSmokeStyle = chartStyle === 'smoke'
 
-  const [now] = useState(() => Date.now())
   const [timeRange, setTimeRange] = useState<{ start: number; end: number; granularity: 'raw' | 'hourly' | 'daily' }>({
-    start: now - INITIAL_DURATION_MS,
-    end: now,
+    start: Date.now() - INITIAL_DURATION_MS,
+    end: Date.now(),
     granularity: 'raw',
   })
 
@@ -145,7 +144,7 @@ export default function MonitoringDetailPage() {
       agentName: taskAgents.find(a => a.agent_uuid === selectedAgentUuid)?.agent_name,
       data: singleMonitoringData?.data ?? []
     }
-    
+
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
     const link = document.createElement('a')
     link.href = URL.createObjectURL(blob)
@@ -205,7 +204,7 @@ export default function MonitoringDetailPage() {
           <span className="text-sm text-text-secondary font-[family-name:var(--font-mono)]">
             {task.target}{task.port ? `:${task.port}` : ''}
           </span>
-          
+
           <DropdownMenu>
             <DropdownMenuTrigger className="flex h-9 items-center gap-2 rounded-md border border-input bg-transparent px-3 text-sm font-medium shadow-sm hover:bg-white/5 hover:text-accent-foreground transition-colors outline-none cursor-pointer">
               <Download className="w-4 h-4" />
