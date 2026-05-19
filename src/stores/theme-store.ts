@@ -18,11 +18,15 @@ function getInitialTheme(): Theme {
 
 function applyTheme(theme: Theme) {
   document.documentElement.classList.toggle('dark', theme === 'dark')
-  document.documentElement.classList.toggle('light', theme === 'light')
+  document.documentElement.style.colorScheme = theme
 }
 
 const initialTheme = getInitialTheme()
-applyTheme(initialTheme)
+
+export function initTheme() {
+  applyTheme(initialTheme)
+  return initialTheme
+}
 
 export const useThemeStore = create<ThemeState>((set) => ({
   theme: initialTheme,

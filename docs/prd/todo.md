@@ -73,13 +73,14 @@ Status: Completed (2026-05-19)
 
 Priority: P1
 Goal: Unify global design tokens and theme behavior.
+Status: Completed (2026-05-19)
 
-- [ ] Align typography system and actual loaded font stack.
+- [x] Align typography system and actual loaded font stack.
   - Files: `src/index.css`
   - Acceptance:
     - Single intentional font strategy documented and applied consistently.
 
-- [ ] Wire theme system intentionally (or remove dead path).
+- [x] Wire theme system intentionally (or remove dead path).
   - Files:
     - `src/stores/theme-store.ts`
     - `src/main.tsx`
