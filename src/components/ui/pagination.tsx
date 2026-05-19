@@ -18,7 +18,7 @@ export function Pagination({ page, totalPages, onPageChange, disabled }: Paginat
         size="sm"
         onClick={() => onPageChange(page - 1)}
         disabled={disabled || page <= 1}
-        className="h-7 px-2"
+        className="h-9 min-w-9 px-3"
       >
         <ChevronLeft className="w-3.5 h-3.5" />
       </Button>
@@ -30,7 +30,7 @@ export function Pagination({ page, totalPages, onPageChange, disabled }: Paginat
         size="sm"
         onClick={() => onPageChange(page + 1)}
         disabled={disabled || page >= totalPages}
-        className="h-7 px-2"
+        className="h-9 min-w-9 px-3"
       >
         <ChevronRight className="w-3.5 h-3.5" />
       </Button>

@@ -18,21 +18,22 @@ Instead of 1 TODO = 1 change, we split by coupling and rollout risk:
 
 Priority: P0
 Goal: Fix core semantic and assistive-tech blockers first.
+Status: Completed (2026-05-19)
 
-- [ ] Replace clickable `div + onClick` cards with semantic interactive elements.
+- [x] Replace clickable `div + onClick` cards with semantic interactive elements.
   - Files: `src/features/monitoring/pages/monitoring-index-page.tsx`
   - Acceptance:
     - Card uses `Link` or `button` semantics.
     - Focus-visible state is visible.
     - Keyboard Enter/Space works as expected.
 
-- [ ] Add accessible names for icon-only buttons.
+- [x] Add accessible names for icon-only buttons.
   - Files: `src/layouts/app-layout.tsx`
   - Acceptance:
     - Each icon-only control has `aria-label`.
     - Decorative icons inside controls are `aria-hidden` when appropriate.
 
-- [ ] Fix login form label/input semantics and autofill hints.
+- [x] Fix login form label/input semantics and autofill hints.
   - Files: `src/features/auth/pages/login-page.tsx`
   - Acceptance:
     - `label` is bound with `htmlFor` + input `id`.
@@ -44,21 +45,22 @@ Goal: Fix core semantic and assistive-tech blockers first.
 
 Priority: P1
 Goal: Improve mobile usability and interaction performance baseline.
+Status: Completed (2026-05-19)
 
-- [ ] Remove `transition: all` usage in shared UI styles/components.
+- [x] Remove `transition: all` usage in shared UI styles/components.
   - Files:
     - `src/index.css`
     - `src/components/ui/button.tsx`
   - Acceptance:
     - Transition lists explicit properties only.
 
-- [ ] Improve PublicLayout responsive behavior on small screens.
+- [x] Improve PublicLayout responsive behavior on small screens.
   - Files: `src/layouts/public-layout.tsx`
   - Acceptance:
     - Sidebar has mobile pattern (drawer/collapse/overlay) or equivalent adaptive layout.
     - Main content is readable at 375px width.
 
-- [ ] Increase touch target sizes for small action controls.
+- [x] Increase touch target sizes for small action controls.
   - Files:
     - `src/components/ui/pagination.tsx`
     - `src/features/tasks/pages/tasks-page.tsx`

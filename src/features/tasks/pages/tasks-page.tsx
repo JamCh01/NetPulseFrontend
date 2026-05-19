@@ -221,34 +221,34 @@ export default function TasksPage() {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="sm" className="text-xs h-7 px-2 text-text-muted hover:text-text-primary"
+                      <Button variant="ghost" size="sm" className="text-xs h-9 px-3 text-text-muted hover:text-text-primary"
                         onClick={() => navigate(`/monitoring/${task.task_uuid}`)}
                       >
                         {t('tasks.viewMonitoring')}
                       </Button>
                       {isAdmin && (
                         <>
-                          <Button variant="ghost" size="sm" className="text-xs h-7 px-2 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
+                          <Button variant="ghost" size="sm" className="text-xs h-9 px-3 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
                             onClick={() => navigate(`/tasks/${task.task_uuid}`)}
                           >
                             {t('tasks.manageTask')}
                           </Button>
-                          <Button variant="ghost" size="sm" className="text-xs h-7 px-2 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
+                          <Button variant="ghost" size="sm" className="text-xs h-9 px-3 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
                             onClick={() => setAssignDialogTaskUuid(task.task_uuid)}
                           >
                             {t('tasks.manageAgents')}
                           </Button>
-                          <Button variant="ghost" size="sm" className="text-xs h-7 px-2 text-blue-400 hover:text-blue-300 hover:bg-blue-500/10"
+                          <Button variant="ghost" size="sm" className="text-xs h-9 px-3 text-blue-400 hover:text-blue-300 hover:bg-blue-500/10"
                             onClick={() => openEditDialog(task)}
                           >
                             {t('common.edit')}
                           </Button>
-                          <Button variant="ghost" size="sm" className="text-xs h-7 px-2 text-text-muted hover:text-text-primary"
+                          <Button variant="ghost" size="sm" className="text-xs h-9 px-3 text-text-muted hover:text-text-primary"
                             onClick={() => handleToggleActive(task)}
                           >
                             {task.is_active ? t('common.disable') : t('common.enable')}
                           </Button>
-                          <Button variant="ghost" size="sm" className="text-xs h-7 px-2 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                          <Button variant="ghost" size="sm" className="text-xs h-9 px-3 text-red-400 hover:text-red-300 hover:bg-red-500/10"
                             onClick={() => setDeleteUuid(task.task_uuid)}
                           >
                             {t('common.delete')}

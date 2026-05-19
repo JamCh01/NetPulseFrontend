@@ -10,6 +10,8 @@ import {
   ChevronRight,
   LogIn,
   Languages,
+  Menu,
+  X,
   Zap,
 } from 'lucide-react'
 import { useState } from 'react'
@@ -34,19 +36,40 @@ export function PublicLayout() {
   const location = useLocation()
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated())
   const [tasksExpanded, setTasksExpanded] = useState(true)
+  const [mobileMenuAnchorPath, setMobileMenuAnchorPath] = useState<string | null>(null)
+  const mobileMenuOpen = mobileMenuAnchorPath === location.pathname
 
   const { data: tasks = [] } = usePublicMonitoringTasks(200)
 
   return (
     <div className="min-h-screen gradient-bg grid-pattern flex">
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-30 md:hidden backdrop-blur-sm"
+          onClick={() => setMobileMenuAnchorPath(null)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="fixed top-0 left-0 h-screen glass flex flex-col z-40 w-(--sidebar-width)">
+      <aside
+        className={cn(
+          'fixed top-0 left-0 h-screen glass flex flex-col z-40 w-(--sidebar-width) transition-transform duration-300',
+          !mobileMenuOpen && '-translate-x-full md:translate-x-0'
+        )}
+      >
         {/* Logo */}
-        <div className="flex items-center gap-2 px-4 h-16 border-b border-white/5">
+        <div className="flex items-center gap-2 px-4 h-16 border-b border-white/5 relative">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center shrink-0">
             <Zap className="w-4 h-4 text-gray-950" />
           </div>
           <span className="text-sm font-bold text-text-primary tracking-tight">{t('nav.brand')}</span>
+          <button
+            aria-label="Close menu"
+            className="absolute right-3 p-1.5 md:hidden text-text-muted hover:text-text-primary"
+            onClick={() => setMobileMenuAnchorPath(null)}
+          >
+            <X className="w-4 h-4" aria-hidden="true" />
+          </button>
         </div>
 
         {/* Tasks nav */}
@@ -137,8 +160,15 @@ export function PublicLayout() {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 ml-(--sidebar-width)">
-        <header className="nav-blur sticky top-0 z-30 h-14 flex items-center justify-between px-6">
+      <main className="flex-1 md:ml-(--sidebar-width)">
+        <header className="nav-blur sticky top-0 z-30 h-14 flex items-center justify-between px-4 md:px-6">
+          <button
+            aria-label="Open menu"
+            className="p-1.5 md:hidden text-text-muted hover:text-text-primary rounded-md hover:bg-white/5"
+            onClick={() => setMobileMenuAnchorPath(location.pathname)}
+          >
+            <Menu className="w-5 h-5" aria-hidden="true" />
+          </button>
           <div className="hidden lg:flex items-center gap-1.5 text-[10px] text-text-dim/70 select-none">
             <span className="uppercase tracking-wide">Tips</span>
             <span>Tab / Shift+Tab</span>
@@ -147,7 +177,7 @@ export function PublicLayout() {
           </div>
           <div />
         </header>
-        <div className="p-6">
+        <div className="p-4 md:p-6">
           <Outlet />
         </div>
       </main>
