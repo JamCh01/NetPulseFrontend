@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { monitoringKeys } from './keys'
 import type { MonitoringDataPoint, MonitoringResponse } from '@/api/generated/types.gen'
+import { buildWsApiUrl } from '@/api/base-url'
 
 interface WsPushMessage {
   task_uuid: string
@@ -28,14 +29,7 @@ export function useMonitoringWebSocket({ taskUuid, agentUuid, enabled = true }: 
     }
 
     const connect = () => {
-      let wsUrl = ''
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-
-      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        wsUrl = `${protocol}//localhost:8000/api/v1/monitoring/ws`
-      } else {
-        wsUrl = `${protocol}//${window.location.host}/api/v1/monitoring/ws`
-      }
+      const wsUrl = buildWsApiUrl('/api/v1/monitoring/ws')
 
       console.debug('[WS] Connecting to:', wsUrl)
       const ws = new WebSocket(wsUrl)

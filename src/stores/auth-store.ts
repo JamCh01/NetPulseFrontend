@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { decodeJwt, isTokenExpired } from '@/lib/jwt'
+import { buildApiUrl } from '@/api/base-url'
 
 interface AuthUser {
   uuid: string
@@ -40,6 +41,8 @@ interface AuthState {
 const REFRESH_TOKEN_KEY = 'netpulse_refresh_token'
 const ACCESS_TOKEN_KEY = 'netpulse_access_token'
 const USER_KEY = 'netpulse_user'
+let initPromise: Promise<void> | null = null
+let hasInitializedOnce = false
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   accessToken: null,
@@ -85,6 +88,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
    * If expired but refreshToken exists, attempt a refresh.
    */
   initFromStorage: async () => {
+    if (hasInitializedOnce || get().initialized) {
+      return
+    }
+    if (initPromise) {
+      return initPromise
+    }
+    initPromise = (async () => {
     const storedAccess = localStorage.getItem(ACCESS_TOKEN_KEY)
     const storedRefresh = localStorage.getItem(REFRESH_TOKEN_KEY)
     const storedUser = localStorage.getItem(USER_KEY)
@@ -101,7 +111,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     // Access token expired or missing — try refresh
     if (storedRefresh) {
       try {
-        const res = await fetch('/api/v1/auth/refresh', {
+        const res = await fetch(buildApiUrl('/api/v1/auth/refresh'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ refresh_token: storedRefresh }),
@@ -137,5 +147,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     localStorage.removeItem(REFRESH_TOKEN_KEY)
     localStorage.removeItem(USER_KEY)
     set({ accessToken: null, refreshToken: null, user: null, initialized: true })
+    })().finally(() => {
+      hasInitializedOnce = true
+      initPromise = null
+    })
+    return initPromise
   },
 }))

@@ -1,8 +1,7 @@
 import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useNavigate } from 'react-router'
-import { useTask } from '@/api/hooks/use-tasks'
-import { useTaskAgents } from '@/api/hooks/use-task-assignments'
+import { useMonitoringTaskDetail } from '@/api/hooks/use-monitoring-task-detail'
 import { useMtrList, useMtrDetail } from '@/api/hooks/use-mtr'
 import { MtrTimeline } from '@/features/monitoring/components/mtr-timeline'
 import { MtrDetailTable } from '@/features/monitoring/components/mtr-detail-table'
@@ -18,7 +17,6 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores/auth-store'
-import type { TaskResponse, AgentResponse } from '@/api/generated/types.gen'
 import { PROTOCOL_COLORS } from '@/lib/constants'
 
 const INITIAL_DURATION_MS = 24 * 60 * 60 * 1000
@@ -28,11 +26,10 @@ export default function MtrDetailPage() {
   const { taskUuid } = useParams()
   const navigate = useNavigate()
   const isAdmin = useAuthStore((s) => s.isAdmin())
-  const { data: taskData, isLoading: taskLoading } = useTask(taskUuid ?? '')
-  const { data: taskAgentsData } = useTaskAgents(taskUuid ?? '')
+  const { data: detailData, isLoading: taskLoading } = useMonitoringTaskDetail(taskUuid ?? '')
 
-  const task = taskData as TaskResponse | undefined
-  const taskAgents = (taskAgentsData ?? []) as AgentResponse[]
+  const task = detailData?.task
+  const taskAgents = detailData?.taskAgents ?? []
 
   const [selectedAgentUuid, setSelectedAgentUuid] = useState<string>('')
   const [selectedResultUuid, setSelectedResultUuid] = useState<string | undefined>()
