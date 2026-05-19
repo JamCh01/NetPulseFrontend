@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/stores/auth-store'
@@ -63,7 +63,7 @@ interface NavItem {
 
 export function AppLayout() {
   const [collapsed, setCollapsed] = useState(false)
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [mobileMenuAnchorPath, setMobileMenuAnchorPath] = useState<string | null>(null)
   const [tasksExpanded, setTasksExpanded] = useState(true)
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false)
   const { t, i18n } = useTranslation()
@@ -73,10 +73,7 @@ export function AppLayout() {
   const logoutMutation = useLogout()
   const location = useLocation()
 
-  // Close mobile menu on navigation
-  useEffect(() => {
-    setMobileMenuOpen(false)
-  }, [location.pathname])
+  const mobileMenuOpen = mobileMenuAnchorPath === location.pathname
 
   const { data: tasksData } = useTasks({ limit: 200 })
   const tasks = ((tasksData as { items?: TaskResponse[] })?.items ?? []) as TaskResponse[]
@@ -136,10 +133,11 @@ export function AppLayout() {
           )}
           {/* Close button for mobile */}
           <button 
+            aria-label="Close menu"
             className="absolute right-3 p-1.5 md:hidden text-text-muted hover:text-text-primary"
-            onClick={() => setMobileMenuOpen(false)}
+            onClick={() => setMobileMenuAnchorPath(null)}
           >
-            <X className="w-4 h-4" />
+            <X className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
 
@@ -301,10 +299,11 @@ export function AppLayout() {
 
         {/* Collapse toggle (desktop only) */}
         <button
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           onClick={() => setCollapsed(!collapsed)}
           className="absolute -right-3 top-20 w-6 h-6 rounded-full glass hidden md:flex items-center justify-center text-text-muted hover:text-text-secondary transition-colors"
         >
-          <ChevronLeft className={cn('w-3 h-3 transition-transform', collapsed && 'rotate-180')} />
+          <ChevronLeft className={cn('w-3 h-3 transition-transform', collapsed && 'rotate-180')} aria-hidden="true" />
         </button>
       </aside>
 
@@ -319,11 +318,18 @@ export function AppLayout() {
         <header className="nav-blur sticky top-0 z-30 h-14 flex items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-3">
             <button 
+              aria-label="Open menu"
               className="p-1.5 md:hidden text-text-muted hover:text-text-primary rounded-md hover:bg-white/5"
-              onClick={() => setMobileMenuOpen(true)}
+              onClick={() => setMobileMenuAnchorPath(location.pathname)}
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="w-5 h-5" aria-hidden="true" />
             </button>
+            <div className="hidden lg:flex items-center gap-1.5 text-[10px] text-text-dim/70 select-none">
+              <span className="uppercase tracking-wide">Tips</span>
+              <span>Tab / Shift+Tab</span>
+              <span>·</span>
+              <span>Enter</span>
+            </div>
           </div>
           <div className="flex items-center gap-4">
             {user && (

@@ -1,9 +1,8 @@
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/stores/auth-store'
-import { useTasks } from '@/api/hooks/use-tasks'
+import { usePublicMonitoringTasks } from '@/api/hooks/use-public-monitoring-tasks'
 import { cn } from '@/lib/utils'
-import type { TaskResponse } from '@/api/generated/types.gen'
 import {
   Activity,
   ClipboardList,
@@ -36,8 +35,7 @@ export function PublicLayout() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated())
   const [tasksExpanded, setTasksExpanded] = useState(true)
 
-  const { data: tasksData } = useTasks({ limit: 200 })
-  const tasks = ((tasksData as { items?: TaskResponse[] })?.items ?? []) as TaskResponse[]
+  const { data: tasks = [] } = usePublicMonitoringTasks(200)
 
   return (
     <div className="min-h-screen gradient-bg grid-pattern flex">
@@ -141,7 +139,12 @@ export function PublicLayout() {
       {/* Main content */}
       <main className="flex-1 ml-(--sidebar-width)">
         <header className="nav-blur sticky top-0 z-30 h-14 flex items-center justify-between px-6">
-          <div />
+          <div className="hidden lg:flex items-center gap-1.5 text-[10px] text-text-dim/70 select-none">
+            <span className="uppercase tracking-wide">Tips</span>
+            <span>Tab / Shift+Tab</span>
+            <span>·</span>
+            <span>Enter</span>
+          </div>
           <div />
         </header>
         <div className="p-6">

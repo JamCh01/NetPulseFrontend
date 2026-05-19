@@ -53,8 +53,11 @@ export default function LoginPage() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-xs font-medium text-text-secondary mb-1.5">{t('auth.username')}</label>
+          <label htmlFor="username" className="block text-xs font-medium text-text-secondary mb-1.5">{t('auth.username')}</label>
           <input
+            id="username"
+            name="username"
+            autoComplete="username"
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
@@ -65,8 +68,11 @@ export default function LoginPage() {
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-text-secondary mb-1.5">{t('auth.password')}</label>
+          <label htmlFor="password" className="block text-xs font-medium text-text-secondary mb-1.5">{t('auth.password')}</label>
           <input
+            id="password"
+            name="password"
+            autoComplete="current-password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}

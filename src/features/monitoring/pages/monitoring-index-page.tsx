@@ -1,7 +1,6 @@
-import { useNavigate } from 'react-router'
+import { Link } from 'react-router'
 import { useTranslation } from 'react-i18next'
-import { useTasks } from '@/api/hooks/use-tasks'
-import type { TaskResponse } from '@/api/generated/types.gen'
+import { usePublicMonitoringTasks } from '@/api/hooks/use-public-monitoring-tasks'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Activity } from 'lucide-react'
 
@@ -14,9 +13,7 @@ const protocolBadge: Record<string, { bg: string; text: string }> = {
 
 export default function MonitoringIndexPage() {
   const { t } = useTranslation()
-  const navigate = useNavigate()
-  const { data, isLoading } = useTasks({ limit: 200 })
-  const tasks = ((data as { items?: TaskResponse[] })?.items ?? []) as TaskResponse[]
+  const { data: tasks = [], isLoading } = usePublicMonitoringTasks(200)
 
   return (
     <div>
@@ -38,10 +35,10 @@ export default function MonitoringIndexPage() {
           {tasks.map((task) => {
             const proto = protocolBadge[task.protocol.toLowerCase()] ?? protocolBadge.icmp
             return (
-              <div
+              <Link
                 key={task.task_uuid}
-                onClick={() => navigate(`/monitoring/${task.task_uuid}`)}
-                className="glass-card rounded-xl p-4 cursor-pointer"
+                to={`/monitoring/${task.task_uuid}`}
+                className="glass-card rounded-xl p-4 cursor-pointer block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
               >
                 <div className="flex items-center gap-3 mb-2">
                   <Activity className={`w-4 h-4 ${proto.text}`} />
@@ -56,7 +53,7 @@ export default function MonitoringIndexPage() {
                 <div className="text-[10px] text-text-dim mt-1">
                   {t('tasks.interval')}: {task.interval}s
                 </div>
-              </div>
+              </Link>
             )
           })}
         </div>
