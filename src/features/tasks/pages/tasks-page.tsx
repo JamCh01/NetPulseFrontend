@@ -36,6 +36,13 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { CheckableList } from '@/components/ui/checkable-list'
 import { Pagination } from '@/components/ui/pagination'
 import { AssignAgentsDialog } from '@/features/tasks/components/assign-agents-dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { MoreHorizontal } from 'lucide-react'
 import type { TaskResponse, ProtocolEnum, AgentResponse, PaginatedResponseTaskResponse } from '@/api/generated/types.gen'
 import { PROTOCOL_COLORS } from '@/lib/constants'
 
@@ -220,40 +227,44 @@ export default function TasksPage() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-2">
                       <Button variant="ghost" size="sm" className="text-xs h-9 px-3 text-text-muted hover:text-text-primary"
                         onClick={() => navigate(`/monitoring/${task.task_uuid}`)}
                       >
                         {t('tasks.viewMonitoring')}
                       </Button>
                       {isAdmin && (
-                        <>
-                          <Button variant="ghost" size="sm" className="text-xs h-9 px-3 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
-                            onClick={() => navigate(`/tasks/${task.task_uuid}`)}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger
+                            render={
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-9 px-2 text-text-muted hover:text-text-primary"
+                                aria-label={t('common.actions')}
+                              />
+                            }
                           >
-                            {t('tasks.manageTask')}
-                          </Button>
-                          <Button variant="ghost" size="sm" className="text-xs h-9 px-3 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
-                            onClick={() => setAssignDialogTaskUuid(task.task_uuid)}
-                          >
-                            {t('tasks.manageAgents')}
-                          </Button>
-                          <Button variant="ghost" size="sm" className="text-xs h-9 px-3 text-blue-400 hover:text-blue-300 hover:bg-blue-500/10"
-                            onClick={() => openEditDialog(task)}
-                          >
-                            {t('common.edit')}
-                          </Button>
-                          <Button variant="ghost" size="sm" className="text-xs h-9 px-3 text-text-muted hover:text-text-primary"
-                            onClick={() => handleToggleActive(task)}
-                          >
-                            {task.is_active ? t('common.disable') : t('common.enable')}
-                          </Button>
-                          <Button variant="ghost" size="sm" className="text-xs h-9 px-3 text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                            onClick={() => setDeleteUuid(task.task_uuid)}
-                          >
-                            {t('common.delete')}
-                          </Button>
-                        </>
+                            <MoreHorizontal className="w-4 h-4" />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-44">
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => navigate(`/tasks/${task.task_uuid}`)}>
+                              {t('tasks.manageTask')}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => setAssignDialogTaskUuid(task.task_uuid)}>
+                              {t('tasks.manageAgents')}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => openEditDialog(task)}>
+                              {t('common.edit')}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => handleToggleActive(task)}>
+                              {task.is_active ? t('common.disable') : t('common.enable')}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="cursor-pointer text-red-400 focus:text-red-400 focus:bg-red-500/10" onClick={() => setDeleteUuid(task.task_uuid)}>
+                              {t('common.delete')}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       )}
                     </div>
                   </TableCell>

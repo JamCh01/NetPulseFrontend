@@ -174,7 +174,7 @@ export function AppLayout() {
               {!collapsed && (
                 <>
                   <span className="flex-1 text-left">{t('nav.tasks')}</span>
-                  <span className="text-[9px] text-text-dim font-mono">{tasks.length}</span>
+                  <span className="text-[11px] text-text-dim font-mono">{tasks.length}</span>
                   {tasksExpanded ? (
                     <ChevronDown className="w-3 h-3 text-text-dim" />
                   ) : (
@@ -205,7 +205,7 @@ export function AppLayout() {
                       <Activity className={cn('w-3 h-3 shrink-0', isActive ? 'text-accent' : protoColor)} />
                       <span className="truncate flex-1">{task.task_name}</span>
                       <span className={cn(
-                        'text-[8px] px-1 py-px rounded font-mono uppercase shrink-0',
+                        'text-[10px] px-1 py-px rounded font-mono uppercase shrink-0',
                         isActive ? 'text-accent/60' : (protocolIconDim[task.protocol.toLowerCase()] ?? 'text-gray-400/60')
                       )}>
                         {task.protocol}
@@ -216,11 +216,11 @@ export function AppLayout() {
 
                 {tasks.length === 0 && (
                   <div className="px-2 py-1.5">
-                    <div className="text-[10px] text-text-dim">{t('nav.noTasks')}</div>
+                    <div className="text-xs text-text-dim">{t('nav.noTasks')}</div>
                     {isAdmin && (
                       <NavLink
                         to="/tasks"
-                        className="mt-1 flex items-center gap-1 text-[10px] text-accent hover:text-accent/80 transition-colors"
+                        className="mt-1 flex items-center gap-1 text-xs text-accent hover:text-accent/80 transition-colors"
                       >
                         <Plus className="w-3 h-3" />
                         {t('tasks.createTask')}

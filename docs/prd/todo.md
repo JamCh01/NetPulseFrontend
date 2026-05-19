@@ -93,8 +93,9 @@ Status: Completed (2026-05-19)
 
 Priority: P2
 Goal: Improve readability and reduce UI action noise.
+Status: Completed (2026-05-19)
 
-- [ ] Reduce ultra-small text usage in navigation/list badges.
+- [x] Reduce ultra-small text usage in navigation/list badges.
   - Files:
     - `src/layouts/app-layout.tsx`
     - `src/layouts/public-layout.tsx`
@@ -102,7 +103,7 @@ Goal: Improve readability and reduce UI action noise.
   - Acceptance:
     - Critical text tokens use readable minimum size.
 
-- [ ] Simplify dense per-row task actions.
+- [x] Simplify dense per-row task actions.
   - Files: `src/features/tasks/pages/tasks-page.tsx`
   - Acceptance:
     - Keep primary action visible; move secondary actions to overflow menu/dialog.

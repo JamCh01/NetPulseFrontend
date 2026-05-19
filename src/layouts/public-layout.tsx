@@ -84,7 +84,7 @@ export function PublicLayout() {
             >
               <ClipboardList className="w-4 h-4 shrink-0" />
               <span className="flex-1 text-left">{t('nav.tasks')}</span>
-              <span className="text-[9px] text-text-dim font-mono">{tasks.length}</span>
+              <span className="text-[11px] text-text-dim font-mono">{tasks.length}</span>
               {tasksExpanded ? (
                 <ChevronDown className="w-3 h-3 text-text-dim" />
               ) : (
@@ -113,7 +113,7 @@ export function PublicLayout() {
                       <Activity className={cn('w-3 h-3 shrink-0', isActive ? 'text-accent' : protoColor)} />
                       <span className="truncate flex-1">{task.task_name}</span>
                       <span className={cn(
-                        'text-[8px] px-1 py-px rounded font-mono uppercase shrink-0',
+                        'text-[10px] px-1 py-px rounded font-mono uppercase shrink-0',
                         isActive ? 'text-accent/60' : (protocolIconDim[task.protocol.toLowerCase()] ?? 'text-gray-400/60')
                       )}>
                         {task.protocol}
@@ -122,7 +122,7 @@ export function PublicLayout() {
                   )
                 })}
                 {tasks.length === 0 && (
-                  <div className="px-2 py-1.5 text-[10px] text-text-dim">{t('nav.noTasks')}</div>
+                  <div className="px-2 py-1.5 text-xs text-text-dim">{t('nav.noTasks')}</div>
                 )}
               </div>
             )}

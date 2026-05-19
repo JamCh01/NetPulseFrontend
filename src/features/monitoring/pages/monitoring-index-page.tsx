@@ -43,14 +43,14 @@ export default function MonitoringIndexPage() {
                 <div className="flex items-center gap-3 mb-2">
                   <Activity className={`w-4 h-4 ${proto.text}`} />
                   <span className="text-sm font-medium text-text-primary">{task.task_name}</span>
-                  <span className={`text-[9px] px-1.5 py-0.5 rounded font-medium ${proto.bg} ${proto.text}`}>
+                  <span className={`text-[11px] px-1.5 py-0.5 rounded font-medium ${proto.bg} ${proto.text}`}>
                     {task.protocol.toUpperCase()}
                   </span>
                 </div>
                 <div className="text-xs text-text-muted font-mono">
                   {task.target}{task.port ? `:${task.port}` : ''}
                 </div>
-                <div className="text-[10px] text-text-dim mt-1">
+                <div className="text-xs text-text-dim mt-1">
                   {t('tasks.interval')}: {task.interval}s
                 </div>
               </Link>
