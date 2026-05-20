@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useNavigate, useLocation } from 'react-router'
 import { Download, ChevronDown } from 'lucide-react'
@@ -72,15 +72,16 @@ export default function MonitoringDetailPage() {
   const { data: detailData, isLoading: taskLoading } = useMonitoringTaskDetail(taskUuid ?? '')
 
   const task = detailData?.task
-  const taskAgents = detailData?.taskAgents ?? []
+  const taskAgents = useMemo(() => detailData?.taskAgents ?? [], [detailData?.taskAgents])
 
   const [selectedAgentUuid, setSelectedAgentUuid] = useState<string>('')
   const [chartStyle, setChartStyle] = useState<ChartStyle>('smoke')
   const isSmokeStyle = chartStyle === 'smoke'
 
+  const [now] = useState(() => Date.now())
   const [timeRange, setTimeRange] = useState<{ start: number; end: number; granularity: 'raw' | 'hourly' | 'daily' }>({
-    start: Date.now() - INITIAL_DURATION_MS,
-    end: Date.now(),
+    start: now - INITIAL_DURATION_MS,
+    end: now,
     granularity: 'raw',
   })
 
