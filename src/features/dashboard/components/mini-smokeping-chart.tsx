@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router'
 import type { MonitoringDataPoint } from '@/api/generated/types.gen'
 import { useChartTheme } from '@/features/monitoring/lib/chart-theme'
 import { transformToChartData } from '@/features/monitoring/lib/transform-chart-data'
+import { PROTOCOL_COLORS } from '@/lib/constants'
 
 interface MiniSmokePingChartProps {
   taskUuid: string
@@ -14,13 +15,6 @@ interface MiniSmokePingChartProps {
   basePath?: string
   data?: MonitoringDataPoint[]
   isLoading?: boolean
-}
-
-const protocolColors: Record<string, { bg: string; text: string }> = {
-  icmp: { bg: 'bg-cyan-500/10', text: 'text-cyan-400' },
-  tcp: { bg: 'bg-purple-500/10', text: 'text-purple-400' },
-  udp: { bg: 'bg-amber-500/10', text: 'text-amber-400' },
-  http: { bg: 'bg-emerald-500/10', text: 'text-emerald-400' },
 }
 
 function MiniSmokePingChartInner({
@@ -114,7 +108,7 @@ function MiniSmokePingChartInner({
   }, [data, theme])
 
   const normalizedProtocol = (protocol ?? 'icmp').toLowerCase()
-  const proto = protocolColors[normalizedProtocol] ?? protocolColors.icmp
+  const protoClass = PROTOCOL_COLORS[normalizedProtocol] ?? PROTOCOL_COLORS.icmp
   const protocolLabel = normalizedProtocol.toUpperCase()
 
   if (isLoading) {
@@ -130,7 +124,7 @@ function MiniSmokePingChartInner({
     >
       <div className="flex items-center justify-between mb-2">
         <span className="text-[10px] font-medium text-text-primary truncate">{taskName}</span>
-        <span className={`text-[9px] px-1.5 py-0.5 rounded font-medium ${proto.bg} ${proto.text}`}>
+        <span className={`text-[9px] px-1.5 py-0.5 rounded font-medium border uppercase ${protoClass}`}>
           {protocolLabel}
         </span>
       </div>

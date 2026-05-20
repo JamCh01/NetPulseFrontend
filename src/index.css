@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -10,15 +11,15 @@
 
 @theme {
   /* Primary: Emerald/Cyan tech accent */
-  --color-accent: #00ffc8;
-  --color-accent-hover: #00e6b4;
-  --color-accent-dim: rgba(0, 255, 200, 0.1);
-  --color-accent-border: rgba(0, 255, 200, 0.06);
-  --color-accent-glow: rgba(0, 255, 200, 0.07);
+  --color-accent: var(--accent-color);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-dim: var(--accent-dim);
+  --color-accent-border: var(--accent-border);
+  --color-accent-glow: var(--accent-glow);
 
   /* Secondary: Cyan/Blue */
-  --color-secondary: #00b4ff;
-  --color-secondary-dim: rgba(0, 180, 255, 0.1);
+  --color-secondary: var(--secondary-color);
+  --color-secondary-dim: var(--secondary-dim);
 
   /* Background layers */
   --color-bg-root: var(--bg-root);
@@ -40,14 +41,14 @@
   --color-status-warning: #f59e0b;
 
   /* Protocol badges */
-  --color-proto-icmp: rgba(0, 200, 255, 0.1);
-  --color-proto-icmp-text: #22d3ee;
-  --color-proto-tcp: rgba(168, 85, 247, 0.1);
-  --color-proto-tcp-text: #a78bfa;
-  --color-proto-udp: rgba(245, 158, 11, 0.1);
-  --color-proto-udp-text: #fbbf24;
-  --color-proto-http: rgba(34, 197, 94, 0.1);
-  --color-proto-http-text: #4ade80;
+  --color-proto-icmp: var(--proto-icmp);
+  --color-proto-icmp-text: var(--proto-icmp-text);
+  --color-proto-tcp: var(--proto-tcp);
+  --color-proto-tcp-text: var(--proto-tcp-text);
+  --color-proto-udp: var(--proto-udp);
+  --color-proto-udp-text: var(--proto-udp-text);
+  --color-proto-http: var(--proto-http);
+  --color-proto-http-text: var(--proto-http-text);
 
   /* Chart bands — cyan/teal palette */
   --color-band-1: rgba(0, 220, 180, 0.06);
@@ -58,7 +59,7 @@
   --color-median: #00dcc8;
 
   /* Fonts */
-  --font-sans: 'Geist Variable', 'Geist', system-ui, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', 'Geist Variable', 'Geist', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
   /* Radii */
@@ -76,7 +77,6 @@
 /* ===== Base ===== */
 html {
   scroll-behavior: smooth;
-  color-scheme: dark;
 }
 
 body {
@@ -145,10 +145,10 @@ body {
 
 /* ===== Nav blur ===== */
 @utility nav-blur {
-  background: rgba(3, 7, 18, 0.85);
+  background: var(--nav-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(0, 255, 200, 0.04);
+  border-bottom: 1px solid var(--border);
 }
 
 /* ===== Scrollbar ===== */
@@ -266,6 +266,17 @@ body {
 }
 
 :root {
+  color-scheme: light;
+
+  --accent-color: #0d9488;
+  --accent-hover: #0f766e;
+  --accent-dim: rgba(13, 148, 136, 0.08);
+  --accent-border: rgba(13, 148, 136, 0.15);
+  --accent-glow: rgba(13, 148, 136, 0.05);
+  --secondary-color: #0284c7;
+  --secondary-dim: rgba(2, 132, 199, 0.1);
+  --nav-bg: rgba(255, 255, 255, 0.85);
+
   --bg-root: #f9fafb;
   --bg-surface: rgba(255, 255, 255, 0.7);
   --bg-surface-light: rgba(243, 244, 246, 0.5);
@@ -289,8 +300,8 @@ body {
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --accent: rgba(13, 148, 136, 0.08);
+  --accent-foreground: #0f766e;
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
@@ -331,9 +342,30 @@ body {
   --btn-ghost-hover-bg: oklch(0.95 0 0);
   --btn-ghost-hover-fg: oklch(0.145 0 0);
   --btn-outline-border: oklch(0.922 0 0);
+
+  /* Protocol colors (Light Mode) */
+  --proto-icmp: rgba(13, 148, 136, 0.08);
+  --proto-icmp-text: #0d9488;
+  --proto-tcp: rgba(124, 58, 237, 0.08);
+  --proto-tcp-text: #7c3aed;
+  --proto-udp: rgba(217, 119, 6, 0.08);
+  --proto-udp-text: #d97706;
+  --proto-http: rgba(22, 163, 74, 0.08);
+  --proto-http-text: #16a34a;
 }
 
 .dark {
+  color-scheme: dark;
+
+  --accent-color: #00ffc8;
+  --accent-hover: #00e6b4;
+  --accent-dim: rgba(0, 255, 200, 0.15);
+  --accent-border: rgba(0, 255, 200, 0.2);
+  --accent-glow: rgba(0, 255, 200, 0.08);
+  --secondary-color: #00b4ff;
+  --secondary-dim: rgba(0, 180, 255, 0.1);
+  --nav-bg: rgba(3, 7, 18, 0.85);
+
   --bg-root: #030712;
   --bg-surface: rgba(6, 12, 24, 0.7);
   --bg-surface-light: rgba(10, 18, 32, 0.5);
@@ -398,6 +430,16 @@ body {
   --btn-ghost-hover-bg: rgba(10, 18, 32, 0.5);
   --btn-ghost-hover-fg: #ffffff;
   --btn-outline-border: rgba(0, 255, 200, 0.12);
+
+  /* Protocol colors (Dark Mode) */
+  --proto-icmp: rgba(6, 182, 212, 0.15);
+  --proto-icmp-text: #22d3ee;
+  --proto-tcp: rgba(168, 85, 247, 0.15);
+  --proto-tcp-text: #a78bfa;
+  --proto-udp: rgba(245, 158, 11, 0.15);
+  --proto-udp-text: #fbbf24;
+  --proto-http: rgba(34, 197, 94, 0.15);
+  --proto-http-text: #4ade80;
 }
 
 @layer base {
@@ -414,6 +456,5 @@ body {
   }
   html {
     scroll-behavior: smooth;
-    color-scheme: dark;
   }
 }

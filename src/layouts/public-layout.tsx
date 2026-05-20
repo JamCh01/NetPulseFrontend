@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/stores/auth-store'
@@ -14,21 +15,7 @@ import {
   X,
   Zap,
 } from 'lucide-react'
-import { useState } from 'react'
-
-const protocolIcon: Record<string, string> = {
-  icmp: 'text-cyan-400',
-  tcp: 'text-purple-400',
-  http: 'text-emerald-400',
-  udp: 'text-amber-400',
-}
-
-const protocolIconDim: Record<string, string> = {
-  icmp: 'text-cyan-400/60',
-  tcp: 'text-purple-400/60',
-  http: 'text-emerald-400/60',
-  udp: 'text-amber-400/60',
-}
+import { PROTOCOL_COLORS, PROTOCOL_ICON_COLORS } from '@/lib/constants'
 
 export function PublicLayout() {
   const { t, i18n } = useTranslation()
@@ -58,7 +45,7 @@ export function PublicLayout() {
         )}
       >
         {/* Logo */}
-        <div className="flex items-center gap-2 px-4 h-16 border-b border-white/5 relative">
+        <div className="flex items-center gap-2 px-4 h-16 border-b border-border relative">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center shrink-0">
             <Zap className="w-4 h-4 text-gray-950" />
           </div>
@@ -79,7 +66,7 @@ export function PublicLayout() {
               onClick={() => setTasksExpanded(!tasksExpanded)}
               className={cn(
                 'flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-colors w-full',
-                'bg-accent-dim text-accent'
+                'bg-accent text-accent-foreground'
               )}
             >
               <ClipboardList className="w-4 h-4 shrink-0" />
@@ -93,9 +80,9 @@ export function PublicLayout() {
             </button>
 
             {tasksExpanded && (
-              <div className="ml-3 mt-0.5 space-y-0.5 border-l border-white/5 pl-3">
+              <div className="ml-3 mt-0.5 space-y-0.5 border-l border-border pl-3">
                 {tasks.map((task) => {
-                  const protoColor = protocolIcon[task.protocol.toLowerCase()] ?? 'text-gray-400'
+                  const protoColor = PROTOCOL_ICON_COLORS[task.protocol.toLowerCase()] ?? 'text-gray-400'
                   const taskPath = `/monitoring/${task.task_uuid}`
                   const isActive = location.pathname === taskPath
 
@@ -106,15 +93,17 @@ export function PublicLayout() {
                       className={cn(
                         'flex items-center gap-2 px-2 py-1.5 rounded-md text-[11px] transition-colors group',
                         isActive
-                          ? 'bg-accent-dim/50 text-accent'
-                          : 'text-text-dim hover:text-text-secondary hover:bg-white/5'
+                          ? 'bg-accent/50 text-accent-foreground'
+                          : 'text-text-dim hover:text-text-secondary hover:bg-muted'
                       )}
                     >
-                      <Activity className={cn('w-3 h-3 shrink-0', isActive ? 'text-accent' : protoColor)} />
+                      <Activity className={cn('w-3 h-3 shrink-0', isActive ? 'text-accent-foreground' : protoColor)} />
                       <span className="truncate flex-1">{task.task_name}</span>
                       <span className={cn(
-                        'text-[10px] px-1 py-px rounded font-mono uppercase shrink-0',
-                        isActive ? 'text-accent/60' : (protocolIconDim[task.protocol.toLowerCase()] ?? 'text-gray-400/60')
+                        'text-[10px] px-1.5 py-0.5 rounded font-mono uppercase border shrink-0',
+                        isActive 
+                          ? 'bg-accent-foreground/15 text-accent-foreground border-accent-foreground/30' 
+                          : (PROTOCOL_COLORS[task.protocol.toLowerCase()] ?? 'bg-muted text-text-muted border-border')
                       )}>
                         {task.protocol}
                       </span>
@@ -130,10 +119,10 @@ export function PublicLayout() {
         </nav>
 
         {/* Bottom actions */}
-        <div className="px-2 py-4 border-t border-white/5 space-y-1">
+        <div className="px-2 py-4 border-t border-border space-y-1">
           <button
             onClick={() => { const next = i18n.language === 'zh' ? 'en' : 'zh'; i18n.changeLanguage(next) }}
-            className="flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium text-text-muted hover:text-text-secondary hover:bg-white/5 transition-colors w-full"
+            className="flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium text-text-muted hover:text-text-secondary hover:bg-muted transition-colors w-full cursor-pointer"
           >
             <Languages className="w-4 h-4" />
             <span>{i18n.language === 'zh' ? 'English' : '中文'}</span>
@@ -141,7 +130,7 @@ export function PublicLayout() {
           {!isAuthenticated && (
             <button
               onClick={() => navigate('/login')}
-              className="flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium text-accent hover:text-accent-hover hover:bg-accent-dim transition-colors w-full"
+              className="flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium text-accent-foreground hover:bg-accent transition-colors w-full cursor-pointer"
             >
               <LogIn className="w-4 h-4" />
               <span>{t('auth.signIn')}</span>
@@ -150,7 +139,7 @@ export function PublicLayout() {
           {isAuthenticated && (
             <button
               onClick={() => navigate('/dashboard')}
-              className="flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium text-accent hover:text-accent-hover hover:bg-accent-dim transition-colors w-full"
+              className="flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium text-accent-foreground hover:bg-accent transition-colors w-full cursor-pointer"
             >
               <Zap className="w-4 h-4" />
               <span>{t('nav.dashboard')}</span>
@@ -164,7 +153,7 @@ export function PublicLayout() {
         <header className="nav-blur sticky top-0 z-30 h-14 flex items-center justify-between px-4 md:px-6">
           <button
             aria-label="Open menu"
-            className="p-1.5 md:hidden text-text-muted hover:text-text-primary rounded-md hover:bg-white/5"
+            className="p-1.5 md:hidden text-text-muted hover:text-text-primary rounded-md hover:bg-muted"
             onClick={() => setMobileMenuAnchorPath(location.pathname)}
           >
             <Menu className="w-5 h-5" aria-hidden="true" />

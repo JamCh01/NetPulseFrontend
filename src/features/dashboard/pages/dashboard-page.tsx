@@ -101,8 +101,8 @@ export default function DashboardPage() {
           </div>
           <Badge className={`border text-xs ${
             overallStatus === 'incident'
-              ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
-              : 'bg-green-500/15 text-green-300 border-green-500/30'
+              ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/30'
+              : 'bg-green-50 text-green-700 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/30'
           }`}>
             {overallStatus === 'incident' ? 'Incident Mode' : 'Healthy Mode'}
           </Badge>
@@ -178,7 +178,7 @@ export default function DashboardPage() {
                       <div className="text-xs text-text-dim truncate">{formatTaskTarget(task)}{task.port ? `:${task.port}` : ''}</div>
                     </div>
                     <Badge className={`border text-[11px] ${
-                      'bg-cyan-500/15 text-cyan-300 border-cyan-500/30'
+                      'bg-cyan-50 text-cyan-700 border-cyan-200 dark:bg-cyan-500/15 dark:text-cyan-300 dark:border-cyan-500/30'
                     }`}>
                       Watch
                     </Badge>

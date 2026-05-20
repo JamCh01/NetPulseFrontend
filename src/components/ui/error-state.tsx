@@ -23,16 +23,16 @@ export function ErrorState({
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center gap-3 rounded-xl border border-red-500/25 bg-red-500/8 px-6 py-8 text-center',
+        'flex flex-col items-center justify-center gap-3 rounded-xl border border-red-200/60 dark:border-red-900/30 bg-red-50/70 dark:bg-red-950/20 px-6 py-8 text-center',
         className,
       )}
     >
-      <div className="rounded-full border border-red-400/30 bg-red-500/10 p-2">
-        <AlertTriangle className="h-5 w-5 text-red-300" />
+      <div className="rounded-full border border-red-200/50 dark:border-red-800/40 bg-red-100/80 dark:bg-red-950/40 p-2">
+        <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
       </div>
       <div className="space-y-1">
-        <p className="text-sm font-semibold text-zinc-100">{title}</p>
-        <p className="text-xs text-zinc-400">{description}</p>
+        <p className="text-sm font-semibold text-red-900 dark:text-zinc-100">{title}</p>
+        <p className="text-xs text-red-700/80 dark:text-zinc-400">{description}</p>
       </div>
       <div className="flex items-center gap-2">
         {onRetry ? (

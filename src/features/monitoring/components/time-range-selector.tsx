@@ -77,8 +77,8 @@ export function TimeRangeSelector({ value, onChange }: TimeRangeSelectorProps) {
                 font-[family-name:var(--font-mono)]
                 ${
                   isActive
-                    ? 'bg-emerald-500/10 text-emerald-400'
-                    : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'
+                    ? 'bg-accent text-accent-foreground font-semibold'
+                    : 'text-text-muted hover:text-text-primary hover:bg-muted'
                 }
               `}
             >
@@ -93,7 +93,7 @@ export function TimeRangeSelector({ value, onChange }: TimeRangeSelectorProps) {
       <span
         className="
           inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium uppercase tracking-wider
-          bg-accent-dim text-accent
+          bg-accent text-accent-foreground
           font-[family-name:var(--font-mono)]
         "
       >

@@ -3,12 +3,13 @@ import { useTranslation } from 'react-i18next'
 import { usePublicMonitoringTasks } from '@/api/hooks/use-public-monitoring-tasks'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Activity } from 'lucide-react'
+import { PROTOCOL_COLORS } from '@/lib/constants'
 
-const protocolBadge: Record<string, { bg: string; text: string }> = {
-  icmp: { bg: 'bg-cyan-500/10', text: 'text-cyan-400' },
-  tcp: { bg: 'bg-purple-500/10', text: 'text-purple-400' },
-  udp: { bg: 'bg-amber-500/10', text: 'text-amber-400' },
-  http: { bg: 'bg-emerald-500/10', text: 'text-emerald-400' },
+const protocolIcon: Record<string, string> = {
+  icmp: 'text-cyan-600 dark:text-cyan-400',
+  tcp: 'text-purple-600 dark:text-purple-400',
+  http: 'text-emerald-600 dark:text-emerald-400',
+  udp: 'text-amber-600 dark:text-amber-400',
 }
 
 export default function MonitoringIndexPage() {
@@ -35,7 +36,9 @@ export default function MonitoringIndexPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {tasks.map((task) => {
-            const proto = protocolBadge[task.protocol.toLowerCase()] ?? protocolBadge.icmp
+            const protocolKey = task.protocol.toLowerCase()
+            const protoClass = PROTOCOL_COLORS[protocolKey] ?? PROTOCOL_COLORS.icmp
+            const iconColor = protocolIcon[protocolKey] ?? 'text-text-secondary'
             return (
               <Link
                 key={task.task_uuid}
@@ -43,10 +46,10 @@ export default function MonitoringIndexPage() {
                 className="glass-card rounded-xl p-4 cursor-pointer block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
               >
                 <div className="flex items-center gap-3 mb-2">
-                  <Activity className={`w-4 h-4 ${proto.text}`} />
+                  <Activity className={`w-4 h-4 ${iconColor}`} />
                   <span className="text-sm font-medium text-text-primary">{task.task_name}</span>
-                  <span className={`text-[11px] px-1.5 py-0.5 rounded font-medium ${proto.bg} ${proto.text}`}>
-                    {task.protocol.toUpperCase()}
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium border uppercase ${protoClass}`}>
+                    {task.protocol}
                   </span>
                 </div>
                 <div className="text-xs text-text-muted font-mono">
