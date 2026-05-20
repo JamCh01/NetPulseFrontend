@@ -65,7 +65,7 @@ export function AssignAgentsDialog({ taskUuid, onClose }: AssignAgentsDialogProp
           />
         )}
         <DialogFooter>
-          <Button onClick={onClose} className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none">
+          <Button onClick={onClose} >
             {t('common.done')}
           </Button>
         </DialogFooter>

@@ -268,7 +268,7 @@ export default function UsersPage() {
                 <Button
                   type="submit"
                   disabled={changePassword.isPending || newPassword.length < 8}
-                  className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none"
+                  
                 >
                   {changePassword.isPending ? t('users.changingPassword') : t('users.changePasswordBtn')}
                 </Button>

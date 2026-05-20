@@ -164,7 +164,7 @@ export default function TasksPage() {
         <h1 className="text-2xl font-bold text-text-primary">{t('tasks.title')}</h1>
         {isAdmin && (
           <Button
-            className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none"
+            
             onClick={() => setCreateOpen(true)}
           >
             {t('tasks.createTask')}
@@ -266,7 +266,7 @@ export default function TasksPage() {
                             <DropdownMenuItem className="cursor-pointer" onClick={() => handleToggleActive(task)}>
                               {task.is_active ? t('common.disable') : t('common.enable')}
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="cursor-pointer text-red-400 focus:text-red-400 focus:bg-red-500/10" onClick={() => setDeleteUuid(task.task_uuid)}>
+                            <DropdownMenuItem className="cursor-pointer" variant="destructive" onClick={() => setDeleteUuid(task.task_uuid)}>
                               {t('common.delete')}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -372,7 +372,7 @@ export default function TasksPage() {
               <Button
                 type="submit"
                 disabled={createTask.isPending}
-                className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none"
+                
               >
                 {createTask.isPending ? t('common.creating') : t('tasks.createTask')}
               </Button>
@@ -418,7 +418,7 @@ export default function TasksPage() {
               <Button
                 type="submit"
                 disabled={updateTask.isPending}
-                className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none"
+                
               >
                 {updateTask.isPending ? t('common.saving') : t('common.save')}
               </Button>

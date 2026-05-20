@@ -29,9 +29,9 @@
 
   /* Text */
   --color-text-primary: #ffffff;
-  --color-text-secondary: #d1d5db;
-  --color-text-muted: #6b7280;
-  --color-text-dim: #4b5563;
+  --color-text-secondary: #dce3ee;
+  --color-text-muted: #a3afc2;
+  --color-text-dim: #7e8ba1;
 
   /* Status */
   --color-status-online: #22c55e;
@@ -281,22 +281,22 @@ body {
 
 .dark {
   --background: #030712;
-  --foreground: #d1d5db;
+  --foreground: #dce3ee;
   --card: rgba(6, 12, 24, 0.6);
-  --card-foreground: #d1d5db;
+  --card-foreground: #dce3ee;
   --popover: #0a1220;
-  --popover-foreground: #d1d5db;
+  --popover-foreground: #dce3ee;
   --primary: #00ffc8;
   --primary-foreground: #030712;
   --secondary: rgba(10, 18, 32, 0.5);
-  --secondary-foreground: #d1d5db;
+  --secondary-foreground: #dce3ee;
   --muted: rgba(10, 18, 32, 0.5);
-  --muted-foreground: #6b7280;
+  --muted-foreground: #95a3b8;
   --accent: rgba(0, 255, 200, 0.1);
   --accent-foreground: #00ffc8;
   --destructive: #ef4444;
-  --border: rgba(0, 255, 200, 0.06);
-  --input: rgba(0, 255, 200, 0.06);
+  --border: rgba(0, 255, 200, 0.12);
+  --input: rgba(0, 255, 200, 0.14);
   --ring: rgba(0, 255, 200, 0.3);
   --chart-1: #00dcc8;
   --chart-2: #00b4ff;
@@ -304,7 +304,7 @@ body {
   --chart-4: #f59e0b;
   --chart-5: #ef4444;
   --sidebar: rgba(6, 12, 24, 0.7);
-  --sidebar-foreground: #d1d5db;
+  --sidebar-foreground: #dce3ee;
   --sidebar-primary: #00ffc8;
   --sidebar-primary-foreground: #030712;
   --sidebar-accent: rgba(0, 255, 200, 0.1);
@@ -320,6 +320,8 @@ body {
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.55;
     min-height: 100vh;
     margin: 0;
   }

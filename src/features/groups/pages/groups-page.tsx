@@ -109,7 +109,7 @@ export default function GroupsPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-text-primary">{t('groups.title')}</h1>
         <Button
-          className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none"
+          
           onClick={() => setCreateOpen(true)}
         >
           {t('groups.createGroup')}
@@ -215,7 +215,7 @@ export default function GroupsPage() {
               <Button
                 type="submit"
                 disabled={createGroup.isPending || !groupName.trim()}
-                className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none"
+                
               >
                 {createGroup.isPending ? t('common.creating') : t('groups.createGroup')}
               </Button>
@@ -258,7 +258,7 @@ export default function GroupsPage() {
               <Button
                 type="submit"
                 disabled={updateGroup.isPending || !editGroupName.trim()}
-                className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none"
+                
               >
                 {updateGroup.isPending ? t('groups.updatingGroup') : t('groups.updateGroup')}
               </Button>

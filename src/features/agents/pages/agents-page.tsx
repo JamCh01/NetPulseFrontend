@@ -159,7 +159,7 @@ export default function AgentsPage() {
             {t('agents.releases')}
           </Button>
           <Button
-            className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none"
+            
             onClick={() => setCreateOpen(true)}
           >
             {t('agents.createAgent')}
@@ -348,7 +348,7 @@ export default function AgentsPage() {
               <Button
                 type="submit"
                 disabled={createAgent.isPending}
-                className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none"
+                
               >
                 {createAgent.isPending ? t('common.creating') : t('agents.createAgent')}
               </Button>
@@ -400,7 +400,7 @@ export default function AgentsPage() {
           <DialogFooter>
             <Button
               onClick={() => setSuccessDialogOpen(false)}
-              className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none"
+              
             >
               {t('common.done')}
             </Button>
@@ -429,7 +429,7 @@ export default function AgentsPage() {
               <Button
                 onClick={handleToggle}
                 disabled={updateAgent.isPending}
-                className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none"
+                
               >
                 {updateAgent.isPending ? t('common.loading') : t('agents.enableAgent')}
               </Button>

@@ -112,7 +112,7 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
             <Button
               type="submit"
               disabled={changePassword.isPending || !newPassword || !confirmPassword}
-              className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none"
+              
             >
               {changePassword.isPending ? (t('users.changingPassword') || 'Changing...') : (t('users.changePasswordBtn') || 'Change Password')}
             </Button>

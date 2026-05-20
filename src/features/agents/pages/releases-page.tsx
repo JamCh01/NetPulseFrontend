@@ -118,7 +118,7 @@ export default function ReleasesPage() {
           <h1 className="text-2xl font-bold text-text-primary">{t('agents.releases')}</h1>
         </div>
         <Button
-          className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none"
+          
           onClick={() => setUploadOpen(true)}
         >
           {t('agents.uploadRelease')}
@@ -293,7 +293,7 @@ export default function ReleasesPage() {
               <Button
                 type="submit"
                 disabled={uploadRelease.isPending}
-                className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none"
+                
               >
                 {uploadRelease.isPending ? t('common.creating') : t('agents.uploadRelease')}
               </Button>
@@ -351,7 +351,7 @@ export default function ReleasesPage() {
                 <Button
                   onClick={handlePush}
                   disabled={pushUpdate.isPending}
-                  className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none"
+                  
                 >
                   {pushUpdate.isPending ? t('common.loading') : t('agents.pushUpdate')}
                 </Button>

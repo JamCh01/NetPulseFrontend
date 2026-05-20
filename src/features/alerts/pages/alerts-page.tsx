@@ -205,7 +205,7 @@ export default function AlertsPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-text-primary">{t('alerts.title')}</h1>
         <Button
-          className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none"
+          
           onClick={() => setCreateOpen(true)}
         >
           {t('alerts.createRule')}
@@ -517,7 +517,7 @@ export default function AlertsPage() {
               <Button
                 type="submit"
                 disabled={createAlertRule.isPending || !taskUuid || !ruleName.trim()}
-                className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none"
+                
               >
                 {createAlertRule.isPending ? t('common.creating') : t('alerts.createRule')}
               </Button>
@@ -629,7 +629,7 @@ export default function AlertsPage() {
               <Button
                 type="submit"
                 disabled={updateAlertRule.isPending || !editRuleName.trim()}
-                className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none"
+                
               >
                 {updateAlertRule.isPending ? t('alerts.updatingRule') : t('alerts.updateRule')}
               </Button>

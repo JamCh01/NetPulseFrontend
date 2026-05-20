@@ -127,7 +127,7 @@ export default function WebhooksPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-text-primary">{t('webhooks.title')}</h1>
         <Button
-          className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none"
+          
           onClick={() => setCreateOpen(true)}
         >
           {t('webhooks.createWebhook')}
@@ -281,7 +281,7 @@ export default function WebhooksPage() {
             </Button>
           </div>
           <DialogFooter>
-            <Button onClick={() => setSecretDialogOpen(false)} className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none">
+            <Button onClick={() => setSecretDialogOpen(false)} >
               {t('common.done')}
             </Button>
           </DialogFooter>

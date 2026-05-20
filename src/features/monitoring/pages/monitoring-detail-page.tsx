@@ -231,7 +231,7 @@ export default function MonitoringDetailPage() {
           </Button>
           {isAdmin && (
             <Button
-              className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none text-sm"
+              className="text-sm"
               onClick={() => navigate(`/tasks/${task.task_uuid}`)}
             >
               {t('tasks.manageTask')}

@@ -205,7 +205,7 @@ export default function AgentDetailPage() {
                 <Button
                   onClick={handleSave}
                   disabled={updateAgent.isPending}
-                  className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none"
+                  
                 >
                   {updateAgent.isPending ? t('common.saving') : t('common.save')}
                 </Button>
@@ -289,7 +289,7 @@ export default function AgentDetailPage() {
                   size="xs"
                   onClick={handleAssignTask}
                   disabled={tasksToAdd.size === 0 || assignTasks.isPending}
-                  className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none text-xs"
+                  className="text-xs"
                 >
                   {assignTasks.isPending ? t('common.loading') : t('agents.addSelected', { count: tasksToAdd.size })}
                 </Button>

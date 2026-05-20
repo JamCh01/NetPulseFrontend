@@ -209,7 +209,7 @@ function WebhookFormContent({ mode, webhook, onOpenChange, onSecretReceived }: W
           <Button
             type="submit"
             disabled={isPending || hasReservedHeaders}
-            className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none"
+            
           >
             {isPending
               ? (mode === 'create' ? t('common.creating') : t('webhooks.updating'))

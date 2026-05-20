@@ -129,7 +129,7 @@ export function AppLayout() {
             <Zap className="w-4 h-4 text-gray-950" />
           </div>
           {!collapsed && (
-            <span className="text-sm font-bold text-text-primary tracking-tight">{t('nav.brand')}</span>
+            <span className="text-base font-bold text-text-primary tracking-tight">{t('nav.brand')}</span>
           )}
           {/* Close button for mobile */}
           <button 
@@ -148,7 +148,7 @@ export function AppLayout() {
             to="/dashboard"
             className={({ isActive }) =>
               cn(
-                'flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-colors',
+                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
                 isActive
                   ? 'bg-accent-dim text-accent'
                   : 'text-text-muted hover:text-text-secondary hover:bg-white/5'
@@ -164,7 +164,7 @@ export function AppLayout() {
             <button
               onClick={() => collapsed ? navigate('/tasks') : setTasksExpanded(!tasksExpanded)}
               className={cn(
-                'flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-colors w-full',
+                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors w-full',
                 isTaskActive
                   ? 'bg-accent-dim text-accent'
                   : 'text-text-muted hover:text-text-secondary hover:bg-white/5'
@@ -174,7 +174,7 @@ export function AppLayout() {
               {!collapsed && (
                 <>
                   <span className="flex-1 text-left">{t('nav.tasks')}</span>
-                  <span className="text-[11px] text-text-dim font-mono">{tasks.length}</span>
+                  <span className="text-xs text-text-muted font-mono">{tasks.length}</span>
                   {tasksExpanded ? (
                     <ChevronDown className="w-3 h-3 text-text-dim" />
                   ) : (
@@ -197,7 +197,7 @@ export function AppLayout() {
                       key={task.task_uuid}
                       to={taskPath}
                       className={cn(
-                        'flex items-center gap-2 px-2 py-1.5 rounded-md text-[11px] transition-colors group',
+                        'flex items-center gap-2 px-2.5 py-2 rounded-md text-xs transition-colors group',
                         isActive
                           ? 'bg-accent-dim/50 text-accent'
                           : 'text-text-dim hover:text-text-secondary hover:bg-white/5'
@@ -206,7 +206,7 @@ export function AppLayout() {
                       <Activity className={cn('w-3 h-3 shrink-0', isActive ? 'text-accent' : protoColor)} />
                       <span className="truncate flex-1">{task.task_name}</span>
                       <span className={cn(
-                        'text-[10px] px-1 py-px rounded font-mono uppercase shrink-0',
+                        'text-[11px] px-1.5 py-px rounded font-mono uppercase shrink-0',
                         isActive ? 'text-accent/60' : (protocolIconDim[protocolKey] ?? 'text-gray-400/60')
                       )}>
                         {(task.protocol ?? 'icmp').toUpperCase()}
@@ -217,11 +217,11 @@ export function AppLayout() {
 
                 {tasks.length === 0 && (
                   <div className="px-2 py-1.5">
-                    <div className="text-xs text-text-dim">{t('nav.noTasks')}</div>
+                    <div className="text-sm text-text-muted">{t('nav.noTasks')}</div>
                     {isAdmin && (
                       <NavLink
                         to="/tasks"
-                        className="mt-1 flex items-center gap-1 text-xs text-accent hover:text-accent/80 transition-colors"
+                        className="mt-1.5 flex items-center gap-1 text-sm text-accent hover:text-accent/80 transition-colors"
                       >
                         <Plus className="w-3 h-3" />
                         {t('tasks.createTask')}
@@ -240,7 +240,7 @@ export function AppLayout() {
               to={item.path}
               className={({ isActive }) =>
                 cn(
-                  'flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-colors',
+                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
                   isActive
                     ? 'bg-accent-dim text-accent'
                     : 'text-text-muted hover:text-text-secondary hover:bg-white/5'
@@ -284,14 +284,14 @@ export function AppLayout() {
               const next = i18n.language === 'zh' ? 'en' : 'zh'
               i18n.changeLanguage(next)
             }}
-            className="flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium text-text-muted hover:text-text-secondary hover:bg-white/5 transition-colors w-full"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-text-muted hover:text-text-secondary hover:bg-white/5 transition-colors w-full"
           >
             <Languages className="w-4 h-4" />
             {!collapsed && <span>{i18n.language === 'zh' ? 'English' : '中文'}</span>}
           </button>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium text-text-muted hover:text-red-400 hover:bg-red-500/5 transition-colors w-full"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-text-muted hover:text-red-300 hover:bg-red-500/10 transition-colors w-full"
           >
             <LogOut className="w-4 h-4" />
             {!collapsed && <span>{t('common.logout')}</span>}
@@ -325,7 +325,7 @@ export function AppLayout() {
             >
               <Menu className="w-5 h-5" aria-hidden="true" />
             </button>
-            <div className="hidden lg:flex items-center gap-1.5 text-[10px] text-text-dim/70 select-none">
+            <div className="hidden lg:flex items-center gap-1.5 text-xs text-text-muted/80 select-none">
               <span className="uppercase tracking-wide">Tips</span>
               <span>Tab / Shift+Tab</span>
               <span>·</span>
@@ -340,8 +340,8 @@ export function AppLayout() {
                     <UserIcon className="w-3.5 h-3.5 text-accent" />
                   </div>
                   <div className="hidden sm:flex flex-col items-start">
-                    <span className="text-xs font-medium text-text-primary leading-tight">{user.username}</span>
-                    <span className="text-[10px] text-text-muted leading-tight capitalize">{user.role}</span>
+                    <span className="text-sm font-medium text-text-primary leading-tight">{user.username}</span>
+                    <span className="text-xs text-text-muted leading-tight capitalize">{user.role}</span>
                   </div>
                   <ChevronDown className="w-3 h-3 text-text-dim ml-1" />
                 </DropdownMenuTrigger>
@@ -356,7 +356,7 @@ export function AppLayout() {
                     {t('users.changePassword') || 'Change Password'}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="cursor-pointer text-red-400 focus:text-red-400 focus:bg-red-500/10" onClick={handleLogout}>
+                  <DropdownMenuItem className="cursor-pointer" variant="destructive" onClick={handleLogout}>
                     <LogOut className="w-4 h-4 mr-2" />
                     {t('common.logout') || 'Log out'}
                   </DropdownMenuItem>
