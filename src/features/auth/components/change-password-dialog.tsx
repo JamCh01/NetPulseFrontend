@@ -114,7 +114,7 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
               disabled={changePassword.isPending || !newPassword || !confirmPassword}
               
             >
-              {changePassword.isPending ? (t('users.changingPassword') || 'Changing...') : (t('users.changePasswordBtn') || 'Change Password')}
+              {changePassword.isPending ? (t('users.changingPassword') || 'Changing…') : (t('users.changePasswordBtn') || 'Change Password')}
             </Button>
           </DialogFooter>
         </form>

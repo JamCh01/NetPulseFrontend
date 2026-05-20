@@ -17,21 +17,17 @@ export default function NotFoundPage() {
           这个地址可能已变更，或你访问了不存在的页面。你可以返回上一页，或者跳转到核心页面继续操作。
         </p>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
-          <Button onClick={() => navigate(-1)} variant="outline" className="border-white/20 bg-transparent">
+          <Button onClick={() => navigate(-1)} variant="outline">
             <Undo2 className="mr-1.5 h-4 w-4" />
             返回上一页
           </Button>
-          <Button asChild className="bg-accent text-black hover:bg-accent-hover">
-            <Link to="/monitoring">
-              <Compass className="mr-1.5 h-4 w-4" />
-              去监控页
-            </Link>
+          <Button render={<Link to="/monitoring" />}>
+            <Compass className="mr-1.5 h-4 w-4" />
+            去监控页
           </Button>
-          <Button asChild variant="secondary">
-            <Link to="/">
-              <Home className="mr-1.5 h-4 w-4" />
-              回到首页
-            </Link>
+          <Button render={<Link to="/" />} variant="secondary">
+            <Home className="mr-1.5 h-4 w-4" />
+            回到首页
           </Button>
         </div>
       </div>

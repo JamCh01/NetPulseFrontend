@@ -23,13 +23,16 @@ async function parseApiResponse<T>(response: Response): Promise<T> {
 }
 
 async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
+  const headers = new Headers(init?.headers)
+  headers.set('Content-Type', 'application/json')
+  const auth = getAuthHeaders()
+  if (auth.Authorization) {
+    headers.set('Authorization', auth.Authorization)
+  }
+
   const response = await fetch(buildApiUrl(path), {
     ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      ...getAuthHeaders(),
-      ...(init?.headers ?? {}),
-    },
+    headers,
   })
   if (!response.ok) {
     const error = new Error(`Request failed: ${response.status}`) as Error & { status?: number }

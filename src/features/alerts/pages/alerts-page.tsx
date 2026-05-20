@@ -185,7 +185,7 @@ export default function AlertsPage() {
   }
 
   const getTaskName = (uuid: string): string => {
-    if (tasksLoading) return '...'
+    if (tasksLoading) return '…'
     const found = tasks.find((task) => task.task_uuid === uuid)
     return found?.task_name ?? t('alerts.unknownTask')
   }

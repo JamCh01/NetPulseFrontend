@@ -63,7 +63,7 @@ export default function HealthPage() {
           className="gap-2"
         >
           <RefreshCcw className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} />
-          {t('common.loading') === 'Loading...' ? 'Refresh' : '刷新'}
+          {i18n.language === 'en' ? 'Refresh' : '刷新'}
         </Button>
       </div>
 
