@@ -215,7 +215,7 @@ export function AppLayout() {
                     {isAdmin && (
                       <NavLink
                         to="/tasks"
-                        className="mt-1.5 flex items-center gap-1 text-sm text-accent hover:text-accent/80 transition-colors"
+                        className="mt-1.5 flex items-center gap-1 text-sm text-accent-foreground hover:text-accent-foreground/80 transition-colors"
                       >
                         <Plus className="w-3 h-3" />
                         {t('tasks.createTask')}

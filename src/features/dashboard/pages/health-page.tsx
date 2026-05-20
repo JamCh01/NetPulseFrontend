@@ -77,7 +77,7 @@ export default function HealthPage() {
         <div className="glass-light rounded-xl p-8 text-center">
           <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-text-primary">{t('health.failedToLoad')}</h3>
-          <Button variant="link" onClick={() => refetch()} className="mt-2 text-accent">
+          <Button variant="link" onClick={() => refetch()} className="mt-2 text-accent-foreground">
             {t('common.retry') || 'Retry'}
           </Button>
         </div>

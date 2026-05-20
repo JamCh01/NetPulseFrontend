@@ -38,7 +38,7 @@ export function HealthCard() {
           <h3 className="text-xs font-medium text-text-muted uppercase tracking-wider group-hover/title:text-text-primary transition-colors">
             {t('health.title')}
           </h3>
-          <ChevronRight className="w-3 h-3 text-text-dim group-hover/title:text-accent transition-all group-hover/title:translate-x-0.5 opacity-0 group-hover/title:opacity-100" />
+          <ChevronRight className="w-3 h-3 text-text-dim group-hover/title:text-accent-foreground transition-all group-hover/title:translate-x-0.5 opacity-0 group-hover/title:opacity-100" />
         </Link>
         <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium border ${
           isOk 

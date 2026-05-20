@@ -7,9 +7,9 @@ export default function NotFoundPage() {
 
   return (
     <div className="min-h-[70vh] px-4 py-12">
-      <div className="mx-auto max-w-2xl rounded-2xl border border-accent/20 bg-[rgba(6,12,24,0.6)] p-8 text-center backdrop-blur-xl">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-accent/30 bg-accent/10">
-          <Compass className="h-6 w-6 text-accent" />
+      <div className="mx-auto max-w-2xl rounded-2xl border border-accent-border bg-[rgba(6,12,24,0.6)] p-8 text-center backdrop-blur-xl">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-accent-border bg-accent">
+          <Compass className="h-6 w-6 text-accent-foreground" />
         </div>
         <p className="text-xs uppercase tracking-[0.2em] text-text-dim">404</p>
         <h1 className="mt-2 text-2xl font-bold text-text-primary">页面不存在</h1>

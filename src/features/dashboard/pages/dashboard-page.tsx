@@ -143,7 +143,7 @@ export default function DashboardPage() {
         <div className="glass-light rounded-xl p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-text-primary">Priority Monitoring Queue</h3>
-            <Link to="/app/monitoring" className="text-xs text-accent hover:text-accent-hover inline-flex items-center gap-1">
+            <Link to="/app/monitoring" className="text-xs text-accent-foreground hover:text-accent-foreground/80 inline-flex items-center gap-1">
               Open Monitoring
               <ArrowRight className="w-3 h-3" />
             </Link>
