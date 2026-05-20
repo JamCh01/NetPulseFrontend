@@ -2,8 +2,10 @@ import { useState } from 'react'
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/stores/auth-store'
+import { useThemeStore } from '@/stores/theme-store'
 import { useLogout } from '@/api/hooks/use-auth'
 import { useTasks } from '@/api/hooks/use-tasks'
+import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { TaskResponse } from '@/api/generated/types.gen'
 import {
@@ -27,6 +29,8 @@ import {
   User as UserIcon,
   Menu,
   X,
+  Sun,
+  Moon,
 } from 'lucide-react'
 
 import {
@@ -72,6 +76,7 @@ export function AppLayout() {
   const navigate = useNavigate()
   const logoutMutation = useLogout()
   const location = useLocation()
+  const { theme, toggleTheme } = useThemeStore()
 
   const mobileMenuOpen = mobileMenuAnchorPath === location.pathname
 
@@ -332,7 +337,16 @@ export function AppLayout() {
               <span>Enter</span>
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2.5">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={toggleTheme}
+              className="text-text-muted hover:text-text-primary rounded-lg cursor-pointer"
+              aria-label="Toggle theme"
+            >
+              {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </Button>
             {user && (
               <DropdownMenu>
                 <DropdownMenuTrigger className="flex items-center gap-2 outline-none hover:bg-white/5 py-1 px-2 rounded-lg transition-colors cursor-pointer border border-transparent hover:border-white/10">
