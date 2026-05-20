@@ -10,15 +10,15 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground hover:bg-[var(--color-accent-hover)] hover:shadow-[0_0_0_1px_rgba(0,255,200,0.35)] active:bg-[var(--color-accent-hover)]/90",
+          "bg-btn-primary-bg text-btn-primary-fg hover:bg-btn-primary-hover hover:shadow-[var(--btn-primary-hover-shadow)] active:bg-btn-primary-active",
         outline:
-          "border-border bg-background text-foreground hover:bg-muted/80 hover:border-ring/60 hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
+          "border-btn-outline-border bg-background text-foreground hover:bg-btn-ghost-hover hover:border-ring/60 hover:text-btn-ghost-hover-fg aria-expanded:bg-btn-ghost-hover aria-expanded:text-btn-ghost-hover-fg dark:bg-input/30 dark:hover:bg-input/50",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/85 hover:text-foreground aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
+          "bg-btn-secondary-bg text-btn-secondary-fg hover:bg-btn-secondary-hover hover:text-btn-secondary-hover-fg aria-expanded:bg-btn-secondary-hover aria-expanded:text-btn-secondary-hover-fg",
         ghost:
-          "text-text-muted hover:bg-muted/70 hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50",
+          "text-btn-ghost-fg hover:bg-btn-ghost-hover hover:text-btn-ghost-hover-fg aria-expanded:bg-btn-ghost-hover aria-expanded:text-btn-ghost-hover-fg",
         destructive:
-          "border-destructive/30 bg-destructive/15 text-destructive hover:border-destructive/50 hover:bg-destructive/25 hover:text-red-200 focus-visible:border-destructive/60 focus-visible:ring-destructive/25 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
+          "border-btn-destructive-border bg-btn-destructive-bg text-btn-destructive-fg hover:border-btn-destructive-hover-border hover:bg-btn-destructive-hover hover:text-btn-destructive-hover-fg focus-visible:border-btn-destructive-hover-border focus-visible:ring-btn-destructive-ring",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
