@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import { useTask, useUpdateTask } from '@/api/hooks/use-tasks'
 import { useTaskAgents, useAssignAgents, useUnassignAgent } from '@/api/hooks/use-task-assignments'
 import { formatDateTime } from '@/lib/format'
@@ -58,7 +59,15 @@ export default function TaskDetailPage() {
           interval: Number(editInterval),
         },
       },
-      { onSuccess: () => setEditing(false) },
+      {
+        onSuccess: () => {
+          setEditing(false)
+          toast.success(t('tasks.updateSuccess') || 'Task updated successfully')
+        },
+        onError: () => {
+          toast.error(t('tasks.failedToUpdate') || 'Failed to update task')
+        },
+      },
     )
   }
 
@@ -67,9 +76,31 @@ export default function TaskDetailPage() {
     setPendingIds((prev) => new Set([...prev, agentUuid]))
     const cleanup = () => setPendingIds((prev) => { const n = new Set(prev); n.delete(agentUuid); return n })
     if (assignedUuids.has(agentUuid)) {
-      unassignAgent.mutate({ taskUuid, agentUuid }, { onSettled: cleanup })
+      unassignAgent.mutate(
+        { taskUuid, agentUuid },
+        {
+          onSuccess: () => {
+            toast.success(t('tasks.unassignSuccess') || 'Agent unassigned successfully')
+          },
+          onError: () => {
+            toast.error(t('tasks.unassignFailed') || 'Failed to unassign agent')
+          },
+          onSettled: cleanup,
+        }
+      )
     } else {
-      assignAgents.mutate({ taskUuid, data: { agent_uuids: [agentUuid] } }, { onSettled: cleanup })
+      assignAgents.mutate(
+        { taskUuid, data: { agent_uuids: [agentUuid] } },
+        {
+          onSuccess: () => {
+            toast.success(t('tasks.assignSuccess') || 'Agent assigned successfully')
+          },
+          onError: () => {
+            toast.error(t('tasks.assignFailed') || 'Failed to assign agent')
+          },
+          onSettled: cleanup,
+        }
+      )
     }
   }
 
@@ -90,7 +121,7 @@ export default function TaskDetailPage() {
       <div>
         <h1 className="text-2xl font-bold text-text-primary mb-6">{t('tasks.detail')}</h1>
         <div className="glass-light rounded-xl p-6 text-center">
-          <p className="text-red-400 text-sm">{t('tasks.failedToLoadDetail')}</p>
+          <p className="text-status-error-fg text-sm">{t('tasks.failedToLoadDetail')}</p>
           <Button variant="outline" className="mt-4" onClick={() => navigate('/tasks')}>
             {t('tasks.backToTasks')}
           </Button>
@@ -113,13 +144,7 @@ export default function TaskDetailPage() {
           <Badge className={`border text-xs uppercase ${PROTOCOL_COLORS[task.protocol] ?? ''}`}>
             {task.protocol}
           </Badge>
-          <Badge
-            className={`border text-xs ${
-              task.is_active
-                ? 'bg-green-500/15 text-green-400 border-green-500/30'
-                : 'bg-gray-500/15 text-gray-400 border-gray-500/30'
-            }`}
-          >
+          <Badge variant={task.is_active ? 'success' : 'inactive'}>
             {task.is_active ? t('common.active') : t('common.inactive')}
           </Badge>
         </div>
@@ -129,7 +154,6 @@ export default function TaskDetailPage() {
               {t('common.edit')}
             </Button>
             <Button
-              
               onClick={() => navigate(`/app/monitoring/${task.task_uuid}`)}
             >
               {t('tasks.viewMonitoring')}
@@ -165,7 +189,6 @@ export default function TaskDetailPage() {
                 <Button
                   onClick={handleSave}
                   disabled={updateTask.isPending}
-                  
                 >
                   {updateTask.isPending ? t('common.saving') : t('common.save')}
                 </Button>
@@ -173,9 +196,6 @@ export default function TaskDetailPage() {
                   {t('common.cancel')}
                 </Button>
               </div>
-              {updateTask.isError && (
-                <p className="text-red-400 text-xs">{t('tasks.failedToUpdate')}</p>
-              )}
             </div>
           ) : (
             <dl className="space-y-3">
@@ -248,7 +268,7 @@ export default function TaskDetailPage() {
                 >
                   <div
                     className={`w-2 h-2 rounded-full ${
-                      agent.status === 'online' ? 'bg-green-500' : 'bg-gray-500'
+                      agent.status === 'online' ? 'bg-status-success-solid' : 'bg-status-inactive-solid'
                     }`}
                   />
                   <span className="text-sm text-text-primary">{agent.agent_name}</span>
@@ -261,3 +281,4 @@ export default function TaskDetailPage() {
     </div>
   )
 }
+

@@ -140,7 +140,7 @@ function MiniSmokePingChartInner({
             <span className="text-[9px] text-text-dim font-mono">
               {option.lastMedian?.toFixed(1)}ms
             </span>
-            <span className={`text-[9px] font-mono ${option.lastLoss > 0 ? 'text-red-400' : 'text-green-400'}`}>
+            <span className={`text-[9px] font-mono ${option.lastLoss > 0 ? 'text-status-error-fg' : 'text-status-success-fg'}`}>
               {option.lastLoss.toFixed(1)}%
             </span>
           </div>

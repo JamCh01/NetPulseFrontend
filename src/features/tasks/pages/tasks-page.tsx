@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import { useTasks, useCreateTask, useUpdateTask, useDisableTask } from '@/api/hooks/use-tasks'
 import { useAgents } from '@/api/hooks/use-agents'
 import { useAssignAgents } from '@/api/hooks/use-task-assignments'
@@ -120,13 +121,24 @@ export default function TasksPage() {
         onSuccess: (result) => {
           setCreateOpen(false)
           resetCreateForm()
+          toast.success(t('tasks.createSuccess') || 'Task created successfully')
           const res = result as TaskResponse | undefined
           if (res?.task_uuid && selectedAgentUuids.size > 0) {
             assignAgents.mutate({
               taskUuid: res.task_uuid,
               data: { agent_uuids: Array.from(selectedAgentUuids) },
+            }, {
+              onSuccess: () => {
+                toast.success(t('tasks.assignSuccess') || 'Agents assigned successfully')
+              },
+              onError: () => {
+                toast.error(t('tasks.assignFailed') || 'Failed to assign agents')
+              },
             })
           }
+        },
+        onError: () => {
+          toast.error(t('tasks.createFailed') || 'Failed to create task')
         },
       },
     )
@@ -145,17 +157,47 @@ export default function TasksPage() {
           packet_count: Number(editPacketCount),
         },
       },
-      { onSuccess: () => setEditUuid(null) },
+      {
+        onSuccess: () => {
+          setEditUuid(null)
+          toast.success(t('tasks.updateSuccess') || 'Task updated successfully')
+        },
+        onError: () => {
+          toast.error(t('tasks.failedToUpdate') || 'Failed to update task')
+        },
+      },
     )
   }
 
   const handleToggleActive = (task: TaskResponse) => {
-    updateTask.mutate({ uuid: task.task_uuid, data: { is_active: !task.is_active } })
+    updateTask.mutate(
+      { uuid: task.task_uuid, data: { is_active: !task.is_active } },
+      {
+        onSuccess: () => {
+          toast.success(
+            task.is_active
+              ? t('tasks.disabledSuccess') || 'Task disabled'
+              : t('tasks.enabledSuccess') || 'Task enabled'
+          )
+        },
+        onError: () => {
+          toast.error(t('tasks.failedToUpdate') || 'Failed to update task')
+        },
+      }
+    )
   }
 
   const handleDelete = () => {
     if (!deleteUuid) return
-    disableTask.mutate(deleteUuid, { onSuccess: () => setDeleteUuid(null) })
+    disableTask.mutate(deleteUuid, {
+      onSuccess: () => {
+        setDeleteUuid(null)
+        toast.success(t('tasks.deleteSuccess') || 'Task deleted successfully')
+      },
+      onError: () => {
+        toast.error(t('tasks.deleteFailed') || 'Failed to delete task')
+      },
+    })
   }
 
   return (
@@ -164,7 +206,6 @@ export default function TasksPage() {
         <h1 className="text-2xl font-bold text-text-primary">{t('tasks.title')}</h1>
         {isAdmin && (
           <Button
-            
             onClick={() => setCreateOpen(true)}
           >
             {t('tasks.createTask')}
@@ -222,13 +263,7 @@ export default function TasksPage() {
                     {task.interval}s
                   </TableCell>
                   <TableCell>
-                    <Badge
-                      className={`border text-xs ${
-                        task.is_active
-                          ? 'bg-green-500/15 text-green-400 border-green-500/30'
-                          : 'bg-gray-500/15 text-gray-400 border-gray-500/30'
-                      }`}
-                    >
+                    <Badge variant={task.is_active ? 'success' : 'inactive'}>
                       {task.is_active ? t('common.active') : t('common.inactive')}
                     </Badge>
                   </TableCell>
@@ -372,14 +407,10 @@ export default function TasksPage() {
               <Button
                 type="submit"
                 disabled={createTask.isPending}
-                
               >
                 {createTask.isPending ? t('common.creating') : t('tasks.createTask')}
               </Button>
             </DialogFooter>
-            {createTask.isError && (
-              <p className="text-red-400 text-xs mt-2">{t('tasks.createFailed')}</p>
-            )}
           </form>
         </DialogContent>
       </Dialog>
@@ -418,14 +449,10 @@ export default function TasksPage() {
               <Button
                 type="submit"
                 disabled={updateTask.isPending}
-                
               >
                 {updateTask.isPending ? t('common.saving') : t('common.save')}
               </Button>
             </DialogFooter>
-            {updateTask.isError && (
-              <p className="text-red-400 text-xs mt-2">{t('tasks.failedToUpdate')}</p>
-            )}
           </form>
         </DialogContent>
       </Dialog>
@@ -454,3 +481,4 @@ export default function TasksPage() {
     </div>
   )
 }
+

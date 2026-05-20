@@ -77,10 +77,10 @@ export default function DashboardPage() {
         <TimeRangeSelector value={timeRange} onChange={handleTimeRangeChange} />
       </div>
       {tasksFailed && (
-        <div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-3 text-xs text-amber-200">
+        <div className="mb-4 rounded-lg border border-status-warning-border bg-status-warning-bg px-3 py-3 text-xs text-status-warning-fg">
           <div className="mb-2 font-medium">任务数据加载失败，页面已降级展示。</div>
           <div className="flex flex-wrap items-center gap-2">
-            <Button size="sm" variant="outline" className="h-7 border-amber-300/40 bg-transparent text-amber-100" onClick={() => { void refetchTasks() }}>
+            <Button size="sm" variant="outline" className="h-7 border-status-warning-border bg-transparent text-status-warning-fg hover:bg-status-warning-bg/85" onClick={() => { void refetchTasks() }}>
               重试任务服务
             </Button>
           </div>
@@ -91,19 +91,15 @@ export default function DashboardPage() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
           <div className="flex items-center gap-2">
             {overallStatus === 'incident' ? (
-              <AlertTriangle className="w-4 h-4 text-amber-400" />
+              <AlertTriangle className="w-4 h-4 text-status-warning-solid" />
             ) : (
-              <CheckCircle2 className="w-4 h-4 text-green-400" />
+              <CheckCircle2 className="w-4 h-4 text-status-success-solid" />
             )}
             <h2 className="text-sm font-semibold text-text-primary">
               {overallStatus === 'incident' ? 'Active Attention Needed' : 'Network Looks Healthy'}
             </h2>
           </div>
-          <Badge className={`border text-xs ${
-            overallStatus === 'incident'
-              ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/30'
-              : 'bg-green-50 text-green-700 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/30'
-          }`}>
+          <Badge variant={overallStatus === 'incident' ? 'warning' : 'success'}>
             {overallStatus === 'incident' ? 'Incident Mode' : 'Healthy Mode'}
           </Badge>
         </div>
@@ -177,9 +173,7 @@ export default function DashboardPage() {
                       <div className="text-sm text-text-primary truncate">{task.task_name}</div>
                       <div className="text-xs text-text-dim truncate">{formatTaskTarget(task)}{task.port ? `:${task.port}` : ''}</div>
                     </div>
-                    <Badge className={`border text-[11px] ${
-                      'bg-cyan-50 text-cyan-700 border-cyan-200 dark:bg-cyan-500/15 dark:text-cyan-300 dark:border-cyan-500/30'
-                    }`}>
+                    <Badge variant="info" className="text-[11px]">
                       Watch
                     </Badge>
                   </Link>
@@ -222,3 +216,4 @@ export default function DashboardPage() {
     </div>
   )
 }
+

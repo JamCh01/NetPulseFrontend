@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import { useAlertRules, useCreateAlertRule, useUpdateAlertRule, useDisableAlertRule } from '@/api/hooks/use-alerts'
 import { useTasks } from '@/api/hooks/use-tasks'
 import { useUsers } from '@/api/hooks/use-users'
@@ -144,6 +145,10 @@ export default function AlertsPage() {
         onSuccess: () => {
           setCreateOpen(false)
           resetCreateForm()
+          toast.success(t('alerts.createSuccess') || 'Alert rule created successfully')
+        },
+        onError: () => {
+          toast.error(t('alerts.createFailed') || 'Failed to create alert rule')
         },
       },
     )
@@ -165,22 +170,48 @@ export default function AlertsPage() {
         } as any,
       },
       {
-        onSuccess: () => setEditUuid(null),
+        onSuccess: () => {
+          setEditUuid(null)
+          toast.success(t('alerts.updateSuccess') || 'Alert rule updated successfully')
+        },
+        onError: () => {
+          toast.error(t('alerts.updateFailed') || 'Failed to update alert rule')
+        },
       },
     )
   }
 
   const handleToggleActive = (rule: AlertRuleResponse) => {
-    updateAlertRule.mutate({
-      uuid: rule.rule_uuid,
-      data: { is_active: !rule.is_active },
-    })
+    updateAlertRule.mutate(
+      {
+        uuid: rule.rule_uuid,
+        data: { is_active: !rule.is_active },
+      },
+      {
+        onSuccess: () => {
+          toast.success(
+            rule.is_active
+              ? t('alerts.disabledSuccess') || 'Alert rule disabled'
+              : t('alerts.enabledSuccess') || 'Alert rule enabled'
+          )
+        },
+        onError: () => {
+          toast.error(t('alerts.updateFailed') || 'Failed to update alert rule state')
+        },
+      }
+    )
   }
 
   const handleDelete = () => {
     if (!deleteUuid) return
     disableAlertRule.mutate(deleteUuid, {
-      onSuccess: () => setDeleteUuid(null),
+      onSuccess: () => {
+        setDeleteUuid(null)
+        toast.success(t('alerts.deleteSuccess') || 'Alert rule deleted successfully')
+      },
+      onError: () => {
+        toast.error(t('alerts.deleteFailed') || 'Failed to delete alert rule')
+      },
     })
   }
 
@@ -205,7 +236,6 @@ export default function AlertsPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-text-primary">{t('alerts.title')}</h1>
         <Button
-          
           onClick={() => setCreateOpen(true)}
         >
           {t('alerts.createRule')}
@@ -272,13 +302,7 @@ export default function AlertsPage() {
                         {rule.m_count}/{rule.n_count}
                       </TableCell>
                       <TableCell>
-                        <Badge
-                          className={`border text-xs ${
-                            rule.is_active
-                              ? 'bg-green-500/15 text-green-400 border-green-500/30'
-                              : 'bg-gray-500/15 text-gray-400 border-gray-500/30'
-                          }`}
-                        >
+                        <Badge variant={rule.is_active ? 'success' : 'inactive'}>
                           {rule.is_active ? t('common.active') : t('common.inactive')}
                         </Badge>
                       </TableCell>
@@ -313,7 +337,7 @@ export default function AlertsPage() {
                                 variant="ghost"
                                 size="xs"
                                 onClick={() => setDeleteUuid(rule.rule_uuid)}
-                                className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                className="text-status-error-fg hover:opacity-80"
                               >
                                 {t('common.delete')}
                               </Button>
@@ -336,13 +360,7 @@ export default function AlertsPage() {
                       <span className="text-text-primary font-medium text-sm">{rule.rule_name}</span>
                       <span className="text-text-secondary text-xs mt-0.5">{getTaskName(rule.task_uuid)}</span>
                     </div>
-                    <Badge
-                      className={`border text-[10px] ${
-                        rule.is_active
-                          ? 'bg-green-500/15 text-green-400 border-green-500/30'
-                          : 'bg-gray-500/15 text-gray-400 border-gray-500/30'
-                      }`}
-                    >
+                    <Badge variant={rule.is_active ? 'success' : 'inactive'} className="text-[10px]">
                       {rule.is_active ? t('common.active') : t('common.inactive')}
                     </Badge>
                   </div>
@@ -387,7 +405,7 @@ export default function AlertsPage() {
                           variant="ghost"
                           size="xs"
                           onClick={() => setDeleteUuid(rule.rule_uuid)}
-                          className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                          className="text-status-error-fg hover:opacity-80"
                         >
                           {t('common.delete')}
                         </Button>
@@ -517,14 +535,10 @@ export default function AlertsPage() {
               <Button
                 type="submit"
                 disabled={createAlertRule.isPending || !taskUuid || !ruleName.trim()}
-                
               >
                 {createAlertRule.isPending ? t('common.creating') : t('alerts.createRule')}
               </Button>
             </DialogFooter>
-            {createAlertRule.isError && (
-              <p className="text-red-400 text-xs mt-2">{t('alerts.createFailed')}</p>
-            )}
           </form>
         </DialogContent>
       </Dialog>
@@ -629,14 +643,10 @@ export default function AlertsPage() {
               <Button
                 type="submit"
                 disabled={updateAlertRule.isPending || !editRuleName.trim()}
-                
               >
                 {updateAlertRule.isPending ? t('alerts.updatingRule') : t('alerts.updateRule')}
               </Button>
             </DialogFooter>
-            {updateAlertRule.isError && (
-              <p className="text-red-400 text-xs mt-2">{t('alerts.updateFailed')}</p>
-            )}
           </form>
         </DialogContent>
       </Dialog>
@@ -672,3 +682,4 @@ export default function AlertsPage() {
     </div>
   )
 }
+

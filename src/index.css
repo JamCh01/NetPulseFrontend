@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -40,6 +39,34 @@
   --color-status-disabled: #ef4444;
   --color-status-warning: #f59e0b;
 
+  /* Status Semantics (Radix Colors Steps 3, 6, 9, 11) */
+  --color-status-success-bg: var(--status-success-bg);
+  --color-status-success-border: var(--status-success-border);
+  --color-status-success-solid: var(--status-success-solid);
+  --color-status-success-fg: var(--status-success-fg);
+
+  --color-status-warning-bg: var(--status-warning-bg);
+  --color-status-warning-border: var(--status-warning-border);
+  --color-status-warning-solid: var(--status-warning-solid);
+  --color-status-warning-fg: var(--status-warning-fg);
+
+  --color-status-error-bg: var(--status-error-bg);
+  --color-status-error-border: var(--status-error-border);
+  --color-status-error-solid: var(--status-error-solid);
+  --color-status-error-fg: var(--status-error-fg);
+
+  --color-status-info-bg: var(--status-info-bg);
+  --color-status-info-border: var(--status-info-border);
+  --color-status-info-solid: var(--status-info-solid);
+  --color-status-info-fg: var(--status-info-fg);
+
+  --color-status-inactive-bg: var(--status-inactive-bg);
+  --color-status-inactive-border: var(--status-inactive-border);
+  --color-status-inactive-solid: var(--status-inactive-solid);
+  --color-status-inactive-fg: var(--status-inactive-fg);
+
+  --color-dialog-overlay: var(--dialog-overlay);
+
   /* Protocol badges */
   --color-proto-icmp: var(--proto-icmp);
   --color-proto-icmp-text: var(--proto-icmp-text);
@@ -59,7 +86,7 @@
   --color-median: #00dcc8;
 
   /* Fonts */
-  --font-sans: 'Plus Jakarta Sans', 'Geist Variable', 'Geist', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans: 'Geist Variable', 'Geist', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
   /* Radii */
@@ -352,6 +379,34 @@ body {
   --proto-udp-text: #d97706;
   --proto-http: rgba(22, 163, 74, 0.08);
   --proto-http-text: #16a34a;
+
+  /* Radix Status variables */
+  --status-success-bg: #e9f9ee;
+  --status-success-border: #b4dfc4;
+  --status-success-solid: #30a46c;
+  --status-success-fg: #18794e;
+
+  --status-warning-bg: #fef3d6;
+  --status-warning-border: #f7d37e;
+  --status-warning-solid: #ffb224;
+  --status-warning-fg: #ad5700;
+
+  --status-error-bg: #ffefef;
+  --status-error-border: #f9c6c6;
+  --status-error-solid: #e5484d;
+  --status-error-fg: #cd2b31;
+
+  --status-info-bg: #edf6ff;
+  --status-info-border: #b7d9f8;
+  --status-info-solid: #0091ff;
+  --status-info-fg: #006adc;
+
+  --status-inactive-bg: #f1f3f5;
+  --status-inactive-border: #e6e8eb;
+  --status-inactive-solid: #8d96a1;
+  --status-inactive-fg: #687076;
+
+  --dialog-overlay: rgba(0, 0, 0, 0.45);
 }
 
 .dark {
@@ -440,6 +495,34 @@ body {
   --proto-udp-text: #fbbf24;
   --proto-http: rgba(34, 197, 94, 0.15);
   --proto-http-text: #4ade80;
+
+  /* Radix Status variables (Dark) */
+  --status-success-bg: #0f291e;
+  --status-success-border: #164430;
+  --status-success-solid: #30a46c;
+  --status-success-fg: #4cc38a;
+
+  --status-warning-bg: #271400;
+  --status-warning-border: #4a2d00;
+  --status-warning-solid: #ffb224;
+  --status-warning-fg: #ffe085;
+
+  --status-error-bg: #3c181a;
+  --status-error-border: #671e22;
+  --status-error-solid: #e5484d;
+  --status-error-fg: #ff6369;
+
+  --status-info-bg: #10243e;
+  --status-info-border: #0d3868;
+  --status-info-solid: #0091ff;
+  --status-info-fg: #52a9ff;
+
+  --status-inactive-bg: #1c2024;
+  --status-inactive-border: #2e353b;
+  --status-inactive-solid: #8d96a1;
+  --status-inactive-fg: #9ba1a6;
+
+  --dialog-overlay: rgba(0, 0, 0, 0.65);
 }
 
 @layer base {

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import { useChangePassword } from '@/api/hooks/use-users'
 import { useAuthStore } from '@/stores/auth-store'
 import {
@@ -52,11 +53,11 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
       { uuid: user.uuid, newPassword },
       {
         onSuccess: () => {
+          toast.success(t('users.changePasswordSuccess') || 'Password changed successfully. Logging out...')
           onOpenChange(false)
           setNewPassword('')
           setConfirmPassword('')
           
-          // Optional: Force logout on password change to force re-login with new credentials
           logoutMutation.mutate(undefined, {
             onSettled: () => {
               navigate('/login')
@@ -64,7 +65,7 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
           })
         },
         onError: () => {
-          setError(t('users.changePasswordFailed') || 'Failed to change password. Please try again.')
+          toast.error(t('users.changePasswordFailed') || 'Failed to change password. Please try again.')
         },
       }
     )
@@ -100,7 +101,7 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
               required
             />
           </div>
-          {error && <p className="text-red-400 text-xs">{error}</p>}
+          {error && <p className="text-status-error-fg text-xs font-medium">{error}</p>}
           <DialogFooter>
             <Button
               type="button"
@@ -112,7 +113,6 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
             <Button
               type="submit"
               disabled={changePassword.isPending || !newPassword || !confirmPassword}
-              
             >
               {changePassword.isPending ? (t('users.changingPassword') || 'Changing…') : (t('users.changePasswordBtn') || 'Change Password')}
             </Button>
@@ -122,3 +122,4 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
     </Dialog>
   )
 }
+

@@ -27,11 +27,6 @@ import type {
   AgentResponse,
 } from '@/api/generated/types.gen'
 
-const STATUS_COLORS: Record<string, string> = {
-  firing: 'bg-red-500/15 text-red-400 border-red-500/30',
-  resolved: 'bg-green-500/15 text-green-400 border-green-500/30',
-}
-
 const PAGE_SIZE = 50
 
 export default function AlertEventsPage() {
@@ -104,7 +99,7 @@ export default function AlertEventsPage() {
         </div>
       </div>
       {eventsApiUnsupported && (
-        <div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-300">
+        <div className="mb-4 rounded-lg border border-status-warning-border bg-status-warning-bg px-3 py-2 text-xs text-status-warning-fg">
           Missing API: <code>/api/v1/alerts/events/</code>
         </div>
       )}
@@ -165,7 +160,7 @@ export default function AlertEventsPage() {
           </div>
         ) : error ? (
           <div className="p-6 text-center">
-            <p className="text-red-400 text-sm">{t('alertEvents.failedToLoad')}</p>
+            <p className="text-status-error-fg text-sm">{t('alertEvents.failedToLoad')}</p>
           </div>
         ) : events.length === 0 ? (
           <div className="p-6 text-center">
@@ -192,7 +187,7 @@ export default function AlertEventsPage() {
                   <TableCell className="text-text-secondary text-xs">{getAgentName(event.agent_uuid)}</TableCell>
                   <TableCell className="text-text-secondary text-xs font-mono">{event.triggered_value}</TableCell>
                   <TableCell>
-                    <Badge className={`border text-xs ${STATUS_COLORS[event.status] ?? ''}`}>
+                    <Badge variant={event.status === 'firing' ? 'error' : 'success'}>
                       {event.status === 'firing' ? t('alertEvents.firing') : t('alertEvents.resolved')}
                     </Badge>
                   </TableCell>
@@ -218,3 +213,4 @@ export default function AlertEventsPage() {
     </div>
   )
 }
+

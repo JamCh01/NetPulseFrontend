@@ -1,7 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link, useSearchParams } from 'react-router'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import { useLogin } from '@/api/hooks/use-auth'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
 
 export default function LoginPage() {
   const [username, setUsername] = useState('')
@@ -26,6 +30,13 @@ export default function LoginPage() {
     return t('auth.loginFailed')
   }
 
+  useEffect(() => {
+    if (registeredSuccess) {
+      toast.success(t('auth.registerSuccess'))
+      navigate('/login', { replace: true })
+    }
+  }, [registeredSuccess, navigate, t])
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setCooldown(true)
@@ -36,6 +47,9 @@ export default function LoginPage() {
         onSuccess: () => {
           navigate('/dashboard')
         },
+        onError: (err) => {
+          toast.error(getErrorMessage(err))
+        },
       }
     )
   }
@@ -45,57 +59,43 @@ export default function LoginPage() {
       <h2 className="text-xl font-bold text-text-primary mb-1">{t('auth.signIn')}</h2>
       <p className="text-sm text-text-muted mb-6">{t('auth.signInDesc')}</p>
 
-      {registeredSuccess && (
-        <div className="mb-4 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-sm text-emerald-400">
-          {t('auth.registerSuccess')}
-        </div>
-      )}
-
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="username" className="block text-xs font-medium text-text-secondary mb-1.5">{t('auth.username')}</label>
-          <input
+          <Label htmlFor="username" className="block text-xs font-medium text-text-secondary mb-1.5">{t('auth.username')}</Label>
+          <Input
             id="username"
             name="username"
             autoComplete="username"
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg glass-light text-sm text-text-primary placeholder:text-text-dim focus:outline-none focus:ring-1 focus:ring-accent/30"
             placeholder={t('auth.usernamePlaceholder')}
             required
             disabled={login.isPending}
           />
         </div>
         <div>
-          <label htmlFor="password" className="block text-xs font-medium text-text-secondary mb-1.5">{t('auth.password')}</label>
-          <input
+          <Label htmlFor="password" className="block text-xs font-medium text-text-secondary mb-1.5">{t('auth.password')}</Label>
+          <Input
             id="password"
             name="password"
             autoComplete="current-password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg glass-light text-sm text-text-primary placeholder:text-text-dim focus:outline-none focus:ring-1 focus:ring-accent/30"
             placeholder={t('auth.passwordPlaceholder')}
             required
             disabled={login.isPending}
           />
         </div>
-        <button
+        <Button
           type="submit"
           disabled={cooldown || login.isPending}
-          className="w-full py-2.5 rounded-lg bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full h-10 text-sm font-semibold transition-colors mt-2"
         >
           {login.isPending ? t('auth.signingIn') : t('auth.signInBtn')}
-        </button>
+        </Button>
       </form>
-
-      {login.isError && (
-        <div className="mt-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-400">
-          {getErrorMessage(login.error)}
-        </div>
-      )}
 
       <p className="mt-6 text-center text-xs text-text-muted">
         {t('auth.noAccount')}{' '}
@@ -106,3 +106,4 @@ export default function LoginPage() {
     </div>
   )
 }
+

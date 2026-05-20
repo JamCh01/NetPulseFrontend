@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import {
   useWebhooks,
   useDeleteWebhook,
@@ -26,9 +27,9 @@ import { WebhookFormDialog } from '@/features/webhooks/components/webhook-form-d
 import type { WebhookResponse, WebhookDeliveryResponse, UserResponse, PaginatedResponseWebhookResponse, PaginatedResponseWebhookDeliveryResponse, PaginatedResponseUserResponse } from '@/api/generated/types.gen'
 
 const STATUS_COLORS: Record<string, string> = {
-  success: 'bg-green-500/15 text-green-400 border-green-500/30',
-  failed: 'bg-red-500/15 text-red-400 border-red-500/30',
-  pending: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
+  success: 'bg-status-success-bg text-status-success-fg border-status-success-border',
+  failed: 'bg-status-error-bg text-status-error-fg border-status-error-border',
+  pending: 'bg-status-warning-bg text-status-warning-fg border-status-warning-border',
 }
 
 const PAGE_SIZE = 50
@@ -84,15 +85,44 @@ export default function WebhooksPage() {
 
   const handleDelete = () => {
     if (!deleteUuid) return
-    deleteWebhook.mutate(deleteUuid, { onSuccess: () => setDeleteUuid(null) })
+    deleteWebhook.mutate(deleteUuid, {
+      onSuccess: () => {
+        setDeleteUuid(null)
+        toast.success(t('webhooks.deleteSuccess') || 'Webhook deleted successfully')
+      },
+      onError: () => {
+        toast.error(t('webhooks.deleteFailed') || 'Failed to delete webhook')
+      },
+    })
   }
 
   const handleToggleActive = (wh: WebhookResponse) => {
-    updateWebhook.mutate({ uuid: wh.webhook_uuid, data: { is_active: !wh.is_active } })
+    updateWebhook.mutate(
+      { uuid: wh.webhook_uuid, data: { is_active: !wh.is_active } },
+      {
+        onSuccess: () => {
+          toast.success(
+            wh.is_active
+              ? t('webhooks.disabledSuccess') || 'Webhook disabled'
+              : t('webhooks.enabledSuccess') || 'Webhook enabled'
+          )
+        },
+        onError: () => {
+          toast.error(t('webhooks.updateFailed') || 'Failed to update webhook')
+        },
+      }
+    )
   }
 
   const handleTest = (uuid: string) => {
-    testWebhook.mutate(uuid)
+    testWebhook.mutate(uuid, {
+      onSuccess: () => {
+        toast.success(t('webhooks.testSuccess') || 'Test webhook triggered successfully')
+      },
+      onError: () => {
+        toast.error(t('webhooks.testFailed') || 'Test webhook trigger failed')
+      },
+    })
   }
 
   const handleRotate = () => {
@@ -105,6 +135,10 @@ export default function WebhooksPage() {
           setShownSecret(res.secret)
           setSecretDialogOpen(true)
         }
+        toast.success(t('webhooks.rotateSuccess') || 'Secret rotated successfully')
+      },
+      onError: () => {
+        toast.error(t('webhooks.rotateFailed') || 'Failed to rotate secret')
       },
     })
   }
@@ -127,7 +161,6 @@ export default function WebhooksPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-text-primary">{t('webhooks.title')}</h1>
         <Button
-          
           onClick={() => setCreateOpen(true)}
         >
           {t('webhooks.createWebhook')}
@@ -142,7 +175,7 @@ export default function WebhooksPage() {
           </div>
         ) : error ? (
           <div className="p-6 text-center">
-            <p className="text-red-400 text-sm">{t('webhooks.failedToLoad')}</p>
+            <p className="text-status-error-fg text-sm">{t('webhooks.failedToLoad')}</p>
           </div>
         ) : webhooks.length === 0 ? (
           <div className="p-6 text-center">
@@ -182,16 +215,16 @@ export default function WebhooksPage() {
                   </TableCell>
                   <TableCell className="text-text-secondary text-xs font-mono max-w-[240px] truncate">{wh.url}</TableCell>
                   <TableCell>
-                    <Badge className={`border text-xs ${wh.is_active ? 'bg-green-500/15 text-green-400 border-green-500/30' : 'bg-gray-500/15 text-gray-400 border-gray-500/30'}`}>
+                    <Badge variant={wh.is_active ? 'success' : 'inactive'}>
                       {wh.is_active ? t('common.active') : t('common.inactive')}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <span className={`text-xs font-mono ${wh.consecutive_failures > 0 ? 'text-red-400' : 'text-text-dim'}`}>
+                    <span className={`text-xs font-mono ${wh.consecutive_failures > 0 ? 'text-status-error-fg' : 'text-text-dim'}`}>
                       {wh.consecutive_failures}
                     </span>
                     {wh.consecutive_failures >= 100 && (
-                      <Badge className="ml-1 border text-[9px] bg-amber-500/15 text-amber-400 border-amber-500/30">
+                      <Badge variant="warning" className="ml-1 text-[9px]">
                         {t('webhooks.autoDisabled')}
                       </Badge>
                     )}
@@ -221,7 +254,7 @@ export default function WebhooksPage() {
                           >
                             {t('webhooks.deliveries')}
                           </Button>
-                          <Button variant="ghost" size="sm" className="text-xs h-7 px-2 text-amber-400 hover:text-amber-300 hover:bg-amber-500/10"
+                          <Button variant="ghost" size="sm" className="text-xs h-7 px-2 text-status-warning-fg hover:opacity-80"
                             onClick={() => setRotateUuid(wh.webhook_uuid)}
                           >
                             {t('webhooks.rotateSecret')}
@@ -231,7 +264,7 @@ export default function WebhooksPage() {
                           >
                             {wh.is_active ? t('common.disable') : t('common.enable')}
                           </Button>
-                          <Button variant="ghost" size="sm" className="text-xs h-7 px-2 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                          <Button variant="ghost" size="sm" className="text-xs h-7 px-2 text-status-error-fg hover:opacity-80"
                             onClick={() => setDeleteUuid(wh.webhook_uuid)}
                           >
                             {t('common.delete')}
@@ -273,7 +306,7 @@ export default function WebhooksPage() {
             <DialogDescription>{t('webhooks.secretDesc')}</DialogDescription>
           </DialogHeader>
           <div className="flex items-center gap-2 mt-2">
-            <code className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-emerald-400 text-sm font-mono break-all">
+            <code className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-status-success-fg text-sm font-mono break-all">
               {shownSecret}
             </code>
             <Button variant="outline" size="sm" onClick={handleCopy} className="shrink-0">
@@ -313,7 +346,7 @@ export default function WebhooksPage() {
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setRotateUuid(null)}>{t('common.cancel')}</Button>
-            <Button onClick={handleRotate} disabled={rotateSecret.isPending} className="bg-amber-500/90 hover:bg-amber-400 text-gray-950 border-none">
+            <Button onClick={handleRotate} disabled={rotateSecret.isPending} className="bg-status-warning-solid text-slate-950 hover:opacity-90 border-none">
               {rotateSecret.isPending ? t('common.loading') : t('webhooks.rotateSecret')}
             </Button>
           </DialogFooter>
@@ -396,10 +429,17 @@ function DeliveriesTable({ webhookUuid }: { webhookUuid: string }) {
               <TableCell>
                 {d.status === 'failed' && (
                   (d as WebhookDeliveryResponse & { next_retry_at?: string | null }).next_retry_at ? (
-                    <span className="text-[10px] text-amber-400">{t('webhooks.waitingRetry')}</span>
+                    <span className="text-[10px] text-status-warning-fg">{t('webhooks.waitingRetry')}</span>
                   ) : (
-                    <Button variant="ghost" size="sm" className="text-xs h-7 px-2 text-amber-400 hover:text-amber-300"
-                      onClick={() => retryDelivery.mutate({ webhookUuid, deliveryUuid: d.delivery_uuid })}
+                    <Button variant="ghost" size="sm" className="text-xs h-7 px-2 text-status-warning-fg hover:opacity-80"
+                      onClick={() => retryDelivery.mutate({ webhookUuid, deliveryUuid: d.delivery_uuid }, {
+                        onSuccess: () => {
+                          toast.success(t('webhooks.retrySuccess') || 'Retry request dispatched')
+                        },
+                        onError: () => {
+                          toast.error(t('webhooks.retryFailed') || 'Failed to retry delivery')
+                        }
+                      })}
                       disabled={retryDelivery.isPending}
                     >
                       {retryDelivery.isPending ? t('webhooks.retrying') : t('webhooks.retry')}
@@ -416,3 +456,4 @@ function DeliveriesTable({ webhookUuid }: { webhookUuid: string }) {
     </>
   )
 }
+

@@ -22,25 +22,25 @@ export function StatsCards({ stats, isLoading }: StatsCardsProps) {
       label: t('dashboard.onlineLabel'),
       getValue: (s) => s.agents.online,
       getSubtext: (s) => t('dashboard.onlineSub', { total: s.agents.total }),
-      dotColor: 'bg-green-500',
+      dotColor: 'bg-status-success-solid',
     },
     {
       label: t('dashboard.offlineLabel'),
       getValue: (s) => s.agents.offline,
       getSubtext: () => t('dashboard.offlineSub'),
-      dotColor: 'bg-gray-500',
+      dotColor: 'bg-status-inactive-solid',
     },
     {
       label: t('dashboard.activeTasksLabel'),
       getValue: (s) => s.tasks.active,
       getSubtext: (s) => t('dashboard.activeTasksSub', { total: s.tasks.total }),
-      dotColor: 'bg-cyan-400',
+      dotColor: 'bg-status-info-solid',
     },
     {
       label: t('dashboard.disabledLabel'),
       getValue: (s) => s.agents.disabled,
       getSubtext: () => t('dashboard.disabledSub'),
-      dotColor: 'bg-red-500',
+      dotColor: 'bg-status-error-solid',
     },
   ]
 

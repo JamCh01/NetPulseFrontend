@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { useHealth } from '@/api/hooks/use-health'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { RefreshCcw, CheckCircle2, AlertCircle, XCircle } from 'lucide-react'
 import { formatDateTime } from '@/lib/format'
 
@@ -18,25 +19,20 @@ export default function HealthPage() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'ok':
-        return <CheckCircle2 className="w-5 h-5 text-green-500 dark:text-green-400" />
+        return <CheckCircle2 className="w-5 h-5 text-status-success-solid" />
       case 'degraded':
-        return <AlertCircle className="w-5 h-5 text-amber-500 dark:text-amber-400" />
+        return <AlertCircle className="w-5 h-5 text-status-warning-solid" />
       default:
-        return <XCircle className="w-5 h-5 text-red-500 dark:text-red-400" />
+        return <XCircle className="w-5 h-5 text-status-error-solid" />
     }
   }
 
   const getStatusBadge = (status: string) => {
-    const colorClass = status === 'ok' 
-      ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/30' 
-      : status === 'degraded'
-        ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/30'
-        : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/30'
-    
+    const variant = status === 'ok' ? 'success' : status === 'degraded' ? 'warning' : 'error'
     return (
-      <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium border ${colorClass}`}>
+      <Badge variant={variant} className="text-[10px] px-2 py-0.5">
         {t(`health.${status}`)}
-      </span>
+      </Badge>
     )
   }
 
@@ -75,7 +71,7 @@ export default function HealthPage() {
         </div>
       ) : isError || !data ? (
         <div className="glass-light rounded-xl p-8 text-center">
-          <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
+          <AlertCircle className="w-12 h-12 text-status-error-solid mx-auto mb-4" />
           <h3 className="text-lg font-medium text-text-primary">{t('health.failedToLoad')}</h3>
           <Button variant="link" onClick={() => refetch()} className="mt-2 text-accent-foreground">
             {t('common.retry') || 'Retry'}
@@ -84,7 +80,7 @@ export default function HealthPage() {
       ) : (
         <div>
           {healthApiUnsupported && (
-            <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
+            <div className="mb-4 rounded-lg border border-status-warning-border bg-status-warning-bg px-3 py-2 text-xs text-status-warning-fg">
               Missing API: <code>/api/v1/health</code> (fallback to <code>/health</code>)
             </div>
           )}
@@ -118,11 +114,11 @@ export default function HealthPage() {
       {!isLoading && !isError && (
         <div className={`mt-8 p-4 rounded-xl border ${
           isOk 
-            ? 'bg-green-50/50 border-green-200 dark:bg-green-500/5 dark:border-green-500/10' 
-            : 'bg-amber-50/50 border-amber-200 dark:bg-amber-500/5 dark:border-amber-500/10'
+            ? 'bg-status-success-bg/50 border-status-success-border' 
+            : 'bg-status-warning-bg/50 border-status-warning-border'
         }`}>
           <div className="flex items-center gap-3">
-            <div className={`w-2 h-2 rounded-full animate-pulse ${isOk ? 'bg-green-500 dark:bg-green-400' : 'bg-amber-500 dark:bg-amber-400'}`} />
+            <div className={`w-2 h-2 rounded-full animate-pulse ${isOk ? 'bg-status-success-solid' : 'bg-status-warning-solid'}`} />
             <p className="text-sm font-medium text-text-primary">
               {isOk 
                 ? (i18n.language === 'zh' ? '所有核心系统组件均已就绪。' : 'All core system components are operational.')
@@ -135,3 +131,4 @@ export default function HealthPage() {
     </div>
   )
 }
+

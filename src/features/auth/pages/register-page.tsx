@@ -1,7 +1,11 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import { useRegister } from '@/api/hooks/use-auth'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
 
 export default function RegisterPage() {
   const [form, setForm] = useState({ username: '', email: '', password: '' })
@@ -33,6 +37,9 @@ export default function RegisterPage() {
         onSuccess: () => {
           navigate('/login?registered=true')
         },
+        onError: (err) => {
+          toast.error(getErrorMessage(err))
+        },
       }
     )
   }
@@ -44,12 +51,11 @@ export default function RegisterPage() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-xs font-medium text-text-secondary mb-1.5">{t('auth.username')}</label>
-          <input
+          <Label className="block text-xs font-medium text-text-secondary mb-1.5">{t('auth.username')}</Label>
+          <Input
             type="text"
             value={form.username}
             onChange={(e) => setForm({ ...form, username: e.target.value })}
-            className="w-full px-3 py-2 rounded-lg glass-light text-sm text-text-primary placeholder:text-text-dim focus:outline-none focus:ring-1 focus:ring-accent/30"
             placeholder={t('auth.usernameHint')}
             required
             minLength={2}
@@ -58,24 +64,22 @@ export default function RegisterPage() {
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-text-secondary mb-1.5">{t('auth.email')}</label>
-          <input
+          <Label className="block text-xs font-medium text-text-secondary mb-1.5">{t('auth.email')}</Label>
+          <Input
             type="email"
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
-            className="w-full px-3 py-2 rounded-lg glass-light text-sm text-text-primary placeholder:text-text-dim focus:outline-none focus:ring-1 focus:ring-accent/30"
             placeholder={t('auth.emailPlaceholder')}
             required
             disabled={register.isPending}
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-text-secondary mb-1.5">{t('auth.password')}</label>
-          <input
+          <Label className="block text-xs font-medium text-text-secondary mb-1.5">{t('auth.password')}</Label>
+          <Input
             type="password"
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
-            className="w-full px-3 py-2 rounded-lg glass-light text-sm text-text-primary placeholder:text-text-dim focus:outline-none focus:ring-1 focus:ring-accent/30"
             placeholder={t('auth.passwordHint')}
             required
             minLength={8}
@@ -83,20 +87,14 @@ export default function RegisterPage() {
             disabled={register.isPending}
           />
         </div>
-        <button
+        <Button
           type="submit"
           disabled={cooldown || register.isPending}
-          className="w-full py-2.5 rounded-lg bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full h-10 text-sm font-semibold transition-colors mt-2"
         >
           {register.isPending ? t('auth.creatingAccount') : t('auth.createAccountBtn')}
-        </button>
+        </Button>
       </form>
-
-      {register.isError && (
-        <div className="mt-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-400">
-          {getErrorMessage(register.error)}
-        </div>
-      )}
 
       <p className="mt-6 text-center text-xs text-text-muted">
         {t('auth.hasAccount')}{' '}
@@ -107,3 +105,4 @@ export default function RegisterPage() {
     </div>
   )
 }
+

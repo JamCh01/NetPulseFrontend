@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import { useCreateWebhook, useUpdateWebhook } from '@/api/hooks/use-webhooks'
 import { isReservedHeader } from '@/features/webhooks/lib/constants'
 import {
@@ -82,7 +83,6 @@ function WebhookFormContent({ mode, webhook, onOpenChange, onSecretReceived }: W
 
   const hasReservedHeaders = headers.some((e) => e.key.trim() !== '' && isReservedHeader(e.key))
   const isPending = mode === 'create' ? createWebhook.isPending : updateWebhook.isPending
-  const isError = mode === 'create' ? createWebhook.isError : updateWebhook.isError
 
   const handleInsertVariable = useCallback((variable: string) => {
     const textarea = templateRef.current
@@ -121,6 +121,10 @@ function WebhookFormContent({ mode, webhook, onOpenChange, onSecretReceived }: W
             if (res?.secret && onSecretReceived) {
               onSecretReceived(res.secret)
             }
+            toast.success(t('webhooks.createSuccess') || 'Webhook created successfully')
+          },
+          onError: () => {
+            toast.error(t('webhooks.createFailed') || 'Failed to create webhook')
           },
         },
       )
@@ -135,7 +139,15 @@ function WebhookFormContent({ mode, webhook, onOpenChange, onSecretReceived }: W
             custom_headers: headersValue,
           },
         },
-        { onSuccess: () => onOpenChange(false) },
+        {
+          onSuccess: () => {
+            onOpenChange(false)
+            toast.success(t('webhooks.updateSuccess') || 'Webhook updated successfully')
+          },
+          onError: () => {
+            toast.error(t('webhooks.updateFailed') || 'Failed to update webhook')
+          },
+        },
       )
     }
   }
@@ -199,7 +211,7 @@ function WebhookFormContent({ mode, webhook, onOpenChange, onSecretReceived }: W
             <div>
               <Label className="text-xs text-text-secondary mb-1.5">{t('webhooks.customHeaders')}</Label>
               <p className="text-[10px] text-text-dim mb-1">{t('webhooks.customHeadersHint')}</p>
-              <p className="text-[10px] text-amber-400/80 mb-2">{t('webhooks.reservedHeadersNote')}</p>
+              <p className="text-[10px] text-status-warning-fg mb-2">{t('webhooks.reservedHeadersNote')}</p>
               <KeyValueEditor value={headers} onChange={setHeaders} />
             </div>
           </div>
@@ -209,7 +221,6 @@ function WebhookFormContent({ mode, webhook, onOpenChange, onSecretReceived }: W
           <Button
             type="submit"
             disabled={isPending || hasReservedHeaders}
-            
           >
             {isPending
               ? (mode === 'create' ? t('common.creating') : t('webhooks.updating'))
@@ -217,12 +228,8 @@ function WebhookFormContent({ mode, webhook, onOpenChange, onSecretReceived }: W
             }
           </Button>
         </DialogFooter>
-        {isError && (
-          <p className="text-red-400 text-xs">
-            {mode === 'create' ? t('webhooks.createFailed') : t('webhooks.updateFailed')}
-          </p>
-        )}
       </form>
     </>
   )
 }
+
