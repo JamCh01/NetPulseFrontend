@@ -36,7 +36,7 @@ export function ErrorState({
       </div>
       <div className="flex items-center gap-2">
         {onRetry ? (
-          <Button variant="outline" size="sm" onClick={onRetry} className="border-red-300/30 bg-transparent hover:bg-red-500/10">
+          <Button variant="destructive" size="sm" onClick={onRetry}>
             <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
             {retryLabel}
           </Button>
