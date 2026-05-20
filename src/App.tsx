@@ -6,6 +6,7 @@ import { queryClient } from '@/lib/query-client'
 import { AppRouter } from '@/router'
 import { useAuthStore } from '@/stores/auth-store'
 import { LoadingState } from '@/components/ui/loading-state'
+import { ErrorBoundary } from '@/components/ui/error-boundary'
 
 export default function App() {
   const initFromStorage = useAuthStore((s) => s.initFromStorage)
@@ -21,9 +22,11 @@ export default function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <AppRouter />
-      </BrowserRouter>
+      <ErrorBoundary>
+        <BrowserRouter>
+          <AppRouter />
+        </BrowserRouter>
+      </ErrorBoundary>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   )

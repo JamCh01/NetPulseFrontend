@@ -4,6 +4,8 @@ import { healthApiV1HealthGet } from '@/api/generated/sdk.gen'
 import { buildApiUrl } from '@/api/base-url'
 import { reportMissingApi } from '@/lib/api-compat'
 
+let apiV1HealthUnsupported = false
+
 function isNotFoundError(error: unknown): boolean {
   if (!error || typeof error !== 'object') return false
   const obj = error as Record<string, unknown>
@@ -45,11 +47,17 @@ export function useHealth() {
   return useQuery({
     queryKey: healthKeys.status(),
     queryFn: async () => {
+      if (apiV1HealthUnsupported) {
+        return fetchRootHealth()
+      }
       const { data, error } = await healthApiV1HealthGet()
       if (error) {
         // Some environments expose only `/health` and not `/api/v1/health`.
         // Always attempt root-health fallback before failing.
         try {
+          if (isNotFoundError(error)) {
+            apiV1HealthUnsupported = true
+          }
           reportMissingApi('/api/v1/health')
           return await fetchRootHealth()
         } catch {

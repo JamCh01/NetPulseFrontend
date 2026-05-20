@@ -187,7 +187,8 @@ export function AppLayout() {
             {!collapsed && tasksExpanded && (
               <div className="ml-3 mt-0.5 space-y-0.5 border-l border-white/5 pl-3">
                 {tasks.map((task) => {
-                  const protoColor = protocolIcon[task.protocol.toLowerCase()] ?? 'text-gray-400'
+                  const protocolKey = (task.protocol ?? 'icmp').toLowerCase()
+                  const protoColor = protocolIcon[protocolKey] ?? 'text-gray-400'
                   const taskPath = `/monitoring/${task.task_uuid}`
                   const isActive = location.pathname === taskPath
 
@@ -206,9 +207,9 @@ export function AppLayout() {
                       <span className="truncate flex-1">{task.task_name}</span>
                       <span className={cn(
                         'text-[10px] px-1 py-px rounded font-mono uppercase shrink-0',
-                        isActive ? 'text-accent/60' : (protocolIconDim[task.protocol.toLowerCase()] ?? 'text-gray-400/60')
+                        isActive ? 'text-accent/60' : (protocolIconDim[protocolKey] ?? 'text-gray-400/60')
                       )}>
-                        {task.protocol}
+                        {(task.protocol ?? 'icmp').toUpperCase()}
                       </span>
                     </NavLink>
                   )

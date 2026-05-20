@@ -28,6 +28,7 @@ const HealthPage = lazy(() => import('@/features/dashboard/pages/health-page'))
 const MonitoringIndexPage = lazy(() => import('@/features/monitoring/pages/monitoring-index-page'))
 const MonitoringDetailPage = lazy(() => import('@/features/monitoring/pages/monitoring-detail-page'))
 const MtrDetailPage = lazy(() => import('@/features/monitoring/pages/mtr-detail-page'))
+const NotFoundPage = lazy(() => import('@/features/system/pages/not-found-page'))
 
 function PageLoader() {
   return <LoadingState label="Loading page" hint="Fetching module and route data" />
@@ -75,7 +76,7 @@ export function AppRouter() {
 
         {/* Default redirect to public monitoring */}
         <Route path="/" element={<Navigate to="/monitoring" replace />} />
-        <Route path="*" element={<Navigate to="/monitoring" replace />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Suspense>
   )

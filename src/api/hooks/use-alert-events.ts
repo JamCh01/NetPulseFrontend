@@ -6,6 +6,9 @@ import {
 } from '@/api/generated/sdk.gen'
 import { reportMissingApi } from '@/lib/api-compat'
 
+let alertEventsUnsupported = false
+let alertEventDetailUnsupported = false
+
 interface AlertEventParams {
   skip?: number
   limit?: number
@@ -27,9 +30,13 @@ export function useAlertEvents(params?: AlertEventParams) {
   return useQuery({
     queryKey: alertEventKeys.list(params),
     queryFn: async () => {
+      if (alertEventsUnsupported) {
+        return { items: [], total: 0, skip: params?.skip ?? 0, limit: params?.limit ?? 50, __unsupported: true }
+      }
       const { data, error } = await listEventsEndpointApiV1AlertsEventsGet({ query: params })
       if (error) {
         if (isNotFoundError(error)) {
+          alertEventsUnsupported = true
           reportMissingApi('/api/v1/alerts/events/')
           return { items: [], total: 0, skip: params?.skip ?? 0, limit: params?.limit ?? 50, __unsupported: true }
         }
@@ -48,9 +55,13 @@ export function useAlertEvent(uuid: string) {
   return useQuery({
     queryKey: alertEventKeys.detail(uuid),
     queryFn: async () => {
+      if (alertEventDetailUnsupported) return undefined
       const { data, error } = await getEventEndpointApiV1AlertsEventsEventUuidGet({ path: { event_uuid: uuid } })
       if (error) {
-        if (isNotFoundError(error)) return undefined
+        if (isNotFoundError(error)) {
+          alertEventDetailUnsupported = true
+          return undefined
+        }
         throw error
       }
       return data

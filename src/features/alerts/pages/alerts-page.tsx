@@ -34,6 +34,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ErrorState } from '@/components/ui/error-state'
 import { Pagination } from '@/components/ui/pagination'
 import type { AlertRuleResponse, TaskResponse, UserResponse, WebhookResponse, MetricTypeEnum, OperatorEnum, PaginatedResponseAlertRuleResponse, PaginatedResponseTaskResponse, PaginatedResponseUserResponse, PaginatedResponseWebhookResponse } from '@/api/generated/types.gen'
 
@@ -57,7 +58,7 @@ export default function AlertsPage() {
   const isAdmin = useAuthStore((s) => s.isAdmin())
   const currentUserUuid = useAuthStore((s) => s.user?.uuid)
   const [page, setPage] = useState(1)
-  const { data, isLoading, error } = useAlertRules({ skip: (page - 1) * PAGE_SIZE, limit: PAGE_SIZE })
+  const { data, isLoading, error, refetch } = useAlertRules({ skip: (page - 1) * PAGE_SIZE, limit: PAGE_SIZE })
   const { data: tasksData, isLoading: tasksLoading } = useTasks({ limit: 200 })
   const { data: usersData } = useUsers(isAdmin ? { limit: 100 } : undefined)
   const { data: webhooksData } = useWebhooks({ limit: 100 })
@@ -219,8 +220,13 @@ export default function AlertsPage() {
             ))}
           </div>
         ) : error ? (
-          <div className="p-6 text-center">
-            <p className="text-red-400 text-sm">{t('alerts.failedToLoad')}</p>
+          <div className="p-6">
+            <ErrorState
+              title={t('alerts.failedToLoad')}
+              description="请检查网络连接，或稍后重试。"
+              onRetry={() => { void refetch() }}
+              retryLabel="重试加载"
+            />
           </div>
         ) : rules.length === 0 ? (
           <div className="p-6 text-center">

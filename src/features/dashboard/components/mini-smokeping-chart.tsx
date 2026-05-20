@@ -9,7 +9,7 @@ import { transformToChartData } from '@/features/monitoring/lib/transform-chart-
 interface MiniSmokePingChartProps {
   taskUuid: string
   taskName: string
-  protocol: string
+  protocol?: string | null
   target: string
   data?: MonitoringDataPoint[]
   isLoading?: boolean
@@ -111,7 +111,9 @@ function MiniSmokePingChartInner({
     }
   }, [data, theme])
 
-  const proto = protocolColors[protocol.toLowerCase()] ?? protocolColors.icmp
+  const normalizedProtocol = (protocol ?? 'icmp').toLowerCase()
+  const proto = protocolColors[normalizedProtocol] ?? protocolColors.icmp
+  const protocolLabel = normalizedProtocol.toUpperCase()
 
   if (isLoading) {
     return (
@@ -127,7 +129,7 @@ function MiniSmokePingChartInner({
       <div className="flex items-center justify-between mb-2">
         <span className="text-[10px] font-medium text-text-primary truncate">{taskName}</span>
         <span className={`text-[9px] px-1.5 py-0.5 rounded font-medium ${proto.bg} ${proto.text}`}>
-          {protocol.toUpperCase()}
+          {protocolLabel}
         </span>
       </div>
 

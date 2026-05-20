@@ -3,6 +3,8 @@ import { dashboardKeys } from './keys'
 import { dashboardStatsApiV1DashboardStatsGet } from '@/api/generated/sdk.gen'
 import { reportMissingApi } from '@/lib/api-compat'
 
+let dashboardStatsUnsupported = false
+
 function isNotFoundError(error: unknown): boolean {
   return Boolean(
     error &&
@@ -16,9 +18,13 @@ export function useDashboardStats() {
   return useQuery({
     queryKey: dashboardKeys.stats(),
     queryFn: async () => {
+      if (dashboardStatsUnsupported) {
+        return { __unsupported: true } as const
+      }
       const { data, error } = await dashboardStatsApiV1DashboardStatsGet()
       if (error) {
         if (isNotFoundError(error)) {
+          dashboardStatsUnsupported = true
           reportMissingApi('/api/v1/dashboard/stats')
           return { __unsupported: true } as const
         }

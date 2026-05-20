@@ -33,6 +33,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ErrorState } from '@/components/ui/error-state'
 import { CheckableList } from '@/components/ui/checkable-list'
 import { Pagination } from '@/components/ui/pagination'
 import { AssignAgentsDialog } from '@/features/tasks/components/assign-agents-dialog'
@@ -53,7 +54,7 @@ export default function TasksPage() {
   const { t } = useTranslation()
   const isAdmin = useAuthStore((s) => s.isAdmin())
   const [page, setPage] = useState(1)
-  const { data, isLoading, error } = useTasks({ skip: (page - 1) * PAGE_SIZE, limit: PAGE_SIZE })
+  const { data, isLoading, error, refetch } = useTasks({ skip: (page - 1) * PAGE_SIZE, limit: PAGE_SIZE })
   const createTask = useCreateTask()
   const updateTask = useUpdateTask()
   const disableTask = useDisableTask()
@@ -179,8 +180,13 @@ export default function TasksPage() {
             ))}
           </div>
         ) : error ? (
-          <div className="p-6 text-center">
-            <p className="text-red-400 text-sm">{t('tasks.failedToLoad')}</p>
+          <div className="p-6">
+            <ErrorState
+              title={t('tasks.failedToLoad')}
+              description="请检查网络或服务状态后重试。"
+              onRetry={() => { void refetch() }}
+              retryLabel="重试加载"
+            />
           </div>
         ) : tasks.length === 0 ? (
           <div className="p-6 text-center">

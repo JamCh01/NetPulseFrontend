@@ -9,14 +9,34 @@ import {
   deleteRuleEndpointApiV1AlertsRulesRuleUuidDelete,
 } from '@/api/generated/sdk.gen'
 import type { AlertRuleCreate, AlertRuleUpdate } from '@/api/generated/types.gen'
+import { reportMissingApi } from '@/lib/api-compat'
+
+function isNotFoundError(error: unknown): boolean {
+  return Boolean(
+    error &&
+    typeof error === 'object' &&
+    'status' in error &&
+    (error as { status?: unknown }).status === 404,
+  )
+}
 
 export function useAlertRules(params?: { skip?: number; limit?: number }) {
   return useQuery({
     queryKey: alertKeys.ruleList(params),
     queryFn: async () => {
       const { data, error } = await listRulesEndpointApiV1AlertsRulesGet({ query: params })
-      if (error) throw error
+      if (error) {
+        if (isNotFoundError(error)) {
+          reportMissingApi('/api/v1/alerts/rules/')
+          return { items: [], total: 0, skip: params?.skip ?? 0, limit: params?.limit ?? 50, __unsupported: true }
+        }
+        throw error
+      }
       return data
+    },
+    retry: (failureCount, error) => {
+      if (isNotFoundError(error)) return false
+      return failureCount < 2
     },
   })
 }
@@ -26,10 +46,17 @@ export function useAlertRule(uuid: string) {
     queryKey: alertKeys.ruleDetail(uuid),
     queryFn: async () => {
       const { data, error } = await getRuleEndpointApiV1AlertsRulesRuleUuidGet({ path: { rule_uuid: uuid } })
-      if (error) throw error
+      if (error) {
+        if (isNotFoundError(error)) return undefined
+        throw error
+      }
       return data
     },
     enabled: !!uuid,
+    retry: (failureCount, error) => {
+      if (isNotFoundError(error)) return false
+      return failureCount < 2
+    },
   })
 }
 

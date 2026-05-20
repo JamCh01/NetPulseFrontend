@@ -1,20 +1,29 @@
 import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
-import { useDashboardStats } from '@/api/hooks/use-dashboard'
 import { useTasks } from '@/api/hooks/use-tasks'
 import { useMonitoringData } from '@/api/hooks/use-monitoring'
-import { useAlertEvents } from '@/api/hooks/use-alert-events'
-import { StatsCards } from '../components/stats-cards'
 import { HealthCard } from '../components/health-card'
 import { MiniSmokePingChart } from '../components/mini-smokeping-chart'
 import { TimeRangeSelector } from '@/features/monitoring/components/time-range-selector'
 import { Badge } from '@/components/ui/badge'
-import type { DashboardStats } from '@/api/types'
-import type { AlertEventResponse, TaskResponse, PaginatedResponseTaskResponse } from '@/api/generated/types.gen'
+import { Button } from '@/components/ui/button'
+import { ErrorState } from '@/components/ui/error-state'
+import type { TaskResponse, PaginatedResponseTaskResponse } from '@/api/generated/types.gen'
 import { Activity, AlertTriangle, ArrowRight, BellRing, CheckCircle2, Clock3, Radar } from 'lucide-react'
 
 const INITIAL_DURATION_MS = 24 * 60 * 60 * 1000
+
+function formatTaskTarget(task: TaskResponse): string {
+  const raw = task.target as unknown
+  if (typeof raw === 'string') return raw
+  if (raw && typeof raw === 'object') {
+    const rec = raw as Record<string, unknown>
+    if (typeof rec.target === 'string' && rec.target) return rec.target
+    if (typeof rec.name === 'string' && rec.name) return rec.name
+  }
+  return 'unknown-target'
+}
 
 function MiniChartWithData({ task, timeRange }: { task: TaskResponse, timeRange: { start: number, end: number, granularity: 'raw' | 'hourly' | 'daily' } }) {
   const { data: monitoringData, isLoading } = useMonitoringData(
@@ -28,7 +37,7 @@ function MiniChartWithData({ task, timeRange }: { task: TaskResponse, timeRange:
       taskUuid={task.task_uuid}
       taskName={task.task_name}
       protocol={task.protocol}
-      target={task.target}
+      target={formatTaskTarget(task)}
       data={monitoringData?.data}
       isLoading={isLoading}
     />
@@ -37,9 +46,7 @@ function MiniChartWithData({ task, timeRange }: { task: TaskResponse, timeRange:
 
 export default function DashboardPage() {
   const { t } = useTranslation()
-  const { data: statsRaw, isLoading: statsLoading } = useDashboardStats()
-  const { data: tasksRaw, isLoading: tasksLoading } = useTasks({ is_active: true, limit: 200 })
-  const { data: alertEventsRaw, isLoading: eventsLoading } = useAlertEvents({ limit: 50 })
+  const { data: tasksRaw, isLoading: tasksLoading, error: tasksError, refetch: refetchTasks } = useTasks({ is_active: true, limit: 200 })
 
   const [now] = useState(() => Date.now())
   const [timeRange, setTimeRange] = useState<{ start: number; end: number; granularity: 'raw' | 'hourly' | 'daily' }>({
@@ -55,22 +62,12 @@ export default function DashboardPage() {
     [],
   )
 
-  // Cast dashboard stats which comes as generic object
-  const stats = statsRaw as DashboardStats | undefined
-  const statsApiUnsupported = Boolean((statsRaw as { __unsupported?: boolean } | undefined)?.__unsupported)
-  const eventsApiUnsupported = Boolean((alertEventsRaw as { __unsupported?: boolean } | undefined)?.__unsupported)
   const tasks = ((tasksRaw as PaginatedResponseTaskResponse)?.items ?? []) as TaskResponse[]
-  const alertEvents = ((alertEventsRaw as { items?: AlertEventResponse[] })?.items ?? []) as AlertEventResponse[]
+  const activeTasks = tasks.filter((task) => task.is_active)
+  const tasksFailed = Boolean(tasksError)
 
-  const firingEvents = alertEvents.filter((event) => event.status === 'firing')
-  const tasksWithFiring = new Set(firingEvents.map((event) => event.task_uuid))
-  const anomalyTasks = tasks.filter((task) => tasksWithFiring.has(task.task_uuid))
-  const recentEvents = alertEvents
-    .slice()
-    .sort((a, b) => new Date(b.triggered_at).getTime() - new Date(a.triggered_at).getTime())
-    .slice(0, 6)
-  const priorityTasks = anomalyTasks.length > 0 ? anomalyTasks : tasks.slice(0, 6)
-  const overallStatus = firingEvents.length > 0 ? 'incident' : 'healthy'
+  const priorityTasks = activeTasks.slice(0, 6)
+  const overallStatus = tasksFailed ? 'incident' : 'healthy'
 
   return (
     <div>
@@ -78,14 +75,14 @@ export default function DashboardPage() {
         <h1 className="text-2xl font-bold text-text-primary">{t('dashboard.title')}</h1>
         <TimeRangeSelector value={timeRange} onChange={handleTimeRangeChange} />
       </div>
-      {statsApiUnsupported && (
-        <div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-300">
-          Missing API: <code>/api/v1/dashboard/stats</code>
-        </div>
-      )}
-      {eventsApiUnsupported && (
-        <div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-300">
-          Missing API: <code>/api/v1/alerts/events/</code>
+      {tasksFailed && (
+        <div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-3 text-xs text-amber-200">
+          <div className="mb-2 font-medium">任务数据加载失败，页面已降级展示。</div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button size="sm" variant="outline" className="h-7 border-amber-300/40 bg-transparent text-amber-100" onClick={() => { void refetchTasks() }}>
+              重试任务服务
+            </Button>
+          </div>
         </div>
       )}
 
@@ -115,28 +112,28 @@ export default function DashboardPage() {
               <BellRing className="w-3 h-3" />
               Active Alerts
             </div>
-            <div className="text-lg font-semibold text-text-primary font-mono">{firingEvents.length}</div>
+            <div className="text-lg font-semibold text-text-primary font-mono">--</div>
           </div>
           <div className="glass-light rounded-lg p-3">
             <div className="flex items-center gap-1.5 text-[11px] text-text-muted mb-1">
               <Radar className="w-3 h-3" />
               Affected Tasks
             </div>
-            <div className="text-lg font-semibold text-text-primary font-mono">{tasksWithFiring.size}</div>
+            <div className="text-lg font-semibold text-text-primary font-mono">--</div>
           </div>
           <div className="glass-light rounded-lg p-3">
             <div className="flex items-center gap-1.5 text-[11px] text-text-muted mb-1">
               <Activity className="w-3 h-3" />
               Active Tasks
             </div>
-            <div className="text-lg font-semibold text-text-primary font-mono">{stats?.tasks.active ?? '--'}</div>
+            <div className="text-lg font-semibold text-text-primary font-mono">{activeTasks.length}</div>
           </div>
           <div className="glass-light rounded-lg p-3">
             <div className="flex items-center gap-1.5 text-[11px] text-text-muted mb-1">
               <Clock3 className="w-3 h-3" />
               Recent Events
             </div>
-            <div className="text-lg font-semibold text-text-primary font-mono">{alertEvents.length}</div>
+            <div className="text-lg font-semibold text-text-primary font-mono">--</div>
           </div>
         </div>
       </div>
@@ -144,15 +141,21 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 xl:grid-cols-[1.5fr_1fr] gap-4 mb-6">
         <div className="glass-light rounded-xl p-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-text-primary">
-              {anomalyTasks.length > 0 ? 'Anomaly Queue' : 'Priority Monitoring Queue'}
-            </h3>
+            <h3 className="text-sm font-semibold text-text-primary">Priority Monitoring Queue</h3>
             <Link to="/monitoring" className="text-xs text-accent hover:text-accent-hover inline-flex items-center gap-1">
               Open Monitoring
               <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
-          {tasksLoading ? (
+          {tasksFailed ? (
+            <ErrorState
+              title="任务数据加载失败"
+              description="无法生成优先队列，请重试任务服务。"
+              onRetry={() => { void refetchTasks() }}
+              retryLabel="重试任务服务"
+              className="min-h-[180px]"
+            />
+          ) : tasksLoading ? (
             <div className="space-y-2">
               {Array.from({ length: 4 }, (_, i) => (
                 <div key={i} className="glass rounded-lg h-12 animate-pulse" />
@@ -163,7 +166,6 @@ export default function DashboardPage() {
           ) : (
             <div className="space-y-2">
               {priorityTasks.map((task) => {
-                const hasFiring = tasksWithFiring.has(task.task_uuid)
                 return (
                   <Link
                     key={task.task_uuid}
@@ -172,14 +174,12 @@ export default function DashboardPage() {
                   >
                     <div className="min-w-0">
                       <div className="text-sm text-text-primary truncate">{task.task_name}</div>
-                      <div className="text-xs text-text-dim truncate">{task.target}{task.port ? `:${task.port}` : ''}</div>
+                      <div className="text-xs text-text-dim truncate">{formatTaskTarget(task)}{task.port ? `:${task.port}` : ''}</div>
                     </div>
                     <Badge className={`border text-[11px] ${
-                      hasFiring
-                        ? 'bg-red-500/15 text-red-300 border-red-500/30'
-                        : 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30'
+                      'bg-cyan-500/15 text-cyan-300 border-cyan-500/30'
                     }`}>
-                      {hasFiring ? 'Investigate' : 'Watch'}
+                      Watch
                     </Badge>
                   </Link>
                 )
@@ -190,43 +190,10 @@ export default function DashboardPage() {
 
         <div className="glass-light rounded-xl p-4">
           <h3 className="text-sm font-semibold text-text-primary mb-3">Recent Incident Signals</h3>
-          {eventsLoading ? (
-            <div className="space-y-2">
-              {Array.from({ length: 4 }, (_, i) => (
-                <div key={i} className="glass rounded-lg h-10 animate-pulse" />
-              ))}
-            </div>
-          ) : recentEvents.length === 0 ? (
-            <div className="text-xs text-text-muted">No recent alert events.</div>
-          ) : (
-            <div className="space-y-2">
-              {recentEvents.map((event) => (
-                <Link
-                  key={event.event_uuid}
-                  to={`/monitoring/${event.task_uuid}`}
-                  className="flex items-center justify-between gap-2 rounded-lg px-3 py-2 hover:bg-white/5 transition-colors border border-white/5"
-                >
-                  <div className="min-w-0">
-                    <div className="text-xs text-text-primary font-medium truncate">{event.task_uuid.slice(0, 8)}…</div>
-                    <div className="text-[11px] text-text-dim truncate">{new Date(event.triggered_at).toLocaleString()}</div>
-                  </div>
-                  <Badge className={`border text-[10px] ${
-                    event.status === 'firing'
-                      ? 'bg-red-500/15 text-red-300 border-red-500/30'
-                      : 'bg-green-500/15 text-green-300 border-green-500/30'
-                  }`}>
-                    {event.status}
-                  </Badge>
-                </Link>
-              ))}
-            </div>
-          )}
+          <div className="rounded-lg border border-white/10 bg-white/5 p-3 text-xs text-text-muted">
+            当前后端未部署 <code>/api/v1/alerts/events</code>，该区域暂不可用。
+          </div>
         </div>
-      </div>
-
-      {/* Supporting context */}
-      <div className="mb-6">
-        <StatsCards stats={stats} isLoading={statsLoading} />
       </div>
 
       {/* Health card */}
