@@ -10,6 +10,7 @@ const COMPONENT_KEYS = ['postgres', 'redis', 'nats', 'victoriametrics'] as const
 export default function HealthPage() {
   const { t, i18n } = useTranslation()
   const { data, isLoading, isError, refetch, isFetching } = useHealth()
+  const healthApiUnsupported = Boolean((data as { __unsupported?: boolean } | undefined)?.__unsupported)
 
   const health = data as { status: string; components: Record<string, string>; timestamp?: string }
   const isOk = health?.status === 'ok'
@@ -81,7 +82,13 @@ export default function HealthPage() {
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          {healthApiUnsupported && (
+            <div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-300">
+              Missing API: <code>/api/v1/health</code> (fallback to <code>/health</code>)
+            </div>
+          )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {COMPONENT_KEYS.map((key) => {
             const status = health.components?.[key] ?? 'error'
             return (
@@ -104,6 +111,7 @@ export default function HealthPage() {
               </div>
             )
           })}
+          </div>
         </div>
       )}
 

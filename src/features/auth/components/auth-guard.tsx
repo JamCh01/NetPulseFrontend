@@ -1,5 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router'
 import { useAuthStore } from '@/stores/auth-store'
+import { LoadingState } from '@/components/ui/loading-state'
 
 export function AuthGuard() {
   const initialized = useAuthStore((s) => s.initialized)
@@ -8,11 +9,7 @@ export function AuthGuard() {
 
   // Wait for auth state to be restored from localStorage
   if (!initialized) {
-    return (
-      <div className="min-h-screen gradient-bg grid-pattern flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
-      </div>
-    )
+    return <LoadingState fullscreen label="Restoring session" hint="Checking login state" />
   }
 
   if (!isAuthenticated) {

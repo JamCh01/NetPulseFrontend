@@ -1,7 +1,7 @@
 import { useQuery, useQueries } from '@tanstack/react-query'
 import { monitoringKeys } from './keys'
 import { buildApiUrl } from '@/api/base-url'
-import type { GranularityEnum, AgentResponse, MonitoringDataPoint } from '@/api/generated/types.gen'
+import type { GranularityEnum, MonitoringDataPoint } from '@/api/generated/types.gen'
 
 interface TimeRange {
   start: number
@@ -185,7 +185,7 @@ export function useMonitoringData(
  */
 export function useMultiAgentMonitoringData(
   taskUuid: string,
-  agents: AgentResponse[],
+  agents: Array<{ agent_uuid: string; agent_name: string }>,
   timeRange: TimeRange,
 ) {
   const config = getGranularityConfig(timeRange)

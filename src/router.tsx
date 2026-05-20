@@ -5,6 +5,7 @@ import { AuthLayout } from '@/layouts/auth-layout'
 import { PublicLayout } from '@/layouts/public-layout'
 import { AuthGuard } from '@/features/auth/components/auth-guard'
 import { AdminGuard } from '@/features/auth/components/admin-guard'
+import { LoadingState } from '@/components/ui/loading-state'
 
 // Auth pages
 const LoginPage = lazy(() => import('@/features/auth/pages/login-page'))
@@ -29,11 +30,7 @@ const MonitoringDetailPage = lazy(() => import('@/features/monitoring/pages/moni
 const MtrDetailPage = lazy(() => import('@/features/monitoring/pages/mtr-detail-page'))
 
 function PageLoader() {
-  return (
-    <div className="flex items-center justify-center min-h-[40vh]">
-      <div className="w-6 h-6 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
-    </div>
-  )
+  return <LoadingState label="Loading page" hint="Fetching module and route data" />
 }
 
 export function AppRouter() {

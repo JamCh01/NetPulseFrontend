@@ -9,6 +9,7 @@ const COMPONENT_KEYS = ['postgres', 'redis', 'nats', 'victoriametrics'] as const
 export function HealthCard() {
   const { t } = useTranslation()
   const { data, isLoading, isError } = useHealth()
+  const healthApiUnsupported = Boolean((data as { __unsupported?: boolean } | undefined)?.__unsupported)
 
   if (isLoading) {
     return <Skeleton className="h-24 w-full rounded-xl" />
@@ -27,6 +28,11 @@ export function HealthCard() {
 
   return (
     <div className="glass-light rounded-xl p-4 relative group">
+      {healthApiUnsupported && (
+        <div className="mb-3 rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-1 text-[10px] text-amber-300">
+          Missing API: <code>/api/v1/health</code> (fallback to <code>/health</code>)
+        </div>
+      )}
       <div className="flex items-center justify-between mb-3">
         <Link to="/system/health" className="flex items-center gap-1 group/title">
           <h3 className="text-xs font-medium text-text-muted uppercase tracking-wider group-hover/title:text-text-primary transition-colors">

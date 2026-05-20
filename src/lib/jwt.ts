@@ -4,7 +4,12 @@ export interface JwtPayload {
   exp: number
 }
 
+export function isJwtToken(token: string): boolean {
+  return token.split('.').length === 3
+}
+
 export function decodeJwt(token: string): JwtPayload | null {
+  if (!isJwtToken(token)) return null
   try {
     const payload = token.split('.')[1]
     if (!payload) return null

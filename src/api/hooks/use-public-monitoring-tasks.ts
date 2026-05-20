@@ -10,25 +10,27 @@ type PublicMonitoringTask = {
   interval?: number
 }
 
+type MonitoringTaskItem = {
+  task_uuid: string
+  name?: string
+  task_type?: string
+  target?: string | {
+    target?: string
+    name?: string
+  } | null
+  interval?: number
+  probe_config?: {
+    port?: number | null
+  } | null
+}
+
 type MonitoringEnvelope = {
   data?: {
-    items?: Array<{
-      task_uuid: string
-      name?: string
-      task_type?: string
-      target?: string | {
-        target?: string
-        name?: string
-      } | null
-      interval?: number
-      probe_config?: {
-        port?: number | null
-      } | null
-    }>
+    items?: MonitoringTaskItem[]
   }
 }
 
-function readTargetLabel(target: MonitoringEnvelope['data']['items'][number]['target']): string {
+function readTargetLabel(target: MonitoringTaskItem['target']): string {
   if (typeof target === 'string') return target
   if (target && typeof target === 'object') {
     if (typeof target.target === 'string' && target.target.length > 0) return target.target

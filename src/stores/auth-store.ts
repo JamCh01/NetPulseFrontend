@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { decodeJwt, isTokenExpired } from '@/lib/jwt'
+import { decodeJwt, isJwtToken, isTokenExpired } from '@/lib/jwt'
 import { buildApiUrl } from '@/api/base-url'
 
 interface AuthUser {
@@ -99,8 +99,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const storedRefresh = localStorage.getItem(REFRESH_TOKEN_KEY)
     const storedUser = localStorage.getItem(USER_KEY)
 
-    // Try to restore from stored access token
-    if (storedAccess && storedUser && !isTokenExpired(storedAccess)) {
+    // Try to restore from stored access token.
+    // Opaque (non-JWT) tokens are considered valid here and validated by backend on request.
+    if (storedAccess && storedUser && (!isJwtToken(storedAccess) || !isTokenExpired(storedAccess))) {
       const user = parseAuthUser(storedUser)
       if (user) {
         set({ accessToken: storedAccess, refreshToken: storedRefresh, user, initialized: true })

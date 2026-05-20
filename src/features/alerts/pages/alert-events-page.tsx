@@ -53,6 +53,7 @@ export default function AlertEventsPage() {
   const { data: agentsData } = useAgents({ limit: 200 })
 
   const paginatedData = data as { items?: AlertEventResponse[]; total?: number } | undefined
+  const eventsApiUnsupported = Boolean((data as { __unsupported?: boolean } | undefined)?.__unsupported)
   const events = (paginatedData?.items ?? []) as AlertEventResponse[]
   const total = paginatedData?.total ?? 0
   const totalPages = Math.ceil(total / PAGE_SIZE)
@@ -102,6 +103,11 @@ export default function AlertEventsPage() {
           </Link>
         </div>
       </div>
+      {eventsApiUnsupported && (
+        <div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-300">
+          Missing API: <code>/api/v1/alerts/events/</code>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex items-center gap-3 mb-4">

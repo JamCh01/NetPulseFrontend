@@ -5,6 +5,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { queryClient } from '@/lib/query-client'
 import { AppRouter } from '@/router'
 import { useAuthStore } from '@/stores/auth-store'
+import { LoadingState } from '@/components/ui/loading-state'
 
 export default function App() {
   const initFromStorage = useAuthStore((s) => s.initFromStorage)
@@ -15,11 +16,7 @@ export default function App() {
   }, [initFromStorage])
 
   if (!initialized) {
-    return (
-      <div className="min-h-screen gradient-bg grid-pattern flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
-      </div>
-    )
+    return <LoadingState fullscreen label="Preparing workspace" hint="Syncing local session" />
   }
 
   return (

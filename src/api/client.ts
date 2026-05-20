@@ -5,16 +5,37 @@ import { refreshRouteApiV1AuthRefreshPost } from '@/api/generated/sdk.gen'
 let isRefreshing = false
 let refreshPromise: Promise<boolean> | null = null
 
+function extractTokens(data: unknown): { accessToken: string; refreshToken: string } | null {
+  if (typeof data !== 'object' || data === null) return null
+  const root = data as Record<string, unknown>
+  const nested = typeof root.data === 'object' && root.data !== null
+    ? (root.data as Record<string, unknown>)
+    : null
+  const source = nested ?? root
+  const accessToken = typeof source.access_token === 'string' ? source.access_token : null
+  if (!accessToken) return null
+  const refreshToken = typeof source.refresh_token === 'string' ? source.refresh_token : accessToken
+  return { accessToken, refreshToken }
+}
+
 async function doRefresh(): Promise<boolean> {
-  const refreshToken = useAuthStore.getState().refreshToken
-  if (!refreshToken) return false
+  const state = useAuthStore.getState()
+  const refreshToken = state.refreshToken
+  const accessToken = state.accessToken
+  const currentToken = accessToken ?? refreshToken
+  if (!currentToken) return false
 
   try {
-    const { data } = await refreshRouteApiV1AuthRefreshPost({
-      body: { refresh_token: refreshToken },
+    const { data, error } = await refreshRouteApiV1AuthRefreshPost({
+      body: { refresh_token: refreshToken ?? currentToken },
+      headers: { authorization: `Bearer ${currentToken}` },
     })
-    if (data) {
-      useAuthStore.getState().setTokens(data.access_token, data.refresh_token)
+    if (error) {
+      return false
+    }
+    const tokens = extractTokens(data)
+    if (tokens) {
+      useAuthStore.getState().setTokens(tokens.accessToken, tokens.refreshToken)
       return true
     }
     return false
