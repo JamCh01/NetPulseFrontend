@@ -242,6 +242,27 @@ body {
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Button Theme Color Mappings */
+  --color-btn-primary-bg: var(--btn-primary-bg);
+  --color-btn-primary-fg: var(--btn-primary-fg);
+  --color-btn-primary-hover: var(--btn-primary-hover-bg);
+  --color-btn-primary-active: var(--btn-primary-active-bg);
+  --color-btn-secondary-bg: var(--btn-secondary-bg);
+  --color-btn-secondary-fg: var(--btn-secondary-fg);
+  --color-btn-secondary-hover: var(--btn-secondary-hover-bg);
+  --color-btn-secondary-hover-fg: var(--btn-secondary-hover-fg);
+  --color-btn-destructive-bg: var(--btn-destructive-bg);
+  --color-btn-destructive-fg: var(--btn-destructive-fg);
+  --color-btn-destructive-border: var(--btn-destructive-border);
+  --color-btn-destructive-hover-bg: var(--btn-destructive-hover-bg);
+  --color-btn-destructive-hover-fg: var(--btn-destructive-hover-fg);
+  --color-btn-destructive-hover-border: var(--btn-destructive-hover-border);
+  --color-btn-destructive-ring: var(--btn-destructive-focus-ring);
+  --color-btn-ghost-fg: var(--btn-ghost-fg);
+  --color-btn-ghost-hover: var(--btn-ghost-hover-bg);
+  --color-btn-ghost-hover-fg: var(--btn-ghost-hover-fg);
+  --color-btn-outline-border: var(--btn-outline-border);
 }
 
 :root {
@@ -277,6 +298,28 @@ body {
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* Button Theme Tokens */
+  --btn-primary-bg: oklch(0.205 0 0);
+  --btn-primary-fg: oklch(0.985 0 0);
+  --btn-primary-hover-bg: oklch(0.3 0 0);
+  --btn-primary-hover-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+  --btn-primary-active-bg: oklch(0.15 0 0);
+  --btn-secondary-bg: oklch(0.97 0 0);
+  --btn-secondary-fg: oklch(0.205 0 0);
+  --btn-secondary-hover-bg: oklch(0.92 0 0);
+  --btn-secondary-hover-fg: oklch(0.1 0 0);
+  --btn-destructive-bg: rgba(239, 68, 68, 0.1);
+  --btn-destructive-fg: #ef4444;
+  --btn-destructive-border: rgba(239, 68, 68, 0.2);
+  --btn-destructive-hover-bg: rgba(239, 68, 68, 0.2);
+  --btn-destructive-hover-fg: #dc2626;
+  --btn-destructive-hover-border: rgba(239, 68, 68, 0.4);
+  --btn-destructive-focus-ring: rgba(239, 68, 68, 0.25);
+  --btn-ghost-fg: oklch(0.439 0 0);
+  --btn-ghost-hover-bg: oklch(0.95 0 0);
+  --btn-ghost-hover-fg: oklch(0.145 0 0);
+  --btn-outline-border: oklch(0.922 0 0);
 }
 
 .dark {
@@ -311,6 +354,28 @@ body {
   --sidebar-accent-foreground: #00ffc8;
   --sidebar-border: rgba(0, 255, 200, 0.06);
   --sidebar-ring: rgba(0, 255, 200, 0.3);
+
+  /* Button Theme Tokens */
+  --btn-primary-bg: #00ffc8;
+  --btn-primary-fg: #030712;
+  --btn-primary-hover-bg: #00e6b4;
+  --btn-primary-hover-shadow: 0 0 0 1px rgba(0, 255, 200, 0.35);
+  --btn-primary-active-bg: rgba(0, 230, 180, 0.9);
+  --btn-secondary-bg: rgba(10, 18, 32, 0.5);
+  --btn-secondary-fg: #dce3ee;
+  --btn-secondary-hover-bg: rgba(10, 18, 32, 0.85);
+  --btn-secondary-hover-fg: #ffffff;
+  --btn-destructive-bg: rgba(239, 68, 68, 0.15);
+  --btn-destructive-fg: #ef4444;
+  --btn-destructive-border: rgba(239, 68, 68, 0.3);
+  --btn-destructive-hover-bg: rgba(239, 68, 68, 0.25);
+  --btn-destructive-hover-fg: #fca5a5;
+  --btn-destructive-hover-border: rgba(239, 68, 68, 0.5);
+  --btn-destructive-focus-ring: rgba(239, 68, 68, 0.25);
+  --btn-ghost-fg: #a3afc2;
+  --btn-ghost-hover-bg: rgba(10, 18, 32, 0.5);
+  --btn-ghost-hover-fg: #ffffff;
+  --btn-outline-border: rgba(0, 255, 200, 0.12);
 }
 
 @layer base {
