@@ -21,17 +21,17 @@
   --color-secondary-dim: rgba(0, 180, 255, 0.1);
 
   /* Background layers */
-  --color-bg-root: #030712;
-  --color-bg-surface: rgba(6, 12, 24, 0.7);
-  --color-bg-surface-light: rgba(10, 18, 32, 0.5);
-  --color-bg-card: rgba(6, 12, 24, 0.6);
-  --color-bg-card-hover: rgba(6, 12, 24, 0.8);
+  --color-bg-root: var(--bg-root);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-surface-light: var(--bg-surface-light);
+  --color-bg-card: var(--bg-card-color);
+  --color-bg-card-hover: var(--bg-card-hover);
 
   /* Text */
-  --color-text-primary: #ffffff;
-  --color-text-secondary: #dce3ee;
-  --color-text-muted: #a3afc2;
-  --color-text-dim: #7e8ba1;
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-dim: var(--text-dim);
 
   /* Status */
   --color-status-online: #22c55e;
@@ -266,6 +266,17 @@ body {
 }
 
 :root {
+  --bg-root: #f9fafb;
+  --bg-surface: rgba(255, 255, 255, 0.7);
+  --bg-surface-light: rgba(243, 244, 246, 0.5);
+  --bg-card-color: rgba(255, 255, 255, 0.6);
+  --bg-card-hover: rgba(255, 255, 255, 0.8);
+
+  --text-primary: oklch(0.145 0 0);
+  --text-secondary: oklch(0.269 0 0);
+  --text-muted: oklch(0.439 0 0);
+  --text-dim: oklch(0.556 0 0);
+
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -323,6 +334,17 @@ body {
 }
 
 .dark {
+  --bg-root: #030712;
+  --bg-surface: rgba(6, 12, 24, 0.7);
+  --bg-surface-light: rgba(10, 18, 32, 0.5);
+  --bg-card-color: rgba(6, 12, 24, 0.6);
+  --bg-card-hover: rgba(6, 12, 24, 0.8);
+
+  --text-primary: #ffffff;
+  --text-secondary: #dce3ee;
+  --text-muted: #a3afc2;
+  --text-dim: #7e8ba1;
+
   --background: #030712;
   --foreground: #dce3ee;
   --card: rgba(6, 12, 24, 0.6);
