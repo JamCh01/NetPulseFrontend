@@ -103,7 +103,7 @@ export function AppLayout() {
   const visibleNav = staticNavItems.filter((item) => !item.adminOnly || isAdmin)
   const visibleAdminNav = adminNavItems.filter((item) => !item.adminOnly || isAdmin)
 
-  const isTaskActive = location.pathname.startsWith('/tasks') || location.pathname.startsWith('/monitoring/')
+  const isTaskActive = location.pathname.startsWith('/tasks') || location.pathname.startsWith('/app/monitoring/')
 
   return (
     <div className="min-h-screen gradient-bg grid-pattern flex">
@@ -189,7 +189,7 @@ export function AppLayout() {
                 {tasks.map((task) => {
                   const protocolKey = (task.protocol ?? 'icmp').toLowerCase()
                   const protoColor = protocolIcon[protocolKey] ?? 'text-gray-400'
-                  const taskPath = `/monitoring/${task.task_uuid}`
+                  const taskPath = `/app/monitoring/${task.task_uuid}`
                   const isActive = location.pathname === taskPath
 
                   return (

@@ -130,7 +130,7 @@ export default function TaskDetailPage() {
             </Button>
             <Button
               className="bg-emerald-500/90 hover:bg-emerald-400 text-gray-950 border-none"
-              onClick={() => navigate(`/monitoring/${task.task_uuid}`)}
+              onClick={() => navigate(`/app/monitoring/${task.task_uuid}`)}
             >
               {t('tasks.viewMonitoring')}
             </Button>

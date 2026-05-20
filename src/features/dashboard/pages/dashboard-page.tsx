@@ -38,6 +38,7 @@ function MiniChartWithData({ task, timeRange }: { task: TaskResponse, timeRange:
       taskName={task.task_name}
       protocol={task.protocol}
       target={formatTaskTarget(task)}
+      basePath="/app/monitoring"
       data={monitoringData?.data}
       isLoading={isLoading}
     />
@@ -142,7 +143,7 @@ export default function DashboardPage() {
         <div className="glass-light rounded-xl p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-text-primary">Priority Monitoring Queue</h3>
-            <Link to="/monitoring" className="text-xs text-accent hover:text-accent-hover inline-flex items-center gap-1">
+            <Link to="/app/monitoring" className="text-xs text-accent hover:text-accent-hover inline-flex items-center gap-1">
               Open Monitoring
               <ArrowRight className="w-3 h-3" />
             </Link>
@@ -169,7 +170,7 @@ export default function DashboardPage() {
                 return (
                   <Link
                     key={task.task_uuid}
-                    to={`/monitoring/${task.task_uuid}`}
+                    to={`/app/monitoring/${task.task_uuid}`}
                     className="flex items-center justify-between gap-3 rounded-lg px-3 py-2 hover:bg-white/5 transition-colors border border-white/5"
                   >
                     <div className="min-w-0">

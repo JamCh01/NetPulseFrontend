@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useParams, useNavigate } from 'react-router'
+import { useParams, useNavigate, useLocation } from 'react-router'
 import { useMonitoringTaskDetail } from '@/api/hooks/use-monitoring-task-detail'
 import { useMtrList, useMtrDetail } from '@/api/hooks/use-mtr'
 import { MtrTimeline } from '@/features/monitoring/components/mtr-timeline'
@@ -25,7 +25,9 @@ export default function MtrDetailPage() {
   const { t } = useTranslation()
   const { taskUuid } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const isAdmin = useAuthStore((s) => s.isAdmin())
+  const monitoringBasePath = location.pathname.startsWith('/app/monitoring') ? '/app/monitoring' : '/monitoring'
   const { data: detailData, isLoading: taskLoading } = useMonitoringTaskDetail(taskUuid ?? '')
 
   const task = detailData?.task
@@ -88,7 +90,7 @@ export default function MtrDetailPage() {
         <h1 className="text-2xl font-bold text-text-primary mb-6">{t('monitoring.mtrTitle')}</h1>
         <div className="glass-light rounded-xl p-6 text-center">
           <p className="text-red-400 text-sm">{t('monitoring.taskNotFound')}</p>
-          <Button variant="outline" className="mt-4" onClick={() => navigate('/monitoring')}>
+          <Button variant="outline" className="mt-4" onClick={() => navigate(monitoringBasePath)}>
             {t('common.back')}
           </Button>
         </div>
@@ -102,7 +104,7 @@ export default function MtrDetailPage() {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => navigate('/monitoring')}
+            onClick={() => navigate(monitoringBasePath)}
             className="text-text-muted hover:text-text-primary transition-colors text-sm"
           >
             {t('monitoring.title')} /

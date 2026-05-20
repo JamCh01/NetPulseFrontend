@@ -1,4 +1,4 @@
-import { Link } from 'react-router'
+import { Link, useLocation } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { usePublicMonitoringTasks } from '@/api/hooks/use-public-monitoring-tasks'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -13,7 +13,9 @@ const protocolBadge: Record<string, { bg: string; text: string }> = {
 
 export default function MonitoringIndexPage() {
   const { t } = useTranslation()
+  const location = useLocation()
   const { data: tasks = [], isLoading } = usePublicMonitoringTasks(200)
+  const basePath = location.pathname.startsWith('/app/monitoring') ? '/app/monitoring' : '/monitoring'
 
   return (
     <div>
@@ -37,7 +39,7 @@ export default function MonitoringIndexPage() {
             return (
               <Link
                 key={task.task_uuid}
-                to={`/monitoring/${task.task_uuid}`}
+                to={`${basePath}/${task.task_uuid}`}
                 className="glass-card rounded-xl p-4 cursor-pointer block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
               >
                 <div className="flex items-center gap-3 mb-2">

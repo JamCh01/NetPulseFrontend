@@ -57,6 +57,9 @@ export function AppRouter() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/tasks" element={<TasksPage />} />
             <Route path="/tasks/:taskUuid" element={<TaskDetailPage />} />
+            <Route path="/app/monitoring" element={<MonitoringIndexPage />} />
+            <Route path="/app/monitoring/:taskUuid" element={<MonitoringDetailPage />} />
+            <Route path="/app/monitoring/:taskUuid/mtr" element={<MtrDetailPage />} />
             <Route path="/alerts" element={<AlertsPage />} />
             <Route path="/alerts/events" element={<AlertEventsPage />} />
             <Route path="/webhooks" element={<WebhooksPage />} />

@@ -11,6 +11,7 @@ interface MiniSmokePingChartProps {
   taskName: string
   protocol?: string | null
   target: string
+  basePath?: string
   data?: MonitoringDataPoint[]
   isLoading?: boolean
 }
@@ -27,6 +28,7 @@ function MiniSmokePingChartInner({
   taskName,
   protocol,
   target,
+  basePath = '/monitoring',
   data,
   isLoading,
 }: MiniSmokePingChartProps) {
@@ -124,7 +126,7 @@ function MiniSmokePingChartInner({
   return (
     <div
       className="glass-light rounded-xl p-3 cursor-pointer hover:border-emerald-500/20 transition-colors"
-      onClick={() => navigate(`/monitoring/${taskUuid}`)}
+      onClick={() => navigate(`${basePath}/${taskUuid}`)}
     >
       <div className="flex items-center justify-between mb-2">
         <span className="text-[10px] font-medium text-text-primary truncate">{taskName}</span>

@@ -235,7 +235,7 @@ export default function TasksPage() {
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Button variant="ghost" size="sm" className="text-xs h-9 px-3 text-text-muted hover:text-text-primary"
-                        onClick={() => navigate(`/monitoring/${task.task_uuid}`)}
+                        onClick={() => navigate(`/app/monitoring/${task.task_uuid}`)}
                       >
                         {t('tasks.viewMonitoring')}
                       </Button>
