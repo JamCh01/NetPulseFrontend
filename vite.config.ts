@@ -5,6 +5,18 @@ import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 
 export default defineConfig({
+  build: {
+    chunkSizeWarningLimit: 700,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('/node_modules/echarts/')) return 'echarts'
+          if (id.includes('/node_modules/react') || id.includes('/node_modules/react-dom') || id.includes('/node_modules/react-router')) return 'react'
+          if (id.includes('/node_modules/@tanstack/react-query')) return 'query'
+        },
+      },
+    },
+  },
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
@@ -21,7 +33,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:8001',
+        target: 'http://127.0.0.1:8000',
         changeOrigin: true,
       },
     },

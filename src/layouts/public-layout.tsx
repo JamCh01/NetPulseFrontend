@@ -1,21 +1,16 @@
 import { useState } from 'react'
-import { Outlet, NavLink, useNavigate, useLocation } from 'react-router'
+import { Outlet, useNavigate, useLocation } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/stores/auth-store'
-import { usePublicMonitoringTasks } from '@/api/hooks/use-public-monitoring-tasks'
 import { cn } from '@/lib/utils'
+import { TargetGeoSidebarTree } from '@/features/monitoring/components/navigation/target-geo-sidebar-tree'
 import {
-  Activity,
-  ClipboardList,
-  ChevronDown,
-  ChevronRight,
   LogIn,
   Languages,
   Menu,
   X,
   Zap,
 } from 'lucide-react'
-import { PROTOCOL_COLORS, PROTOCOL_ICON_COLORS } from '@/lib/constants'
 
 export function PublicLayout() {
   const { t, i18n } = useTranslation()
@@ -25,8 +20,7 @@ export function PublicLayout() {
   const [tasksExpanded, setTasksExpanded] = useState(true)
   const [mobileMenuAnchorPath, setMobileMenuAnchorPath] = useState<string | null>(null)
   const mobileMenuOpen = mobileMenuAnchorPath === location.pathname
-
-  const { data: tasks = [] } = usePublicMonitoringTasks(200)
+  const hideHeader = location.pathname.startsWith('/monitoring')
 
   return (
     <div className="min-h-screen gradient-bg grid-pattern flex">
@@ -61,61 +55,12 @@ export function PublicLayout() {
 
         {/* Tasks nav */}
         <nav className="flex-1 py-4 px-2 space-y-1 overflow-y-auto">
-          <div>
-            <button
-              onClick={() => setTasksExpanded(!tasksExpanded)}
-              className={cn(
-                'flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-colors w-full',
-                'bg-accent text-accent-foreground'
-              )}
-            >
-              <ClipboardList className="w-4 h-4 shrink-0" />
-              <span className="flex-1 text-left">{t('nav.tasks')}</span>
-              <span className="text-[11px] text-text-dim font-mono">{tasks.length}</span>
-              {tasksExpanded ? (
-                <ChevronDown className="w-3 h-3 text-text-dim" />
-              ) : (
-                <ChevronRight className="w-3 h-3 text-text-dim" />
-              )}
-            </button>
-
-            {tasksExpanded && (
-              <div className="ml-3 mt-0.5 space-y-0.5 border-l border-border pl-3">
-                {tasks.map((task) => {
-                  const protoColor = PROTOCOL_ICON_COLORS[task.protocol.toLowerCase()] ?? 'text-gray-400'
-                  const taskPath = `/monitoring/${task.task_uuid}`
-                  const isActive = location.pathname === taskPath
-
-                  return (
-                    <NavLink
-                      key={task.task_uuid}
-                      to={taskPath}
-                      className={cn(
-                        'flex items-center gap-2 px-2 py-1.5 rounded-md text-[11px] transition-colors group',
-                        isActive
-                          ? 'bg-accent/50 text-accent-foreground'
-                          : 'text-text-dim hover:text-text-secondary hover:bg-muted'
-                      )}
-                    >
-                      <Activity className={cn('w-3 h-3 shrink-0', isActive ? 'text-accent-foreground' : protoColor)} />
-                      <span className="truncate flex-1">{task.task_name}</span>
-                      <span className={cn(
-                        'text-[10px] px-1.5 py-0.5 rounded font-mono uppercase border shrink-0',
-                        isActive 
-                          ? 'bg-accent-foreground/15 text-accent-foreground border-accent-foreground/30' 
-                          : (PROTOCOL_COLORS[task.protocol.toLowerCase()] ?? 'bg-muted text-text-muted border-border')
-                      )}>
-                        {task.protocol}
-                      </span>
-                    </NavLink>
-                  )
-                })}
-                {tasks.length === 0 && (
-                  <div className="px-2 py-1.5 text-xs text-text-dim">{t('nav.noTasks')}</div>
-                )}
-              </div>
-            )}
-          </div>
+          <TargetGeoSidebarTree
+            basePath="/monitoring"
+            expanded={tasksExpanded}
+            onToggle={() => setTasksExpanded(!tasksExpanded)}
+            compact
+          />
         </nav>
 
         {/* Bottom actions */}
@@ -150,22 +95,24 @@ export function PublicLayout() {
 
       {/* Main content */}
       <main className="flex-1 md:ml-(--sidebar-width)">
-        <header className="nav-blur sticky top-0 z-30 h-14 flex items-center justify-between px-4 md:px-6">
-          <button
-            aria-label="Open menu"
-            className="p-1.5 md:hidden text-text-muted hover:text-text-primary rounded-md hover:bg-muted"
-            onClick={() => setMobileMenuAnchorPath(location.pathname)}
-          >
-            <Menu className="w-5 h-5" aria-hidden="true" />
-          </button>
-          <div className="hidden lg:flex items-center gap-1.5 text-[10px] text-text-dim/70 select-none">
-            <span className="uppercase tracking-wide">Tips</span>
-            <span>Tab / Shift+Tab</span>
-            <span>·</span>
-            <span>Enter</span>
-          </div>
-          <div />
-        </header>
+        {!hideHeader && (
+          <header className="nav-blur sticky top-0 z-30 h-14 flex items-center justify-between px-4 md:px-6">
+            <button
+              aria-label="Open menu"
+              className="p-1.5 md:hidden text-text-muted hover:text-text-primary rounded-md hover:bg-muted"
+              onClick={() => setMobileMenuAnchorPath(location.pathname)}
+            >
+              <Menu className="w-5 h-5" aria-hidden="true" />
+            </button>
+            <div className="hidden lg:flex items-center gap-1.5 text-[10px] text-text-dim/70 select-none">
+              <span className="uppercase tracking-wide">Tips</span>
+              <span>Tab / Shift+Tab</span>
+              <span>·</span>
+              <span>Enter</span>
+            </div>
+            <div />
+          </header>
+        )}
         <div className="p-4 md:p-6">
           <Outlet />
         </div>

@@ -24,8 +24,8 @@
 
 联调基线以线上文档为准：
 
-- Swagger: `http://115.178.32.10:8001/docs`
-- OpenAPI: `http://115.178.32.10:8001/openapi.json`
+- Swagger: `http://115.178.32.10:8000/docs`
+- OpenAPI: `http://115.178.32.10:8000/openapi.json`
 
 当前后端已确认提供：
 

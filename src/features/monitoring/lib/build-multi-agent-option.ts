@@ -19,7 +19,8 @@ interface ProcessedAgentData {
   timestamps: number[]
   min: (number | null)[]
   max: (number | null)[]
-  median: (number | null)[]
+  avg: (number | null)[]
+  loss: (number | null)[]
   rawPoints: Map<number, MonitoringDataPoint>
 }
 
@@ -30,7 +31,8 @@ function processAgentData(points: MonitoringDataPoint[]): ProcessedAgentData {
   const timestamps: number[] = []
   const min: (number | null)[] = []
   const max: (number | null)[] = []
-  const median: (number | null)[] = []
+  const avg: (number | null)[] = []
+  const loss: (number | null)[] = []
   const rawPoints = new Map<number, MonitoringDataPoint>()
 
   for (let i = 0; i < points.length; i++) {
@@ -45,24 +47,25 @@ function processAgentData(points: MonitoringDataPoint[]): ProcessedAgentData {
         timestamps.push(midTs)
         min.push(null)
         max.push(null)
-        median.push(null)
+        avg.push(null)
+        loss.push(null)
       }
     }
 
     timestamps.push(ts)
     min.push(p.min_rtt)
     max.push(p.max_rtt)
-    median.push(p.median_rtt)
+    avg.push(p.avg_rtt)
+    loss.push(p.packet_loss_pct)
     rawPoints.set(ts, p)
   }
 
-  return { timestamps, min, max, median, rawPoints }
+  return { timestamps, min, max, avg, loss, rawPoints }
 }
 
 /**
  * Build a multi-agent overlay chart.
- * Each agent gets its own median line with a distinct color.
- * A shared band (min-max envelope) is drawn for the first agent as reference.
+ * Each agent gets Avg as the main line, a Min-Max envelope, and packet loss bars.
  */
 export function buildMultiAgentOption(
   agentSeries: AgentSeriesData[],
@@ -97,7 +100,7 @@ export function buildMultiAgentOption(
 
     // Band area (min → max) — subtle fill per agent
     series.push({
-      name: `${agent.agentName}_band_lower`,
+      name: `${agent.agentName} Min baseline`,
       type: 'line',
       stack: `band_${i}`,
       symbol: 'none',
@@ -112,7 +115,7 @@ export function buildMultiAgentOption(
       connectNulls: false,
     })
     series.push({
-      name: `${agent.agentName}_band`,
+      name: `${agent.agentName} Min-Max band`,
       type: 'line',
       stack: `band_${i}`,
       symbol: 'none',
@@ -131,7 +134,25 @@ export function buildMultiAgentOption(
       connectNulls: false,
     })
 
-    // Median line — the main visible line per agent
+    // Packet loss bars use the right axis.
+    series.push({
+      name: `${agent.agentName} Packet Loss`,
+      type: 'bar',
+      yAxisIndex: 1,
+      barMaxWidth: 8,
+      itemStyle: {
+        color: color.line,
+        opacity: 0.28,
+        borderRadius: [2, 2, 0, 0],
+      },
+      data: processed.timestamps.map((ts, j) => {
+        const val = processed.loss[j]
+        return val === null ? [ts, null] : [ts, val]
+      }),
+      z: 3,
+    })
+
+    // Avg line — the main visible line per agent
     series.push({
       name: agent.agentName,
       type: 'line',
@@ -149,7 +170,7 @@ export function buildMultiAgentOption(
       },
       itemStyle: { color: color.line },
       data: processed.timestamps.map((ts, j) => {
-        const val = processed.median[j]
+        const val = processed.avg[j]
         return val === null ? [ts, null] : [ts, val]
       }),
       z: 10 + i,
@@ -176,7 +197,7 @@ export function buildMultiAgentOption(
       itemWidth: 16,
       itemHeight: 2,
       itemGap: 16,
-      // Only show agent median lines in legend, not band/loss series
+      // Only show agent Avg lines in legend, not band/loss series
       selector: false,
       data: processedAgents.map((pa, i) => ({
         name: pa.agent.agentName,
@@ -201,21 +222,41 @@ export function buildMultiAgentOption(
       },
       splitLine: { show: false },
     },
-    yAxis: {
-      type: 'value',
-      axisLabel: {
-        color: theme.axisLabelColor,
-        fontSize: 10,
-        fontFamily: "'JetBrains Mono', monospace",
-        formatter: '{value}ms',
+    yAxis: [
+      {
+        type: 'value',
+        name: 'Latency',
+        nameTextStyle: { color: theme.axisLabelColor, fontSize: 10 },
+        axisLabel: {
+          color: theme.axisLabelColor,
+          fontSize: 10,
+          fontFamily: "'JetBrains Mono', monospace",
+          formatter: '{value}ms',
+        },
+        axisLine: { show: false },
+        axisTick: { show: false },
+        splitLine: {
+          lineStyle: { color: theme.gridLineColor, type: 'dashed' },
+        },
+        min: 0,
       },
-      axisLine: { show: false },
-      axisTick: { show: false },
-      splitLine: {
-        lineStyle: { color: theme.gridLineColor, type: 'dashed' },
+      {
+        type: 'value',
+        name: 'Loss',
+        nameTextStyle: { color: theme.axisLabelColor, fontSize: 10 },
+        axisLabel: {
+          color: theme.axisLabelColor,
+          fontSize: 10,
+          fontFamily: "'JetBrains Mono', monospace",
+          formatter: '{value}%',
+        },
+        axisLine: { show: false },
+        axisTick: { show: false },
+        splitLine: { show: false },
+        min: 0,
+        max: 100,
       },
-      min: 0,
-    },
+    ],
     tooltip: {
       trigger: 'axis',
       axisPointer: {
@@ -233,7 +274,7 @@ export function buildMultiAgentOption(
         const visibleNames = new Set(
           rawItems
             .map((i) => i.seriesName)
-            .filter((n) => !n.includes('_band')),
+            .filter((n) => !n.includes('Min baseline') && !n.includes('Min-Max band') && !n.includes('Packet Loss')),
         )
 
         const ts = rawItems[0].axisValue
@@ -267,15 +308,14 @@ export function buildMultiAgentOption(
         let html = `<div style="font-family:'Inter',sans-serif;font-size:11px;line-height:1.4">`
         html += `<div style="color:${labelColor};margin-bottom:4px">${timeStr}</div>`
         html += `<table style="border-collapse:collapse;width:100%">`
-        html += `<tr><td style="${th}"></td><td style="${th}">Med</td><td style="${th}">Avg</td><td style="${th}">Min</td><td style="${th}">Max</td><td style="${th}">P95</td><td style="${th}">P99</td><td style="${th}">Loss</td></tr>`
+        html += `<tr><td style="${th}"></td><td style="${th}">Avg</td><td style="${th}">Min</td><td style="${th}">Max</td><td style="${th}">P95</td><td style="${th}">P99</td><td style="${th}">Loss</td></tr>`
 
         for (const row of rows) {
           const p = row.point
           const lc = p.packet_loss_pct > 0 ? '#ff3250' : '#4ade80'
           html += `<tr>`
           html += `<td style="padding:1px 4px;white-space:nowrap"><span style="display:inline-block;width:8px;height:2px;border-radius:1px;background:${row.color};vertical-align:middle;margin-right:4px"></span><span style="color:${nameColor};font-size:10px">${row.name}</span></td>`
-          html += `<td style="${td};color:${row.color}">${rtt(p.median_rtt)}</td>`
-          html += `<td style="${td};color:${valueColor}">${rtt(p.avg_rtt)}</td>`
+          html += `<td style="${td};color:${row.color}">${rtt(p.avg_rtt)}</td>`
           html += `<td style="${td};color:${valueColor}">${rtt(p.min_rtt)}</td>`
           html += `<td style="${td};color:${valueColor}">${rtt(p.max_rtt)}</td>`
           html += `<td style="${td};color:${valueColor}">${rtt(p.p95_rtt)}</td>`

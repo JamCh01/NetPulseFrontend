@@ -1,10 +1,10 @@
 import { memo, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import ReactECharts from 'echarts-for-react'
 import type { MonitoringDataPoint } from '@/api/generated/types.gen'
-import { transformToChartData } from '../lib/transform-chart-data'
-import { useChartTheme } from '../lib/chart-theme'
-import { buildSmokePingOption } from '../lib/build-chart-option'
+import { LazyECharts } from '@/components/charts/lazy-echarts'
+import { transformToChartData } from '../../lib/transform-chart-data'
+import { useChartTheme } from '../../lib/chart-theme'
+import { buildSmokePingOption } from '../../lib/build-chart-option'
 import { Skeleton } from '@/components/ui/skeleton'
 
 type ChartStyle = 'basic' | 'smoke'
@@ -81,12 +81,11 @@ function SmokePingChartInner({
 
   return (
     <div className="glass-light rounded-xl p-4">
-      <ReactECharts
+      <LazyECharts
         option={chartOption!}
         style={{ height, width: '100%' }}
         notMerge={false}
         lazyUpdate
-        opts={{ renderer: 'canvas' }}
       />
     </div>
   )

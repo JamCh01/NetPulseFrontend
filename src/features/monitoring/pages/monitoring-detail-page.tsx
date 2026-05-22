@@ -1,455 +1,322 @@
-import { useState, useCallback, useMemo } from 'react'
-import { useTranslation } from 'react-i18next'
-import { useParams, useNavigate, useLocation } from 'react-router'
-import { Download, ChevronDown } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Link, useLocation, useNavigate, useParams } from 'react-router'
+import { ArrowLeft, Download, Radio, Server, Signal, Waypoints } from 'lucide-react'
 import { useMonitoringData, useMultiAgentMonitoringData } from '@/api/hooks/use-monitoring'
 import { useMonitoringTaskDetail } from '@/api/hooks/use-monitoring-task-detail'
-import { SmokePingChart } from '@/features/monitoring/components/smokeping-chart'
-import { MultiAgentChart } from '@/features/monitoring/components/multi-agent-chart'
-import { TimeRangeSelector } from '@/features/monitoring/components/time-range-selector'
-import { getAgentColor } from '@/features/monitoring/lib/agent-colors'
+import { SmokePingChart } from '@/features/monitoring/components/charts/smokeping-chart'
+import { MultiAgentChart } from '@/features/monitoring/components/charts/multi-agent-chart'
+import { TimeRangeSelector } from '@/features/monitoring/components/time-range/time-range-selector'
 import { Badge } from '@/components/ui/badge'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { ToggleSwitch } from '@/components/ui/toggle-switch'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
-import { useAuthStore } from '@/stores/auth-store'
-import type { MonitoringDataPoint } from '@/api/generated/types.gen'
+import { Skeleton } from '@/components/ui/skeleton'
 import { PROTOCOL_COLORS } from '@/lib/constants'
-
-const INITIAL_DURATION_MS = 24 * 60 * 60 * 1000
-
-function computeStats(data: MonitoringDataPoint[]) {
-  if (data.length === 0) return null
-  let sumMedian = 0, sumAvg = 0, sumLoss = 0
-  let minRtt = Infinity, maxRtt = -Infinity
-  let p95Sum = 0, p99Sum = 0
-
-  for (const p of data) {
-    sumMedian += p.median_rtt
-    sumAvg += p.avg_rtt
-    sumLoss += p.packet_loss_pct
-    if (p.min_rtt < minRtt) minRtt = p.min_rtt
-    if (p.max_rtt > maxRtt) maxRtt = p.max_rtt
-    p95Sum += p.p95_rtt
-    p99Sum += p.p99_rtt
-  }
-
-  const n = data.length
-  return {
-    median: sumMedian / n,
-    avg: sumAvg / n,
-    min: minRtt,
-    max: maxRtt,
-    p95: p95Sum / n,
-    p99: p99Sum / n,
-    loss: sumLoss / n,
-    points: n,
-  }
-}
+import { useAuthStore } from '@/stores/auth-store'
+import {
+  classifyTaskStatus,
+  formatAgentLocation,
+  formatLatestSample,
+  formatTargetLocation,
+  protocolLabel,
+  type LatestResultState,
+} from '@/features/monitoring/lib/monitoring-models'
+import {
+  AUTO_REFRESH_INTERVAL_MS,
+  createRelativeTimeRange,
+  refreshRelativeTimeRange,
+  type MonitoringTimeRange,
+} from '@/features/monitoring/lib/time-range'
+import type { MonitoringDataPoint } from '@/api/generated/types.gen'
 
 type ChartStyle = 'basic' | 'smoke'
 
+const statusCopy: Record<LatestResultState, { label: string; variant: 'success' | 'warning' | 'error' | 'inactive' }> = {
+  ok: { label: '正常', variant: 'success' },
+  missing: { label: '无数据', variant: 'warning' },
+  failed: { label: '异常', variant: 'error' },
+  unknown: { label: '未知', variant: 'inactive' },
+}
+
+function computeStats(data: MonitoringDataPoint[]) {
+  if (data.length === 0) return null
+  const sum = data.reduce(
+    (acc, point) => {
+      acc.avg += point.avg_rtt
+      acc.loss += point.packet_loss_pct
+      acc.min = Math.min(acc.min, point.min_rtt)
+      acc.max = Math.max(acc.max, point.max_rtt)
+      acc.p95 += point.p95_rtt
+      return acc
+    },
+    { avg: 0, loss: 0, min: Infinity, max: -Infinity, p95: 0 },
+  )
+  return {
+    avg: sum.avg / data.length,
+    loss: sum.loss / data.length,
+    min: sum.min,
+    max: sum.max,
+    p95: sum.p95 / data.length,
+    points: data.length,
+  }
+}
+
+function StatItem({ label, value, tone }: { label: string; value: string; tone?: string }) {
+  return (
+    <div className="rounded-lg border border-border bg-bg-surface-light px-3 py-2">
+      <div className="text-[10px] uppercase text-text-dim">{label}</div>
+      <div className={`mt-1 font-mono text-sm font-semibold ${tone ?? 'text-text-primary'}`}>{value}</div>
+    </div>
+  )
+}
+
 export default function MonitoringDetailPage() {
-  const { t } = useTranslation()
   const { taskUuid } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
   const isAdmin = useAuthStore((s) => s.isAdmin())
   const monitoringBasePath = location.pathname.startsWith('/app/monitoring') ? '/app/monitoring' : '/monitoring'
-  const { data: detailData, isLoading: taskLoading } = useMonitoringTaskDetail(taskUuid ?? '')
-
+  const { data: detailData, isLoading: taskLoading, error: taskError } = useMonitoringTaskDetail(taskUuid ?? '')
   const task = detailData?.task
   const taskAgents = useMemo(() => detailData?.taskAgents ?? [], [detailData?.taskAgents])
 
   const [selectedAgentUuid, setSelectedAgentUuid] = useState<string>('')
   const [chartStyle, setChartStyle] = useState<ChartStyle>('smoke')
-  const isSmokeStyle = chartStyle === 'smoke'
+  const [timeRange, setTimeRange] = useState<MonitoringTimeRange>(() => createRelativeTimeRange())
 
-  const [now] = useState(() => Date.now())
-  const [timeRange, setTimeRange] = useState<{ start: number; end: number; granularity: 'raw' | 'hourly' | 'daily' }>({
-    start: now - INITIAL_DURATION_MS,
-    end: now,
-    granularity: 'raw',
-  })
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setTimeRange((current) => refreshRelativeTimeRange(current))
+    }, AUTO_REFRESH_INTERVAL_MS)
+    return () => window.clearInterval(timer)
+  }, [])
 
+  const isMtr = task?.task_type === 'mtr'
   const isAllAgents = !selectedAgentUuid
 
-  // Single agent mode
   const {
     data: singleMonitoringData,
     isLoading: singleLoading,
     error: singleError,
-  } = useMonitoringData(taskUuid ?? '', selectedAgentUuid || undefined, {
+  } = useMonitoringData(isMtr ? '' : (taskUuid ?? ''), selectedAgentUuid || undefined, {
     start: timeRange.start,
     end: timeRange.end,
   })
 
-  // Multi agent mode
   const {
     agentSeries,
     isLoading: multiLoading,
     error: multiError,
   } = useMultiAgentMonitoringData(
-    isAllAgents ? (taskUuid ?? '') : '',
+    !isMtr && isAllAgents ? (taskUuid ?? '') : '',
     isAllAgents ? taskAgents : [],
     { start: timeRange.start, end: timeRange.end },
   )
 
-  const handleExportCsv = useCallback(() => {
-    if (!task) return
-
-    let csv = ''
-    const filename = `netpulse_${task.task_name}_${new Date().toISOString().slice(0, 10)}.csv`
-
+  const stats = useMemo(() => {
     if (isAllAgents) {
-      csv = 'Timestamp,Agent,Median (ms),Avg (ms),Min (ms),Max (ms),P95 (ms),P99 (ms),Loss (%)\n'
-      for (const series of agentSeries) {
-        for (const p of series.data) {
-          csv += `${p.timestamp},"${series.agentName}",${p.median_rtt.toFixed(2)},${p.avg_rtt.toFixed(2)},${p.min_rtt.toFixed(2)},${p.max_rtt.toFixed(2)},${p.p95_rtt.toFixed(2)},${p.p99_rtt.toFixed(2)},${p.packet_loss_pct.toFixed(2)}\n`
-        }
-      }
-    } else {
-      const agent = taskAgents.find(a => a.agent_uuid === selectedAgentUuid)
-      const data = singleMonitoringData?.data ?? []
-      csv = 'Timestamp,Agent,Median (ms),Avg (ms),Min (ms),Max (ms),P95 (ms),P99 (ms),Loss (%)\n'
-      for (const p of data) {
-        csv += `${p.timestamp},"${agent?.agent_name ?? 'Unknown'}",${p.median_rtt.toFixed(2)},${p.avg_rtt.toFixed(2)},${p.min_rtt.toFixed(2)},${p.max_rtt.toFixed(2)},${p.p95_rtt.toFixed(2)},${p.p99_rtt.toFixed(2)},${p.packet_loss_pct.toFixed(2)}\n`
-      }
+      const all = agentSeries.flatMap((series) => series.data)
+      return computeStats(all)
     }
+    return computeStats(singleMonitoringData?.data ?? [])
+  }, [agentSeries, isAllAgents, singleMonitoringData?.data])
+
+  const handleExportCsv = useCallback(() => {
+    if (!task || isMtr) return
+    const rows = isAllAgents
+      ? agentSeries.flatMap((series) => series.data.map((point) => ({ point, agent: series.agentName })))
+      : (singleMonitoringData?.data ?? []).map((point) => ({ point, agent: task.agent?.name ?? 'Unknown' }))
+
+    const csv = [
+      'Timestamp,Agent,Avg (ms),Min (ms),Max (ms),P95 (ms),Loss (%)',
+      ...rows.map(({ point, agent }) => [
+        point.timestamp,
+        `"${agent}"`,
+        point.avg_rtt.toFixed(2),
+        point.min_rtt.toFixed(2),
+        point.max_rtt.toFixed(2),
+        point.p95_rtt.toFixed(2),
+        point.packet_loss_pct.toFixed(2),
+      ].join(',')),
+    ].join('\n')
 
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
     const link = document.createElement('a')
     link.href = URL.createObjectURL(blob)
-    link.download = filename
+    link.download = `netpulse_${task.name}_${new Date().toISOString().slice(0, 10)}.csv`
     link.click()
     URL.revokeObjectURL(link.href)
-  }, [task, isAllAgents, agentSeries, singleMonitoringData, selectedAgentUuid, taskAgents])
-
-  const handleExportJson = useCallback(() => {
-    if (!task) return
-    const filename = `netpulse_${task.task_name}_${new Date().toISOString().slice(0, 10)}.json`
-    const data = isAllAgents ? agentSeries : {
-      agentName: taskAgents.find(a => a.agent_uuid === selectedAgentUuid)?.agent_name,
-      data: singleMonitoringData?.data ?? []
-    }
-
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
-    const link = document.createElement('a')
-    link.href = URL.createObjectURL(blob)
-    link.download = filename
-    link.click()
-    URL.revokeObjectURL(link.href)
-  }, [task, isAllAgents, agentSeries, singleMonitoringData, selectedAgentUuid, taskAgents])
-
-  const handleTimeRangeChange = useCallback(
-    (range: { start: number; end: number; granularity: 'raw' | 'hourly' | 'daily' }) => {
-      setTimeRange(range)
-    },
-    [],
-  )
+  }, [agentSeries, isAllAgents, isMtr, singleMonitoringData?.data, task])
 
   if (taskLoading) {
     return (
-      <div>
-        <Skeleton className="h-8 w-64 mb-6" />
-        <Skeleton className="h-10 w-full mb-4" />
-        <Skeleton className="h-80 w-full" />
+      <div className="space-y-4">
+        <Skeleton className="h-28 rounded-xl" />
+        <Skeleton className="h-96 rounded-xl" />
       </div>
     )
   }
 
-  if (!task) {
+  if (taskError || !task) {
     return (
-      <div>
-        <h1 className="text-2xl font-bold text-text-primary mb-6">{t('monitoring.title')}</h1>
-        <div className="glass-light rounded-xl p-6 text-center">
-          <p className="text-red-400 text-sm">{t('monitoring.taskNotFound')}</p>
-          <Button variant="outline" className="mt-4" onClick={() => navigate(monitoringBasePath)}>
-            {t('common.back')}
-          </Button>
-        </div>
+      <div className="rounded-xl border border-border bg-bg-surface p-8 text-center">
+        <div className="text-sm font-medium text-text-primary">任务不存在或加载失败</div>
+        <Button variant="outline" className="mt-4" onClick={() => navigate(monitoringBasePath)}>
+          返回监控目标
+        </Button>
       </div>
     )
   }
+
+  const status = statusCopy[classifyTaskStatus(task)]
+  const port = typeof task.probe_config?.port === 'number' ? `:${task.probe_config.port}` : ''
 
   return (
-    <div>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate(monitoringBasePath)}
-            className="text-text-muted hover:text-text-primary transition-colors text-sm"
-          >
-            {t('monitoring.title')} /
-          </button>
-          <h1 className="text-2xl font-bold text-text-primary">{task.task_name}</h1>
-          <Badge className={`border text-xs uppercase ${PROTOCOL_COLORS[task.protocol] ?? ''}`}>
-            {task.protocol}
-          </Badge>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-text-secondary font-[family-name:var(--font-mono)]">
-            {task.target}{task.port ? `:${task.port}` : ''}
-          </span>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger className="flex h-9 items-center gap-2 rounded-md border border-input bg-transparent px-3 text-sm font-medium shadow-sm hover:bg-white/5 hover:text-accent-foreground transition-colors outline-none cursor-pointer">
-              <Download className="w-4 h-4" />
-              <span className="hidden sm:inline">{t('monitoring.export')}</span>
-              <ChevronDown className="w-3 h-3 text-text-dim" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40">
-              <DropdownMenuItem onClick={handleExportCsv} className="cursor-pointer">
-                {t('monitoring.exportCsv')}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleExportJson} className="cursor-pointer">
-                {t('monitoring.exportJson')}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <Button
-            variant="outline"
-            className="text-sm"
-            onClick={() => navigate(`${monitoringBasePath}/${task.task_uuid}/mtr`)}
-          >
-            MTR
-          </Button>
-          {isAdmin && (
-            <Button
-              className="text-sm"
-              onClick={() => navigate(`/tasks/${task.task_uuid}`)}
-            >
-              {t('tasks.manageTask')}
-            </Button>
-          )}
-        </div>
-      </div>
-
-      {/* Controls */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-4">
-        <TimeRangeSelector value={timeRange} onChange={handleTimeRangeChange} />
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-text-muted">{t('monitoring.agent')}:</span>
-          <Select
-            value={selectedAgentUuid}
-            onValueChange={(val) => setSelectedAgentUuid(val ?? '')}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder={t('monitoring.allAgents')}>
-                {(value: string | null) => {
-                  if (!value) return t('monitoring.allAgents')
-                  const agent = taskAgents.find((a) => a.agent_uuid === value)
-                  return agent?.agent_name ?? t('monitoring.allAgents')
-                }}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">{t('monitoring.allAgents')}</SelectItem>
-              {taskAgents.map((agent) => (
-                <SelectItem key={agent.agent_uuid} value={agent.agent_uuid}>
-                  {agent.agent_name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <ToggleSwitch
-          checked={isSmokeStyle}
-          onChange={(checked) => setChartStyle(checked ? 'smoke' : 'basic')}
-          labelLeft={t('monitoring.chartStyleBasic')}
-          labelRight={t('monitoring.chartStyleSmoke')}
-        />
-      </div>
-
-      {/* Chart */}
-      {isAllAgents ? (
-        <MultiAgentChart
-          agentSeries={agentSeries}
-          isLoading={multiLoading}
-          error={multiError}
-          height={400}
-          chartStyle={chartStyle}
-        />
-      ) : (
-        <SmokePingChart
-          data={singleMonitoringData?.data}
-          isLoading={singleLoading}
-          error={singleError as Error | null}
-          agentName={taskAgents.find((a) => a.agent_uuid === selectedAgentUuid)?.agent_name}
-          height={400}
-          chartStyle={chartStyle}
-        />
-      )}
-
-      {/* Per-agent stats table */}
-      {isAllAgents && agentSeries.length > 0 && (
-        <div className="mt-4 glass-light rounded-xl overflow-hidden">
-          {/* Desktop Table */}
-          <table className="hidden md:table w-full">
-            <thead>
-              <tr className="border-b border-white/5">
-                <th className="text-left px-4 py-2.5 text-[10px] text-text-muted uppercase tracking-wider font-medium">{t('monitoring.agent')}</th>
-                <th className="text-right px-3 py-2.5 text-[10px] text-text-muted uppercase tracking-wider font-medium">{t('monitoring.median')}</th>
-                <th className="text-right px-3 py-2.5 text-[10px] text-text-muted uppercase tracking-wider font-medium">{t('monitoring.avg')}</th>
-                <th className="text-right px-3 py-2.5 text-[10px] text-text-muted uppercase tracking-wider font-medium">{t('monitoring.min')}</th>
-                <th className="text-right px-3 py-2.5 text-[10px] text-text-muted uppercase tracking-wider font-medium">{t('monitoring.max')}</th>
-                <th className="text-right px-3 py-2.5 text-[10px] text-text-muted uppercase tracking-wider font-medium">{t('monitoring.p95')}</th>
-                <th className="text-right px-3 py-2.5 text-[10px] text-text-muted uppercase tracking-wider font-medium">{t('monitoring.p99')}</th>
-                <th className="text-right px-3 py-2.5 text-[10px] text-text-muted uppercase tracking-wider font-medium">{t('monitoring.loss')}</th>
-                <th className="text-right px-4 py-2.5 text-[10px] text-text-muted uppercase tracking-wider font-medium">{t('monitoring.points')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {agentSeries.map((agent, i) => {
-                const color = getAgentColor(i)
-                const stats = computeStats(agent.data)
-                if (!stats) return null
-
-                return (
-                  <tr key={agent.agentUuid} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
-                    <td className="px-4 py-2.5">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="w-3 h-[3px] rounded-full shrink-0"
-                          style={{ backgroundColor: color.line }}
-                        />
-                        <span className="text-xs text-text-primary font-medium">{agent.agentName}</span>
-                      </div>
-                    </td>
-                    <td className="text-right px-3 py-2.5 text-[11px] font-mono" style={{ color: color.line }}>
-                      {stats.median.toFixed(1)}ms
-                    </td>
-                    <td className="text-right px-3 py-2.5 text-[11px] text-text-secondary font-mono">
-                      {stats.avg.toFixed(1)}ms
-                    </td>
-                    <td className="text-right px-3 py-2.5 text-[11px] text-text-secondary font-mono">
-                      {stats.min.toFixed(1)}ms
-                    </td>
-                    <td className="text-right px-3 py-2.5 text-[11px] text-text-secondary font-mono">
-                      {stats.max.toFixed(1)}ms
-                    </td>
-                    <td className="text-right px-3 py-2.5 text-[11px] text-text-secondary font-mono">
-                      {stats.p95.toFixed(1)}ms
-                    </td>
-                    <td className="text-right px-3 py-2.5 text-[11px] text-text-secondary font-mono">
-                      {stats.p99.toFixed(1)}ms
-                    </td>
-                    <td className={`text-right px-3 py-2.5 text-[11px] font-mono ${stats.loss > 0 ? 'text-red-400' : 'text-green-400'}`}>
-                      {stats.loss.toFixed(1)}%
-                    </td>
-                    <td className="text-right px-4 py-2.5 text-[11px] text-text-dim font-mono">
-                      {stats.points}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-
-          {/* Mobile Card List */}
-          <div className="md:hidden flex flex-col divide-y divide-white/5">
-            {agentSeries.map((agent, i) => {
-              const color = getAgentColor(i)
-              const stats = computeStats(agent.data)
-              if (!stats) return null
-
-              return (
-                <div key={agent.agentUuid} className="p-4 flex flex-col gap-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className="w-3 h-[3px] rounded-full shrink-0"
-                        style={{ backgroundColor: color.line }}
-                      />
-                      <span className="text-sm text-text-primary font-medium">{agent.agentName}</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="flex flex-col items-end">
-                        <span className="text-[10px] text-text-muted">{t('monitoring.median')}</span>
-                        <span className="text-xs font-mono font-medium" style={{ color: color.line }}>
-                          {stats.median.toFixed(1)}ms
-                        </span>
-                      </div>
-                      <div className="flex flex-col items-end">
-                        <span className="text-[10px] text-text-muted">{t('monitoring.loss')}</span>
-                        <span className={`text-xs font-mono font-medium ${stats.loss > 0 ? 'text-red-400' : 'text-green-400'}`}>
-                          {stats.loss.toFixed(1)}%
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-4 gap-2">
-                    <MobileStatItem label={t('monitoring.avg')} value={`${stats.avg.toFixed(1)}ms`} />
-                    <MobileStatItem label={t('monitoring.min')} value={`${stats.min.toFixed(1)}ms`} />
-                    <MobileStatItem label={t('monitoring.max')} value={`${stats.max.toFixed(1)}ms`} />
-                    <MobileStatItem label={t('monitoring.points')} value={String(stats.points)} />
-                  </div>
-                </div>
-              )
-            })}
+    <div className="space-y-4">
+      <div className="rounded-xl border border-border bg-bg-surface">
+        <div className="border-b border-border px-4 py-3">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+            <div className="min-w-0">
+              <button
+                type="button"
+                onClick={() => navigate(monitoringBasePath)}
+                className="mb-2 inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-primary"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+                监控目标
+              </button>
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="truncate text-xl font-semibold text-text-primary">{task.name}</h1>
+                <Badge className={`border text-xs uppercase ${PROTOCOL_COLORS[task.task_type] ?? ''}`}>
+                  {protocolLabel(task.task_type)}
+                </Badge>
+                <Badge variant={status.variant}>{status.label}</Badge>
+                {task.target.is_anycast && <Badge variant="info">Anycast</Badge>}
+              </div>
+              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-muted">
+                <span className="font-mono text-text-secondary">{task.target.target}{port}</span>
+                <span>{task.target.name}</span>
+                <span>{formatTargetLocation(task.target)}</span>
+                {task.target.carrier && <span>{task.target.carrier}</span>}
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {!isMtr && (
+                <Button variant="outline" onClick={handleExportCsv}>
+                  <Download className="h-4 w-4" />
+                  导出 CSV
+                </Button>
+              )}
+              <Link to={`${monitoringBasePath}/${task.task_uuid}/mtr`}>
+                <Button variant={isMtr ? 'default' : 'outline'}>
+                  <Waypoints className="h-4 w-4" />
+                  MTR 证据
+                </Button>
+              </Link>
+              {isAdmin && (
+                <Button onClick={() => navigate(`/tasks/${task.task_uuid}`)}>
+                  管理任务
+                </Button>
+              )}
+            </div>
           </div>
         </div>
-      )}
 
-      {/* Single agent stats */}
-      {!isAllAgents && singleMonitoringData?.data && singleMonitoringData.data.length > 0 && (
-        <div className="flex flex-wrap items-center gap-4 sm:gap-6 mt-4 glass-light rounded-xl px-4 py-3">
-          {(() => {
-            const stats = computeStats(singleMonitoringData.data)
-            if (!stats) return null
-            return (
-              <>
-                <StatItem label={t('monitoring.median')} value={`${stats.median.toFixed(1)}ms`} color="text-emerald-400" />
-                <StatItem label={t('monitoring.avg')} value={`${stats.avg.toFixed(1)}ms`} />
-                <StatItem label={t('monitoring.min')} value={`${stats.min.toFixed(1)}ms`} />
-                <StatItem label={t('monitoring.max')} value={`${stats.max.toFixed(1)}ms`} />
-                <StatItem label={t('monitoring.p95')} value={`${stats.p95.toFixed(1)}ms`} />
-                <StatItem label={t('monitoring.p99')} value={`${stats.p99.toFixed(1)}ms`} />
-                <StatItem
-                  label={t('monitoring.loss')}
-                  value={`${stats.loss.toFixed(1)}%`}
-                  color={stats.loss > 0 ? 'text-red-400' : 'text-green-400'}
-                />
-              </>
-            )
-          })()}
+        <div className="grid gap-3 p-4 md:grid-cols-2 xl:grid-cols-4">
+          <StatItem label="Agent" value={task.agent?.name ?? '未绑定'} />
+          <StatItem label="Agent 位置" value={formatAgentLocation(task.agent)} />
+          <StatItem label="最新样本" value={formatLatestSample(task.latest_result.latest_sample_at)} />
+          <StatItem label="执行状态" value={task.latest_result.latest_run_status ?? '暂无'} tone={status.variant === 'success' ? 'text-status-success-fg' : undefined} />
         </div>
+      </div>
+
+      {isMtr ? (
+        <div className="rounded-xl border border-status-info-border bg-status-info-bg p-5">
+          <div className="flex items-start gap-3">
+            <Waypoints className="mt-0.5 h-5 w-5 text-status-info-fg" />
+            <div>
+              <div className="text-sm font-medium text-status-info-fg">MTR 不使用 metrics 图表</div>
+              <p className="mt-1 text-xs text-status-info-fg/80">
+                MTR 数据以 result 和 hop 为单位存储，请进入 MTR 证据页查看 packet loss、avg、best、worst 与 ASN。
+              </p>
+              <Link to={`${monitoringBasePath}/${task.task_uuid}/mtr`}>
+                <Button className="mt-3" size="sm">查看 MTR 证据</Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="flex flex-col gap-3 rounded-xl border border-border bg-bg-surface p-3 lg:flex-row lg:items-center lg:justify-between">
+            <TimeRangeSelector value={timeRange} onChange={setTimeRange} />
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                size="sm"
+                variant={!selectedAgentUuid ? 'default' : 'outline'}
+                onClick={() => setSelectedAgentUuid('')}
+              >
+                全部 Agent
+              </Button>
+              {taskAgents.map((agent) => (
+                <Button
+                  key={agent.agent_uuid}
+                  size="sm"
+                  variant={selectedAgentUuid === agent.agent_uuid ? 'default' : 'outline'}
+                  onClick={() => setSelectedAgentUuid(agent.agent_uuid)}
+                >
+                  <Radio className="h-3.5 w-3.5" />
+                  {agent.agent_name}
+                </Button>
+              ))}
+              <Button
+                size="sm"
+                variant={chartStyle === 'smoke' ? 'default' : 'outline'}
+                onClick={() => setChartStyle(chartStyle === 'smoke' ? 'basic' : 'smoke')}
+              >
+                <Signal className="h-3.5 w-3.5" />
+                {chartStyle === 'smoke' ? 'Smoke' : 'Basic'}
+              </Button>
+            </div>
+          </div>
+
+          {isAllAgents ? (
+            <MultiAgentChart agentSeries={agentSeries} isLoading={multiLoading} error={multiError} height={420} chartStyle={chartStyle} />
+          ) : (
+            <SmokePingChart
+              data={singleMonitoringData?.data}
+              isLoading={singleLoading}
+              error={singleError as Error | null}
+              agentName={taskAgents.find((agent) => agent.agent_uuid === selectedAgentUuid)?.agent_name}
+              height={420}
+              chartStyle={chartStyle}
+            />
+          )}
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            <StatItem label="平均延迟" value={stats ? `${stats.avg.toFixed(1)}ms` : '-'} />
+            <StatItem label="P95" value={stats ? `${stats.p95.toFixed(1)}ms` : '-'} />
+            <StatItem label="最小/最大" value={stats ? `${stats.min.toFixed(1)} / ${stats.max.toFixed(1)}ms` : '-'} />
+            <StatItem label="丢包率" value={stats ? `${stats.loss.toFixed(1)}%` : '-'} tone={stats && stats.loss > 0 ? 'text-status-error-fg' : 'text-status-success-fg'} />
+            <StatItem label="样本点" value={stats ? String(stats.points) : '-'} />
+          </div>
+
+          <section className="rounded-xl border border-border bg-bg-surface p-4">
+            <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-text-primary">
+              <Server className="h-4 w-4 text-text-muted" />
+              指标来源
+            </div>
+            <div className="grid gap-3 text-xs text-text-muted md:grid-cols-3">
+              <div className="rounded-lg border border-border bg-bg-surface-light p-3">
+                ICMP: latency_avg_ms、packet_loss_pct、jitter_ms。
+              </div>
+              <div className="rounded-lg border border-border bg-bg-surface-light p-3">
+                TCP: connect_latency_avg_ms、connect_failure_pct、jitter_ms。
+              </div>
+              <div className="rounded-lg border border-border bg-bg-surface-light p-3">
+                数据来自 VictoriaMetrics，最小 step_sec 为 60 秒。
+              </div>
+            </div>
+          </section>
+        </>
       )}
-    </div>
-  )
-}
-
-function StatItem({ label, value, color }: { label: string; value: string; color?: string }) {
-  return (
-    <div className="flex items-center gap-1.5">
-      <span className="text-[10px] text-text-muted">{label}</span>
-      <span className={`text-[10px] font-[family-name:var(--font-mono)] font-medium ${color ?? 'text-text-primary'}`}>
-        {value}
-      </span>
-    </div>
-  )
-}
-
-function MobileStatItem({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex flex-col items-center bg-white/5 rounded-md py-1.5">
-      <span className="text-[9px] text-text-muted">{label}</span>
-      <span className="text-[10px] font-mono text-text-secondary mt-0.5">{value}</span>
     </div>
   )
 }

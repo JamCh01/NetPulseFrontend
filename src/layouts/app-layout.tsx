@@ -4,14 +4,11 @@ import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/stores/auth-store'
 import { useThemeStore } from '@/stores/theme-store'
 import { useLogout } from '@/api/hooks/use-auth'
-import { useTasks } from '@/api/hooks/use-tasks'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import type { TaskResponse } from '@/api/generated/types.gen'
-import { PROTOCOL_COLORS, PROTOCOL_ICON_COLORS } from '@/lib/constants'
+import { TargetGeoSidebarTree } from '@/features/monitoring/components/navigation/target-geo-sidebar-tree'
 import {
   LayoutDashboard,
-  ClipboardList,
   Radio,
   Bell,
   Link2,
@@ -19,11 +16,9 @@ import {
   LogOut,
   ChevronLeft,
   ChevronDown,
-  ChevronRight,
   Zap,
   Activity,
   Languages,
-  Plus,
   ScrollText,
   BellRing,
   FolderOpen,
@@ -32,6 +27,7 @@ import {
   X,
   Sun,
   Moon,
+  Crosshair,
 } from 'lucide-react'
 
 import {
@@ -66,9 +62,7 @@ export function AppLayout() {
   const { theme, toggleTheme } = useThemeStore()
 
   const mobileMenuOpen = mobileMenuAnchorPath === location.pathname
-
-  const { data: tasksData } = useTasks({ limit: 200 })
-  const tasks = ((tasksData as { items?: TaskResponse[] })?.items ?? []) as TaskResponse[]
+  const hideHeader = location.pathname.startsWith('/app/monitoring')
 
   const staticNavItems: NavItem[] = [
     { label: t('nav.agents'), path: '/agents', icon: <Radio className="w-4 h-4" />, adminOnly: true },
@@ -94,8 +88,6 @@ export function AppLayout() {
 
   const visibleNav = staticNavItems.filter((item) => !item.adminOnly || isAdmin)
   const visibleAdminNav = adminNavItems.filter((item) => !item.adminOnly || isAdmin)
-
-  const isTaskActive = location.pathname.startsWith('/tasks') || location.pathname.startsWith('/app/monitoring/')
 
   return (
     <div className="min-h-screen gradient-bg grid-pattern flex">
@@ -148,84 +140,31 @@ export function AppLayout() {
             }
           >
             <LayoutDashboard className="w-4 h-4" />
-            {!collapsed && <span>{t('nav.dashboard')}</span>}
+            {!collapsed && <span>Network Health</span>}
           </NavLink>
 
-          {/* Tasks with expandable sub-items */}
-          <div>
-            <button
-              onClick={() => collapsed ? navigate('/tasks') : setTasksExpanded(!tasksExpanded)}
-              className={cn(
-                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors w-full',
-                isTaskActive
+          <NavLink
+            to="/app/monitoring"
+            className={({ isActive }) =>
+              cn(
+                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                isActive || location.pathname.startsWith('/app/monitoring')
                   ? 'bg-accent text-accent-foreground'
                   : 'text-text-muted hover:text-text-secondary hover:bg-muted'
-              )}
-            >
-              <ClipboardList className="w-4 h-4 shrink-0" />
-              {!collapsed && (
-                <>
-                  <span className="flex-1 text-left">{t('nav.tasks')}</span>
-                  <span className="text-xs text-text-muted font-mono">{tasks.length}</span>
-                  {tasksExpanded ? (
-                    <ChevronDown className="w-3 h-3 text-text-dim" />
-                  ) : (
-                    <ChevronRight className="w-3 h-3 text-text-dim" />
-                  )}
-                </>
-              )}
-            </button>
+              )
+            }
+          >
+            <Crosshair className="w-4 h-4" />
+            {!collapsed && <span>Monitoring</span>}
+          </NavLink>
 
-            {!collapsed && tasksExpanded && (
-              <div className="ml-3 mt-0.5 space-y-0.5 border-l border-border pl-3">
-                {tasks.map((task) => {
-                  const protocolKey = (task.protocol ?? 'icmp').toLowerCase()
-                  const protoColor = PROTOCOL_ICON_COLORS[protocolKey] ?? 'text-gray-400'
-                  const taskPath = `/app/monitoring/${task.task_uuid}`
-                  const isActive = location.pathname === taskPath
-
-                  return (
-                    <NavLink
-                      key={task.task_uuid}
-                      to={taskPath}
-                      className={cn(
-                        'flex items-center gap-2 px-2.5 py-2 rounded-md text-xs transition-colors group',
-                        isActive
-                          ? 'bg-accent/50 text-accent-foreground'
-                          : 'text-text-dim hover:text-text-secondary hover:bg-muted'
-                      )}
-                    >
-                      <Activity className={cn('w-3 h-3 shrink-0', isActive ? 'text-accent-foreground' : protoColor)} />
-                      <span className="truncate flex-1">{task.task_name}</span>
-                      <span className={cn(
-                        'text-[10px] px-1.5 py-0.5 rounded font-mono uppercase border shrink-0',
-                        isActive 
-                          ? 'bg-accent-foreground/15 text-accent-foreground border-accent-foreground/30' 
-                          : (PROTOCOL_COLORS[protocolKey] ?? 'bg-muted text-text-muted border-border')
-                      )}>
-                        {(task.protocol ?? 'icmp').toUpperCase()}
-                      </span>
-                    </NavLink>
-                  )
-                })}
-
-                {tasks.length === 0 && (
-                  <div className="px-2 py-1.5">
-                    <div className="text-sm text-text-muted">{t('nav.noTasks')}</div>
-                    {isAdmin && (
-                      <NavLink
-                        to="/tasks"
-                        className="mt-1.5 flex items-center gap-1 text-sm text-accent-foreground hover:text-accent-foreground/80 transition-colors"
-                      >
-                        <Plus className="w-3 h-3" />
-                        {t('tasks.createTask')}
-                      </NavLink>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+          {!collapsed && (
+            <TargetGeoSidebarTree
+              basePath="/app/monitoring"
+              expanded={tasksExpanded}
+              onToggle={() => setTasksExpanded(!tasksExpanded)}
+            />
+          )}
 
           {/* Remaining nav items */}
           {visibleNav.map((item) => (
@@ -309,65 +248,66 @@ export function AppLayout() {
           collapsed ? 'md:ml-(--sidebar-collapsed-width)' : 'md:ml-(--sidebar-width)'
         )}
       >
-        {/* Header */}
-        <header className="nav-blur sticky top-0 z-30 h-14 flex items-center justify-between px-4 md:px-6">
-          <div className="flex items-center gap-3">
-            <button 
-              aria-label="Open menu"
-              className="p-1.5 md:hidden text-text-muted hover:text-text-primary rounded-md hover:bg-muted"
-              onClick={() => setMobileMenuAnchorPath(location.pathname)}
-            >
-              <Menu className="w-5 h-5" aria-hidden="true" />
-            </button>
-            <div className="hidden lg:flex items-center gap-1.5 text-xs text-text-muted/80 select-none">
-              <span className="uppercase tracking-wide">Tips</span>
-              <span>Tab / Shift+Tab</span>
-              <span>·</span>
-              <span>Enter</span>
+        {!hideHeader && (
+          <header className="nav-blur sticky top-0 z-30 h-14 flex items-center justify-between px-4 md:px-6">
+            <div className="flex items-center gap-3">
+              <button
+                aria-label="Open menu"
+                className="p-1.5 md:hidden text-text-muted hover:text-text-primary rounded-md hover:bg-muted"
+                onClick={() => setMobileMenuAnchorPath(location.pathname)}
+              >
+                <Menu className="w-5 h-5" aria-hidden="true" />
+              </button>
+              <div className="hidden lg:flex items-center gap-1.5 text-xs text-text-muted/80 select-none">
+                <span className="uppercase tracking-wide">Tips</span>
+                <span>Tab / Shift+Tab</span>
+                <span>·</span>
+                <span>Enter</span>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-2.5">
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={toggleTheme}
-              className="text-text-muted hover:text-text-primary rounded-lg cursor-pointer"
-              aria-label="Toggle theme"
-            >
-              {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </Button>
-            {user && (
-              <DropdownMenu>
-                <DropdownMenuTrigger className="flex items-center gap-2 outline-none hover:bg-muted py-1 px-2 rounded-lg transition-colors cursor-pointer border border-transparent hover:border-border">
-                  <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center shrink-0">
-                    <UserIcon className="w-3.5 h-3.5 text-accent-foreground" />
-                  </div>
-                  <div className="hidden sm:flex flex-col items-start">
-                    <span className="text-sm font-medium text-text-primary leading-tight">{user.username}</span>
-                    <span className="text-xs text-text-muted leading-tight capitalize">{user.role}</span>
-                  </div>
-                  <ChevronDown className="w-3 h-3 text-text-dim ml-1" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none text-text-primary">{user.username}</p>
+            <div className="flex items-center gap-2.5">
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={toggleTheme}
+                className="text-text-muted hover:text-text-primary rounded-lg cursor-pointer"
+                aria-label="Toggle theme"
+              >
+                {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </Button>
+              {user && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="flex items-center gap-2 outline-none hover:bg-muted py-1 px-2 rounded-lg transition-colors cursor-pointer border border-transparent hover:border-border">
+                    <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center shrink-0">
+                      <UserIcon className="w-3.5 h-3.5 text-accent-foreground" />
                     </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem className="cursor-pointer" onClick={() => setPasswordDialogOpen(true)}>
-                    {t('users.changePassword') || 'Change Password'}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem className="cursor-pointer" variant="destructive" onClick={handleLogout}>
-                    <LogOut className="w-4 h-4 mr-2" />
-                    {t('common.logout') || 'Log out'}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-          </div>
-        </header>
+                    <div className="hidden sm:flex flex-col items-start">
+                      <span className="text-sm font-medium text-text-primary leading-tight">{user.username}</span>
+                      <span className="text-xs text-text-muted leading-tight capitalize">{user.role}</span>
+                    </div>
+                    <ChevronDown className="w-3 h-3 text-text-dim ml-1" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none text-text-primary">{user.username}</p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="cursor-pointer" onClick={() => setPasswordDialogOpen(true)}>
+                      {t('users.changePassword') || 'Change Password'}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="cursor-pointer" variant="destructive" onClick={handleLogout}>
+                      <LogOut className="w-4 h-4 mr-2" />
+                      {t('common.logout') || 'Log out'}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
+          </header>
+        )}
 
         {/* Page content */}
         <div className="p-4 md:p-6 max-w-full overflow-x-hidden">

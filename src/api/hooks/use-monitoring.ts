@@ -1,17 +1,18 @@
 import { useQuery, useQueries } from '@tanstack/react-query'
 import { monitoringKeys } from './keys'
 import { buildApiUrl } from '@/api/base-url'
+import type { MonitoringTask } from '@/features/monitoring/lib/monitoring-models'
 import type { GranularityEnum, MonitoringDataPoint } from '@/api/generated/types.gen'
 
 interface TimeRange {
   start: number
   end: number
+  stepSec?: number
 }
 
 interface GranularityConfig {
   granularity: GranularityEnum
   staleTime: number
-  refetchInterval: number | false
   stepSec: number
 }
 
@@ -24,8 +25,7 @@ function getGranularityConfig(timeRange: TimeRange): GranularityConfig {
     return {
       granularity: 'raw',
       staleTime: 30 * 1000,
-      refetchInterval: 60 * 1000,
-      stepSec: 60,
+      stepSec: timeRange.stepSec ?? 60,
     }
   }
 
@@ -33,16 +33,14 @@ function getGranularityConfig(timeRange: TimeRange): GranularityConfig {
     return {
       granularity: 'hourly',
       staleTime: 5 * 60 * 1000,
-      refetchInterval: false,
-      stepSec: 3600,
+      stepSec: timeRange.stepSec ?? 3600,
     }
   }
 
   return {
     granularity: 'daily',
     staleTime: 30 * 60 * 1000,
-    refetchInterval: false,
-    stepSec: 86400,
+    stepSec: timeRange.stepSec ?? 86400,
   }
 }
 
@@ -56,6 +54,18 @@ type MetricsEnvelope = {
       }>
     }>
   }
+}
+
+interface AgentMonitoringSeries {
+  agentUuid: string
+  agentName: string
+  data: MonitoringDataPoint[]
+}
+
+interface MonitoringSeriesResult {
+  agentSeries: AgentMonitoringSeries[]
+  isLoading: boolean
+  error: Error | null
 }
 
 function seriesToMonitoringPoints(series: NonNullable<MetricsEnvelope['data']>['series'] | undefined): MonitoringDataPoint[] {
@@ -104,20 +114,9 @@ function seriesToMonitoringPoints(series: NonNullable<MetricsEnvelope['data']>['
         case 'connect_failure_pct':
           row.packet_loss_pct = p.value
           break
-        case 'final_hop_avg_ms':
-          row.avg_rtt = p.value
-          row.median_rtt = p.value
+        case 'jitter_ms':
+        case 'jitter_avg_ms':
           row.p95_rtt = p.value
-          row.p99_rtt = p.value
-          break
-        case 'final_hop_best_ms':
-          row.min_rtt = p.value
-          break
-        case 'final_hop_worst_ms':
-          row.max_rtt = p.value
-          break
-        case 'final_hop_loss_pct':
-          row.packet_loss_pct = p.value
           break
         default:
           break
@@ -157,6 +156,7 @@ export function useMonitoringData(
       start: startSec,
       end: endSec,
       granularity: config.granularity,
+      step_sec: config.stepSec,
     }),
     queryFn: async () => {
       const startIso = new Date(startSec * 1000).toISOString()
@@ -175,7 +175,6 @@ export function useMonitoringData(
     },
     enabled: !!taskUuid,
     staleTime: config.staleTime,
-    refetchInterval: config.refetchInterval,
   })
 }
 
@@ -192,7 +191,7 @@ export function useMultiAgentMonitoringData(
   const startSec = Math.floor(timeRange.start / 1000)
   const endSec = Math.floor(timeRange.end / 1000)
 
-  const results = useQueries({
+  return useQueries({
     queries: agents.map((agent) => ({
       queryKey: monitoringKeys.query({
         task_uuid: taskUuid,
@@ -200,6 +199,7 @@ export function useMultiAgentMonitoringData(
         start: startSec,
         end: endSec,
         granularity: config.granularity,
+        step_sec: config.stepSec,
       }),
       queryFn: async () => {
         const startIso = new Date(startSec * 1000).toISOString()
@@ -216,15 +216,59 @@ export function useMultiAgentMonitoringData(
       },
       enabled: !!taskUuid && agents.length > 0,
       staleTime: config.staleTime,
-      refetchInterval: config.refetchInterval,
     })),
+    combine: (results): MonitoringSeriesResult => ({
+      isLoading: results.some((result) => result.isLoading),
+      error: results.find((result) => result.error)?.error as Error | null,
+      agentSeries: results
+        .filter((result) => result.data)
+        .map((result) => result.data!),
+    }),
   })
+}
 
-  const isLoading = results.some((r) => r.isLoading)
-  const error = results.find((r) => r.error)?.error as Error | null
-  const agentSeries = results
-    .filter((r) => r.data)
-    .map((r) => r.data!)
+export function useTaskMonitoringSeries(tasks: MonitoringTask[], timeRange: TimeRange) {
+  const config = getGranularityConfig(timeRange)
+  const startSec = Math.floor(timeRange.start / 1000)
+  const endSec = Math.floor(timeRange.end / 1000)
 
-  return { agentSeries, isLoading, error }
+  return useQueries({
+    queries: tasks.map((task) => ({
+      queryKey: monitoringKeys.query({
+        task_uuid: task.task_uuid,
+        agent_uuid: task.agent?.agent_uuid,
+        start: startSec,
+        end: endSec,
+        granularity: config.granularity,
+        step_sec: config.stepSec,
+      }),
+      queryFn: async () => {
+        const startIso = new Date(startSec * 1000).toISOString()
+        const endIso = new Date(endSec * 1000).toISOString()
+        const params = new URLSearchParams({
+          start: startIso,
+          end: endIso,
+          step_sec: String(config.stepSec),
+        })
+        const res = await fetch(buildApiUrl(`/api/v1/monitoring/tasks/${task.task_uuid}/metrics?${params.toString()}`))
+        if (!res.ok) throw new Error(`Failed to load monitoring metrics: ${res.status}`)
+        const body = (await res.json()) as MetricsEnvelope
+        const port = typeof task.probe_config?.port === 'number' ? `:${task.probe_config.port}` : ''
+        return {
+          agentUuid: task.agent?.agent_uuid ?? task.task_uuid,
+          agentName: task.agent?.name ? `${task.agent.name}${port}` : task.name,
+          data: seriesToMonitoringPoints(body.data?.series),
+        }
+      },
+      enabled: !!task.task_uuid,
+      staleTime: config.staleTime,
+    })),
+    combine: (results): MonitoringSeriesResult => ({
+      isLoading: results.some((result) => result.isLoading),
+      error: results.find((result) => result.error)?.error as Error | null,
+      agentSeries: results
+        .filter((result) => result.data)
+        .map((result) => result.data!),
+    }),
+  })
 }

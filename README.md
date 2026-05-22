@@ -17,17 +17,17 @@ NetPulse is a network monitoring platform (SmokePing-style). This is the React f
 
 ## Core Features
 
-### 🚀 Real-time WebSocket Monitoring
-Monitoring charts feature zero-refresh updates using **WebSocket** push. 
-- **Direct Cache Patching**: When new data points arrive via WS, they are directly patched into the TanStack Query cache.
-- **Visual Continuity**: Charts draw new segments instantly without making extra HTTP requests.
-- **De-duplication**: Automatic timestamp-based de-duplication and sorting for data integrity.
+### 📡 Target-Centric Monitoring
+- **GEO Sidebar**: Targets are grouped by continent, country, and city, with a separate AnyCast branch.
+- **Target Detail View**: Selecting a Target shows ICMP, TCP, and MTR data on the same page instead of drilling into task pages first.
+- **Agent Filtering**: ICMP, TCP, and MTR sections have independent Agent checkbox filters, so each protocol can be inspected separately.
+- **Time Ranges**: Monitoring charts default to the latest 1 hour. Quick ranges are relative windows that advance every minute to fetch the latest data; absolute ranges stay fixed.
 
-### 📈 Intelligent Charts
-- **SmokePing-style**: Supports both segment (Smoke) and smooth (Basic) interpolation styles.
-- **Gap Detection**: Automatically visualizes data gaps > 5 minutes as line breaks.
-- **Time Range Sync**: Global time range selector on the dashboard linked to all mini-charts.
-- **Data Export**: Support exporting monitoring data to **CSV** or **JSON** for offline analysis.
+### 📈 Monitoring Visualizations
+- **ICMP/TCP Smoke Charts**: Uses a main Avg line, translucent Min-Max band, and Packet Loss bars for SmokePing-style analysis.
+- **VictoriaMetrics Source**: ICMP and TCP metrics are queried from VictoriaMetrics through the backend metrics API.
+- **MTR Evidence Workbench**: MTR uses result and hop data instead of synthetic metrics. The workbench includes an Agent-colored result timeline and hop evidence table.
+- **Data Export**: Single-task ICMP/TCP detail pages support CSV export.
 
 ### 🛡️ Security & Management
 - **User Self-Service**: Users can change their own passwords via the header dropdown menu.
@@ -70,7 +70,7 @@ npm run dev
 src/
   api/
     generated/          # Auto-generated API client (openapi-ts)
-    hooks/              # TanStack Query hooks (use-agents, use-alerts, use-monitoring-ws, etc.)
+    hooks/              # TanStack Query hooks for API resources and monitoring data
     client.ts           # API client config (interceptors, token refresh)
   components/ui/        # Shared UI primitives (shadcn/ui)
   features/
@@ -80,7 +80,15 @@ src/
     agents/             # Agent management + release management
     alerts/             # Alert rules + Webhook assignment
     webhooks/           # Webhook management + deliveries
-    monitoring/         # SmokePing charts + MTR + export logic
+    monitoring/
+      components/
+        charts/         # SmokePing and multi-Agent chart components
+        mtr/            # MTR result timeline, evidence workbench, hop table
+        navigation/     # Target GEO sidebar tree
+        target/         # Target-level ICMP/TCP/MTR monitoring panel
+        time-range/     # Relative and absolute time range selectors
+      lib/              # Monitoring normalizers, chart options, GEO tree, time range helpers
+      pages/            # Monitoring route pages
   layouts/              # Responsive AppLayout with mobile menu
   stores/               # Zustand stores (auth, theme)
 ```
@@ -89,8 +97,9 @@ src/
 
 | Path | Access | Page |
 |------|--------|------|
-| `/monitoring` | Public | Task selection grid |
-| `/monitoring/:taskUuid` | Public | SmokePing chart + Data Export |
+| `/monitoring` | Public | Target GEO tree and Target monitoring view |
+| `/monitoring?target_uuid=<uuid>` | Public | ICMP, TCP, and MTR sections for one Target |
+| `/monitoring/:taskUuid` | Public | Single-task ICMP/TCP chart + CSV export |
 | `/monitoring/:taskUuid/mtr` | Public | MTR traceroute timeline |
 | `/login` | Public | Login |
 | `/dashboard` | Auth | Stats overview + Time Range Selector |
@@ -111,16 +120,17 @@ src/
 
 The project is built using `npm run build` and produces static files in `dist/`.
 
-**WebSocket Nginx Configuration:**
-To support real-time monitoring, ensure your Nginx config includes the following Upgrade headers:
+**API Reverse Proxy:**
+The frontend calls `/api/v1/...` endpoints. If `VITE_API_BASE_URL` is empty, proxy API requests from the frontend origin to the backend:
 
 ```nginx
 location /api/ {
     proxy_pass http://127.0.0.1:8000;
     proxy_http_version 1.1;
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection "upgrade";
-    proxy_read_timeout 86400s;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
 }
 ```
 

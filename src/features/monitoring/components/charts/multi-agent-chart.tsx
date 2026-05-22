@@ -1,8 +1,8 @@
 import { memo, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import ReactECharts from 'echarts-for-react'
-import { useChartTheme } from '../lib/chart-theme'
-import { buildMultiAgentOption, type AgentSeriesData } from '../lib/build-multi-agent-option'
+import { LazyECharts } from '@/components/charts/lazy-echarts'
+import { useChartTheme } from '../../lib/chart-theme'
+import { buildMultiAgentOption, type AgentSeriesData } from '../../lib/build-multi-agent-option'
 import { Skeleton } from '@/components/ui/skeleton'
 
 type ChartStyle = 'basic' | 'smoke'
@@ -67,12 +67,11 @@ function MultiAgentChartInner({
 
   return (
     <div className="glass-light rounded-xl p-4">
-      <ReactECharts
+      <LazyECharts
         option={option}
         style={{ height, width: '100%' }}
         notMerge={false}
         lazyUpdate
-        opts={{ renderer: 'canvas' }}
       />
     </div>
   )

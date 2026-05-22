@@ -29,12 +29,16 @@ export const taskKeys = {
 
 export const monitoringKeys = {
   all: ['monitoring'] as const,
+  tasks: (params?: { page?: number; page_size?: number; target_uuid?: string }) =>
+    [...monitoringKeys.all, 'tasks', params] as const,
+  targetGeoTree: () => [...monitoringKeys.all, 'target-geo-tree'] as const,
   query: (params: {
     task_uuid: string
     agent_uuid?: string
     start: number
     end: number
     granularity: string
+    step_sec?: number
   }) => [...monitoringKeys.all, 'query', params] as const,
   mtrList: (params: {
     task_uuid: string

@@ -1,12 +1,12 @@
 import { useMemo } from 'react'
-import ReactECharts from 'echarts-for-react'
 import type { EChartsOption } from 'echarts'
-import type { MtrResultSummary } from '@/api/generated/types.gen'
+import { LazyECharts } from '@/components/charts/lazy-echarts'
+import type { MtrResultSummaryView } from '@/features/monitoring/lib/monitoring-models'
 import { formatChartTime } from '@/lib/format'
-import { useChartTheme } from '../lib/chart-theme'
+import { useChartTheme } from '../../lib/chart-theme'
 
 interface MtrTimelineProps {
-  results: MtrResultSummary[]
+  results: MtrResultSummaryView[]
   isLoading?: boolean
   onSelectResult?: (resultUuid: string) => void
   selectedResultUuid?: string
@@ -168,7 +168,7 @@ export function MtrTimeline({
   }
 
   return (
-    <ReactECharts
+    <LazyECharts
       option={option}
       style={{ height }}
       notMerge={true}

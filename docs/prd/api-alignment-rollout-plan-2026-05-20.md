@@ -1,6 +1,6 @@
 # API Alignment Rollout Plan (2026-05-20)
 
-Scope: Align frontend delivery with current backend capabilities at `http://115.178.32.10:8001/docs`.
+Scope: Align frontend delivery with current backend capabilities at `http://115.178.32.10:8000/docs`.
 
 ## Execution Order
 
@@ -139,4 +139,3 @@ Use this for each validated item:
 - Test result: pass/fail
 - Notes:
 - Next action:
-

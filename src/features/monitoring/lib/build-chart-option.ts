@@ -15,7 +15,8 @@ interface BuildOptionParams {
 }
 
 /**
- * Build a SmokePing-style ECharts option with stacked band areas.
+ * Build a latency/loss combo chart:
+ * Avg line + translucent Min-Max band + Packet Loss bars.
  */
 export function buildSmokePingOption({
   data,
@@ -28,55 +29,60 @@ export function buildSmokePingOption({
     return { title: { text: 'No data', left: 'center', top: 'center', textStyle: { color: theme.axisLabelColor, fontSize: 14 } } }
   }
 
-  const bandConfigs = [
-    { name: 'min_avg', band: data.bands.minToAvg, color: theme.bandColors[0], stack: 'band1' },
-    { name: 'avg_p95', band: data.bands.avgToP95, color: theme.bandColors[1], stack: 'band2' },
-    { name: 'p95_p99', band: data.bands.p95ToP99, color: theme.bandColors[2], stack: 'band3' },
-    { name: 'p99_max', band: data.bands.p99ToMax, color: theme.bandColors[3], stack: 'band4' },
-  ]
-
   const series: EChartsOption['series'] = []
 
-  for (const cfg of bandConfigs) {
-    series.push({
-      name: `${cfg.name.split('_')[0]}_lower`,
-      type: 'line',
-      stack: cfg.stack,
-      symbol: 'none',
-      lineStyle: { opacity: 0, width: 0 },
-      areaStyle: { opacity: 0 },
-      data: data.timestamps.map((ts, i) => {
-        const val = cfg.band.lower[i]
-        return val === null ? [ts, null] : [ts, val]
-      }),
-      silent: true,
-      z: 1,
-      connectNulls: false,
-    })
-    series.push({
-      name: `${cfg.name.split('_')[1]}_delta`,
-      type: 'line',
-      stack: cfg.stack,
-      symbol: 'none',
-      lineStyle: { opacity: 0, width: 0 },
-      areaStyle: { color: cfg.color },
-      data: data.timestamps.map((ts, i) => {
-        const val = cfg.band.delta[i]
-        return val === null ? [ts, null] : [ts, val]
-      }),
-      silent: true,
-      z: 1,
-      connectNulls: false,
-    })
-  }
-
-  const markAreaData = data.lossIntervals.map(([start, end]) => [
-    { xAxis: start, itemStyle: { color: theme.lossAreaColor } },
-    { xAxis: end },
-  ])
+  series.push({
+    name: 'Min baseline',
+    type: 'line',
+    stack: 'min_max_band',
+    symbol: 'none',
+    showSymbol: false,
+    lineStyle: { opacity: 0, width: 0 },
+    areaStyle: { opacity: 0 },
+    data: data.timestamps.map((ts, i) => {
+      const val = data.minLine[i]
+      return val === null ? [ts, null] : [ts, val]
+    }),
+    silent: true,
+    z: 1,
+    connectNulls: false,
+  })
 
   series.push({
-    name: 'Median',
+    name: 'Min-Max band',
+    type: 'line',
+    stack: 'min_max_band',
+    symbol: 'none',
+    showSymbol: false,
+    lineStyle: { opacity: 0, width: 0 },
+    areaStyle: { color: theme.bandColors[1], opacity: 1 },
+    data: data.timestamps.map((ts, i) => {
+      const delta = data.minMaxDelta[i]
+      return delta === null ? [ts, null] : [ts, delta]
+    }),
+    silent: true,
+    z: 2,
+    connectNulls: false,
+  })
+
+  series.push({
+    name: 'Packet Loss',
+    type: 'bar',
+    yAxisIndex: 1,
+    barMaxWidth: 10,
+    itemStyle: {
+      color: theme.lossColor,
+      borderRadius: [2, 2, 0, 0],
+    },
+    data: data.timestamps.map((ts, i) => {
+      const val = data.packetLoss[i]
+      return val === null ? [ts, null] : [ts, val]
+    }),
+    z: 3,
+  })
+
+  series.push({
+    name: 'Avg',
     type: 'line',
     smooth: chartStyle === 'basic',
     step: chartStyle === 'smoke' ? 'middle' : false,
@@ -86,18 +92,17 @@ export function buildSmokePingOption({
     emphasis: { focus: 'series', itemStyle: { borderWidth: 2 } },
     lineStyle: {
       color: theme.medianColor,
-      width: 2,
+      width: 2.5,
       shadowColor: theme.medianGlow,
       shadowBlur: 8,
     },
     itemStyle: { color: theme.medianColor },
     data: data.timestamps.map((ts, i) => {
-      const val = data.medianLine[i]
+      const val = data.avgLine[i]
       return val === null ? [ts, null] : [ts, val]
     }),
     z: 10,
     connectNulls: false,
-    markArea: markAreaData.length > 0 ? { silent: true, data: markAreaData as never } : undefined,
   })
 
   // Build data index for tooltip lookup
@@ -125,21 +130,41 @@ export function buildSmokePingOption({
       },
       splitLine: { show: false },
     },
-    yAxis: {
-      type: 'value',
-      axisLabel: {
-        color: theme.axisLabelColor,
-        fontSize: 10,
-        fontFamily: "'JetBrains Mono', monospace",
-        formatter: '{value}ms',
+    yAxis: [
+      {
+        type: 'value',
+        name: 'Latency',
+        nameTextStyle: { color: theme.axisLabelColor, fontSize: 10 },
+        axisLabel: {
+          color: theme.axisLabelColor,
+          fontSize: 10,
+          fontFamily: "'JetBrains Mono', monospace",
+          formatter: '{value}ms',
+        },
+        axisLine: { show: false },
+        axisTick: { show: false },
+        splitLine: {
+          lineStyle: { color: theme.gridLineColor, type: 'dashed' },
+        },
+        min: 0,
       },
-      axisLine: { show: false },
-      axisTick: { show: false },
-      splitLine: {
-        lineStyle: { color: theme.gridLineColor, type: 'dashed' },
+      {
+        type: 'value',
+        name: 'Loss',
+        nameTextStyle: { color: theme.axisLabelColor, fontSize: 10 },
+        axisLabel: {
+          color: theme.axisLabelColor,
+          fontSize: 10,
+          fontFamily: "'JetBrains Mono', monospace",
+          formatter: '{value}%',
+        },
+        axisLine: { show: false },
+        axisTick: { show: false },
+        splitLine: { show: false },
+        min: 0,
+        max: 100,
       },
-      min: 0,
-    },
+    ],
     tooltip: {
       trigger: 'axis',
       axisPointer: {

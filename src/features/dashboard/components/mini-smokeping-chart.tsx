@@ -1,8 +1,8 @@
 import { memo, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import ReactECharts from 'echarts-for-react'
 import { useNavigate } from 'react-router'
 import type { MonitoringDataPoint } from '@/api/generated/types.gen'
+import { LazyECharts } from '@/components/charts/lazy-echarts'
 import { useChartTheme } from '@/features/monitoring/lib/chart-theme'
 import { transformToChartData } from '@/features/monitoring/lib/transform-chart-data'
 import { PROTOCOL_COLORS } from '@/lib/constants'
@@ -131,10 +131,9 @@ function MiniSmokePingChartInner({
 
       {option ? (
         <>
-          <ReactECharts
+          <LazyECharts
             option={option.option}
             style={{ height: 56, width: '100%' }}
-            opts={{ renderer: 'canvas' }}
           />
           <div className="flex items-center justify-between mt-1">
             <span className="text-[9px] text-text-dim font-mono">

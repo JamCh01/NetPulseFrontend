@@ -1,6 +1,6 @@
 # Backend API Compatibility Gap (2026-05-20)
 
-Scope: Frontend runtime compatibility against the currently deployed API at `http://115.178.32.10:8001`.
+Scope: Frontend runtime compatibility against the currently deployed API at `http://115.178.32.10:8000`.
 
 ## Confirmed Available (from `/openapi.json` check)
 

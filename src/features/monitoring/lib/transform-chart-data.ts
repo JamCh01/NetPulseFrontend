@@ -11,6 +11,10 @@ interface BandPair {
 export interface ChartBandData {
   timestamps: number[]
   medianLine: (number | null)[]
+  avgLine: (number | null)[]
+  minLine: (number | null)[]
+  maxLine: (number | null)[]
+  minMaxDelta: (number | null)[]
   packetLoss: (number | null)[]
   bands: {
     minToAvg: BandPair
@@ -25,6 +29,10 @@ function emptyBandData(): ChartBandData {
   return {
     timestamps: [],
     medianLine: [],
+    avgLine: [],
+    minLine: [],
+    maxLine: [],
+    minMaxDelta: [],
     packetLoss: [],
     bands: {
       minToAvg: { lower: [], delta: [] },
@@ -76,6 +84,10 @@ function insertGaps(
 ): {
   timestamps: number[]
   medianLine: (number | null)[]
+  avgLine: (number | null)[]
+  minLine: (number | null)[]
+  maxLine: (number | null)[]
+  minMaxDelta: (number | null)[]
   packetLoss: (number | null)[]
   bands: {
     minToAvg: BandPair
@@ -86,6 +98,10 @@ function insertGaps(
 } {
   const timestamps: number[] = []
   const medianLine: (number | null)[] = []
+  const avgLine: (number | null)[] = []
+  const minLine: (number | null)[] = []
+  const maxLine: (number | null)[] = []
+  const minMaxDelta: (number | null)[] = []
   const minToAvg: BandPair = { lower: [], delta: [] }
   const avgToP95: BandPair = { lower: [], delta: [] }
   const p95ToP99: BandPair = { lower: [], delta: [] }
@@ -104,6 +120,10 @@ function insertGaps(
         const midTs = prevTs + (ts - prevTs) / 2
         timestamps.push(midTs)
         medianLine.push(null)
+        avgLine.push(null)
+        minLine.push(null)
+        maxLine.push(null)
+        minMaxDelta.push(null)
         lossPcts.push(null)
         minToAvg.lower.push(null)
         minToAvg.delta.push(null)
@@ -119,6 +139,10 @@ function insertGaps(
     // Add the actual data point
     timestamps.push(ts)
     medianLine.push(p.median_rtt)
+    avgLine.push(p.avg_rtt)
+    minLine.push(p.min_rtt)
+    maxLine.push(p.max_rtt)
+    minMaxDelta.push(Math.max(0, p.max_rtt - p.min_rtt))
     lossPcts.push(p.packet_loss_pct)
 
     // Band 1: min → avg
@@ -141,6 +165,10 @@ function insertGaps(
   return {
     timestamps,
     medianLine,
+    avgLine,
+    minLine,
+    maxLine,
+    minMaxDelta,
     packetLoss: lossPcts,
     bands: { minToAvg, avgToP95, p95ToP99, p99ToMax },
   }
@@ -149,12 +177,16 @@ function insertGaps(
 export function transformToChartData(points: MonitoringDataPoint[]): ChartBandData {
   if (points.length === 0) return emptyBandData()
 
-  const { timestamps, medianLine, packetLoss, bands } = insertGaps(points)
+  const { timestamps, medianLine, avgLine, minLine, maxLine, minMaxDelta, packetLoss, bands } = insertGaps(points)
   const lossIntervals = mergeLossIntervals(timestamps, packetLoss)
 
   return {
     timestamps,
     medianLine,
+    avgLine,
+    minLine,
+    maxLine,
+    minMaxDelta,
     packetLoss,
     bands,
     lossIntervals,

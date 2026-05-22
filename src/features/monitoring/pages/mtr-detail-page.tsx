@@ -1,183 +1,203 @@
-import { useState, useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
-import { useParams, useNavigate, useLocation } from 'react-router'
+import { useCallback, useEffect, useState } from 'react'
+import { Link, useLocation, useNavigate, useParams } from 'react-router'
+import { ArrowLeft, Clock3, MapPin, Radio, Waypoints } from 'lucide-react'
 import { useMonitoringTaskDetail } from '@/api/hooks/use-monitoring-task-detail'
-import { useMtrList, useMtrDetail } from '@/api/hooks/use-mtr'
-import { MtrTimeline } from '@/features/monitoring/components/mtr-timeline'
-import { MtrDetailTable } from '@/features/monitoring/components/mtr-detail-table'
-import { TimeRangeSelector } from '@/features/monitoring/components/time-range-selector'
+import { useMtrDetail, useMtrList } from '@/api/hooks/use-mtr'
+import { MtrDetailTable } from '@/features/monitoring/components/mtr/mtr-detail-table'
+import { MtrTimeline } from '@/features/monitoring/components/mtr/mtr-timeline'
+import { TimeRangeSelector } from '@/features/monitoring/components/time-range/time-range-selector'
 import { Badge } from '@/components/ui/badge'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
-import { useAuthStore } from '@/stores/auth-store'
+import { Skeleton } from '@/components/ui/skeleton'
 import { PROTOCOL_COLORS } from '@/lib/constants'
-
-const INITIAL_DURATION_MS = 24 * 60 * 60 * 1000
+import { useAuthStore } from '@/stores/auth-store'
+import {
+  classifyTaskStatus,
+  formatAgentLocation,
+  formatLatestSample,
+  formatTargetLocation,
+} from '@/features/monitoring/lib/monitoring-models'
+import {
+  AUTO_REFRESH_INTERVAL_MS,
+  createRelativeTimeRange,
+  refreshRelativeTimeRange,
+  type MonitoringTimeRange,
+} from '@/features/monitoring/lib/time-range'
 
 export default function MtrDetailPage() {
-  const { t } = useTranslation()
   const { taskUuid } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
   const isAdmin = useAuthStore((s) => s.isAdmin())
   const monitoringBasePath = location.pathname.startsWith('/app/monitoring') ? '/app/monitoring' : '/monitoring'
-  const { data: detailData, isLoading: taskLoading } = useMonitoringTaskDetail(taskUuid ?? '')
-
+  const { data: detailData, isLoading: taskLoading, error: taskError } = useMonitoringTaskDetail(taskUuid ?? '')
   const task = detailData?.task
   const taskAgents = detailData?.taskAgents ?? []
 
   const [selectedAgentUuid, setSelectedAgentUuid] = useState<string>('')
   const [selectedResultUuid, setSelectedResultUuid] = useState<string | undefined>()
+  const [timeRange, setTimeRange] = useState<MonitoringTimeRange>(() => createRelativeTimeRange())
 
-  const [now] = useState(() => Date.now())
-  const [timeRange, setTimeRange] = useState<{ start: number; end: number; granularity: 'raw' | 'hourly' | 'daily' }>({
-    start: now - INITIAL_DURATION_MS,
-    end: now,
-    granularity: 'raw',
-  })
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setTimeRange((current) => refreshRelativeTimeRange(current))
+    }, AUTO_REFRESH_INTERVAL_MS)
+    return () => window.clearInterval(timer)
+  }, [])
 
-  // Single agent mode
-  const {
-    data: mtrListData,
-    isLoading: mtrListLoading,
-  } = useMtrList(
+  const { data: mtrListData, isLoading: mtrListLoading, error: mtrListError } = useMtrList(
     taskUuid ?? '',
     selectedAgentUuid || undefined,
-    { start: timeRange.start, end: timeRange.end }
+    { start: timeRange.start, end: timeRange.end },
   )
+  const { data: mtrDetailData, isLoading: mtrDetailLoading } = useMtrDetail(selectedResultUuid ?? '')
 
-  // Selected detail
-  const {
-    data: mtrDetailData,
-    isLoading: mtrDetailLoading,
-  } = useMtrDetail(selectedResultUuid ?? '')
+  useEffect(() => {
+    if (!selectedResultUuid && mtrListData?.results.length) {
+      setSelectedResultUuid(mtrListData.results[0].result_uuid)
+    }
+  }, [mtrListData?.results, selectedResultUuid])
 
-  const handleTimeRangeChange = useCallback(
-    (range: { start: number; end: number; granularity: 'raw' | 'hourly' | 'daily' }) => {
-      setTimeRange(range)
-    },
-    [],
-  )
-
-  const handleSelectResult = useCallback(
-    (resultUuid: string) => {
-      setSelectedResultUuid(resultUuid)
-    },
-    [],
-  )
+  const handleSelectResult = useCallback((resultUuid: string) => {
+    setSelectedResultUuid(resultUuid)
+  }, [])
 
   if (taskLoading) {
     return (
-      <div>
-        <Skeleton className="h-8 w-64 mb-6" />
-        <Skeleton className="h-10 w-full mb-4" />
-        <Skeleton className="h-40 w-full mb-4" />
-        <Skeleton className="h-80 w-full" />
+      <div className="space-y-4">
+        <Skeleton className="h-28 rounded-xl" />
+        <Skeleton className="h-48 rounded-xl" />
+        <Skeleton className="h-96 rounded-xl" />
       </div>
     )
   }
 
-  if (!task) {
+  if (taskError || !task) {
     return (
-      <div>
-        <h1 className="text-2xl font-bold text-text-primary mb-6">{t('monitoring.mtrTitle')}</h1>
-        <div className="glass-light rounded-xl p-6 text-center">
-          <p className="text-red-400 text-sm">{t('monitoring.taskNotFound')}</p>
-          <Button variant="outline" className="mt-4" onClick={() => navigate(monitoringBasePath)}>
-            {t('common.back')}
-          </Button>
-        </div>
+      <div className="rounded-xl border border-border bg-bg-surface p-8 text-center">
+        <div className="text-sm font-medium text-text-primary">MTR 任务不存在或加载失败</div>
+        <Button variant="outline" className="mt-4" onClick={() => navigate(monitoringBasePath)}>
+          返回监控目标
+        </Button>
       </div>
     )
   }
+
+  const status = classifyTaskStatus(task)
+  const reachedCount = mtrListData?.results.filter((result) => result.target_reached).length ?? 0
+  const failedCount = (mtrListData?.results.length ?? 0) - reachedCount
 
   return (
-    <div>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate(monitoringBasePath)}
-            className="text-text-muted hover:text-text-primary transition-colors text-sm"
-          >
-            {t('monitoring.title')} /
-          </button>
-          <h1 className="text-2xl font-bold text-text-primary">{task.task_name}</h1>
-          <Badge className={`border text-xs uppercase ${PROTOCOL_COLORS[task.protocol] ?? ''}`}>
-            MTR
-          </Badge>
+    <div className="space-y-4">
+      <div className="rounded-xl border border-border bg-bg-surface">
+        <div className="border-b border-border px-4 py-3">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+            <div className="min-w-0">
+              <button
+                type="button"
+                onClick={() => navigate(monitoringBasePath)}
+                className="mb-2 inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-primary"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+                监控目标
+              </button>
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="truncate text-xl font-semibold text-text-primary">{task.name}</h1>
+                <Badge className={`border text-xs uppercase ${PROTOCOL_COLORS.mtr}`}>MTR</Badge>
+                <Badge variant={status === 'ok' ? 'success' : status === 'failed' ? 'error' : 'warning'}>
+                  {status === 'ok' ? '正常' : status === 'failed' ? '异常' : '无数据'}
+                </Badge>
+                {task.target.is_anycast && <Badge variant="info">Anycast</Badge>}
+              </div>
+              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-muted">
+                <span className="font-mono text-text-secondary">{task.target.target}</span>
+                <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{formatTargetLocation(task.target)}</span>
+                <span className="inline-flex items-center gap-1"><Radio className="h-3.5 w-3.5" />{task.agent?.name ?? '未绑定 Agent'}</span>
+                <span>{formatAgentLocation(task.agent)}</span>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Link to={`${monitoringBasePath}/${task.task_uuid}`}>
+                <Button variant="outline">指标详情</Button>
+              </Link>
+              {isAdmin && (
+                <Button onClick={() => navigate(`/tasks/${task.task_uuid}`)}>
+                  管理任务
+                </Button>
+              )}
+            </div>
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-text-secondary font-[family-name:var(--font-mono)]">
-            {task.target}{task.port ? `:${task.port}` : ''}
-          </span>
-          {isAdmin && (
-            <Button
-              className="text-sm"
-              onClick={() => navigate(`/tasks/${task.task_uuid}`)}
-            >
-              {t('tasks.manageTask')}
-            </Button>
-          )}
+
+        <div className="grid gap-3 p-4 md:grid-cols-4">
+          <Summary label="最新样本" value={formatLatestSample(task.latest_result.latest_sample_at)} icon={Clock3} />
+          <Summary label="Result" value={String(mtrListData?.results.length ?? 0)} icon={Waypoints} />
+          <Summary label="到达目标" value={String(reachedCount)} icon={Waypoints} />
+          <Summary label="未到达" value={String(failedCount)} icon={Waypoints} tone={failedCount > 0 ? 'text-status-error-fg' : 'text-status-success-fg'} />
         </div>
       </div>
 
-      {/* Controls */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-4">
-        <TimeRangeSelector value={timeRange} onChange={handleTimeRangeChange} />
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-text-muted">{t('monitoring.agent')}:</span>
-          <Select
-            value={selectedAgentUuid}
-            onValueChange={(val) => {
-              setSelectedAgentUuid(val ?? '')
+      <div className="flex flex-col gap-3 rounded-xl border border-border bg-bg-surface p-3 lg:flex-row lg:items-center lg:justify-between">
+        <TimeRangeSelector value={timeRange} onChange={(range) => {
+          setTimeRange(range)
+          setSelectedResultUuid(undefined)
+        }} />
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            size="sm"
+            variant={!selectedAgentUuid ? 'default' : 'outline'}
+            onClick={() => {
+              setSelectedAgentUuid('')
               setSelectedResultUuid(undefined)
             }}
           >
-            <SelectTrigger>
-              <SelectValue placeholder={t('monitoring.allAgents')}>
-                {(value: string | null) => {
-                  if (!value) return t('monitoring.allAgents')
-                  const agent = taskAgents.find((a) => a.agent_uuid === value)
-                  return agent?.agent_name ?? t('monitoring.allAgents')
-                }}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">{t('monitoring.allAgents')}</SelectItem>
-              {taskAgents.map((agent) => (
-                <SelectItem key={agent.agent_uuid} value={agent.agent_uuid}>
-                  {agent.agent_name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            全部 Agent
+          </Button>
+          {taskAgents.map((agent) => (
+            <Button
+              key={agent.agent_uuid}
+              size="sm"
+              variant={selectedAgentUuid === agent.agent_uuid ? 'default' : 'outline'}
+              onClick={() => {
+                setSelectedAgentUuid(agent.agent_uuid)
+                setSelectedResultUuid(undefined)
+              }}
+            >
+              {agent.agent_name}
+            </Button>
+          ))}
         </div>
       </div>
 
-      {/* Timeline */}
-      <div className="mb-4">
-        <MtrTimeline
-          results={mtrListData?.results ?? []}
-          isLoading={mtrListLoading}
-          onSelectResult={handleSelectResult}
-          selectedResultUuid={selectedResultUuid}
-          height={180}
-        />
-      </div>
+      {mtrListError ? (
+        <div className="rounded-xl border border-status-error-border bg-status-error-bg p-4 text-sm text-status-error-fg">
+          MTR result 加载失败：{(mtrListError as Error).message}
+        </div>
+      ) : (
+        <div className="rounded-xl border border-border bg-bg-surface p-3">
+          <MtrTimeline
+            results={mtrListData?.results ?? []}
+            isLoading={mtrListLoading}
+            onSelectResult={handleSelectResult}
+            selectedResultUuid={selectedResultUuid}
+            height={220}
+          />
+        </div>
+      )}
 
-      {/* Detail Table */}
-      <MtrDetailTable
-        result={selectedResultUuid ? mtrDetailData : undefined}
-        isLoading={selectedResultUuid ? mtrDetailLoading : false}
-      />
+      <MtrDetailTable result={selectedResultUuid ? mtrDetailData : undefined} isLoading={selectedResultUuid ? mtrDetailLoading : false} />
+    </div>
+  )
+}
+
+function Summary({ label, value, icon: Icon, tone }: { label: string; value: string; icon: React.ComponentType<{ className?: string }>; tone?: string }) {
+  return (
+    <div className="rounded-lg border border-border bg-bg-surface-light px-3 py-2">
+      <div className="flex items-center justify-between gap-3">
+        <div className="text-[10px] uppercase text-text-dim">{label}</div>
+        <Icon className={`h-3.5 w-3.5 ${tone ?? 'text-text-muted'}`} />
+      </div>
+      <div className={`mt-1 font-mono text-sm font-semibold ${tone ?? 'text-text-primary'}`}>{value}</div>
     </div>
   )
 }
