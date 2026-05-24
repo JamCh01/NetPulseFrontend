@@ -18,6 +18,12 @@ export interface TimeRangeSelectorProps {
   onChange: (range: MonitoringTimeRange) => void
 }
 
+interface GrafanaTimeRangeSelectorProps extends TimeRangeSelectorProps {
+  showStep?: boolean
+  density?: 'default' | 'compact'
+  className?: string
+}
+
 interface PresetConfig {
   label: string
   grafanaLabel: string
@@ -159,7 +165,13 @@ export function TimeRangeSelector({ value, onChange }: TimeRangeSelectorProps) {
   )
 }
 
-export function GrafanaTimeRangeSelector({ value, onChange }: TimeRangeSelectorProps) {
+export function GrafanaTimeRangeSelector({
+  value,
+  onChange,
+  showStep = true,
+  density = 'default',
+  className,
+}: GrafanaTimeRangeSelectorProps) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const triggerRef = useRef<HTMLButtonElement | null>(null)
@@ -235,19 +247,25 @@ export function GrafanaTimeRangeSelector({ value, onChange }: TimeRangeSelectorP
       return
     }
     const nextGranularity = granularityForTimeRange(start, end)
-    const parsedStep = stepValue === 'auto' ? defaultStepForGranularity(nextGranularity) : Number(stepValue)
-    if (!Number.isFinite(parsedStep) || parsedStep < 60) {
-      setAbsoluteError('Step 最小值为 60 秒。')
-      return
-    }
-    if (parsedStep > 86400) {
-      setAbsoluteError('Step 最大值为 86400 秒。')
-      return
+    const parsedStep = showStep
+      ? stepValue === 'auto'
+        ? defaultStepForGranularity(nextGranularity)
+        : Number(stepValue)
+      : defaultStepForGranularity(nextGranularity)
+    if (showStep) {
+      if (!Number.isFinite(parsedStep) || parsedStep < 60) {
+        setAbsoluteError('Step 最小值为 60 秒。')
+        return
+      }
+      if (parsedStep > 86400) {
+        setAbsoluteError('Step 最大值为 86400 秒。')
+        return
+      }
     }
     setAbsoluteError(null)
     onChange(createAbsoluteTimeRange(start, end, normalizeStep(parsedStep, nextGranularity)))
     setOpen(false)
-  }, [absoluteEnd, absoluteStart, onChange, stepValue])
+  }, [absoluteEnd, absoluteStart, onChange, showStep, stepValue])
 
   const handleOpenChange = () => {
     setAbsoluteStart(toDateTimeTextValue(value.start))
@@ -263,16 +281,20 @@ export function GrafanaTimeRangeSelector({ value, onChange }: TimeRangeSelectorP
         ref={triggerRef}
         type="button"
         onClick={handleOpenChange}
-        className="inline-flex h-8 items-center gap-2 rounded-md border border-border bg-bg-surface-light px-2.5 text-xs font-medium text-text-secondary shadow-sm transition-colors hover:border-accent-border hover:bg-muted hover:text-text-primary"
+        className={`inline-flex min-w-0 items-center gap-2 rounded-md border border-border bg-bg-surface-light text-xs font-medium text-text-secondary shadow-sm transition-colors hover:border-accent-border hover:bg-muted hover:text-text-primary ${
+          density === 'compact' ? 'h-9 px-3' : 'h-8 px-2.5'
+        } ${className ?? ''}`}
       >
         <CalendarClock className="h-3.5 w-3.5 text-text-muted" />
-        <span className="font-[family-name:var(--font-mono)]">{triggerLabel}</span>
+        <span className="min-w-0 flex-1 truncate text-left font-[family-name:var(--font-mono)]">{triggerLabel}</span>
         <span className="rounded border border-border bg-muted/60 px-1.5 py-0.5 text-[10px] uppercase text-text-dim">
           {t(GRANULARITY_KEYS[value.granularity])}
         </span>
-        <span className="rounded border border-border bg-muted/60 px-1.5 py-0.5 text-[10px] text-text-dim">
-          step {displayStep(value)}
-        </span>
+        {showStep && (
+          <span className="rounded border border-border bg-muted/60 px-1.5 py-0.5 text-[10px] text-text-dim">
+            step {displayStep(value)}
+          </span>
+        )}
         <ChevronDown className="h-3.5 w-3.5 text-text-dim" />
       </button>
 
@@ -341,22 +363,26 @@ export function GrafanaTimeRangeSelector({ value, onChange }: TimeRangeSelectorP
                     />
                   </label>
                 </div>
-                <label className="grid gap-1 text-xs text-text-muted sm:max-w-40">
-                  <span>Step</span>
-                  <select
-                    value={stepValue}
-                    onChange={(event) => setStepValue(event.target.value)}
-                    className="h-8 rounded-md border border-border bg-bg-surface-light px-2 font-[family-name:var(--font-mono)] text-xs text-text-primary outline-none transition-colors focus:border-accent-border"
-                  >
-                    {STEP_OPTIONS.map((option) => (
-                      <option key={option.label} value={option.value ?? 'auto'}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                {showStep && (
+                  <label className="grid gap-1 text-xs text-text-muted sm:max-w-40">
+                    <span>Step</span>
+                    <select
+                      value={stepValue}
+                      onChange={(event) => setStepValue(event.target.value)}
+                      className="h-8 rounded-md border border-border bg-bg-surface-light px-2 font-[family-name:var(--font-mono)] text-xs text-text-primary outline-none transition-colors focus:border-accent-border"
+                    >
+                      {STEP_OPTIONS.map((option) => (
+                        <option key={option.label} value={option.value ?? 'auto'}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
                 <div className="rounded-md border border-border bg-bg-surface-light px-2 py-1.5 text-[11px] leading-relaxed text-text-dim">
-                  Step 是 range query 的查询分辨率，表示 start 和 end 之间每隔多久返回一个点；后端 step_sec 只接受 60 到 86400 秒，Auto 会在前端转换为具体秒数。快捷时间范围会每 1 分钟自动推进到最新窗口；绝对时间范围不会自动刷新。
+                  {showStep
+                    ? 'Step 是 range query 的查询分辨率，表示 start 和 end 之间每隔多久返回一个点；后端 step_sec 只接受 60 到 86400 秒，Auto 会在前端转换为具体秒数。快捷时间范围会每 1 分钟自动推进到最新窗口；绝对时间范围不会自动刷新。'
+                    : 'MTR result 按实际探测时间点查询，不使用 metrics 聚合步长。快捷时间范围会每 1 分钟自动推进到最新窗口；绝对时间范围不会自动刷新。'}
                 </div>
                 {absoluteError && (
                   <div className="text-xs text-status-error-fg">{absoluteError}</div>

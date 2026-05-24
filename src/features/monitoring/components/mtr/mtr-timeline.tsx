@@ -161,7 +161,7 @@ export function MtrTimeline({
     }
   }, [results, theme, selectedResultUuid])
 
-  if (isLoading) {
+  if (isLoading && results.length === 0) {
     return (
       <div style={{ height }} className="glass-light rounded-xl animate-pulse" />
     )

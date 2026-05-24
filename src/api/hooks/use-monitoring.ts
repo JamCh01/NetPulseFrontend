@@ -1,4 +1,4 @@
-import { useQuery, useQueries } from '@tanstack/react-query'
+import { keepPreviousData, useQuery, useQueries } from '@tanstack/react-query'
 import { monitoringKeys } from './keys'
 import { buildApiUrl } from '@/api/base-url'
 import type { MonitoringTask } from '@/features/monitoring/lib/monitoring-models'
@@ -174,6 +174,7 @@ export function useMonitoringData(
       return { data: seriesToMonitoringPoints(body.data?.series) }
     },
     enabled: !!taskUuid,
+    placeholderData: keepPreviousData,
     staleTime: config.staleTime,
   })
 }
@@ -215,6 +216,7 @@ export function useMultiAgentMonitoringData(
         return { agentUuid: agent.agent_uuid, agentName: agent.agent_name, data: seriesToMonitoringPoints(body.data?.series) }
       },
       enabled: !!taskUuid && agents.length > 0,
+      placeholderData: keepPreviousData,
       staleTime: config.staleTime,
     })),
     combine: (results): MonitoringSeriesResult => ({
@@ -261,6 +263,7 @@ export function useTaskMonitoringSeries(tasks: MonitoringTask[], timeRange: Time
         }
       },
       enabled: !!task.task_uuid,
+      placeholderData: keepPreviousData,
       staleTime: config.staleTime,
     })),
     combine: (results): MonitoringSeriesResult => ({

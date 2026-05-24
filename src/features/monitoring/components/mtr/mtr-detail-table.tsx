@@ -9,7 +9,7 @@ interface MtrDetailTableProps {
 }
 
 export function MtrDetailTable({ result, isLoading, showHeader = true }: MtrDetailTableProps) {
-  if (isLoading) {
+  if (isLoading && !result) {
     return (
       <div className="rounded-xl border border-border bg-bg-surface p-4">
         <Skeleton className="h-6 w-48" />

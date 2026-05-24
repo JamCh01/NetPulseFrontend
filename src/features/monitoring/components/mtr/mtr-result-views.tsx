@@ -92,7 +92,7 @@ function MtrResultTimeline({
   onSelectResult: (resultUuid: string) => void
   isLoading?: boolean
 }) {
-  if (isLoading) {
+  if (isLoading && items.length === 0) {
     return (
       <div className="rounded-xl border border-border bg-bg-surface-light p-4">
         <div className="h-16 animate-pulse rounded-lg bg-muted" />

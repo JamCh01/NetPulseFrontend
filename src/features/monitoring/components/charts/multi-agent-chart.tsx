@@ -30,7 +30,9 @@ function MultiAgentChartInner({
     [agentSeries, theme, chartStyle],
   )
 
-  if (isLoading) {
+  const hasData = agentSeries.some((s) => s.data.length > 0)
+
+  if (isLoading && !hasData) {
     return (
       <div className="glass-light rounded-xl p-6" style={{ height }}>
         <div className="flex flex-col gap-3 h-full justify-center">
@@ -53,7 +55,6 @@ function MultiAgentChartInner({
     )
   }
 
-  const hasData = agentSeries.some((s) => s.data.length > 0)
   if (!hasData) {
     return (
       <div className="glass-light rounded-xl p-6 flex items-center justify-center" style={{ height }}>

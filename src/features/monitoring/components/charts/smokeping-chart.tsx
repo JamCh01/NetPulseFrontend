@@ -35,7 +35,9 @@ function SmokePingChartInner({
     return buildSmokePingOption({ data: bandData, theme, agentName, rawPoints: data, chartStyle })
   }, [data, theme, agentName, chartStyle])
 
-  if (isLoading) {
+  const hasData = Boolean(data?.length)
+
+  if (isLoading && !hasData) {
     return (
       <div className="glass-light rounded-xl p-6" style={{ height }}>
         <div className="flex flex-col gap-3 h-full justify-center">
@@ -63,7 +65,7 @@ function SmokePingChartInner({
     )
   }
 
-  if (!data || data.length === 0) {
+  if (!hasData) {
     return (
       <div
         className="glass-light rounded-xl p-6 flex items-center justify-center"

@@ -1,4 +1,4 @@
-import { useQueries, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQueries, useQuery } from '@tanstack/react-query'
 import { monitoringKeys } from './keys'
 import { buildApiUrl } from '@/api/base-url'
 import {
@@ -83,6 +83,7 @@ export function useMtrList(
       }
     },
     enabled: !!taskUuid,
+    placeholderData: keepPreviousData,
     staleTime: 30 * 1000,
   })
 }
@@ -143,6 +144,7 @@ export function useMtrListsForTasks(tasks: MonitoringTask[], timeRange: TimeRang
         }
       },
       enabled: !!task.task_uuid,
+      placeholderData: keepPreviousData,
       staleTime: 30 * 1000,
     })),
     combine: (results): MtrListsResult => {

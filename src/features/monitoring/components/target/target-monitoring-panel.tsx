@@ -48,6 +48,8 @@ const statusCopy: Record<LatestResultState, { label: string; variant: 'success' 
   unknown: { label: '未知', variant: 'inactive' },
 }
 
+const filterButtonClass = 'h-9 w-full min-w-0 justify-between border-border bg-bg-surface-light px-3 text-xs text-text-secondary shadow-sm hover:border-accent-border hover:bg-muted hover:text-text-primary'
+
 function latestTimestamp(tasks: MonitoringTask[], sources: Array<(task: MonitoringTask) => string | null | undefined>) {
   return tasks
     .flatMap((task) => sources.map((source) => source(task)))
@@ -130,16 +132,22 @@ function ProtocolHeader({
         </div>
       </div>
       {(showAgentFilter || (timeRange && onTimeRangeChange)) && (
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="grid w-full gap-2 sm:grid-cols-2 lg:w-auto lg:min-w-[42rem]">
           {showAgentFilter && (
             <AgentFilterDropdown
               options={agentOptions}
               selectedAgentUuids={selectedAgentUuids}
               onSelectedAgentUuidsChange={onSelectedAgentUuidsChange}
+              className={filterButtonClass}
             />
           )}
           {timeRange && onTimeRangeChange && (
-            <GrafanaTimeRangeSelector value={timeRange} onChange={onTimeRangeChange} />
+            <GrafanaTimeRangeSelector
+              value={timeRange}
+              onChange={onTimeRangeChange}
+              density="compact"
+              className={filterButtonClass}
+            />
           )}
         </div>
       )}
@@ -151,14 +159,17 @@ function AgentFilterDropdown({
   options,
   selectedAgentUuids,
   onSelectedAgentUuidsChange,
+  className,
 }: {
   options: AgentFilterOption[]
   selectedAgentUuids: string[]
   onSelectedAgentUuidsChange: (agentUuids: string[]) => void
+  className?: string
 }) {
   const selected = useMemo(() => new Set(selectedAgentUuids), [selectedAgentUuids])
   const allSelected = options.length > 0 && selectedAgentUuids.length === options.length
   const label = labelForAgentSelection(selectedAgentUuids.length, options.length)
+  const selectedLabel = options.length === 0 ? '已选择 0/0' : `已选择 ${selectedAgentUuids.length}/${options.length}`
 
   const handleToggleAll = (checked: boolean) => {
     onSelectedAgentUuidsChange(checked ? options.map((option) => option.agentUuid) : [])
@@ -180,12 +191,15 @@ function AgentFilterDropdown({
             type="button"
             variant="outline"
             size="sm"
-            className="h-8 border-border bg-bg-surface-light px-2.5 text-xs text-text-secondary hover:border-accent-border hover:bg-muted hover:text-text-primary"
+            className={className ?? filterButtonClass}
           />
         }
       >
         <Users className="h-3.5 w-3.5 text-text-muted" />
-        <span className="font-[family-name:var(--font-mono)]">{label}</span>
+        <span className="min-w-0 flex-1 truncate text-left font-[family-name:var(--font-mono)]">{label}</span>
+        <span className="rounded border border-border bg-muted/60 px-1.5 py-0.5 text-[10px] text-text-dim">
+          {selectedLabel}
+        </span>
         <ChevronDown className="h-3.5 w-3.5 text-text-dim" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-60 rounded-md border border-border bg-popover text-text-secondary">
@@ -215,6 +229,65 @@ function AgentFilterDropdown({
         )}
       </DropdownMenuContent>
     </DropdownMenu>
+  )
+}
+
+function MtrEvidenceToolbar({
+  tasks,
+  timeRange,
+  onTimeRangeChange,
+  agentOptions,
+  selectedAgentUuids,
+  onSelectedAgentUuidsChange,
+}: {
+  tasks: MonitoringTask[]
+  timeRange: MonitoringTimeRange
+  onTimeRangeChange: (range: MonitoringTimeRange) => void
+  agentOptions: AgentFilterOption[]
+  selectedAgentUuids: string[]
+  onSelectedAgentUuidsChange: (agentUuids: string[]) => void
+}) {
+  const agents = new Set(tasks.map((task) => task.agent?.agent_uuid).filter(Boolean)).size
+
+  return (
+    <div className="border-b border-border bg-bg-surface">
+      <div className="flex flex-col gap-3 px-4 py-3 xl:flex-row xl:items-center xl:justify-between">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-sky-500/30 bg-sky-500/10 text-sky-300">
+              <Waypoints className="h-4 w-4" />
+            </span>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-base font-semibold text-text-primary">MTR 证据</h2>
+                <Badge variant="info">Result Timeline</Badge>
+              </div>
+              <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-muted">
+                <span>{tasks.length} 个任务</span>
+                <span>{agents} 个 Agent</span>
+                <span>最新样本 {formatLatestSample(latestSample(tasks))}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid w-full gap-2 sm:grid-cols-2 xl:w-auto xl:min-w-[42rem]">
+          <AgentFilterDropdown
+            options={agentOptions}
+            selectedAgentUuids={selectedAgentUuids}
+            onSelectedAgentUuidsChange={onSelectedAgentUuidsChange}
+            className={filterButtonClass}
+          />
+          <GrafanaTimeRangeSelector
+            value={timeRange}
+            onChange={onTimeRangeChange}
+            showStep={false}
+            density="compact"
+            className={filterButtonClass}
+          />
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -338,10 +411,8 @@ function MtrProtocolPanel({
 
   return (
     <section className="overflow-hidden rounded-xl border border-border bg-bg-surface">
-      <ProtocolHeader
-        protocol="mtr"
+      <MtrEvidenceToolbar
         tasks={tasks}
-        icon={<Waypoints className="h-4 w-4" />}
         timeRange={timeRange}
         onTimeRangeChange={onTimeRangeChange}
         agentOptions={agentOptions}
