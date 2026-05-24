@@ -10,6 +10,7 @@ import {
   useCreateAgent,
   useDeleteAgent,
   useSetAgentEnabled,
+  useUpdateAgent,
 } from '@/api/hooks/admin-api'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -38,6 +39,7 @@ export default function AgentsPage() {
   const [keyword, setKeyword] = useState('')
   const [status, setStatus] = useState<AgentStatus | 'all'>('all')
   const [createOpen, setCreateOpen] = useState(false)
+  const [editingAgent, setEditingAgent] = useState<AdminAgent | null>(null)
   const [createdAgent, setCreatedAgent] = useState<AdminAgent | null>(null)
   const [copiedToken, setCopiedToken] = useState(false)
   const [form, setForm] = useState({
@@ -62,6 +64,7 @@ export default function AgentsPage() {
     sort_order: 'asc',
   })
   const createAgent = useCreateAgent()
+  const updateAgent = useUpdateAgent()
   const setAgentEnabled = useSetAgentEnabled()
   const deleteAgent = useDeleteAgent()
 
@@ -83,9 +86,30 @@ export default function AgentsPage() {
     })
   }
 
-  const handleCreate = (event: React.FormEvent) => {
-    event.preventDefault()
-    createAgent.mutate({
+  const closeAgentDialog = () => {
+    setCreateOpen(false)
+    setEditingAgent(null)
+    resetForm()
+  }
+
+  const openEditAgent = (agent: AdminAgent) => {
+    setForm({
+      name: agent.name,
+      ip_version: agent.ip_version,
+      continent: agent.continent,
+      country: agent.country,
+      region: agent.region,
+      city: agent.city,
+      zip_code: agent.zip_code,
+      carrier: agent.carrier,
+      tags: agent.tags.join(', '),
+      comment: agent.comment ?? '',
+    })
+    setEditingAgent(agent)
+    setCreateOpen(true)
+  }
+
+  const agentPayload = () => ({
       name: form.name,
       ip_version: form.ip_version,
       continent: form.continent,
@@ -96,7 +120,24 @@ export default function AgentsPage() {
       carrier: form.carrier,
       tags: csvToList(form.tags),
       comment: form.comment || null,
-    }, {
+    })
+
+  const handleSubmitAgent = (event: React.FormEvent) => {
+    event.preventDefault()
+    if (editingAgent) {
+      updateAgent.mutate({
+        uuid: editingAgent.agent_uuid,
+        data: agentPayload(),
+      }, {
+        onSuccess: () => {
+          toast.success('Agent 已更新')
+          closeAgentDialog()
+        },
+        onError: (error) => toast.error(error.message || '更新 Agent 失败'),
+      })
+      return
+    }
+    createAgent.mutate(agentPayload(), {
       onSuccess: (agent) => {
         toast.success('Agent 已创建')
         setCreateOpen(false)
@@ -127,7 +168,11 @@ export default function AgentsPage() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => navigate('/agents/releases')}>版本发布</Button>
-          <Button onClick={() => setCreateOpen(true)}>新增 Agent</Button>
+          <Button onClick={() => {
+            setEditingAgent(null)
+            resetForm()
+            setCreateOpen(true)
+          }}>新增 Agent</Button>
         </div>
       </div>
 
@@ -201,6 +246,7 @@ export default function AgentsPage() {
                   <TableCell className="text-sm text-text-secondary">{formatDateTime(agent.last_heartbeat_at)}</TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-2">
+                      <Button variant="ghost" size="sm" onClick={() => openEditAgent(agent)}>编辑</Button>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -239,13 +285,13 @@ export default function AgentsPage() {
         )}
       </div>
 
-      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+      <Dialog open={createOpen} onOpenChange={(open) => { if (open) setCreateOpen(true); else closeAgentDialog() }}>
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>新增 Agent</DialogTitle>
-            <DialogDescription>创建后会返回一次性 auth_token，请立即保存到 Agent 配置中。</DialogDescription>
+            <DialogTitle>{editingAgent ? '编辑 Agent' : '新增 Agent'}</DialogTitle>
+            <DialogDescription>{editingAgent ? '修改 Agent 管理信息后，后端会重新发布该 Agent 的任务快照。' : '创建后会返回一次性 auth_token，请立即保存到 Agent 配置中。'}</DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleCreate} className="mt-2 grid gap-4">
+          <form onSubmit={handleSubmitAgent} className="mt-2 grid gap-4">
             <div className="grid gap-3 md:grid-cols-2">
               <div>
                 <Label className="mb-1.5 text-xs text-text-secondary">名称</Label>
@@ -276,8 +322,10 @@ export default function AgentsPage() {
             <Input placeholder="标签，使用英文逗号分隔" value={form.tags} onChange={(event) => setForm({ ...form, tags: event.target.value })} />
             <Textarea placeholder="备注" value={form.comment} onChange={(event) => setForm({ ...form, comment: event.target.value })} />
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>取消</Button>
-              <Button type="submit" disabled={createAgent.isPending}>{createAgent.isPending ? '创建中' : '创建'}</Button>
+              <Button type="button" variant="outline" onClick={closeAgentDialog}>取消</Button>
+              <Button type="submit" disabled={createAgent.isPending || updateAgent.isPending}>
+                {createAgent.isPending || updateAgent.isPending ? '保存中' : (editingAgent ? '保存' : '创建')}
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>

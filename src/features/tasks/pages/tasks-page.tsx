@@ -39,6 +39,18 @@ export default function TasksPage() {
   const [createOpen, setCreateOpen] = useState(false)
   const [quickOpen, setQuickOpen] = useState(false)
   const [editTask, setEditTask] = useState<AdminTask | null>(null)
+  const [editForm, setEditForm] = useState({
+    name: '',
+    target_uuid: '',
+    agent_uuid: '',
+    ip_family: '4' as IpFamily,
+    interval: '60',
+    timeout: '3000',
+    packet_count: '4',
+    port: '',
+    iperf3_mode: 'single_thread' as 'single_thread' | 'multi_thread',
+    iperf3_duration: '10',
+  })
   const [deleteTaskUuid, setDeleteTaskUuid] = useState<string | null>(null)
   const [quickTargetUuid, setQuickTargetUuid] = useState('')
   const [quickAgentUuid, setQuickAgentUuid] = useState('')
@@ -73,6 +85,10 @@ export default function TasksPage() {
     [form.target_uuid, targets],
   )
   const availableTaskTypes = protocolOptionsForTarget(selectedTarget)
+  const selectedEditTarget = useMemo(
+    () => targets.find((target) => target.target_uuid === editForm.target_uuid) ?? null,
+    [editForm.target_uuid, targets],
+  )
 
   const resetCreateForm = () => {
     setForm({
@@ -115,16 +131,55 @@ export default function TasksPage() {
     })
   }
 
+  const openEditTask = (task: AdminTask) => {
+    const probeConfig = task.probe_config ?? {}
+    const mode = probeConfig.mode === 'multi_thread' ? 'multi_thread' : 'single_thread'
+    const durationSec = typeof probeConfig.duration_sec === 'number' ? probeConfig.duration_sec : 10
+    const port = typeof probeConfig.port === 'number' ? String(probeConfig.port) : ''
+    setEditForm({
+      name: task.name,
+      target_uuid: task.target_uuid,
+      agent_uuid: task.agent_uuid,
+      ip_family: task.ip_family,
+      interval: String(task.interval),
+      timeout: String(task.timeout),
+      packet_count: String(task.packet_count),
+      port,
+      iperf3_mode: mode,
+      iperf3_duration: String(durationSec),
+    })
+    setEditTask(task)
+  }
+
   const handleEdit = (event: React.FormEvent) => {
     event.preventDefault()
     if (!editTask) return
+    const nextPayload = buildTaskPayload({
+      name: editForm.name,
+      target_uuid: editForm.target_uuid,
+      agent_uuid: editForm.agent_uuid,
+      task_type: editTask.task_type,
+      ip_family: editForm.ip_family,
+      interval: Number(editForm.interval),
+      timeout: Number(editForm.timeout),
+      packet_count: Number(editForm.packet_count),
+      port: editForm.port ? Number(editForm.port) : undefined,
+      iperf3Mode: editForm.iperf3_mode,
+      iperf3Duration: editForm.iperf3_duration ? Number(editForm.iperf3_duration) : undefined,
+    })
     updateTask.mutate({
       uuid: editTask.task_uuid,
       data: {
-        name: editTask.name,
-        interval: editTask.interval,
-        timeout: editTask.timeout,
-        packet_count: editTask.packet_count,
+        name: nextPayload.name,
+        target_uuid: nextPayload.target_uuid,
+        agent_uuid: nextPayload.agent_uuid,
+        ip_family: nextPayload.ip_family,
+        interval: nextPayload.interval,
+        timeout: nextPayload.timeout,
+        packet_count: nextPayload.packet_count,
+        probe_config: nextPayload.probe_config,
+        mtr_retry_config: nextPayload.mtr_retry_config,
+        schedule_jitter_ms: nextPayload.schedule_jitter_ms,
       },
     }, {
       onSuccess: () => {
@@ -242,7 +297,7 @@ export default function TasksPage() {
                       <Link to={`/app/monitoring/${task.task_uuid}`}>
                         <Button variant="ghost" size="sm">查看数据</Button>
                       </Link>
-                      <Button variant="ghost" size="sm" onClick={() => setEditTask(task)}>编辑</Button>
+                      <Button variant="ghost" size="sm" onClick={() => openEditTask(task)}>编辑</Button>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -387,20 +442,76 @@ export default function TasksPage() {
       </Dialog>
 
       <Dialog open={!!editTask} onOpenChange={(open) => { if (!open) setEditTask(null) }}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>编辑 Task</DialogTitle>
-            <DialogDescription>当前只开放安全字段：名称、间隔、超时和包数量。</DialogDescription>
+            <DialogDescription>可修改任务名称、绑定关系、IP 协议族、调度参数和协议相关 probe_config；任务类型保持不变。</DialogDescription>
           </DialogHeader>
           {editTask && (
-            <form onSubmit={handleEdit} className="space-y-3">
-              <Input value={editTask.name} onChange={(event) => setEditTask({ ...editTask, name: event.target.value })} />
-              <Input type="number" min="60" value={editTask.interval} onChange={(event) => setEditTask({ ...editTask, interval: Number(event.target.value) })} />
-              <Input type="number" min="1000" value={editTask.timeout} onChange={(event) => setEditTask({ ...editTask, timeout: Number(event.target.value) })} />
-              <Input type="number" min="1" value={editTask.packet_count} onChange={(event) => setEditTask({ ...editTask, packet_count: Number(event.target.value) })} />
+            <form onSubmit={handleEdit} className="grid gap-4">
+              <Input value={editForm.name} onChange={(event) => setEditForm({ ...editForm, name: event.target.value })} placeholder="任务名称" />
+              <div className="grid gap-3 md:grid-cols-2">
+                <div>
+                  <Label className="mb-1.5 text-xs text-text-secondary">Target</Label>
+                  <Select value={editForm.target_uuid} onValueChange={(value) => setEditForm({ ...editForm, target_uuid: value ?? '' })}>
+                    <SelectTrigger className="w-full"><SelectValue placeholder="选择 Target" /></SelectTrigger>
+                    <SelectContent>
+                      {targets.map((target) => (
+                        <SelectItem key={target.target_uuid} value={target.target_uuid}>{target.name} - {target.target}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {selectedEditTarget && !protocolOptionsForTarget(selectedEditTarget).includes(editTask.task_type) && (
+                    <p className="mt-1 text-xs text-red-400">当前 Target 未声明支持 {editTask.task_type.toUpperCase()}。</p>
+                  )}
+                </div>
+                <div>
+                  <Label className="mb-1.5 text-xs text-text-secondary">Agent</Label>
+                  <Select value={editForm.agent_uuid} onValueChange={(value) => setEditForm({ ...editForm, agent_uuid: value ?? '' })}>
+                    <SelectTrigger className="w-full"><SelectValue placeholder="选择 Agent" /></SelectTrigger>
+                    <SelectContent>
+                      {agents.map((agent) => (
+                        <SelectItem key={agent.agent_uuid} value={agent.agent_uuid}>{agent.name} - {agent.city || agent.country}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid gap-3 md:grid-cols-4">
+                <Input value={editTask.task_type.toUpperCase()} disabled />
+                <Select value={editForm.ip_family} onValueChange={(value) => setEditForm({ ...editForm, ip_family: value as IpFamily })}>
+                  <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="4">IPv4</SelectItem>
+                    <SelectItem value="6">IPv6</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Input type="number" min="60" value={editForm.interval} onChange={(event) => setEditForm({ ...editForm, interval: event.target.value })} placeholder="间隔秒" />
+                <Input type="number" min="1000" value={editForm.timeout} onChange={(event) => setEditForm({ ...editForm, timeout: event.target.value })} placeholder="超时毫秒" />
+              </div>
+              <div className="grid gap-3 md:grid-cols-3">
+                <Input type="number" min="1" value={editForm.packet_count} onChange={(event) => setEditForm({ ...editForm, packet_count: event.target.value })} placeholder="包数量" />
+                {(editTask.task_type === 'tcp' || editTask.task_type === 'iperf3') && (
+                  <Input type="number" min="1" max="65535" value={editForm.port} onChange={(event) => setEditForm({ ...editForm, port: event.target.value })} placeholder="端口" />
+                )}
+                {editTask.task_type === 'iperf3' && (
+                  <>
+                    <Select value={editForm.iperf3_mode} onValueChange={(value) => setEditForm({ ...editForm, iperf3_mode: value as 'single_thread' | 'multi_thread' })}>
+                      <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="single_thread">单线程</SelectItem>
+                        <SelectItem value="multi_thread">8 线程</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Input type="number" min="1" value={editForm.iperf3_duration} onChange={(event) => setEditForm({ ...editForm, iperf3_duration: event.target.value })} placeholder="执行秒数" />
+                  </>
+                )}
+              </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setEditTask(null)}>取消</Button>
-                <Button type="submit" disabled={updateTask.isPending}>{updateTask.isPending ? '保存中' : '保存'}</Button>
+                <Button type="submit" disabled={!editForm.target_uuid || !editForm.agent_uuid || updateTask.isPending}>
+                  {updateTask.isPending ? '保存中' : '保存'}
+                </Button>
               </DialogFooter>
             </form>
           )}

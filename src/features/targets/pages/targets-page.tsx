@@ -13,6 +13,7 @@ import {
   useQuickAssociate,
   useSetTargetEnabled,
   useTargets,
+  useUpdateTarget,
 } from '@/api/hooks/admin-api'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -40,6 +41,7 @@ export default function TargetsPage() {
   const [page, setPage] = useState(1)
   const [keyword, setKeyword] = useState('')
   const [createOpen, setCreateOpen] = useState(false)
+  const [editingTarget, setEditingTarget] = useState<AdminTarget | null>(null)
   const [associateTarget, setAssociateTarget] = useState<AdminTarget | null>(null)
   const [selectedAgentUuid, setSelectedAgentUuid] = useState('')
   const [form, setForm] = useState({
@@ -61,6 +63,7 @@ export default function TargetsPage() {
   const targetsQuery = useTargets({ page, page_size: PAGE_SIZE, keyword, sort_by: 'name', sort_order: 'asc' })
   const agentsQuery = useAgents({ page_size: 200, sort_by: 'name', sort_order: 'asc', is_enabled: true })
   const createTarget = useCreateTarget()
+  const updateTarget = useUpdateTarget()
   const setTargetEnabled = useSetTargetEnabled()
   const deleteTarget = useDeleteTarget()
   const quickAssociate = useQuickAssociate()
@@ -87,6 +90,32 @@ export default function TargetsPage() {
     })
   }
 
+  const closeTargetDialog = () => {
+    setCreateOpen(false)
+    setEditingTarget(null)
+    resetForm()
+  }
+
+  const openEditTarget = (target: AdminTarget) => {
+    setForm({
+      name: target.name,
+      target: target.target,
+      ip_version: target.ip_version,
+      is_anycast: target.is_anycast,
+      continent: target.continent ?? '',
+      country: target.country ?? '',
+      region: target.region ?? '',
+      city: target.city ?? '',
+      zip_code: target.zip_code ?? 'UNKNOWN',
+      carrier: target.carrier,
+      tags: target.tags.join(', '),
+      comment: target.comment ?? '',
+      supported_protocols: target.supported_protocols,
+    })
+    setEditingTarget(target)
+    setCreateOpen(true)
+  }
+
   const toggleProtocol = (protocol: TargetProtocol) => {
     setForm((prev) => ({
       ...prev,
@@ -96,27 +125,41 @@ export default function TargetsPage() {
     }))
   }
 
-  const handleCreate = (event: React.FormEvent) => {
+  const targetPayload = () => ({
+    name: form.name,
+    target: form.target,
+    ip_version: form.ip_version,
+    is_anycast: form.is_anycast,
+    continent: form.continent || null,
+    country: form.country || null,
+    region: form.region || null,
+    city: form.city || null,
+    zip_code: form.zip_code || 'UNKNOWN',
+    carrier: form.carrier,
+    comment: form.comment || null,
+    tags: csvToList(form.tags),
+    supported_protocols: form.supported_protocols,
+  })
+
+  const handleSubmitTarget = (event: React.FormEvent) => {
     event.preventDefault()
-    createTarget.mutate({
-      name: form.name,
-      target: form.target,
-      ip_version: form.ip_version,
-      is_anycast: form.is_anycast,
-      continent: form.continent || null,
-      country: form.country || null,
-      region: form.region || null,
-      city: form.city || null,
-      zip_code: form.zip_code || 'UNKNOWN',
-      carrier: form.carrier,
-      comment: form.comment || null,
-      tags: csvToList(form.tags),
-      supported_protocols: form.supported_protocols,
-    }, {
+    if (editingTarget) {
+      updateTarget.mutate({
+        uuid: editingTarget.target_uuid,
+        data: targetPayload(),
+      }, {
+        onSuccess: () => {
+          toast.success('Target 已更新')
+          closeTargetDialog()
+        },
+        onError: (error) => toast.error(error.message || '更新 Target 失败'),
+      })
+      return
+    }
+    createTarget.mutate(targetPayload(), {
       onSuccess: () => {
         toast.success('Target 已创建')
-        setCreateOpen(false)
-        resetForm()
+        closeTargetDialog()
       },
       onError: (error) => toast.error(error.message || '创建 Target 失败'),
     })
@@ -144,7 +187,11 @@ export default function TargetsPage() {
           <h1 className="text-2xl font-bold text-text-primary">Target 管理</h1>
           <p className="text-sm text-text-muted">通过 /api/v1/targets/* 维护监控目标，并可快速关联 Agent。</p>
         </div>
-        <Button onClick={() => setCreateOpen(true)}>新增 Target</Button>
+        <Button onClick={() => {
+          setEditingTarget(null)
+          resetForm()
+          setCreateOpen(true)
+        }}>新增 Target</Button>
       </div>
 
       <div className="glass-light rounded-xl p-4">
@@ -206,6 +253,7 @@ export default function TargetsPage() {
                   <TableCell className="text-sm text-text-secondary">{formatDateTime(target.updated_at)}</TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-2">
+                      <Button variant="ghost" size="sm" onClick={() => openEditTarget(target)}>编辑</Button>
                       <Button variant="ghost" size="sm" onClick={() => setAssociateTarget(target)}>关联 Agent</Button>
                       <Link to={`/app/monitoring?target_uuid=${target.target_uuid}`}>
                         <Button variant="ghost" size="sm">查看数据</Button>
@@ -248,13 +296,13 @@ export default function TargetsPage() {
         )}
       </div>
 
-      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+      <Dialog open={createOpen} onOpenChange={(open) => { if (open) setCreateOpen(true); else closeTargetDialog() }}>
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>新增 Target</DialogTitle>
-            <DialogDescription>Target 是监控任务绑定的目标地址，iperf3 目标需要勾选 iperf3 协议支持。</DialogDescription>
+            <DialogTitle>{editingTarget ? '编辑 Target' : '新增 Target'}</DialogTitle>
+            <DialogDescription>Target 是监控任务绑定的目标地址，修改后后端会同步受影响的 Agent 任务快照。</DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleCreate} className="mt-2 grid gap-4">
+          <form onSubmit={handleSubmitTarget} className="mt-2 grid gap-4">
             <div className="grid gap-3 md:grid-cols-2">
               <div>
                 <Label className="mb-1.5 text-xs text-text-secondary">名称</Label>
@@ -319,8 +367,10 @@ export default function TargetsPage() {
             <Textarea placeholder="备注" value={form.comment} onChange={(event) => setForm({ ...form, comment: event.target.value })} />
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>取消</Button>
-              <Button type="submit" disabled={createTarget.isPending}>{createTarget.isPending ? '创建中' : '创建'}</Button>
+              <Button type="button" variant="outline" onClick={closeTargetDialog}>取消</Button>
+              <Button type="submit" disabled={createTarget.isPending || updateTarget.isPending}>
+                {createTarget.isPending || updateTarget.isPending ? '保存中' : (editingTarget ? '保存' : '创建')}
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>
