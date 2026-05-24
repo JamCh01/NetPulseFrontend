@@ -19,9 +19,6 @@ interface MtrListEnvelope {
     task_uuid?: string
     items?: unknown[]
     results?: unknown[]
-    pagination?: {
-      total?: number
-    }
   }
 }
 
@@ -61,9 +58,11 @@ export function useMtrList(
       end: endSec,
     }),
     queryFn: async (): Promise<MtrResultListView> => {
+      const startIso = new Date(startSec * 1000).toISOString()
+      const endIso = new Date(endSec * 1000).toISOString()
       const params = new URLSearchParams({
-        start: String(startSec),
-        end: String(endSec),
+        start: startIso,
+        end: endIso,
       })
       if (agentUuid) params.set('agent_uuid', agentUuid)
 
@@ -78,7 +77,7 @@ export function useMtrList(
       return {
         task_uuid: data?.task_uuid ?? taskUuid,
         agent_uuid: agentUuid ?? null,
-        total: data?.pagination?.total ?? rawResults.length,
+        total: rawResults.length,
         results: rawResults.map(normalizeMtrListItem).filter((result) => result.result_uuid),
       }
     },
@@ -120,11 +119,11 @@ export function useMtrListsForTasks(tasks: MonitoringTask[], timeRange: TimeRang
         end: endSec,
       }),
       queryFn: async (): Promise<MtrResultListView> => {
+        const startIso = new Date(startSec * 1000).toISOString()
+        const endIso = new Date(endSec * 1000).toISOString()
         const params = new URLSearchParams({
-          start: String(startSec),
-          end: String(endSec),
-          page: '1',
-          page_size: '50',
+          start: startIso,
+          end: endIso,
         })
         if (task.agent?.agent_uuid) params.set('agent_uuid', task.agent.agent_uuid)
 
@@ -139,7 +138,7 @@ export function useMtrListsForTasks(tasks: MonitoringTask[], timeRange: TimeRang
         return {
           task_uuid: data?.task_uuid ?? task.task_uuid,
           agent_uuid: task.agent?.agent_uuid ?? null,
-          total: data?.pagination?.total ?? rawResults.length,
+          total: rawResults.length,
           results: rawResults.map(normalizeMtrListItem).filter((result) => result.result_uuid),
         }
       },
