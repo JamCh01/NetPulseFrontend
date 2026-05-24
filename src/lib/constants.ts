@@ -3,6 +3,8 @@ export const PROTOCOL_COLORS: Record<string, string> = {
   tcp: 'bg-proto-tcp text-proto-tcp-text border-proto-tcp-text/20 dark:border-proto-tcp-text/35',
   udp: 'bg-proto-udp text-proto-udp-text border-proto-udp-text/20 dark:border-proto-udp-text/35',
   http: 'bg-proto-http text-proto-http-text border-proto-http-text/20 dark:border-proto-http-text/35',
+  iperf3: 'bg-teal-500/10 text-teal-700 border-teal-500/25 dark:text-teal-300 dark:border-teal-400/30',
+  mtr: 'bg-sky-500/10 text-sky-700 border-sky-500/25 dark:text-sky-300 dark:border-sky-400/30',
 }
 
 export const PROTOCOL_ICON_COLORS: Record<string, string> = {
@@ -10,6 +12,8 @@ export const PROTOCOL_ICON_COLORS: Record<string, string> = {
   tcp: 'text-purple-600 dark:text-purple-400',
   http: 'text-emerald-600 dark:text-emerald-400',
   udp: 'text-amber-600 dark:text-amber-400',
+  iperf3: 'text-teal-600 dark:text-teal-400',
+  mtr: 'text-sky-600 dark:text-sky-400',
 }
 
 export const AGENT_STATUS_COLORS: Record<string, string> = {

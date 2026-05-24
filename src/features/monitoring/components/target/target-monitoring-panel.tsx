@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Activity, ChevronDown, MapPin, Radio, Server, ShieldCheck, Users, Waypoints, Wifi } from 'lucide-react'
+import { Activity, ChevronDown, Gauge, MapPin, Radio, Server, ShieldCheck, Users, Waypoints, Wifi } from 'lucide-react'
+import { useIperf3ListsForTasks } from '@/api/hooks/use-iperf3'
 import { useMtrDetail, useMtrListsForTasks } from '@/api/hooks/use-mtr'
 import { useTaskMonitoringSeries } from '@/api/hooks/use-monitoring'
 import { usePublicMonitoringTasks } from '@/api/hooks/use-public-monitoring-tasks'
@@ -15,6 +16,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Skeleton } from '@/components/ui/skeleton'
 import { MultiAgentChart } from '@/features/monitoring/components/charts/multi-agent-chart'
+import { Iperf3ResultViews } from '@/features/monitoring/components/iperf3/iperf3-result-views'
 import { MtrResultViews } from '@/features/monitoring/components/mtr/mtr-result-views'
 import { GrafanaTimeRangeSelector } from '@/features/monitoring/components/time-range/time-range-selector'
 import {
@@ -101,7 +103,7 @@ function ProtocolHeader({
   selectedAgentUuids,
   onSelectedAgentUuidsChange,
 }: {
-  protocol: 'icmp' | 'tcp' | 'mtr'
+  protocol: 'icmp' | 'tcp' | 'mtr' | 'iperf3'
   tasks: MonitoringTask[]
   icon: React.ReactNode
   timeRange?: MonitoringTimeRange
@@ -232,7 +234,10 @@ function AgentFilterDropdown({
   )
 }
 
-function MtrEvidenceToolbar({
+function EvidenceToolbar({
+  title,
+  badge,
+  icon,
   tasks,
   timeRange,
   onTimeRangeChange,
@@ -240,6 +245,9 @@ function MtrEvidenceToolbar({
   selectedAgentUuids,
   onSelectedAgentUuidsChange,
 }: {
+  title: string
+  badge: string
+  icon: React.ReactNode
   tasks: MonitoringTask[]
   timeRange: MonitoringTimeRange
   onTimeRangeChange: (range: MonitoringTimeRange) => void
@@ -255,12 +263,12 @@ function MtrEvidenceToolbar({
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-sky-500/30 bg-sky-500/10 text-sky-300">
-              <Waypoints className="h-4 w-4" />
+              {icon}
             </span>
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <h2 className="text-base font-semibold text-text-primary">MTR 证据</h2>
-                <Badge variant="info">Result Timeline</Badge>
+                <h2 className="text-base font-semibold text-text-primary">{title}</h2>
+                <Badge variant="info">{badge}</Badge>
               </div>
               <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-muted">
                 <span>{tasks.length} 个任务</span>
@@ -291,6 +299,28 @@ function MtrEvidenceToolbar({
   )
 }
 
+function MtrEvidenceToolbar(props: Omit<Parameters<typeof EvidenceToolbar>[0], 'protocol' | 'title' | 'badge' | 'icon'>) {
+  return (
+    <EvidenceToolbar
+      {...props}
+      title="MTR 证据"
+      badge="Result Timeline"
+      icon={<Waypoints className="h-4 w-4" />}
+    />
+  )
+}
+
+function Iperf3EvidenceToolbar(props: Omit<Parameters<typeof EvidenceToolbar>[0], 'protocol' | 'title' | 'badge' | 'icon'>) {
+  return (
+    <EvidenceToolbar
+      {...props}
+      title="iperf3 结果"
+      badge="Throughput Timeline"
+      icon={<Gauge className="h-4 w-4" />}
+    />
+  )
+}
+
 function EmptyProtocolState({ protocol }: { protocol: string }) {
   return (
     <div className="p-8 text-center">
@@ -314,19 +344,12 @@ function MetricsProtocolPanel({
 }) {
   const agentOptions = useMemo(() => buildAgentFilterOptions(tasks), [tasks])
   const [selectedAgentUuids, setSelectedAgentUuids] = useState<string[] | null>(null)
-
-  useEffect(() => {
-    setSelectedAgentUuids((current) => {
-      const available = new Set(agentOptions.map((option) => option.agentUuid))
-      if (current === null) {
-        return agentOptions.map((option) => option.agentUuid)
-      }
-      const retained = current.filter((agentUuid) => available.has(agentUuid))
-      return retained
-    })
-  }, [agentOptions])
-
-  const effectiveSelectedAgentUuids = selectedAgentUuids ?? agentOptions.map((option) => option.agentUuid)
+  const availableAgentUuids = useMemo(() => new Set(agentOptions.map((option) => option.agentUuid)), [agentOptions])
+  const allAgentUuids = useMemo(() => agentOptions.map((option) => option.agentUuid), [agentOptions])
+  const effectiveSelectedAgentUuids = useMemo(
+    () => (selectedAgentUuids ?? allAgentUuids).filter((agentUuid) => availableAgentUuids.has(agentUuid)),
+    [allAgentUuids, availableAgentUuids, selectedAgentUuids],
+  )
 
   const filteredTasks = useMemo(
     () => filterTasksBySelectedAgents(tasks, effectiveSelectedAgentUuids),
@@ -380,34 +403,22 @@ function MtrProtocolPanel({
 }) {
   const agentOptions = useMemo(() => buildAgentFilterOptions(tasks), [tasks])
   const [selectedAgentUuids, setSelectedAgentUuids] = useState<string[] | null>(null)
-  useEffect(() => {
-    setSelectedAgentUuids((current) => {
-      const available = new Set(agentOptions.map((option) => option.agentUuid))
-      if (current === null) {
-        return agentOptions.map((option) => option.agentUuid)
-      }
-      return current.filter((agentUuid) => available.has(agentUuid))
-    })
-  }, [agentOptions])
-  const effectiveSelectedAgentUuids = selectedAgentUuids ?? agentOptions.map((option) => option.agentUuid)
+  const availableAgentUuids = useMemo(() => new Set(agentOptions.map((option) => option.agentUuid)), [agentOptions])
+  const allAgentUuids = useMemo(() => agentOptions.map((option) => option.agentUuid), [agentOptions])
+  const effectiveSelectedAgentUuids = useMemo(
+    () => (selectedAgentUuids ?? allAgentUuids).filter((agentUuid) => availableAgentUuids.has(agentUuid)),
+    [allAgentUuids, availableAgentUuids, selectedAgentUuids],
+  )
   const filteredTasks = useMemo(
     () => filterTasksBySelectedAgents(tasks, effectiveSelectedAgentUuids),
     [effectiveSelectedAgentUuids, tasks],
   )
   const { combinedResults, total, isLoading, error } = useMtrListsForTasks(filteredTasks, timeRange)
   const [selectedResultUuid, setSelectedResultUuid] = useState<string>('')
-  const selectedResult = selectedResultUuid || combinedResults[0]?.result_uuid || ''
+  const selectedResult = combinedResults.some((result) => result.result_uuid === selectedResultUuid)
+    ? selectedResultUuid
+    : combinedResults[0]?.result_uuid || ''
   const { data: mtrDetail, isLoading: detailLoading } = useMtrDetail(selectedResult)
-
-  useEffect(() => {
-    if (selectedResultUuid && !combinedResults.some((result) => result.result_uuid === selectedResultUuid)) {
-      setSelectedResultUuid(combinedResults[0]?.result_uuid ?? '')
-      return
-    }
-    if (!selectedResultUuid && combinedResults[0]?.result_uuid) {
-      setSelectedResultUuid(combinedResults[0].result_uuid)
-    }
-  }, [combinedResults, selectedResultUuid])
 
   return (
     <section className="overflow-hidden rounded-xl border border-border bg-bg-surface">
@@ -439,6 +450,69 @@ function MtrProtocolPanel({
             onSelectResult={setSelectedResultUuid}
             selectedResult={mtrDetail}
             detailLoading={selectedResult ? detailLoading : false}
+            listLoading={isLoading}
+          />
+        </div>
+      )}
+    </section>
+  )
+}
+
+function Iperf3ProtocolPanel({
+  tasks,
+  timeRange,
+  onTimeRangeChange,
+}: {
+  tasks: MonitoringTask[]
+  timeRange: MonitoringTimeRange
+  onTimeRangeChange: (range: MonitoringTimeRange) => void
+}) {
+  const agentOptions = useMemo(() => buildAgentFilterOptions(tasks), [tasks])
+  const [selectedAgentUuids, setSelectedAgentUuids] = useState<string[] | null>(null)
+  const availableAgentUuids = useMemo(() => new Set(agentOptions.map((option) => option.agentUuid)), [agentOptions])
+  const allAgentUuids = useMemo(() => agentOptions.map((option) => option.agentUuid), [agentOptions])
+  const effectiveSelectedAgentUuids = useMemo(
+    () => (selectedAgentUuids ?? allAgentUuids).filter((agentUuid) => availableAgentUuids.has(agentUuid)),
+    [allAgentUuids, availableAgentUuids, selectedAgentUuids],
+  )
+  const filteredTasks = useMemo(
+    () => filterTasksBySelectedAgents(tasks, effectiveSelectedAgentUuids),
+    [effectiveSelectedAgentUuids, tasks],
+  )
+  const { combinedResults, total, isLoading, error } = useIperf3ListsForTasks(filteredTasks, timeRange)
+  const [selectedResultUuid, setSelectedResultUuid] = useState<string>('')
+  const selectedResult = combinedResults.some((result) => result.result_uuid === selectedResultUuid)
+    ? selectedResultUuid
+    : combinedResults[0]?.result_uuid || ''
+
+  return (
+    <section className="overflow-hidden rounded-xl border border-border bg-bg-surface">
+      <Iperf3EvidenceToolbar
+        tasks={tasks}
+        timeRange={timeRange}
+        onTimeRangeChange={onTimeRangeChange}
+        agentOptions={agentOptions}
+        selectedAgentUuids={effectiveSelectedAgentUuids}
+        onSelectedAgentUuidsChange={setSelectedAgentUuids}
+      />
+      {tasks.length === 0 ? (
+        <EmptyProtocolState protocol="iperf3" />
+      ) : filteredTasks.length === 0 ? (
+        <div className="p-8 text-center">
+          <Users className="mx-auto h-7 w-7 text-text-dim" />
+          <div className="mt-3 text-sm font-medium text-text-primary">未选择 Agent</div>
+          <div className="mt-1 text-xs text-text-muted">请在上方 Agent 筛选中至少选择一个 Agent。</div>
+        </div>
+      ) : error ? (
+        <div className="p-6 text-sm text-status-error-fg">iperf3 数据加载失败：{error.message}</div>
+      ) : (
+        <div className="p-4">
+          <Iperf3ResultViews
+            tasks={filteredTasks}
+            results={combinedResults}
+            total={total}
+            selectedResultUuid={selectedResult}
+            onSelectResult={setSelectedResultUuid}
             listLoading={isLoading}
           />
         </div>
@@ -501,7 +575,6 @@ function SummaryMetric({ label, value }: { label: string; value: string }) {
 export function TargetMonitoringPanel({
   targetUuid,
   fallbackGroup,
-  basePath: _basePath,
 }: {
   targetUuid: string
   fallbackGroup?: MonitoringTargetGroup
@@ -514,12 +587,14 @@ export function TargetMonitoringPanel({
   const [icmpTimeRange, setIcmpTimeRange] = useState<MonitoringTimeRange>(() => createRelativeTimeRange())
   const [tcpTimeRange, setTcpTimeRange] = useState<MonitoringTimeRange>(() => createRelativeTimeRange())
   const [mtrTimeRange, setMtrTimeRange] = useState<MonitoringTimeRange>(() => createRelativeTimeRange())
+  const [iperf3TimeRange, setIperf3TimeRange] = useState<MonitoringTimeRange>(() => createRelativeTimeRange())
 
   useEffect(() => {
     const timer = window.setInterval(() => {
       setIcmpTimeRange((current) => refreshRelativeTimeRange(current))
       setTcpTimeRange((current) => refreshRelativeTimeRange(current))
       setMtrTimeRange((current) => refreshRelativeTimeRange(current))
+      setIperf3TimeRange((current) => refreshRelativeTimeRange(current))
     }, AUTO_REFRESH_INTERVAL_MS)
     return () => window.clearInterval(timer)
   }, [])
@@ -528,6 +603,7 @@ export function TargetMonitoringPanel({
   const icmpTasks = useMemo(() => protocolTasks(group?.tasks ?? [], 'icmp'), [group?.tasks])
   const tcpTasks = useMemo(() => protocolTasks(group?.tasks ?? [], 'tcp'), [group?.tasks])
   const mtrTasks = useMemo(() => protocolTasks(group?.tasks ?? [], 'mtr'), [group?.tasks])
+  const iperf3Tasks = useMemo(() => protocolTasks(group?.tasks ?? [], 'iperf3'), [group?.tasks])
 
   if (isLoading && !group) {
     return (
@@ -557,6 +633,7 @@ export function TargetMonitoringPanel({
       <MetricsProtocolPanel protocol="icmp" tasks={icmpTasks} timeRange={icmpTimeRange} onTimeRangeChange={setIcmpTimeRange} />
       <MetricsProtocolPanel protocol="tcp" tasks={tcpTasks} timeRange={tcpTimeRange} onTimeRangeChange={setTcpTimeRange} />
       <MtrProtocolPanel tasks={mtrTasks} timeRange={mtrTimeRange} onTimeRangeChange={setMtrTimeRange} />
+      <Iperf3ProtocolPanel tasks={iperf3Tasks} timeRange={iperf3TimeRange} onTimeRangeChange={setIperf3TimeRange} />
     </div>
   )
 }

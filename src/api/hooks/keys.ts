@@ -47,6 +47,12 @@ export const monitoringKeys = {
     end: number
   }) => [...monitoringKeys.all, 'mtr', 'list', params] as const,
   mtrDetail: (result_uuid: string) => [...monitoringKeys.all, 'mtr', 'detail', result_uuid] as const,
+  iperf3List: (params: {
+    task_uuid: string
+    agent_uuid?: string | null
+    start: number
+    end: number
+  }) => [...monitoringKeys.all, 'iperf3', 'list', params] as const,
 }
 
 export const dashboardKeys = {

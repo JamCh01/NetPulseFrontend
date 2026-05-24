@@ -83,6 +83,29 @@ export interface MtrResultSummaryView {
   duration_ms?: number | null
 }
 
+export interface Iperf3ResultSummaryView {
+  result_uuid: string
+  execution_uuid: string
+  task_uuid: string
+  agent_uuid?: string | null
+  timestamp: string
+  latest_sample_at: string
+  started_at?: string | null
+  finished_at?: string | null
+  duration_ms?: number | null
+  resolved_ip?: string | null
+  latest_run_status: string
+  mode: string
+  parallel: number
+  port: number
+  duration_sec: number
+  bits_per_second?: number | null
+  throughput_mbps?: number | null
+  bytes?: number | null
+  retransmits?: number | null
+  success: boolean
+}
+
 export interface MtrHopAddressView {
   hop: number
   ip: string
@@ -295,6 +318,38 @@ export function normalizeMtrListItem(raw: unknown): MtrResultSummaryView {
     latest_run_status: readNullableString(item.latest_run_status),
     resolved_ip: readNullableString(item.resolved_ip),
     duration_ms: typeof item.duration_ms === 'number' ? item.duration_ms : null,
+  }
+}
+
+export function normalizeIperf3ListItem(raw: unknown): Iperf3ResultSummaryView {
+  const item = isRecord(raw) ? raw : {}
+  const status = readString(item.latest_run_status, readString(item.run_status, '')).toLowerCase()
+  const latestSampleAt = readString(item.latest_sample_at, readString(item.timestamp, readString(item.finished_at, readString(item.started_at, ''))))
+  const bitsPerSecond = typeof item.bits_per_second === 'number' && Number.isFinite(item.bits_per_second)
+    ? item.bits_per_second
+    : null
+
+  return {
+    result_uuid: readString(item.result_uuid),
+    execution_uuid: readString(item.execution_uuid),
+    task_uuid: readString(item.task_uuid),
+    agent_uuid: readNullableString(item.agent_uuid),
+    timestamp: latestSampleAt,
+    latest_sample_at: latestSampleAt,
+    started_at: readNullableString(item.started_at),
+    finished_at: readNullableString(item.finished_at),
+    duration_ms: typeof item.duration_ms === 'number' ? item.duration_ms : null,
+    resolved_ip: readNullableString(item.resolved_ip),
+    latest_run_status: readString(item.latest_run_status, readString(item.run_status, 'unknown')),
+    mode: readString(item.mode, 'single_thread'),
+    parallel: readNumber(item.parallel, 1),
+    port: readNumber(item.port, 5201),
+    duration_sec: readNumber(item.duration_sec),
+    bits_per_second: bitsPerSecond,
+    throughput_mbps: bitsPerSecond === null ? null : bitsPerSecond / 1_000_000,
+    bytes: typeof item.bytes === 'number' ? item.bytes : null,
+    retransmits: typeof item.retransmits === 'number' ? item.retransmits : null,
+    success: ['completed', 'success', 'ok'].includes(status),
   }
 }
 
