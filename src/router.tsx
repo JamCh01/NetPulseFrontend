@@ -18,13 +18,6 @@ const TaskDetailPage = lazy(() => import('@/features/tasks/pages/task-detail-pag
 const AgentsPage = lazy(() => import('@/features/agents/pages/agents-page'))
 const AgentDetailPage = lazy(() => import('@/features/agents/pages/agent-detail-page'))
 const ReleasesPage = lazy(() => import('@/features/agents/pages/releases-page'))
-const AlertsPage = lazy(() => import('@/features/alerts/pages/alerts-page'))
-const WebhooksPage = lazy(() => import('@/features/webhooks/pages/webhooks-page'))
-const AlertEventsPage = lazy(() => import('@/features/alerts/pages/alert-events-page'))
-const UsersPage = lazy(() => import('@/features/users/pages/users-page'))
-const AuditPage = lazy(() => import('@/features/audit/pages/audit-page'))
-const GroupsPage = lazy(() => import('@/features/groups/pages/groups-page'))
-const HealthPage = lazy(() => import('@/features/dashboard/pages/health-page'))
 const MonitoringIndexPage = lazy(() => import('@/features/monitoring/pages/monitoring-index-page'))
 const MonitoringDetailPage = lazy(() => import('@/features/monitoring/pages/monitoring-detail-page'))
 const MtrDetailPage = lazy(() => import('@/features/monitoring/pages/mtr-detail-page'))
@@ -60,19 +53,12 @@ export function AppRouter() {
             <Route path="/app/monitoring" element={<MonitoringIndexPage />} />
             <Route path="/app/monitoring/:taskUuid" element={<MonitoringDetailPage />} />
             <Route path="/app/monitoring/:taskUuid/mtr" element={<MtrDetailPage />} />
-            <Route path="/alerts" element={<AlertsPage />} />
-            <Route path="/alerts/events" element={<AlertEventsPage />} />
-            <Route path="/webhooks" element={<WebhooksPage />} />
 
             {/* Admin-only routes */}
             <Route element={<AdminGuard />}>
               <Route path="/agents" element={<AgentsPage />} />
               <Route path="/agents/releases" element={<ReleasesPage />} />
               <Route path="/agents/:agentUuid" element={<AgentDetailPage />} />
-              <Route path="/users" element={<UsersPage />} />
-              <Route path="/audit" element={<AuditPage />} />
-              <Route path="/groups" element={<GroupsPage />} />
-              <Route path="/system/health" element={<HealthPage />} />
             </Route>
           </Route>
         </Route>

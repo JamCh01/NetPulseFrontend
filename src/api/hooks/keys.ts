@@ -54,46 +54,6 @@ export const dashboardKeys = {
   stats: () => [...dashboardKeys.all, 'stats'] as const,
 }
 
-export const alertKeys = {
-  all: ['alerts'] as const,
-  rules: () => [...alertKeys.all, 'rules'] as const,
-  ruleList: (params?: { skip?: number; limit?: number }) =>
-    [...alertKeys.all, 'rules', 'list', params] as const,
-  ruleDetail: (uuid: string) => [...alertKeys.all, 'rules', 'detail', uuid] as const,
-}
-
-export const webhookKeys = {
-  all: ['webhooks'] as const,
-  list: (params?: { skip?: number; limit?: number }) =>
-    [...webhookKeys.all, 'list', params] as const,
-  detail: (uuid: string) => [...webhookKeys.all, 'detail', uuid] as const,
-}
-
-export const healthKeys = {
-  all: ['health'] as const,
-  status: () => [...healthKeys.all, 'status'] as const,
-}
-
-export const auditKeys = {
-  all: ['audit'] as const,
-  list: (params?: { skip?: number; limit?: number; actor_uuid?: string | null; resource_type?: string | null; action?: string | null }) =>
-    [...auditKeys.all, 'list', params] as const,
-}
-
-export const alertEventKeys = {
-  all: ['alertEvents'] as const,
-  list: (params?: { skip?: number; limit?: number; rule_uuid?: string | null; task_uuid?: string | null; status?: string | null }) =>
-    [...alertEventKeys.all, 'list', params] as const,
-  detail: (uuid: string) => [...alertEventKeys.all, 'detail', uuid] as const,
-}
-
-export const groupKeys = {
-  all: ['groups'] as const,
-  list: (params?: { skip?: number; limit?: number }) =>
-    [...groupKeys.all, 'list', params] as const,
-  detail: (uuid: string) => [...groupKeys.all, 'detail', uuid] as const,
-}
-
 export const releaseKeys = {
   all: ['releases'] as const,
   list: (platform?: string | null) => [...releaseKeys.all, 'list', platform] as const,

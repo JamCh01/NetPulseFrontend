@@ -10,18 +10,11 @@ import { TargetGeoSidebarTree } from '@/features/monitoring/components/navigatio
 import {
   LayoutDashboard,
   Radio,
-  Bell,
-  Link2,
-  Users,
   LogOut,
   ChevronLeft,
   ChevronDown,
   Zap,
-  Activity,
   Languages,
-  ScrollText,
-  BellRing,
-  FolderOpen,
   User as UserIcon,
   Menu,
   X,
@@ -66,16 +59,6 @@ export function AppLayout() {
 
   const staticNavItems: NavItem[] = [
     { label: t('nav.agents'), path: '/agents', icon: <Radio className="w-4 h-4" />, adminOnly: true },
-    { label: t('nav.alerts'), path: '/alerts', icon: <Bell className="w-4 h-4" /> },
-    { label: t('nav.alertEvents'), path: '/alerts/events', icon: <BellRing className="w-4 h-4" /> },
-    { label: t('nav.webhooks'), path: '/webhooks', icon: <Link2 className="w-4 h-4" /> },
-  ]
-
-  const adminNavItems: NavItem[] = [
-    { label: t('nav.users'), path: '/users', icon: <Users className="w-4 h-4" />, adminOnly: true },
-    { label: t('nav.audit'), path: '/audit', icon: <ScrollText className="w-4 h-4" />, adminOnly: true },
-    { label: t('nav.groups'), path: '/groups', icon: <FolderOpen className="w-4 h-4" />, adminOnly: true },
-    { label: t('nav.systemHealth'), path: '/system/health', icon: <Activity className="w-4 h-4" />, adminOnly: true },
   ]
 
   const handleLogout = () => {
@@ -87,7 +70,6 @@ export function AppLayout() {
   }
 
   const visibleNav = staticNavItems.filter((item) => !item.adminOnly || isAdmin)
-  const visibleAdminNav = adminNavItems.filter((item) => !item.adminOnly || isAdmin)
 
   return (
     <div className="min-h-screen gradient-bg grid-pattern flex">
@@ -185,29 +167,6 @@ export function AppLayout() {
             </NavLink>
           ))}
 
-          {/* Admin section */}
-          {visibleAdminNav.length > 0 && (
-            <>
-              <div className="my-3 border-t border-border" />
-              {visibleAdminNav.map((item) => (
-                <NavLink
-                  key={item.path}
-                  to={item.path}
-                  className={({ isActive }) =>
-                    cn(
-                      'flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-colors',
-                      isActive
-                        ? 'bg-accent text-accent-foreground'
-                        : 'text-text-muted hover:text-text-secondary hover:bg-muted'
-                    )
-                  }
-                >
-                  {item.icon}
-                  {!collapsed && <span>{item.label}</span>}
-                </NavLink>
-              ))}
-            </>
-          )}
         </nav>
 
         {/* Bottom actions */}
