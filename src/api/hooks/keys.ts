@@ -38,6 +38,13 @@ export const resultKeys = {
   ingestionEvents: (params?: unknown) => [...resultKeys.all, 'ingestion-events', params] as const,
 }
 
+export const geoKeys = {
+  all: ['geo'] as const,
+  continents: (params?: unknown) => [...geoKeys.all, 'continents', params] as const,
+  countries: (params?: unknown) => [...geoKeys.all, 'countries', params] as const,
+  cities: (params?: unknown) => [...geoKeys.all, 'cities', params] as const,
+}
+
 export const monitoringKeys = {
   all: ['monitoring'] as const,
   tasks: (params?: { page?: number; page_size?: number; target_uuid?: string }) =>

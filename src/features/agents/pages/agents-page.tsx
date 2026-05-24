@@ -28,6 +28,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Textarea } from '@/components/ui/textarea'
+import { GeoInput } from '@/features/admin/geo-input'
+import { TagInput } from '@/features/admin/tag-input'
 import { csvToList, formatDateTime, joinLocation } from '@/features/admin/utils'
 import { AGENT_STATUS_COLORS } from '@/lib/constants'
 
@@ -309,17 +311,21 @@ export default function AgentsPage() {
                 </Select>
               </div>
             </div>
-            <div className="grid gap-3 md:grid-cols-4">
-              <Input placeholder="大洲" value={form.continent} onChange={(event) => setForm({ ...form, continent: event.target.value })} required />
-              <Input placeholder="国家" value={form.country} onChange={(event) => setForm({ ...form, country: event.target.value })} required />
+            <GeoInput
+              value={{ continent: form.continent, country: form.country, city: form.city }}
+              onChange={(geo) => setForm({ ...form, ...geo })}
+              required
+            />
+
+            <div>
+              <Label className="mb-1.5 text-xs text-text-secondary">区域 / 省州</Label>
               <Input placeholder="区域" value={form.region} onChange={(event) => setForm({ ...form, region: event.target.value })} required />
-              <Input placeholder="城市" value={form.city} onChange={(event) => setForm({ ...form, city: event.target.value })} required />
             </div>
             <div className="grid gap-3 md:grid-cols-2">
               <Input placeholder="邮编，未知填 UNKNOWN" value={form.zip_code} onChange={(event) => setForm({ ...form, zip_code: event.target.value })} required />
               <Input placeholder="运营商 / 机房 / 云厂商" value={form.carrier} onChange={(event) => setForm({ ...form, carrier: event.target.value })} required />
             </div>
-            <Input placeholder="标签，使用英文逗号分隔" value={form.tags} onChange={(event) => setForm({ ...form, tags: event.target.value })} />
+            <TagInput label="标签" resourceType="agent" value={form.tags} onChange={(tags) => setForm({ ...form, tags })} />
             <Textarea placeholder="备注" value={form.comment} onChange={(event) => setForm({ ...form, comment: event.target.value })} />
             <DialogFooter>
               <Button type="button" variant="outline" onClick={closeAgentDialog}>取消</Button>

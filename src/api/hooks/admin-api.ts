@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { buildApiUrl } from '@/api/base-url'
 import { useAuthStore } from '@/stores/auth-store'
-import { agentKeys, resultKeys, targetKeys, taskKeys } from './keys'
+import { agentKeys, geoKeys, resultKeys, targetKeys, taskKeys } from './keys'
 
 export type IpVersion = '4' | '6' | '4+6'
 export type IpFamily = '4' | '6'
@@ -142,6 +142,49 @@ export interface ResultIngestionEvent {
   updated_at: string
 }
 
+export interface ResourceTag {
+  tag: string
+  resource_type: 'agent' | 'target'
+  resource_count: number
+}
+
+export interface GeoContinent {
+  continent_uuid: string
+  name: string
+  code?: string | null
+  name_zh?: string | null
+  is_deleted: boolean
+  created_at: string
+  updated_at: string
+  deleted_at?: string | null
+}
+
+export interface GeoCountry {
+  country_uuid: string
+  continent_uuid: string
+  name: string
+  code?: string | null
+  name_zh?: string | null
+  is_deleted: boolean
+  created_at: string
+  updated_at: string
+  deleted_at?: string | null
+}
+
+export interface GeoCity {
+  city_uuid: string
+  country_uuid: string
+  name: string
+  code?: string | null
+  name_zh?: string | null
+  is_capital: boolean
+  popularity: number
+  is_deleted: boolean
+  created_at: string
+  updated_at: string
+  deleted_at?: string | null
+}
+
 export interface TargetCreatePayload {
   name: string
   target: string
@@ -234,6 +277,60 @@ export interface ListResultEventsParams {
   execution_uuid?: string
   status?: string
 }
+
+export interface ListTagsParams {
+  resource_type?: 'agent' | 'target'
+  keyword?: string
+  limit?: number
+}
+
+export interface ListGeoContinentsParams {
+  keyword?: string
+  include_deleted?: boolean
+  limit?: number
+}
+
+export interface ListGeoCountriesParams {
+  continent_uuid?: string
+  keyword?: string
+  include_deleted?: boolean
+  limit?: number
+}
+
+export interface ListGeoCitiesParams {
+  country_uuid?: string
+  keyword?: string
+  include_deleted?: boolean
+  limit?: number
+}
+
+export interface GeoContinentPayload {
+  name: string
+  code?: string | null
+  name_zh?: string | null
+}
+
+export type GeoContinentUpdatePayload = Partial<GeoContinentPayload & { is_deleted: boolean }>
+
+export interface GeoCountryPayload {
+  continent_uuid: string
+  name: string
+  code?: string | null
+  name_zh?: string | null
+}
+
+export type GeoCountryUpdatePayload = Partial<GeoCountryPayload & { is_deleted: boolean }>
+
+export interface GeoCityPayload {
+  country_uuid: string
+  name: string
+  code?: string | null
+  name_zh?: string | null
+  is_capital?: boolean
+  popularity?: number
+}
+
+export type GeoCityUpdatePayload = Partial<GeoCityPayload & { is_deleted: boolean }>
 
 type ApiEnvelope<T> = {
   data?: T
@@ -559,5 +656,128 @@ export function useResultIngestionEvents(params?: ListResultEventsParams) {
   return useQuery({
     queryKey: resultKeys.ingestionEvents(params),
     queryFn: () => adminRequest<AdminListResponse<ResultIngestionEvent>>(`/api/v1/results/ingestion-events${buildQuery(params)}`),
+  })
+}
+
+export function useTags(params?: ListTagsParams) {
+  return useQuery({
+    queryKey: ['tags', 'list', params] as const,
+    queryFn: () => adminRequest<AdminListResponse<ResourceTag>>(`/api/v1/tags${buildQuery(params)}`),
+  })
+}
+
+export function useGeoContinents(params?: ListGeoContinentsParams) {
+  return useQuery({
+    queryKey: geoKeys.continents(params),
+    queryFn: () => adminRequest<AdminListResponse<GeoContinent>>(`/api/v1/geo/continents${buildQuery(params)}`),
+  })
+}
+
+export function useGeoCountries(params?: ListGeoCountriesParams) {
+  return useQuery({
+    queryKey: geoKeys.countries(params),
+    queryFn: () => adminRequest<AdminListResponse<GeoCountry>>(`/api/v1/geo/countries${buildQuery(params)}`),
+    enabled: !!params?.continent_uuid,
+  })
+}
+
+export function useGeoCities(params?: ListGeoCitiesParams) {
+  return useQuery({
+    queryKey: geoKeys.cities(params),
+    queryFn: () => adminRequest<AdminListResponse<GeoCity>>(`/api/v1/geo/cities${buildQuery(params)}`),
+    enabled: !!params?.country_uuid,
+  })
+}
+
+export function useCreateGeoContinent() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (body: GeoContinentPayload) => adminRequest<GeoContinent>('/api/v1/geo/continents', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: geoKeys.all }),
+  })
+}
+
+export function useUpdateGeoContinent() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ uuid, data }: { uuid: string; data: GeoContinentUpdatePayload }) =>
+      adminRequest<GeoContinent>(`/api/v1/geo/continents/${uuid}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: geoKeys.all }),
+  })
+}
+
+export function useDeleteGeoContinent() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (uuid: string) => adminRequest<GeoContinent>(`/api/v1/geo/continents/${uuid}`, { method: 'DELETE' }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: geoKeys.all }),
+  })
+}
+
+export function useCreateGeoCountry() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (body: GeoCountryPayload) => adminRequest<GeoCountry>('/api/v1/geo/countries', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: geoKeys.all }),
+  })
+}
+
+export function useUpdateGeoCountry() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ uuid, data }: { uuid: string; data: GeoCountryUpdatePayload }) =>
+      adminRequest<GeoCountry>(`/api/v1/geo/countries/${uuid}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: geoKeys.all }),
+  })
+}
+
+export function useDeleteGeoCountry() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (uuid: string) => adminRequest<GeoCountry>(`/api/v1/geo/countries/${uuid}`, { method: 'DELETE' }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: geoKeys.all }),
+  })
+}
+
+export function useCreateGeoCity() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (body: GeoCityPayload) => adminRequest<GeoCity>('/api/v1/geo/cities', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: geoKeys.all }),
+  })
+}
+
+export function useUpdateGeoCity() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ uuid, data }: { uuid: string; data: GeoCityUpdatePayload }) =>
+      adminRequest<GeoCity>(`/api/v1/geo/cities/${uuid}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: geoKeys.all }),
+  })
+}
+
+export function useDeleteGeoCity() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (uuid: string) => adminRequest<GeoCity>(`/api/v1/geo/cities/${uuid}`, { method: 'DELETE' }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: geoKeys.all }),
   })
 }

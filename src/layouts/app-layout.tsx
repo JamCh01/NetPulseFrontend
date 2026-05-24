@@ -23,6 +23,7 @@ import {
   Moon,
   Crosshair,
   DatabaseZap,
+  Map,
 } from 'lucide-react'
 
 import {
@@ -63,6 +64,7 @@ export function AppLayout() {
     { label: 'Targets', path: '/targets', icon: <Crosshair className="w-4 h-4" />, adminOnly: true },
     { label: t('nav.agents'), path: '/agents', icon: <Radio className="w-4 h-4" />, adminOnly: true },
     { label: 'Tasks', path: '/tasks', icon: <ListChecks className="w-4 h-4" />, adminOnly: true },
+    { label: 'GEO', path: '/geo', icon: <Map className="w-4 h-4" />, adminOnly: true },
     { label: 'Results', path: '/results/ingestion-events', icon: <DatabaseZap className="w-4 h-4" />, adminOnly: true },
   ]
 

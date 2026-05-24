@@ -31,6 +31,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Textarea } from '@/components/ui/textarea'
+import { GeoInput } from '@/features/admin/geo-input'
+import { TagInput } from '@/features/admin/tag-input'
 import { csvToList, formatDateTime, joinLocation } from '@/features/admin/utils'
 import { PROTOCOL_COLORS } from '@/lib/constants'
 
@@ -329,11 +331,14 @@ export default function TargetsPage() {
               </div>
             </div>
 
-            <div className="grid gap-3 md:grid-cols-4">
-              <Input placeholder="大洲" value={form.continent} onChange={(event) => setForm({ ...form, continent: event.target.value })} />
-              <Input placeholder="国家" value={form.country} onChange={(event) => setForm({ ...form, country: event.target.value })} />
+            <GeoInput
+              value={{ continent: form.continent, country: form.country, city: form.city }}
+              onChange={(geo) => setForm({ ...form, ...geo })}
+            />
+
+            <div>
+              <Label className="mb-1.5 text-xs text-text-secondary">区域 / 省州</Label>
               <Input placeholder="区域" value={form.region} onChange={(event) => setForm({ ...form, region: event.target.value })} />
-              <Input placeholder="城市" value={form.city} onChange={(event) => setForm({ ...form, city: event.target.value })} />
             </div>
 
             <div>
@@ -363,7 +368,7 @@ export default function TargetsPage() {
               <Label htmlFor="target-anycast" className="text-sm text-text-secondary">标记为 AnyCast</Label>
             </div>
 
-            <Input placeholder="标签，使用英文逗号分隔" value={form.tags} onChange={(event) => setForm({ ...form, tags: event.target.value })} />
+            <TagInput label="标签" resourceType="target" value={form.tags} onChange={(tags) => setForm({ ...form, tags })} />
             <Textarea placeholder="备注" value={form.comment} onChange={(event) => setForm({ ...form, comment: event.target.value })} />
 
             <DialogFooter>
