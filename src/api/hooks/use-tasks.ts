@@ -9,6 +9,36 @@ type ApiEnvelope<T> = {
   data?: T
 }
 
+type TaskListResponse = {
+  items?: unknown[]
+}
+
+function normalizeTask(raw: unknown) {
+  if (!raw || typeof raw !== 'object') return raw
+  const item = raw as Record<string, unknown>
+  const probeConfig = (item.probe_config && typeof item.probe_config === 'object')
+    ? item.probe_config as Record<string, unknown>
+    : {}
+  const mtrRetryConfig = (item.mtr_retry_config && typeof item.mtr_retry_config === 'object')
+    ? item.mtr_retry_config as Record<string, unknown>
+    : {}
+
+  return {
+    ...item,
+    task_name: item.task_name ?? item.name,
+    protocol: item.protocol ?? item.task_type,
+    target: typeof item.target === 'string'
+      ? item.target
+      : (item.target && typeof item.target === 'object' ? (item.target as Record<string, unknown>).target : undefined),
+    port: item.port ?? probeConfig.port ?? null,
+    max_hops: item.max_hops ?? probeConfig.max_hops ?? null,
+    loss_threshold: item.loss_threshold ?? mtrRetryConfig.loss_threshold_pct ?? null,
+    cooldown_secs: item.cooldown_secs ?? mtrRetryConfig.cooldown_duration_sec ?? null,
+    max_retries: item.max_retries ?? mtrRetryConfig.max_retry_count ?? null,
+    is_active: item.is_active ?? item.is_enabled,
+  }
+}
+
 function getAuthHeaders() {
   const token = useAuthStore.getState().accessToken
   return token ? { Authorization: `Bearer ${token}` } : {}
@@ -42,16 +72,18 @@ async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
   return parseApiResponse<T>(response)
 }
 
-export function useTasks(params?: { skip?: number; limit?: number; is_active?: boolean }) {
+export function useTasks(params?: { is_active?: boolean }) {
   return useQuery({
     queryKey: taskKeys.list(params),
     queryFn: async () => {
       const query = new URLSearchParams()
-      if (typeof params?.skip === 'number') query.set('skip', String(params.skip))
-      if (typeof params?.limit === 'number') query.set('limit', String(params.limit))
       if (typeof params?.is_active === 'boolean') query.set('is_active', String(params.is_active))
       const suffix = query.toString() ? `?${query.toString()}` : ''
-      return requestJson(`/api/v1/tasks${suffix}`)
+      const response = await requestJson<TaskListResponse>(`/api/v1/tasks${suffix}`)
+      return {
+        ...response,
+        items: (response.items ?? []).map(normalizeTask),
+      }
     },
   })
 }
@@ -60,7 +92,8 @@ export function useTask(uuid: string) {
   return useQuery({
     queryKey: taskKeys.detail(uuid),
     queryFn: async () => {
-      return requestJson(`/api/v1/tasks/${uuid}`)
+      const response = await requestJson(`/api/v1/tasks/${uuid}`)
+      return normalizeTask(response)
     },
     enabled: !!uuid,
   })
@@ -70,10 +103,11 @@ export function useCreateTask() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (body: TaskCreate) => {
-      return requestJson('/api/v1/tasks', {
+      const response = await requestJson('/api/v1/tasks', {
         method: 'POST',
         body: JSON.stringify(body),
       })
+      return normalizeTask(response)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: taskKeys.all })

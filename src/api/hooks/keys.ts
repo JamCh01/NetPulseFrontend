@@ -21,7 +21,7 @@ export const agentKeys = {
 
 export const taskKeys = {
   all: ['tasks'] as const,
-  list: (params?: { skip?: number; limit?: number; is_active?: boolean }) =>
+  list: (params?: { is_active?: boolean }) =>
     [...taskKeys.all, 'list', params] as const,
   detail: (uuid: string) => [...taskKeys.all, 'detail', uuid] as const,
   agents: (taskUuid: string) => [...taskKeys.all, 'agents', taskUuid] as const,

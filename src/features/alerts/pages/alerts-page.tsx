@@ -37,7 +37,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorState } from '@/components/ui/error-state'
 import { Pagination } from '@/components/ui/pagination'
-import type { AlertRuleResponse, TaskResponse, UserResponse, WebhookResponse, MetricTypeEnum, OperatorEnum, PaginatedResponseAlertRuleResponse, PaginatedResponseTaskResponse, PaginatedResponseUserResponse, PaginatedResponseWebhookResponse } from '@/api/generated/types.gen'
+import type { AlertRuleResponse, TaskResponse, UserResponse, WebhookResponse, MetricTypeEnum, OperatorEnum, PaginatedResponseAlertRuleResponse, PaginatedResponseUserResponse, PaginatedResponseWebhookResponse } from '@/api/generated/types.gen'
 
 const METRIC_COLORS: Record<string, string> = {
   latency: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30',
@@ -60,7 +60,7 @@ export default function AlertsPage() {
   const currentUserUuid = useAuthStore((s) => s.user?.uuid)
   const [page, setPage] = useState(1)
   const { data, isLoading, error, refetch } = useAlertRules({ skip: (page - 1) * PAGE_SIZE, limit: PAGE_SIZE })
-  const { data: tasksData, isLoading: tasksLoading } = useTasks({ limit: 200 })
+  const { data: tasksData, isLoading: tasksLoading } = useTasks()
   const { data: usersData } = useUsers(isAdmin ? { limit: 100 } : undefined)
   const { data: webhooksData } = useWebhooks({ limit: 100 })
 
@@ -70,7 +70,7 @@ export default function AlertsPage() {
 
   const rules = ((data as PaginatedResponseAlertRuleResponse)?.items ?? []) as AlertRuleResponse[]
   const totalPages = Math.ceil(((data as PaginatedResponseAlertRuleResponse)?.total ?? 0) / PAGE_SIZE)
-  const tasks = ((tasksData as PaginatedResponseTaskResponse)?.items ?? []) as TaskResponse[]
+  const tasks = ((tasksData as { items?: TaskResponse[] })?.items ?? []) as TaskResponse[]
   const users = ((usersData as PaginatedResponseUserResponse)?.items ?? []) as UserResponse[]
   const webhooks = ((webhooksData as PaginatedResponseWebhookResponse)?.items ?? []) as WebhookResponse[]
 
@@ -682,4 +682,3 @@ export default function AlertsPage() {
     </div>
   )
 }
-

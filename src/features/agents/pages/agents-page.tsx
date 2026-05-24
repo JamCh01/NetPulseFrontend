@@ -49,7 +49,7 @@ export default function AgentsPage() {
   const createAgent = useCreateAgent()
   const disableAgent = useDisableAgent()
   const updateAgent = useUpdateAgent()
-  const { data: allTasksData } = useTasks({ limit: 200 })
+  const { data: allTasksData } = useTasks()
   const assignAgentsHook = useAssignAgents()
 
   const [createOpen, setCreateOpen] = useState(false)

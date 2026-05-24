@@ -1,9 +1,9 @@
 import { http, HttpResponse } from 'msw'
-import { createMockTask, createMockAgent, paginate } from '@/test/mocks/data/factories'
+import { createMockTask, createMockAgent } from '@/test/mocks/data/factories'
 
 export const taskHandlers = [
   http.get('*/api/v1/tasks/', () => {
-    return HttpResponse.json(paginate([createMockTask(), createMockTask({ protocol: 'http', port: 443 })]))
+    return HttpResponse.json({ items: [createMockTask(), createMockTask({ protocol: 'http', port: 443 })] })
   }),
 
   http.get('*/api/v1/tasks/:taskUuid', () => {

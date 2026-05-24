@@ -42,7 +42,7 @@ export default function AgentDetailPage() {
   const isAdmin = useAuthStore((s) => s.isAdmin())
 
   const { data: agentTasksData, isLoading: tasksLoading } = useAgentTasks(agentUuid ?? '')
-  const { data: allTasksData } = useTasks({ limit: 200 })
+  const { data: allTasksData } = useTasks()
   const assignTasks = useAssignTasksFromAgent()
   const unassignTask = useUnassignTaskFromAgent()
 

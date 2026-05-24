@@ -36,7 +36,6 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorState } from '@/components/ui/error-state'
 import { CheckableList } from '@/components/ui/checkable-list'
-import { Pagination } from '@/components/ui/pagination'
 import { AssignAgentsDialog } from '@/features/tasks/components/assign-agents-dialog'
 import {
   DropdownMenu,
@@ -45,25 +44,21 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { MoreHorizontal } from 'lucide-react'
-import type { TaskResponse, ProtocolEnum, AgentResponse, PaginatedResponseTaskResponse } from '@/api/generated/types.gen'
+import type { TaskResponse, ProtocolEnum, AgentResponse } from '@/api/generated/types.gen'
 import { PROTOCOL_COLORS } from '@/lib/constants'
-
-const PAGE_SIZE = 50
 
 export default function TasksPage() {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const isAdmin = useAuthStore((s) => s.isAdmin())
-  const [page, setPage] = useState(1)
-  const { data, isLoading, error, refetch } = useTasks({ skip: (page - 1) * PAGE_SIZE, limit: PAGE_SIZE })
+  const { data, isLoading, error, refetch } = useTasks()
   const createTask = useCreateTask()
   const updateTask = useUpdateTask()
   const disableTask = useDisableTask()
   const { data: allAgentsData } = useAgents({ limit: 200 })
   const assignAgents = useAssignAgents()
 
-  const tasks = ((data as PaginatedResponseTaskResponse)?.items ?? []) as TaskResponse[]
-  const totalPages = Math.ceil(((data as PaginatedResponseTaskResponse)?.total ?? 0) / PAGE_SIZE)
+  const tasks = ((data as { items?: TaskResponse[] })?.items ?? []) as TaskResponse[]
   const allAgents = ((allAgentsData as { items?: AgentResponse[] })?.items ?? []) as AgentResponse[]
 
   // Create dialog
@@ -316,8 +311,6 @@ export default function TasksPage() {
         )}
       </div>
 
-      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} disabled={isLoading} />
-
       {/* Create Task Dialog */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="sm:max-w-md">
@@ -481,4 +474,3 @@ export default function TasksPage() {
     </div>
   )
 }
-

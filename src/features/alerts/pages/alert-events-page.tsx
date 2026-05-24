@@ -44,7 +44,7 @@ export default function AlertEventsPage() {
     status: statusFilter,
   })
   const { data: rulesData } = useAlertRules({ limit: 200 })
-  const { data: tasksData } = useTasks({ limit: 200 })
+  const { data: tasksData } = useTasks()
   const { data: agentsData } = useAgents({ limit: 200 })
 
   const paginatedData = data as { items?: AlertEventResponse[]; total?: number } | undefined
@@ -213,4 +213,3 @@ export default function AlertEventsPage() {
     </div>
   )
 }
-
