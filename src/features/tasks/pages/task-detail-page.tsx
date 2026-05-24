@@ -23,7 +23,7 @@ export default function TaskDetailPage() {
   const isAdmin = useAuthStore((s) => s.isAdmin())
   const { data: taskData, isLoading: taskLoading, error: taskError } = useTask(taskUuid ?? '')
   const { data: taskAgentsData, isLoading: agentsLoading } = useTaskAgents(taskUuid ?? '')
-  const { data: allAgentsData } = useAgents({ limit: 200 })
+  const { data: allAgentsData } = useAgents({ page_size: 200 })
   const updateTask = useUpdateTask()
   const assignAgents = useAssignAgents()
   const unassignAgent = useUnassignAgent()
@@ -54,8 +54,7 @@ export default function TaskDetailPage() {
       {
         uuid: taskUuid,
         data: {
-          task_name: editName,
-          target: editTarget,
+          name: editName,
           interval: Number(editInterval),
         },
       },
@@ -281,4 +280,3 @@ export default function TaskDetailPage() {
     </div>
   )
 }
-

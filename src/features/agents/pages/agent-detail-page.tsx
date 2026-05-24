@@ -50,7 +50,7 @@ export default function AgentDetailPage() {
   const agentTasks: TaskResponse[] = Array.isArray(agentTasksRaw)
     ? agentTasksRaw
     : (agentTasksRaw?.tasks ?? [])
-  const allTasks = ((allTasksData as { items?: TaskResponse[] })?.items ?? []) as TaskResponse[]
+  const allTasks = ((allTasksData as unknown as { items?: TaskResponse[] })?.items ?? []) as TaskResponse[]
   const assignedTaskUuids = new Set(agentTasks.map((tk) => tk.task_uuid))
   const availableTasks = allTasks.filter((tk) => !assignedTaskUuids.has(tk.task_uuid) && tk.is_active)
 
@@ -77,7 +77,7 @@ export default function AgentDetailPage() {
     if (!agentUuid) return
     const tags = Object.entries(editTags).map(([k, v]) => `${k}:${v}`)
     updateAgent.mutate(
-      { uuid: agentUuid, data: { agent_name: editName, tags } },
+      { uuid: agentUuid, data: { name: editName, tags } },
       { onSuccess: () => setEditing(false) },
     )
   }

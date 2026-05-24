@@ -13,18 +13,29 @@ export const userKeys = {
 
 export const agentKeys = {
   all: ['agents'] as const,
-  list: (params?: { skip?: number; limit?: number; tags?: string[] }) =>
+  list: (params?: unknown) =>
     [...agentKeys.all, 'list', params] as const,
   detail: (uuid: string) => [...agentKeys.all, 'detail', uuid] as const,
   tasks: (agentUuid: string) => [...agentKeys.all, 'tasks', agentUuid] as const,
 }
 
+export const targetKeys = {
+  all: ['targets'] as const,
+  list: (params?: unknown) => [...targetKeys.all, 'list', params] as const,
+  detail: (uuid: string) => [...targetKeys.all, 'detail', uuid] as const,
+}
+
 export const taskKeys = {
   all: ['tasks'] as const,
-  list: (params?: { is_active?: boolean }) =>
+  list: (params?: unknown) =>
     [...taskKeys.all, 'list', params] as const,
   detail: (uuid: string) => [...taskKeys.all, 'detail', uuid] as const,
   agents: (taskUuid: string) => [...taskKeys.all, 'agents', taskUuid] as const,
+}
+
+export const resultKeys = {
+  all: ['results'] as const,
+  ingestionEvents: (params?: unknown) => [...resultKeys.all, 'ingestion-events', params] as const,
 }
 
 export const monitoringKeys = {

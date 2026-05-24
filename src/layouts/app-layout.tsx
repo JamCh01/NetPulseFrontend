@@ -10,6 +10,7 @@ import { TargetGeoSidebarTree } from '@/features/monitoring/components/navigatio
 import {
   LayoutDashboard,
   Radio,
+  ListChecks,
   LogOut,
   ChevronLeft,
   ChevronDown,
@@ -21,6 +22,7 @@ import {
   Sun,
   Moon,
   Crosshair,
+  DatabaseZap,
 } from 'lucide-react'
 
 import {
@@ -58,7 +60,10 @@ export function AppLayout() {
   const hideHeader = location.pathname.startsWith('/app/monitoring')
 
   const staticNavItems: NavItem[] = [
+    { label: 'Targets', path: '/targets', icon: <Crosshair className="w-4 h-4" />, adminOnly: true },
     { label: t('nav.agents'), path: '/agents', icon: <Radio className="w-4 h-4" />, adminOnly: true },
+    { label: 'Tasks', path: '/tasks', icon: <ListChecks className="w-4 h-4" />, adminOnly: true },
+    { label: 'Results', path: '/results/ingestion-events', icon: <DatabaseZap className="w-4 h-4" />, adminOnly: true },
   ]
 
   const handleLogout = () => {

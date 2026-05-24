@@ -1,307 +1,266 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router'
-import { useTranslation } from 'react-i18next'
+import { useMemo, useState } from 'react'
+import { Link } from 'react-router'
 import { toast } from 'sonner'
-import { useTasks, useCreateTask, useUpdateTask, useDisableTask } from '@/api/hooks/use-tasks'
-import { useAgents } from '@/api/hooks/use-agents'
-import { useAssignAgents } from '@/api/hooks/use-task-assignments'
-import { useAuthStore } from '@/stores/auth-store'
+
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+  type AdminTask,
+  type IpFamily,
+  type TaskType,
+  useAgents,
+  useCreateTask,
+  useDeleteTask,
+  useQuickAssociate,
+  useSetTaskEnabled,
+  useTargets,
+  useTasks,
+  useUpdateTask,
+} from '@/api/hooks/admin-api'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
-import { ErrorState } from '@/components/ui/error-state'
-import { CheckableList } from '@/components/ui/checkable-list'
-import { AssignAgentsDialog } from '@/features/tasks/components/assign-agents-dialog'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { MoreHorizontal } from 'lucide-react'
-import type { TaskResponse, ProtocolEnum, AgentResponse } from '@/api/generated/types.gen'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { buildTaskPayload, formatDateTime, protocolOptionsForTarget } from '@/features/admin/utils'
 import { PROTOCOL_COLORS } from '@/lib/constants'
 
 export default function TasksPage() {
-  const navigate = useNavigate()
-  const { t } = useTranslation()
-  const isAdmin = useAuthStore((s) => s.isAdmin())
-  const { data, isLoading, error, refetch } = useTasks()
+  const [keyword, setKeyword] = useState('')
+  const [taskType, setTaskType] = useState<TaskType | 'all'>('all')
+  const [createOpen, setCreateOpen] = useState(false)
+  const [quickOpen, setQuickOpen] = useState(false)
+  const [editTask, setEditTask] = useState<AdminTask | null>(null)
+  const [deleteTaskUuid, setDeleteTaskUuid] = useState<string | null>(null)
+  const [quickTargetUuid, setQuickTargetUuid] = useState('')
+  const [quickAgentUuid, setQuickAgentUuid] = useState('')
+  const [form, setForm] = useState({
+    name: '',
+    target_uuid: '',
+    agent_uuid: '',
+    task_type: 'icmp' as TaskType,
+    ip_family: '4' as IpFamily,
+    interval: '60',
+    timeout: '3000',
+    packet_count: '4',
+    port: '443',
+    iperf3_mode: 'single_thread' as 'single_thread' | 'multi_thread',
+    iperf3_duration: '10',
+  })
+
+  const tasksQuery = useTasks({ keyword, task_type: taskType, sort_by: 'name', sort_order: 'asc' })
+  const targetsQuery = useTargets({ page_size: 200, sort_by: 'name', sort_order: 'asc', is_enabled: true })
+  const agentsQuery = useAgents({ page_size: 200, sort_by: 'name', sort_order: 'asc', is_enabled: true })
   const createTask = useCreateTask()
   const updateTask = useUpdateTask()
-  const disableTask = useDisableTask()
-  const { data: allAgentsData } = useAgents({ limit: 200 })
-  const assignAgents = useAssignAgents()
+  const setTaskEnabled = useSetTaskEnabled()
+  const deleteTask = useDeleteTask()
+  const quickAssociate = useQuickAssociate()
 
-  const tasks = ((data as { items?: TaskResponse[] })?.items ?? []) as TaskResponse[]
-  const allAgents = ((allAgentsData as { items?: AgentResponse[] })?.items ?? []) as AgentResponse[]
-
-  // Create dialog
-  const [createOpen, setCreateOpen] = useState(false)
-  const [taskName, setTaskName] = useState('')
-  const [protocol, setProtocol] = useState<ProtocolEnum>('icmp')
-  const [target, setTarget] = useState('')
-  const [port, setPort] = useState('')
-  const [interval, setInterval_] = useState('60')
-  const [selectedAgentUuids, setSelectedAgentUuids] = useState<Set<string>>(new Set())
-
-  // Edit dialog
-  const [editUuid, setEditUuid] = useState<string | null>(null)
-  const editTarget_ = editUuid ? tasks.find((t) => t.task_uuid === editUuid) : null
-  const [editName, setEditName] = useState('')
-  const [editTargetVal, setEditTargetVal] = useState('')
-  const [editInterval, setEditInterval] = useState('')
-  const [editPacketCount, setEditPacketCount] = useState('')
-
-  // Delete dialog
-  const [deleteUuid, setDeleteUuid] = useState<string | null>(null)
-  const deleteTarget = deleteUuid ? tasks.find((t) => t.task_uuid === deleteUuid) : null
-
-  // Assign agents dialog
-  const [assignDialogTaskUuid, setAssignDialogTaskUuid] = useState<string | null>(null)
+  const tasks = tasksQuery.data?.items ?? []
+  const targets = targetsQuery.data?.items ?? []
+  const agents = agentsQuery.data?.items ?? []
+  const selectedTarget = useMemo(
+    () => targets.find((target) => target.target_uuid === form.target_uuid) ?? null,
+    [form.target_uuid, targets],
+  )
+  const availableTaskTypes = protocolOptionsForTarget(selectedTarget)
 
   const resetCreateForm = () => {
-    setTaskName('')
-    setProtocol('icmp')
-    setTarget('')
-    setPort('')
-    setInterval_('60')
-    setSelectedAgentUuids(new Set())
-  }
-
-  const openEditDialog = (task: TaskResponse) => {
-    setEditName(task.task_name)
-    setEditTargetVal(task.target)
-    setEditInterval(String(task.interval))
-    setEditPacketCount(String(task.packet_count))
-    setEditUuid(task.task_uuid)
-  }
-
-  const handleCreate = (e: React.FormEvent) => {
-    e.preventDefault()
-    createTask.mutate(
-      {
-        task_name: taskName,
-        protocol,
-        target,
-        port: port ? Number(port) : undefined,
-        interval: Number(interval),
-      },
-      {
-        onSuccess: (result) => {
-          setCreateOpen(false)
-          resetCreateForm()
-          toast.success(t('tasks.createSuccess') || 'Task created successfully')
-          const res = result as TaskResponse | undefined
-          if (res?.task_uuid && selectedAgentUuids.size > 0) {
-            assignAgents.mutate({
-              taskUuid: res.task_uuid,
-              data: { agent_uuids: Array.from(selectedAgentUuids) },
-            }, {
-              onSuccess: () => {
-                toast.success(t('tasks.assignSuccess') || 'Agents assigned successfully')
-              },
-              onError: () => {
-                toast.error(t('tasks.assignFailed') || 'Failed to assign agents')
-              },
-            })
-          }
-        },
-        onError: () => {
-          toast.error(t('tasks.createFailed') || 'Failed to create task')
-        },
-      },
-    )
-  }
-
-  const handleEdit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!editUuid) return
-    updateTask.mutate(
-      {
-        uuid: editUuid,
-        data: {
-          task_name: editName,
-          target: editTargetVal,
-          interval: Number(editInterval),
-          packet_count: Number(editPacketCount),
-        },
-      },
-      {
-        onSuccess: () => {
-          setEditUuid(null)
-          toast.success(t('tasks.updateSuccess') || 'Task updated successfully')
-        },
-        onError: () => {
-          toast.error(t('tasks.failedToUpdate') || 'Failed to update task')
-        },
-      },
-    )
-  }
-
-  const handleToggleActive = (task: TaskResponse) => {
-    updateTask.mutate(
-      { uuid: task.task_uuid, data: { is_active: !task.is_active } },
-      {
-        onSuccess: () => {
-          toast.success(
-            task.is_active
-              ? t('tasks.disabledSuccess') || 'Task disabled'
-              : t('tasks.enabledSuccess') || 'Task enabled'
-          )
-        },
-        onError: () => {
-          toast.error(t('tasks.failedToUpdate') || 'Failed to update task')
-        },
-      }
-    )
-  }
-
-  const handleDelete = () => {
-    if (!deleteUuid) return
-    disableTask.mutate(deleteUuid, {
-      onSuccess: () => {
-        setDeleteUuid(null)
-        toast.success(t('tasks.deleteSuccess') || 'Task deleted successfully')
-      },
-      onError: () => {
-        toast.error(t('tasks.deleteFailed') || 'Failed to delete task')
-      },
+    setForm({
+      name: '',
+      target_uuid: '',
+      agent_uuid: '',
+      task_type: 'icmp',
+      ip_family: '4',
+      interval: '60',
+      timeout: '3000',
+      packet_count: '4',
+      port: '443',
+      iperf3_mode: 'single_thread',
+      iperf3_duration: '10',
     })
   }
 
+  const handleCreate = (event: React.FormEvent) => {
+    event.preventDefault()
+    const payload = buildTaskPayload({
+      name: form.name,
+      target_uuid: form.target_uuid,
+      agent_uuid: form.agent_uuid,
+      task_type: form.task_type,
+      ip_family: form.ip_family,
+      interval: Number(form.interval),
+      timeout: Number(form.timeout),
+      packet_count: Number(form.packet_count),
+      port: form.port ? Number(form.port) : undefined,
+      iperf3Mode: form.iperf3_mode,
+      iperf3Duration: form.iperf3_duration ? Number(form.iperf3_duration) : undefined,
+    })
+    createTask.mutate(payload, {
+      onSuccess: () => {
+        toast.success('Task 已创建')
+        setCreateOpen(false)
+        resetCreateForm()
+      },
+      onError: (error) => toast.error(error.message || '创建 Task 失败'),
+    })
+  }
+
+  const handleEdit = (event: React.FormEvent) => {
+    event.preventDefault()
+    if (!editTask) return
+    updateTask.mutate({
+      uuid: editTask.task_uuid,
+      data: {
+        name: editTask.name,
+        interval: editTask.interval,
+        timeout: editTask.timeout,
+        packet_count: editTask.packet_count,
+      },
+    }, {
+      onSuccess: () => {
+        toast.success('Task 已更新')
+        setEditTask(null)
+      },
+      onError: (error) => toast.error(error.message || '更新失败'),
+    })
+  }
+
+  const handleQuickAssociate = () => {
+    if (!quickTargetUuid || !quickAgentUuid) return
+    quickAssociate.mutate({
+      target_uuid: quickTargetUuid,
+      agent_uuid: quickAgentUuid,
+    }, {
+      onSuccess: (createdTasks) => {
+        toast.success(`快速关联完成，创建或复用 ${createdTasks.length} 个任务`)
+        setQuickOpen(false)
+        setQuickTargetUuid('')
+        setQuickAgentUuid('')
+      },
+      onError: (error) => toast.error(error.message || '快速关联失败'),
+    })
+  }
+
+  const taskToDelete = deleteTaskUuid ? tasks.find((task) => task.task_uuid === deleteTaskUuid) : null
+
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-text-primary">{t('tasks.title')}</h1>
-        {isAdmin && (
-          <Button
-            onClick={() => setCreateOpen(true)}
-          >
-            {t('tasks.createTask')}
-          </Button>
-        )}
+    <div className="space-y-5">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-text-primary">Task 管理</h1>
+          <p className="text-sm text-text-muted">通过 /api/v1/tasks/* 管理任务，使用 /api/v1/relations/quick-associate 批量建立 Target 与 Agent 关系。</p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setQuickOpen(true)}>快速关联</Button>
+          <Button onClick={() => setCreateOpen(true)}>新增 Task</Button>
+        </div>
       </div>
 
-      <div className="glass-light rounded-xl p-1">
-        {isLoading ? (
-          <div className="p-6 space-y-3">
-            {Array.from({ length: 5 }, (_, i) => (
-              <Skeleton key={i} className="h-10 w-full" />
-            ))}
+      <div className="glass-light rounded-xl p-4">
+        <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center">
+          <Input
+            value={keyword}
+            onChange={(event) => setKeyword(event.target.value)}
+            placeholder="按名称、Target、Agent 搜索"
+            className="md:max-w-sm"
+          />
+          <Select value={taskType} onValueChange={(value) => setTaskType(value as TaskType | 'all')}>
+            <SelectTrigger className="w-full md:w-40"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">全部类型</SelectItem>
+              <SelectItem value="icmp">ICMP</SelectItem>
+              <SelectItem value="tcp">TCP</SelectItem>
+              <SelectItem value="mtr">MTR</SelectItem>
+              <SelectItem value="iperf3">iperf3</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button variant="outline" onClick={() => void tasksQuery.refetch()}>刷新</Button>
+        </div>
+
+        {tasksQuery.isLoading ? (
+          <div className="space-y-3">
+            {Array.from({ length: 6 }, (_, index) => <Skeleton key={index} className="h-10 w-full" />)}
           </div>
-        ) : error ? (
-          <div className="p-6">
-            <ErrorState
-              title={t('tasks.failedToLoad')}
-              description="请检查网络或服务状态后重试。"
-              onRetry={() => { void refetch() }}
-              retryLabel="重试加载"
-            />
-          </div>
+        ) : tasksQuery.error ? (
+          <div className="p-6 text-center text-sm text-red-400">Task 列表加载失败</div>
         ) : tasks.length === 0 ? (
-          <div className="p-6 text-center">
-            <p className="text-text-muted text-sm">{t('tasks.noTasks')}</p>
-          </div>
+          <div className="p-6 text-center text-sm text-text-muted">暂无 Task</div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow className="border-white/5 hover:bg-transparent">
-                <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('common.name')}</TableHead>
-                <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('tasks.protocol')}</TableHead>
-                <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('tasks.target')}</TableHead>
-                <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('tasks.port')}</TableHead>
-                <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('tasks.interval')}</TableHead>
-                <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('common.status')}</TableHead>
-                <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('common.actions')}</TableHead>
+                <TableHead>名称</TableHead>
+                <TableHead>类型</TableHead>
+                <TableHead>Target</TableHead>
+                <TableHead>Agent</TableHead>
+                <TableHead>配置</TableHead>
+                <TableHead>状态</TableHead>
+                <TableHead>更新时间</TableHead>
+                <TableHead>操作</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {tasks.map((task) => (
                 <TableRow key={task.task_uuid} className="border-white/5 hover:bg-white/5">
-                  <TableCell className="text-text-primary font-medium">{task.task_name}</TableCell>
+                  <TableCell className="font-medium text-text-primary">
+                    <div>{task.name}</div>
+                    <div className="text-xs text-text-muted">{task.task_uuid}</div>
+                  </TableCell>
                   <TableCell>
-                    <Badge className={`border text-xs uppercase ${PROTOCOL_COLORS[task.protocol] ?? ''}`}>
-                      {task.protocol}
+                    <Badge className={`border uppercase ${PROTOCOL_COLORS[task.task_type] ?? ''}`}>{task.task_type}</Badge>
+                  </TableCell>
+                  <TableCell className="text-sm text-text-secondary">
+                    <div>{task.target?.name ?? task.target_uuid}</div>
+                    <div className="font-[family-name:var(--font-mono)] text-xs text-text-muted">{task.target?.target}</div>
+                  </TableCell>
+                  <TableCell className="text-sm text-text-secondary">
+                    <div>{task.agent?.name ?? task.agent_uuid}</div>
+                    <div className="text-xs text-text-muted">{task.agent?.city ?? '-'}</div>
+                  </TableCell>
+                  <TableCell className="text-sm text-text-secondary">
+                    <div>{task.interval}s / timeout {task.timeout}ms</div>
+                    <div className="text-xs text-text-muted">{task.port ? `port ${task.port}` : `packet ${task.packet_count}`}</div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={task.is_enabled ? 'success' : 'inactive'}>
+                      {task.is_enabled ? '启用' : '停用'}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-text-secondary text-sm font-[family-name:var(--font-mono)]">{task.target}</TableCell>
-                  <TableCell className="text-text-secondary text-sm font-[family-name:var(--font-mono)]">
-                    {task.port ?? '-'}
-                  </TableCell>
-                  <TableCell className="text-text-secondary text-sm font-[family-name:var(--font-mono)]">
-                    {task.interval}s
-                  </TableCell>
+                  <TableCell className="text-sm text-text-secondary">{formatDateTime(task.updated_at)}</TableCell>
                   <TableCell>
-                    <Badge variant={task.is_active ? 'success' : 'inactive'}>
-                      {task.is_active ? t('common.active') : t('common.inactive')}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="sm" className="text-xs h-9 px-3 text-text-muted hover:text-text-primary"
-                        onClick={() => navigate(`/app/monitoring/${task.task_uuid}`)}
+                    <div className="flex flex-wrap gap-2">
+                      <Link to={`/app/monitoring/${task.task_uuid}`}>
+                        <Button variant="ghost" size="sm">查看数据</Button>
+                      </Link>
+                      <Button variant="ghost" size="sm" onClick={() => setEditTask(task)}>编辑</Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setTaskEnabled.mutate(
+                          { uuid: task.task_uuid, enabled: !task.is_enabled },
+                          { onError: (error) => toast.error(error.message || '状态更新失败') },
+                        )}
                       >
-                        {t('tasks.viewMonitoring')}
+                        {task.is_enabled ? '停用' : '启用'}
                       </Button>
-                      {isAdmin && (
-                        <DropdownMenu>
-                          <DropdownMenuTrigger
-                            render={
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-9 px-2 text-text-muted hover:text-text-primary"
-                                aria-label={t('common.actions')}
-                              />
-                            }
-                          >
-                            <MoreHorizontal className="w-4 h-4" />
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-44">
-                            <DropdownMenuItem className="cursor-pointer" onClick={() => navigate(`/tasks/${task.task_uuid}`)}>
-                              {t('tasks.manageTask')}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="cursor-pointer" onClick={() => setAssignDialogTaskUuid(task.task_uuid)}>
-                              {t('tasks.manageAgents')}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="cursor-pointer" onClick={() => openEditDialog(task)}>
-                              {t('common.edit')}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="cursor-pointer" onClick={() => handleToggleActive(task)}>
-                              {task.is_active ? t('common.disable') : t('common.enable')}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="cursor-pointer" variant="destructive" onClick={() => setDeleteUuid(task.task_uuid)}>
-                              {t('common.delete')}
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-400 hover:text-red-300"
+                        onClick={() => setDeleteTaskUuid(task.task_uuid)}
+                      >
+                        删除
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -311,166 +270,170 @@ export default function TasksPage() {
         )}
       </div>
 
-      {/* Create Task Dialog */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>{t('tasks.dialogTitle')}</DialogTitle>
-            <DialogDescription>{t('tasks.dialogDesc')}</DialogDescription>
+            <DialogTitle>新增 Task</DialogTitle>
+            <DialogDescription>Task 必须绑定一个 Target 和一个 Agent，协议需被 Target 支持。</DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleCreate} className="space-y-4 mt-2">
-            <div>
-              <Label className="text-xs text-text-secondary mb-1.5">{t('tasks.taskName')}</Label>
-              <Input
-                value={taskName}
-                onChange={(e) => setTaskName(e.target.value)}
-                placeholder={t('tasks.taskNamePlaceholder')}
-                required
-              />
+          <form onSubmit={handleCreate} className="mt-2 grid gap-4">
+            <Input placeholder="任务名称，可为空" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} />
+            <div className="grid gap-3 md:grid-cols-2">
+              <div>
+                <Label className="mb-1.5 text-xs text-text-secondary">Target</Label>
+                <Select value={form.target_uuid} onValueChange={(value) => {
+                  const target = targets.find((item) => item.target_uuid === value)
+                  const nextTypes = protocolOptionsForTarget(target)
+                  setForm({ ...form, target_uuid: value ?? '', task_type: nextTypes.includes(form.task_type) ? form.task_type : nextTypes[0] })
+                }}>
+                  <SelectTrigger className="w-full"><SelectValue placeholder="选择 Target" /></SelectTrigger>
+                  <SelectContent>
+                    {targets.map((target) => (
+                      <SelectItem key={target.target_uuid} value={target.target_uuid}>{target.name} - {target.target}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="mb-1.5 text-xs text-text-secondary">Agent</Label>
+                <Select value={form.agent_uuid} onValueChange={(value) => setForm({ ...form, agent_uuid: value ?? '' })}>
+                  <SelectTrigger className="w-full"><SelectValue placeholder="选择 Agent" /></SelectTrigger>
+                  <SelectContent>
+                    {agents.map((agent) => (
+                      <SelectItem key={agent.agent_uuid} value={agent.agent_uuid}>{agent.name} - {agent.city || agent.country}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div>
-              <Label className="text-xs text-text-secondary mb-1.5">{t('tasks.protocol')}</Label>
-              <Select value={protocol} onValueChange={(val) => setProtocol(val as ProtocolEnum)}>
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
+            <div className="grid gap-3 md:grid-cols-4">
+              <Select value={form.task_type} onValueChange={(value) => setForm({ ...form, task_type: value as TaskType })}>
+                <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="icmp">ICMP</SelectItem>
-                  <SelectItem value="tcp">TCP</SelectItem>
-                  <SelectItem value="http">HTTP</SelectItem>
-                  <SelectItem value="udp">UDP</SelectItem>
+                  {availableTaskTypes.map((type) => (
+                    <SelectItem key={type} value={type}>{type.toUpperCase()}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
+              <Select value={form.ip_family} onValueChange={(value) => setForm({ ...form, ip_family: value as IpFamily })}>
+                <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="4">IPv4</SelectItem>
+                  <SelectItem value="6">IPv6</SelectItem>
+                </SelectContent>
+              </Select>
+              <Input type="number" min="60" placeholder="间隔秒" value={form.interval} onChange={(event) => setForm({ ...form, interval: event.target.value })} />
+              <Input type="number" min="1000" placeholder="超时毫秒" value={form.timeout} onChange={(event) => setForm({ ...form, timeout: event.target.value })} />
             </div>
-            <div>
-              <Label className="text-xs text-text-secondary mb-1.5">{t('tasks.target')}</Label>
-              <Input
-                value={target}
-                onChange={(e) => setTarget(e.target.value)}
-                placeholder={t('tasks.targetPlaceholder')}
-                required
-              />
+            <div className="grid gap-3 md:grid-cols-3">
+              <Input type="number" min="1" placeholder="包数量" value={form.packet_count} onChange={(event) => setForm({ ...form, packet_count: event.target.value })} />
+              {(form.task_type === 'tcp' || form.task_type === 'iperf3') && (
+                <Input type="number" min="1" max="65535" placeholder="端口" value={form.port} onChange={(event) => setForm({ ...form, port: event.target.value })} />
+              )}
+              {form.task_type === 'iperf3' && (
+                <>
+                  <Select value={form.iperf3_mode} onValueChange={(value) => setForm({ ...form, iperf3_mode: value as 'single_thread' | 'multi_thread' })}>
+                    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="single_thread">单线程</SelectItem>
+                      <SelectItem value="multi_thread">8 线程</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Input type="number" min="1" placeholder="执行秒数" value={form.iperf3_duration} onChange={(event) => setForm({ ...form, iperf3_duration: event.target.value })} />
+                </>
+              )}
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="text-xs text-text-secondary mb-1.5">{t('tasks.portOptional')}</Label>
-                <Input
-                  type="number"
-                  value={port}
-                  onChange={(e) => setPort(e.target.value)}
-                  placeholder={t('tasks.portPlaceholder')}
-                />
-              </div>
-              <div>
-                <Label className="text-xs text-text-secondary mb-1.5">{t('tasks.intervalSeconds')}</Label>
-                <Input
-                  type="number"
-                  value={interval}
-                  onChange={(e) => setInterval_(e.target.value)}
-                  min="10"
-                  required
-                />
-              </div>
-            </div>
-            {isAdmin && (
-              <div>
-                <Label className="text-xs text-text-secondary mb-1.5">{t('tasks.assignAgentsOptional')}</Label>
-                <CheckableList
-                  items={allAgents
-                    .filter((a) => a.status !== 'disabled')
-                    .map((a) => ({
-                      id: a.agent_uuid,
-                      label: a.agent_name,
-                      sublabel: a.tags.find((tg) => tg.startsWith('city:'))?.slice(5) ?? '',
-                    }))}
-                  selectedIds={selectedAgentUuids}
-                  onToggle={(id) => {
-                    setSelectedAgentUuids((prev) => {
-                      const next = new Set(prev)
-                      if (next.has(id)) next.delete(id)
-                      else next.add(id)
-                      return next
-                    })
-                  }}
-                  emptyMessage={t('tasks.noAvailableAgents')}
-                />
-              </div>
-            )}
             <DialogFooter>
-              <Button
-                type="submit"
-                disabled={createTask.isPending}
-              >
-                {createTask.isPending ? t('common.creating') : t('tasks.createTask')}
+              <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>取消</Button>
+              <Button type="submit" disabled={!form.target_uuid || !form.agent_uuid || createTask.isPending}>
+                {createTask.isPending ? '创建中' : '创建'}
               </Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
 
-      {/* Edit Task Dialog */}
-      <Dialog open={editUuid !== null} onOpenChange={(open) => { if (!open) setEditUuid(null) }}>
-        <DialogContent className="sm:max-w-md">
+      <Dialog open={quickOpen} onOpenChange={setQuickOpen}>
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>{t('tasks.editTask')}</DialogTitle>
-            <DialogDescription>{t('tasks.editTaskDesc')}</DialogDescription>
+            <DialogTitle>快速关联</DialogTitle>
+            <DialogDescription>选择一个 Target 和一个 Agent，由后端自动创建该关系下的默认任务。</DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleEdit} className="space-y-4 mt-2">
-            <div>
-              <Label className="text-xs text-text-secondary mb-1.5">{t('tasks.taskName')}</Label>
-              <Input value={editName} onChange={(e) => setEditName(e.target.value)} required />
-            </div>
-            <div>
-              <Label className="text-xs text-text-secondary mb-1.5">{t('tasks.protocol')}</Label>
-              <Input value={editTarget_?.protocol?.toUpperCase() ?? ''} disabled className="opacity-60" />
-            </div>
-            <div>
-              <Label className="text-xs text-text-secondary mb-1.5">{t('tasks.target')}</Label>
-              <Input value={editTargetVal} onChange={(e) => setEditTargetVal(e.target.value)} required />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="text-xs text-text-secondary mb-1.5">{t('tasks.intervalSeconds')}</Label>
-                <Input type="number" value={editInterval} onChange={(e) => setEditInterval(e.target.value)} min="10" required />
-              </div>
-              <div>
-                <Label className="text-xs text-text-secondary mb-1.5">{t('tasks.packetCount')}</Label>
-                <Input type="number" value={editPacketCount} onChange={(e) => setEditPacketCount(e.target.value)} min="1" required />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button
-                type="submit"
-                disabled={updateTask.isPending}
-              >
-                {updateTask.isPending ? t('common.saving') : t('common.save')}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete Confirmation */}
-      <Dialog open={deleteUuid !== null} onOpenChange={(open) => { if (!open) setDeleteUuid(null) }}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t('tasks.deleteTask')}</DialogTitle>
-            <DialogDescription>{t('tasks.deleteConfirm', { name: deleteTarget?.task_name ?? '' })}</DialogDescription>
-          </DialogHeader>
+          <div className="space-y-3">
+            <Select value={quickTargetUuid} onValueChange={(value) => setQuickTargetUuid(value ?? '')}>
+              <SelectTrigger className="w-full"><SelectValue placeholder="选择 Target" /></SelectTrigger>
+              <SelectContent>
+                {targets.map((target) => (
+                  <SelectItem key={target.target_uuid} value={target.target_uuid}>{target.name} - {target.target}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={quickAgentUuid} onValueChange={(value) => setQuickAgentUuid(value ?? '')}>
+              <SelectTrigger className="w-full"><SelectValue placeholder="选择 Agent" /></SelectTrigger>
+              <SelectContent>
+                {agents.map((agent) => (
+                  <SelectItem key={agent.agent_uuid} value={agent.agent_uuid}>{agent.name} - {agent.city || agent.country}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteUuid(null)}>{t('common.cancel')}</Button>
-            <Button variant="destructive" onClick={handleDelete} disabled={disableTask.isPending}>
-              {disableTask.isPending ? t('common.deleting') : t('common.delete')}
+            <Button variant="outline" onClick={() => setQuickOpen(false)}>取消</Button>
+            <Button disabled={!quickTargetUuid || !quickAgentUuid || quickAssociate.isPending} onClick={handleQuickAssociate}>
+              {quickAssociate.isPending ? '关联中' : '关联'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Assign Agents Dialog */}
-      <AssignAgentsDialog
-        taskUuid={assignDialogTaskUuid}
-        onClose={() => setAssignDialogTaskUuid(null)}
-      />
+      <Dialog open={!!editTask} onOpenChange={(open) => { if (!open) setEditTask(null) }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>编辑 Task</DialogTitle>
+            <DialogDescription>当前只开放安全字段：名称、间隔、超时和包数量。</DialogDescription>
+          </DialogHeader>
+          {editTask && (
+            <form onSubmit={handleEdit} className="space-y-3">
+              <Input value={editTask.name} onChange={(event) => setEditTask({ ...editTask, name: event.target.value })} />
+              <Input type="number" min="60" value={editTask.interval} onChange={(event) => setEditTask({ ...editTask, interval: Number(event.target.value) })} />
+              <Input type="number" min="1000" value={editTask.timeout} onChange={(event) => setEditTask({ ...editTask, timeout: Number(event.target.value) })} />
+              <Input type="number" min="1" value={editTask.packet_count} onChange={(event) => setEditTask({ ...editTask, packet_count: Number(event.target.value) })} />
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setEditTask(null)}>取消</Button>
+                <Button type="submit" disabled={updateTask.isPending}>{updateTask.isPending ? '保存中' : '保存'}</Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!deleteTaskUuid} onOpenChange={(open) => { if (!open) setDeleteTaskUuid(null) }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>删除 Task</DialogTitle>
+            <DialogDescription>确认软删除 {taskToDelete?.name ?? deleteTaskUuid}？删除后后端会重新发布 Agent 任务快照。</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteTaskUuid(null)}>取消</Button>
+            <Button
+              variant="destructive"
+              disabled={deleteTask.isPending}
+              onClick={() => {
+                if (!deleteTaskUuid) return
+                deleteTask.mutate(deleteTaskUuid, {
+                  onSuccess: () => {
+                    toast.success('Task 已删除')
+                    setDeleteTaskUuid(null)
+                  },
+                  onError: (error) => toast.error(error.message || '删除失败'),
+                })
+              }}
+            >
+              {deleteTask.isPending ? '删除中' : '删除'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -1,447 +1,303 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
-import { useTranslation } from 'react-i18next'
-import { useAgents, useCreateAgent, useDisableAgent, useUpdateAgent } from '@/api/hooks/use-agents'
-import { useTasks } from '@/api/hooks/use-tasks'
-import { useAssignAgents } from '@/api/hooks/use-task-assignments'
+import { toast } from 'sonner'
+
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+  type AgentStatus,
+  type AdminAgent,
+  type IpVersion,
+  useAgents,
+  useCreateAgent,
+  useDeleteAgent,
+  useSetAgentEnabled,
+} from '@/api/hooks/admin-api'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
-import { CheckableList } from '@/components/ui/checkable-list'
-import { Pagination } from '@/components/ui/pagination'
-import { GeoCascader } from '@/features/agents/components/geo-cascader'
-import type { AgentResponse, TaskResponse, PlatformEnum } from '@/api/generated/types.gen'
-import { AGENT_STATUS_COLORS, PLATFORM_OPTIONS } from '@/lib/constants'
-import { formatDate } from '@/lib/format'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Textarea } from '@/components/ui/textarea'
+import { csvToList, formatDateTime, joinLocation } from '@/features/admin/utils'
+import { AGENT_STATUS_COLORS } from '@/lib/constants'
 
-const PAGE_SIZE = 50
+const PAGE_SIZE = 100
 
 export default function AgentsPage() {
   const navigate = useNavigate()
-  const { t, i18n } = useTranslation()
   const [page, setPage] = useState(1)
-  const { data, isLoading, error } = useAgents({ skip: (page - 1) * PAGE_SIZE, limit: PAGE_SIZE })
-  const createAgent = useCreateAgent()
-  const disableAgent = useDisableAgent()
-  const updateAgent = useUpdateAgent()
-  const { data: allTasksData } = useTasks()
-  const assignAgentsHook = useAssignAgents()
-
+  const [keyword, setKeyword] = useState('')
+  const [status, setStatus] = useState<AgentStatus | 'all'>('all')
   const [createOpen, setCreateOpen] = useState(false)
-  const [disableUuid, setDisableUuid] = useState<string | null>(null)
-  const [agentName, setAgentName] = useState('')
-  const [continent, setContinent] = useState('')
-  const [country, setCountry] = useState('')
-  const [city, setCity] = useState('')
-  const [isp, setIsp] = useState('')
-  const [platform, setPlatform] = useState<PlatformEnum | ''>('')
-  const [selectedTaskUuids, setSelectedTaskUuids] = useState<Set<string>>(new Set())
+  const [createdAgent, setCreatedAgent] = useState<AdminAgent | null>(null)
+  const [copiedToken, setCopiedToken] = useState(false)
+  const [form, setForm] = useState({
+    name: '',
+    ip_version: '4+6' as IpVersion,
+    continent: '',
+    country: '',
+    region: '',
+    city: '',
+    zip_code: 'UNKNOWN',
+    carrier: '',
+    tags: '',
+    comment: '',
+  })
 
-  // Success dialog state
-  const [successDialogOpen, setSuccessDialogOpen] = useState(false)
-  const [createdAccessKey, setCreatedAccessKey] = useState('')
-  const [createdInstallCommand, setCreatedInstallCommand] = useState('')
-  const [copiedKey, setCopiedKey] = useState(false)
-  const [copiedCmd, setCopiedCmd] = useState(false)
+  const agentsQuery = useAgents({
+    page,
+    page_size: PAGE_SIZE,
+    keyword,
+    status,
+    sort_by: 'name',
+    sort_order: 'asc',
+  })
+  const createAgent = useCreateAgent()
+  const setAgentEnabled = useSetAgentEnabled()
+  const deleteAgent = useDeleteAgent()
 
-  const agents = ((data as { items?: AgentResponse[] })?.items ?? []) as AgentResponse[]
-  const totalPages = Math.ceil(((data as { total?: number })?.total ?? 0) / PAGE_SIZE)
-  const allTasks = ((allTasksData as { items?: TaskResponse[] })?.items ?? []) as TaskResponse[]
-  const disableTarget = disableUuid ? agents.find((a) => a.agent_uuid === disableUuid) : null
+  const agents = agentsQuery.data?.items ?? []
+  const pagination = agentsQuery.data?.pagination
 
-  const handleToggle = () => {
-    if (!disableUuid || !disableTarget) return
-    if (disableTarget.status === 'disabled') {
-      updateAgent.mutate(
-        { uuid: disableUuid, data: { status: 'offline' } },
-        { onSuccess: () => setDisableUuid(null) },
-      )
-    } else {
-      disableAgent.mutate(disableUuid, {
-        onSuccess: () => setDisableUuid(null),
-      })
+  const resetForm = () => {
+    setForm({
+      name: '',
+      ip_version: '4+6',
+      continent: '',
+      country: '',
+      region: '',
+      city: '',
+      zip_code: 'UNKNOWN',
+      carrier: '',
+      tags: '',
+      comment: '',
+    })
+  }
+
+  const handleCreate = (event: React.FormEvent) => {
+    event.preventDefault()
+    createAgent.mutate({
+      name: form.name,
+      ip_version: form.ip_version,
+      continent: form.continent,
+      country: form.country,
+      region: form.region || form.city || form.country,
+      city: form.city,
+      zip_code: form.zip_code || 'UNKNOWN',
+      carrier: form.carrier,
+      tags: csvToList(form.tags),
+      comment: form.comment || null,
+    }, {
+      onSuccess: (agent) => {
+        toast.success('Agent 已创建')
+        setCreateOpen(false)
+        setCreatedAgent(agent)
+        resetForm()
+      },
+      onError: (error) => toast.error(error.message || '创建 Agent 失败'),
+    })
+  }
+
+  const copyToken = async () => {
+    if (!createdAgent?.auth_token) return
+    try {
+      await navigator.clipboard.writeText(createdAgent.auth_token)
+      setCopiedToken(true)
+      setTimeout(() => setCopiedToken(false), 1800)
+    } catch {
+      toast.error('复制失败')
     }
   }
 
-  const resetForm = () => {
-    setAgentName('')
-    setContinent('')
-    setCountry('')
-    setCity('')
-    setIsp('')
-    setPlatform('')
-    setSelectedTaskUuids(new Set())
-  }
-
-  const handleCreate = (e: React.FormEvent) => {
-    e.preventDefault()
-    const tags = [
-      `continent:${continent}`,
-      `country:${country}`,
-      `city:${city}`,
-      `isp:${isp}`,
-    ]
-    createAgent.mutate(
-      { agent_name: agentName, tags, platform: (platform as PlatformEnum) || null },
-      {
-        onSuccess: (result) => {
-          setCreateOpen(false)
-          resetForm()
-          const res = result as { agent_uuid?: string; access_key?: string; install_command?: string } | undefined
-          if (res?.access_key) {
-            setCreatedAccessKey(res.access_key)
-            setCreatedInstallCommand(res.install_command ?? '')
-            setSuccessDialogOpen(true)
-          }
-          if (res?.agent_uuid && selectedTaskUuids.size > 0) {
-            for (const taskUuid of selectedTaskUuids) {
-              assignAgentsHook.mutate({
-                taskUuid,
-                data: { agent_uuids: [res.agent_uuid] },
-              })
-            }
-          }
-        },
-      },
-    )
-  }
-
-  const handleCopyKey = async () => {
-    try {
-      await navigator.clipboard.writeText(createdAccessKey)
-      setCopiedKey(true)
-      setTimeout(() => setCopiedKey(false), 2000)
-    } catch { /* clipboard not available */ }
-  }
-
-  const handleCopyCmd = async () => {
-    try {
-      await navigator.clipboard.writeText(createdInstallCommand)
-      setCopiedCmd(true)
-      setTimeout(() => setCopiedCmd(false), 2000)
-    } catch { /* clipboard not available */ }
-  }
-
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-text-primary">{t('agents.title')}</h1>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            onClick={() => navigate('/agents/releases')}
-          >
-            {t('agents.releases')}
-          </Button>
-          <Button
-            
-            onClick={() => setCreateOpen(true)}
-          >
-            {t('agents.createAgent')}
-          </Button>
+    <div className="space-y-5">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-text-primary">Agent 管理</h1>
+          <p className="text-sm text-text-muted">通过 /api/v1/agents/* 管理探针、状态和配置同步信息。</p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => navigate('/agents/releases')}>版本发布</Button>
+          <Button onClick={() => setCreateOpen(true)}>新增 Agent</Button>
         </div>
       </div>
 
-      <div className="glass-light rounded-xl p-1">
-        {isLoading ? (
-          <div className="p-6 space-y-3">
-            {Array.from({ length: 5 }, (_, i) => (
-              <Skeleton key={i} className="h-10 w-full" />
-            ))}
+      <div className="glass-light rounded-xl p-4">
+        <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center">
+          <Input
+            value={keyword}
+            onChange={(event) => {
+              setKeyword(event.target.value)
+              setPage(1)
+            }}
+            placeholder="按名称、城市、运营商搜索"
+            className="md:max-w-sm"
+          />
+          <Select value={status} onValueChange={(value) => {
+            setStatus(value as AgentStatus | 'all')
+            setPage(1)
+          }}>
+            <SelectTrigger className="w-full md:w-40"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">全部状态</SelectItem>
+              <SelectItem value="online">Online</SelectItem>
+              <SelectItem value="offline">Offline</SelectItem>
+              <SelectItem value="disabled">Disabled</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button variant="outline" onClick={() => void agentsQuery.refetch()}>刷新</Button>
+        </div>
+
+        {agentsQuery.isLoading ? (
+          <div className="space-y-3">
+            {Array.from({ length: 6 }, (_, index) => <Skeleton key={index} className="h-10 w-full" />)}
           </div>
-        ) : error ? (
-          <div className="p-6 text-center">
-            <p className="text-red-400 text-sm">{t('agents.failedToLoad')}</p>
-          </div>
+        ) : agentsQuery.error ? (
+          <div className="p-6 text-center text-sm text-red-400">Agent 列表加载失败</div>
         ) : agents.length === 0 ? (
-          <div className="p-6 text-center">
-            <p className="text-text-muted text-sm">{t('agents.noAgents')}</p>
-          </div>
+          <div className="p-6 text-center text-sm text-text-muted">暂无 Agent</div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow className="border-white/5 hover:bg-transparent">
-                <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('common.name')}</TableHead>
-                <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('agents.tags')}</TableHead>
-                <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('agents.version')}</TableHead>
-                <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('agents.platform')}</TableHead>
-                <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('common.status')}</TableHead>
-                <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('common.createdAt')}</TableHead>
-                <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('common.actions')}</TableHead>
+                <TableHead>名称</TableHead>
+                <TableHead>位置</TableHead>
+                <TableHead>运营商</TableHead>
+                <TableHead>版本 / 平台</TableHead>
+                <TableHead>状态</TableHead>
+                <TableHead>心跳</TableHead>
+                <TableHead>操作</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {agents.map((agent) => (
-                <TableRow
-                  key={agent.agent_uuid}
-                  className="border-white/5 cursor-pointer hover:bg-white/5"
-                  onClick={() => navigate(`/agents/${agent.agent_uuid}`)}
-                >
-                  <TableCell className="text-text-primary font-medium">{agent.agent_name}</TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {agent.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-white/5 text-text-secondary border border-white/10"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
+                <TableRow key={agent.agent_uuid} className="border-white/5 hover:bg-white/5">
+                  <TableCell className="font-medium text-text-primary">
+                    <button className="text-left hover:text-cyan-300" onClick={() => navigate(`/agents/${agent.agent_uuid}`)}>
+                      {agent.name}
+                    </button>
+                    <div className="text-xs text-text-muted">{agent.agent_uuid}</div>
                   </TableCell>
-                  <TableCell className="text-text-secondary text-xs font-mono">
-                    {agent.agent_version ?? '-'}
-                  </TableCell>
-                  <TableCell className="text-text-secondary text-xs">
-                    {agent.platform
-                      ? (PLATFORM_OPTIONS.find((p) => p.value === agent.platform)
-                          ? t(PLATFORM_OPTIONS.find((p) => p.value === agent.platform)!.labelKey)
-                          : agent.platform)
-                      : '-'}
+                  <TableCell className="text-sm text-text-secondary">{joinLocation(agent)}</TableCell>
+                  <TableCell className="text-sm text-text-secondary">{agent.carrier}</TableCell>
+                  <TableCell className="text-sm text-text-secondary">
+                    <div>{agent.version ?? '-'}</div>
+                    <div className="text-xs text-text-muted">{agent.platform ?? '-'}</div>
                   </TableCell>
                   <TableCell>
-                    <Badge
-                      className={`border text-xs ${AGENT_STATUS_COLORS[agent.status] ?? AGENT_STATUS_COLORS.offline}`}
-                    >
+                    <Badge className={`border ${AGENT_STATUS_COLORS[agent.status] ?? AGENT_STATUS_COLORS.offline}`}>
                       {agent.status}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-text-secondary text-sm font-[family-name:var(--font-mono)]">
-                    {formatDate(agent.created_at, i18n.language)}
-                  </TableCell>
+                  <TableCell className="text-sm text-text-secondary">{formatDateTime(agent.last_heartbeat_at)}</TableCell>
                   <TableCell>
-                    {agent.status === 'disabled' ? (
+                    <div className="flex flex-wrap gap-2">
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={(e) => { e.stopPropagation(); setDisableUuid(agent.agent_uuid) }}
-                        className="text-green-400 hover:text-green-300 hover:bg-green-500/10 text-xs h-7 px-2"
+                        onClick={() => setAgentEnabled.mutate(
+                          { uuid: agent.agent_uuid, enabled: !agent.is_enabled },
+                          { onError: (error) => toast.error(error.message || '状态更新失败') },
+                        )}
                       >
-                        {t('agents.enableAgent')}
+                        {agent.is_enabled ? '停用' : '启用'}
                       </Button>
-                    ) : (
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={(e) => { e.stopPropagation(); setDisableUuid(agent.agent_uuid) }}
-                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10 text-xs h-7 px-2"
+                        className="text-red-400 hover:text-red-300"
+                        onClick={() => deleteAgent.mutate(agent.agent_uuid, {
+                          onSuccess: () => toast.success('Agent 已删除'),
+                          onError: (error) => toast.error(error.message || '删除失败'),
+                        })}
                       >
-                        {t('agents.disableAgent')}
+                        删除
                       </Button>
-                    )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         )}
+
+        {pagination && pagination.total_pages > 1 && (
+          <div className="mt-4 flex items-center justify-end gap-2 text-sm text-text-muted">
+            <span>第 {pagination.page} / {pagination.total_pages} 页，共 {pagination.total} 条</span>
+            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((value) => value - 1)}>上一页</Button>
+            <Button variant="outline" size="sm" disabled={page >= pagination.total_pages} onClick={() => setPage((value) => value + 1)}>下一页</Button>
+          </div>
+        )}
       </div>
 
-      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} disabled={isLoading} />
-
-      {/* Create Agent Dialog */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="sm:max-w-xl">
+        <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>{t('agents.dialogTitle')}</DialogTitle>
-            <DialogDescription>{t('agents.dialogDesc')}</DialogDescription>
+            <DialogTitle>新增 Agent</DialogTitle>
+            <DialogDescription>创建后会返回一次性 auth_token，请立即保存到 Agent 配置中。</DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleCreate} className="space-y-4 mt-2">
-            <div>
-              <Label className="text-xs text-text-secondary mb-1.5">{t('agents.agentName')}</Label>
-              <Input
-                value={agentName}
-                onChange={(e) => setAgentName(e.target.value)}
-                placeholder={t('agents.agentNamePlaceholder')}
-                required
-              />
+          <form onSubmit={handleCreate} className="mt-2 grid gap-4">
+            <div className="grid gap-3 md:grid-cols-2">
+              <div>
+                <Label className="mb-1.5 text-xs text-text-secondary">名称</Label>
+                <Input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} required />
+              </div>
+              <div>
+                <Label className="mb-1.5 text-xs text-text-secondary">IP 支持</Label>
+                <Select value={form.ip_version} onValueChange={(value) => setForm({ ...form, ip_version: value as IpVersion })}>
+                  <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="4">IPv4</SelectItem>
+                    <SelectItem value="6">IPv6</SelectItem>
+                    <SelectItem value="4+6">IPv4 + IPv6</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <GeoCascader
-              continent={continent}
-              country={country}
-              city={city}
-              onChange={({ continent: c, country: co, city: ci }) => {
-                setContinent(c)
-                setCountry(co)
-                setCity(ci)
-              }}
-            />
-            <div>
-              <Label className="text-xs text-text-secondary mb-1.5">{t('agents.isp')}</Label>
-              <Input
-                value={isp}
-                onChange={(e) => setIsp(e.target.value)}
-                placeholder={t('agents.ispPlaceholder')}
-                required
-              />
+            <div className="grid gap-3 md:grid-cols-4">
+              <Input placeholder="大洲" value={form.continent} onChange={(event) => setForm({ ...form, continent: event.target.value })} required />
+              <Input placeholder="国家" value={form.country} onChange={(event) => setForm({ ...form, country: event.target.value })} required />
+              <Input placeholder="区域" value={form.region} onChange={(event) => setForm({ ...form, region: event.target.value })} required />
+              <Input placeholder="城市" value={form.city} onChange={(event) => setForm({ ...form, city: event.target.value })} required />
             </div>
-            <div>
-              <Label className="text-xs text-text-secondary mb-1.5">{t('agents.platform')}</Label>
-              <Select value={platform} onValueChange={(v) => setPlatform(v ?? '')}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder={t('agents.selectPlatform')}>
-                    {(value: string | null) => {
-                      if (!value) return t('agents.selectPlatform')
-                      const opt = PLATFORM_OPTIONS.find((o) => o.value === value)
-                      return opt ? t(opt.labelKey) : value
-                    }}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {PLATFORM_OPTIONS.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {t(opt.labelKey)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="grid gap-3 md:grid-cols-2">
+              <Input placeholder="邮编，未知填 UNKNOWN" value={form.zip_code} onChange={(event) => setForm({ ...form, zip_code: event.target.value })} required />
+              <Input placeholder="运营商 / 机房 / 云厂商" value={form.carrier} onChange={(event) => setForm({ ...form, carrier: event.target.value })} required />
             </div>
-            <div>
-              <Label className="text-xs text-text-secondary mb-1.5">{t('agents.assignTasksOptional')}</Label>
-              <CheckableList
-                items={allTasks
-                  .filter((task) => task.is_active)
-                  .map((task) => ({
-                    id: task.task_uuid,
-                    label: task.task_name,
-                    sublabel: `${task.protocol.toUpperCase()} - ${task.target}`,
-                  }))}
-                selectedIds={selectedTaskUuids}
-                onToggle={(id) => {
-                  setSelectedTaskUuids((prev) => {
-                    const next = new Set(prev)
-                    if (next.has(id)) next.delete(id)
-                    else next.add(id)
-                    return next
-                  })
-                }}
-                emptyMessage={t('agents.noAvailableTasks')}
-              />
-            </div>
+            <Input placeholder="标签，使用英文逗号分隔" value={form.tags} onChange={(event) => setForm({ ...form, tags: event.target.value })} />
+            <Textarea placeholder="备注" value={form.comment} onChange={(event) => setForm({ ...form, comment: event.target.value })} />
             <DialogFooter>
-              <Button
-                type="submit"
-                disabled={createAgent.isPending}
-                
-              >
-                {createAgent.isPending ? t('common.creating') : t('agents.createAgent')}
-              </Button>
+              <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>取消</Button>
+              <Button type="submit" disabled={createAgent.isPending}>{createAgent.isPending ? '创建中' : '创建'}</Button>
             </DialogFooter>
-            {createAgent.isError && (
-              <p className="text-red-400 text-xs mt-2">{t('agents.createFailed')}</p>
-            )}
           </form>
         </DialogContent>
       </Dialog>
 
-      {/* Agent Created Success Dialog */}
-      <Dialog open={successDialogOpen} onOpenChange={setSuccessDialogOpen}>
-        <DialogContent className="sm:max-w-lg" showCloseButton={false}>
+      <Dialog open={!!createdAgent} onOpenChange={(open) => { if (!open) setCreatedAgent(null) }}>
+        <DialogContent className="sm:max-w-xl">
           <DialogHeader>
-            <DialogTitle>{t('agents.createdTitle')}</DialogTitle>
-            <DialogDescription>{t('agents.createdDesc')}</DialogDescription>
+            <DialogTitle>Agent 已创建</DialogTitle>
+            <DialogDescription>auth_token 只在创建响应中返回一次。</DialogDescription>
           </DialogHeader>
-          <div className="mt-2 space-y-4">
-            {/* Access Key */}
-            <div>
-              <Label className="text-xs text-text-secondary mb-1.5">{t('agents.accessKey')}</Label>
-              <div className="flex items-center gap-2">
-                <code className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-emerald-400 text-sm font-mono break-all">
-                  {createdAccessKey}
-                </code>
-                <Button variant="outline" size="sm" onClick={handleCopyKey} className="shrink-0">
-                  {copiedKey ? t('common.copied') : t('common.copy')}
-                </Button>
-              </div>
-            </div>
-
-            {/* Install Command */}
-            {createdInstallCommand && (
-              <div>
-                <Label className="text-xs text-text-secondary mb-1.5">{t('agents.installCommand')}</Label>
-                <p className="text-[10px] text-text-dim mb-1.5">{t('agents.installCommandHint')}</p>
-                <div className="flex items-start gap-2">
-                  <code className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-cyan-400 text-xs font-mono break-all max-h-[120px] overflow-y-auto">
-                    {createdInstallCommand}
-                  </code>
-                  <Button variant="outline" size="sm" onClick={handleCopyCmd} className="shrink-0 mt-0.5">
-                    {copiedCmd ? t('common.copied') : t('common.copy')}
-                  </Button>
-                </div>
-              </div>
-            )}
+          <div className="space-y-3">
+            <div className="text-sm text-text-secondary">{createdAgent?.name}</div>
+            <code className="block rounded-lg border border-border bg-muted/40 p-3 text-sm text-emerald-300 break-all">
+              {createdAgent?.auth_token ?? '-'}
+            </code>
           </div>
           <DialogFooter>
-            <Button
-              onClick={() => setSuccessDialogOpen(false)}
-              
-            >
-              {t('common.done')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Disable/Enable Agent Confirmation Dialog */}
-      <Dialog open={disableUuid !== null} onOpenChange={(open) => { if (!open) setDisableUuid(null) }}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {disableTarget?.status === 'disabled' ? t('agents.enableAgent') : t('agents.disableAgent')}
-            </DialogTitle>
-            <DialogDescription>
-              {disableTarget?.status === 'disabled'
-                ? t('agents.enableAgentConfirm', { name: disableTarget?.agent_name ?? '' })
-                : t('agents.disableAgentConfirm', { name: disableTarget?.agent_name ?? '' })}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDisableUuid(null)}>
-              {t('common.cancel')}
-            </Button>
-            {disableTarget?.status === 'disabled' ? (
-              <Button
-                onClick={handleToggle}
-                disabled={updateAgent.isPending}
-                
-              >
-                {updateAgent.isPending ? t('common.loading') : t('agents.enableAgent')}
-              </Button>
-            ) : (
-              <Button
-                variant="destructive"
-                onClick={handleToggle}
-                disabled={disableAgent.isPending}
-              >
-                {disableAgent.isPending ? t('common.disabling') : t('agents.disableAgent')}
-              </Button>
-            )}
+            <Button variant="outline" onClick={copyToken}>{copiedToken ? '已复制' : '复制 Token'}</Button>
+            <Button onClick={() => setCreatedAgent(null)}>完成</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
