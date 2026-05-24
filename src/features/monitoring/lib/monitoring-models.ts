@@ -99,11 +99,38 @@ export interface Iperf3ResultSummaryView {
   parallel: number
   port: number
   duration_sec: number
+  upload_bits_per_second?: number | null
+  upload_mbps?: number | null
+  upload_bytes?: number | null
+  upload_retransmits?: number | null
+  download_bits_per_second?: number | null
+  download_mbps?: number | null
+  download_bytes?: number | null
+  download_retransmits?: number | null
+  upload_intervals: Iperf3IntervalView[]
+  download_intervals: Iperf3IntervalView[]
+  upload_end: Record<string, unknown>
+  download_end: Record<string, unknown>
   bits_per_second?: number | null
   throughput_mbps?: number | null
   bytes?: number | null
   retransmits?: number | null
   success: boolean
+}
+
+export interface Iperf3IntervalView {
+  start?: number | null
+  end?: number | null
+  seconds?: number | null
+  bytes?: number | null
+  bits_per_second?: number | null
+  mbps?: number | null
+  retransmits?: number | null
+  snd_cwnd?: number | null
+  snd_wnd?: number | null
+  rtt?: number | null
+  rttvar?: number | null
+  sender?: boolean | null
 }
 
 export interface MtrHopAddressView {
@@ -325,9 +352,13 @@ export function normalizeIperf3ListItem(raw: unknown): Iperf3ResultSummaryView {
   const item = isRecord(raw) ? raw : {}
   const status = readString(item.latest_run_status, readString(item.run_status, '')).toLowerCase()
   const latestSampleAt = readString(item.latest_sample_at, readString(item.timestamp, readString(item.finished_at, readString(item.started_at, ''))))
-  const bitsPerSecond = typeof item.bits_per_second === 'number' && Number.isFinite(item.bits_per_second)
-    ? item.bits_per_second
-    : null
+  const uploadBitsPerSecond = readFiniteNumber(item.upload_bits_per_second, readFiniteNumber(item.bits_per_second))
+  const downloadBitsPerSecond = readFiniteNumber(item.download_bits_per_second)
+  const bitsPerSecond = readFiniteNumber(item.bits_per_second, uploadBitsPerSecond)
+  const uploadBytes = readFiniteNumber(item.upload_bytes, readFiniteNumber(item.bytes))
+  const downloadBytes = readFiniteNumber(item.download_bytes)
+  const uploadRetransmits = readFiniteNumber(item.upload_retransmits, readFiniteNumber(item.retransmits))
+  const downloadRetransmits = readFiniteNumber(item.download_retransmits)
 
   return {
     result_uuid: readString(item.result_uuid),
@@ -345,12 +376,49 @@ export function normalizeIperf3ListItem(raw: unknown): Iperf3ResultSummaryView {
     parallel: readNumber(item.parallel, 1),
     port: readNumber(item.port, 5201),
     duration_sec: readNumber(item.duration_sec),
+    upload_bits_per_second: uploadBitsPerSecond,
+    upload_mbps: uploadBitsPerSecond === null ? null : uploadBitsPerSecond / 1_000_000,
+    upload_bytes: uploadBytes,
+    upload_retransmits: uploadRetransmits,
+    download_bits_per_second: downloadBitsPerSecond,
+    download_mbps: downloadBitsPerSecond === null ? null : downloadBitsPerSecond / 1_000_000,
+    download_bytes: downloadBytes,
+    download_retransmits: downloadRetransmits,
+    upload_intervals: normalizeIperf3Intervals(item.upload_intervals),
+    download_intervals: normalizeIperf3Intervals(item.download_intervals),
+    upload_end: isRecord(item.upload_end) ? item.upload_end : {},
+    download_end: isRecord(item.download_end) ? item.download_end : {},
     bits_per_second: bitsPerSecond,
     throughput_mbps: bitsPerSecond === null ? null : bitsPerSecond / 1_000_000,
-    bytes: typeof item.bytes === 'number' ? item.bytes : null,
-    retransmits: typeof item.retransmits === 'number' ? item.retransmits : null,
+    bytes: readFiniteNumber(item.bytes, uploadBytes),
+    retransmits: readFiniteNumber(item.retransmits, uploadRetransmits),
     success: ['completed', 'success', 'ok'].includes(status),
   }
+}
+
+function readFiniteNumber(value: unknown, fallback: number | null = null): number | null {
+  return typeof value === 'number' && Number.isFinite(value) ? value : fallback
+}
+
+function normalizeIperf3Intervals(raw: unknown): Iperf3IntervalView[] {
+  if (!Array.isArray(raw)) return []
+  return raw.filter(isRecord).map((item) => {
+    const bitsPerSecond = readFiniteNumber(item.bits_per_second)
+    return {
+      start: readFiniteNumber(item.start),
+      end: readFiniteNumber(item.end),
+      seconds: readFiniteNumber(item.seconds),
+      bytes: readFiniteNumber(item.bytes),
+      bits_per_second: bitsPerSecond,
+      mbps: bitsPerSecond === null ? null : bitsPerSecond / 1_000_000,
+      retransmits: readFiniteNumber(item.retransmits),
+      snd_cwnd: readFiniteNumber(item.snd_cwnd),
+      snd_wnd: readFiniteNumber(item.snd_wnd),
+      rtt: readFiniteNumber(item.rtt),
+      rttvar: readFiniteNumber(item.rttvar),
+      sender: typeof item.sender === 'boolean' ? item.sender : null,
+    }
+  })
 }
 
 export function normalizeMtrDetail(raw: unknown): MtrResultDetailView {

@@ -6,7 +6,8 @@ export type Iperf3TimelineItem = {
   resultUuid: string
   timestamp: string
   success: boolean
-  throughputMbps: number | null
+  uploadMbps: number | null
+  downloadMbps: number | null
   mode: string
 }
 
@@ -57,7 +58,8 @@ export function buildIperf3TimelineItems(
         resultUuid: result.result_uuid,
         timestamp: result.timestamp,
         success: result.success ?? ['completed', 'success', 'ok'].includes(result.latest_run_status?.toLowerCase?.() ?? ''),
-        throughputMbps: result.throughput_mbps ?? (typeof result.bits_per_second === 'number' ? result.bits_per_second / 1_000_000 : null),
+        uploadMbps: result.upload_mbps ?? result.throughput_mbps ?? (typeof result.bits_per_second === 'number' ? result.bits_per_second / 1_000_000 : null),
+        downloadMbps: result.download_mbps ?? null,
         mode: result.mode,
       }
     })

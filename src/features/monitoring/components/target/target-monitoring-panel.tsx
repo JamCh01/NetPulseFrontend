@@ -33,7 +33,6 @@ import {
 } from '@/features/monitoring/lib/time-range'
 import { PROTOCOL_COLORS } from '@/lib/constants'
 import {
-  classifyTaskStatus,
   formatLatestSample,
   formatTargetLocation,
   protocolLabel,
@@ -71,26 +70,10 @@ function latestTaskUpdate(tasks: MonitoringTask[]) {
   ])
 }
 
-function statusLabelForTasks(tasks: MonitoringTask[], state: LatestResultState) {
-  if (state === 'missing') {
-    return `上次更新 ${formatLatestSample(latestTaskUpdate(tasks))}`
-  }
-  return statusCopy[state].label
-}
-
 function protocolTasks(tasks: MonitoringTask[], protocol: MonitoringProtocol) {
   return tasks
     .filter((task) => task.task_type === protocol)
     .sort((a, b) => (a.agent?.name ?? '').localeCompare(b.agent?.name ?? '') || a.name.localeCompare(b.name))
-}
-
-function statusForTasks(tasks: MonitoringTask[]): LatestResultState {
-  if (tasks.length === 0) return 'missing'
-  const states = tasks.map(classifyTaskStatus)
-  if (states.includes('failed')) return 'failed'
-  if (states.includes('missing')) return 'missing'
-  if (states.includes('unknown')) return 'unknown'
-  return 'ok'
 }
 
 function ProtocolHeader({
@@ -112,8 +95,6 @@ function ProtocolHeader({
   selectedAgentUuids?: string[]
   onSelectedAgentUuidsChange?: (agentUuids: string[]) => void
 }) {
-  const statusState = statusForTasks(tasks)
-  const status = statusCopy[statusState]
   const agents = new Set(tasks.map((task) => task.agent?.agent_uuid).filter(Boolean)).size
   const showAgentFilter = agentOptions && selectedAgentUuids && onSelectedAgentUuidsChange
 
@@ -126,7 +107,6 @@ function ProtocolHeader({
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="text-base font-semibold text-text-primary">{protocolLabel(protocol)}</h2>
-            <Badge variant={status.variant}>{statusLabelForTasks(tasks, statusState)}</Badge>
           </div>
           <div className="mt-0.5 text-xs text-text-muted">
             {tasks.length} 个任务 · {agents} 个 Agent · 最新样本 {formatLatestSample(latestSample(tasks))}
@@ -236,7 +216,6 @@ function AgentFilterDropdown({
 
 function EvidenceToolbar({
   title,
-  badge,
   icon,
   tasks,
   timeRange,
@@ -246,7 +225,6 @@ function EvidenceToolbar({
   onSelectedAgentUuidsChange,
 }: {
   title: string
-  badge: string
   icon: React.ReactNode
   tasks: MonitoringTask[]
   timeRange: MonitoringTimeRange
@@ -268,7 +246,6 @@ function EvidenceToolbar({
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <h2 className="text-base font-semibold text-text-primary">{title}</h2>
-                <Badge variant="info">{badge}</Badge>
               </div>
               <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-muted">
                 <span>{tasks.length} 个任务</span>
@@ -299,23 +276,21 @@ function EvidenceToolbar({
   )
 }
 
-function MtrEvidenceToolbar(props: Omit<Parameters<typeof EvidenceToolbar>[0], 'protocol' | 'title' | 'badge' | 'icon'>) {
+function MtrEvidenceToolbar(props: Omit<Parameters<typeof EvidenceToolbar>[0], 'protocol' | 'title' | 'icon'>) {
   return (
     <EvidenceToolbar
       {...props}
-      title="MTR 证据"
-      badge="Result Timeline"
+      title="MTR 结果"
       icon={<Waypoints className="h-4 w-4" />}
     />
   )
 }
 
-function Iperf3EvidenceToolbar(props: Omit<Parameters<typeof EvidenceToolbar>[0], 'protocol' | 'title' | 'badge' | 'icon'>) {
+function Iperf3EvidenceToolbar(props: Omit<Parameters<typeof EvidenceToolbar>[0], 'protocol' | 'title' | 'icon'>) {
   return (
     <EvidenceToolbar
       {...props}
       title="iperf3 结果"
-      badge="Throughput Timeline"
       icon={<Gauge className="h-4 w-4" />}
     />
   )

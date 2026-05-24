@@ -26,7 +26,7 @@ function task(taskUuid: string, agentUuid: string, agentName: string): Monitorin
   }
 }
 
-function result(resultUuid: string, taskUuid: string, agentUuid: string, timestamp: string, bps: number): Iperf3ResultSummaryView {
+function result(resultUuid: string, taskUuid: string, agentUuid: string, timestamp: string, uploadBps: number, downloadBps: number): Iperf3ResultSummaryView {
   return {
     result_uuid: resultUuid,
     execution_uuid: `exec-${resultUuid}`,
@@ -39,7 +39,20 @@ function result(resultUuid: string, taskUuid: string, agentUuid: string, timesta
     parallel: 1,
     port: 5201,
     duration_sec: 10,
-    bits_per_second: bps,
+    upload_bits_per_second: uploadBps,
+    upload_mbps: uploadBps / 1_000_000,
+    upload_bytes: 12500000,
+    upload_retransmits: 0,
+    download_bits_per_second: downloadBps,
+    download_mbps: downloadBps / 1_000_000,
+    download_bytes: 11500000,
+    download_retransmits: 0,
+    upload_intervals: [],
+    download_intervals: [],
+    upload_end: {},
+    download_end: {},
+    bits_per_second: uploadBps,
+    throughput_mbps: uploadBps / 1_000_000,
     bytes: 12500000,
     retransmits: 0,
     success: true,
@@ -47,7 +60,7 @@ function result(resultUuid: string, taskUuid: string, agentUuid: string, timesta
 }
 
 describe('iperf3 view helpers', () => {
-  it('normalizes backend list items with derived timestamps and throughput', () => {
+  it('normalizes backend list items with derived timestamps and directional throughput', () => {
     const item = normalizeIperf3ListItem({
       result_uuid: 'result-1',
       execution_uuid: 'exec-1',
@@ -59,9 +72,28 @@ describe('iperf3 view helpers', () => {
       parallel: 8,
       port: 5201,
       duration_sec: 15,
-      bits_per_second: 987654321,
-      bytes: 1851851852,
-      retransmits: 2,
+      upload_bits_per_second: 987654321,
+      upload_bytes: 1851851852,
+      upload_retransmits: 2,
+      download_bits_per_second: 876543210,
+      download_bytes: 1646093512,
+      download_retransmits: 0,
+      upload_intervals: [
+        {
+          start: 0,
+          end: 1,
+          seconds: 1,
+          bytes: 123456789,
+          bits_per_second: 987654321,
+          retransmits: 2,
+          rtt: 68,
+        },
+      ],
+      upload_end: {
+        cpu_utilization_percent: {
+          host_total: 95.3,
+        },
+      },
     })
 
     expect(item).toMatchObject({
@@ -72,6 +104,15 @@ describe('iperf3 view helpers', () => {
       timestamp: '2026-05-23T00:00:00Z',
       mode: 'multi_thread',
       parallel: 8,
+      upload_mbps: 987.654321,
+      download_mbps: 876.54321,
+      upload_intervals: [
+        expect.objectContaining({
+          mbps: 987.654321,
+          retransmits: 2,
+          rtt: 68,
+        }),
+      ],
       throughput_mbps: 987.654321,
       success: true,
     })
@@ -81,13 +122,13 @@ describe('iperf3 view helpers', () => {
     const items = buildIperf3TimelineItems(
       [task('task-a', 'agent-a', 'Tokyo')],
       [
-        result('new-a', 'task-a', 'agent-a', '2026-05-23T00:01:00Z', 900000000),
-        result('old-a', 'task-a', 'agent-a', '2026-05-23T00:00:00Z', 800000000),
+        result('new-a', 'task-a', 'agent-a', '2026-05-23T00:01:00Z', 900000000, 880000000),
+        result('old-a', 'task-a', 'agent-a', '2026-05-23T00:00:00Z', 800000000, 760000000),
       ],
     )
 
     expect(items.map((item) => item.resultUuid)).toEqual(['old-a', 'new-a'])
-    expect(items[1]).toMatchObject({ agentName: 'Tokyo', success: true, throughputMbps: 900 })
+    expect(items[1]).toMatchObject({ agentName: 'Tokyo', success: true, uploadMbps: 900, downloadMbps: 880 })
   })
 
   it('assigns stable distinct colors by agent uuid', () => {

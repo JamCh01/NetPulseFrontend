@@ -23,9 +23,13 @@ export function Iperf3ResultViews({
   const failedCount = results.length - successCount
   const latest = results[0]
   const selectedResult = results.find((result) => result.result_uuid === selectedResultUuid)
-  const peakMbps = results.reduce<number | null>((peak, result) => {
-    if (typeof result.throughput_mbps !== 'number') return peak
-    return peak === null ? result.throughput_mbps : Math.max(peak, result.throughput_mbps)
+  const peakUploadMbps = results.reduce<number | null>((peak, result) => {
+    if (typeof result.upload_mbps !== 'number') return peak
+    return peak === null ? result.upload_mbps : Math.max(peak, result.upload_mbps)
+  }, null)
+  const peakDownloadMbps = results.reduce<number | null>((peak, result) => {
+    if (typeof result.download_mbps !== 'number') return peak
+    return peak === null ? result.download_mbps : Math.max(peak, result.download_mbps)
   }, null)
   const timelineItems = buildIperf3TimelineItems(tasks, results)
   const timelineAgents = Array.from(
@@ -34,11 +38,12 @@ export function Iperf3ResultViews({
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-2 sm:grid-cols-5">
+      <div className="grid gap-2 sm:grid-cols-6">
         <Iperf3SummaryPill label="Result" value={String(total)} icon={RadioTower} />
         <Iperf3SummaryPill label="成功" value={String(successCount)} icon={Activity} tone="success" />
         <Iperf3SummaryPill label="失败" value={String(failedCount)} icon={Activity} tone={failedCount > 0 ? 'error' : 'success'} />
-        <Iperf3SummaryPill label="峰值 Mbps" value={formatMbps(peakMbps)} icon={Gauge} />
+        <Iperf3SummaryPill label="上传峰值" value={formatMbps(peakUploadMbps)} icon={Gauge} />
+        <Iperf3SummaryPill label="下载峰值" value={formatMbps(peakDownloadMbps)} icon={HardDriveDownload} />
         <Iperf3SummaryPill label="最近" value={formatLatestSample(latest?.timestamp)} icon={Clock3} />
       </div>
 
@@ -131,7 +136,7 @@ function Iperf3ResultTimeline({
                   type="button"
                   onClick={() => onSelectResult(item.resultUuid)}
                   className="group relative flex w-28 flex-col items-center gap-2 text-center"
-                  title={`${item.agentName} ${new Date(item.timestamp).toLocaleString()} ${formatMbps(item.throughputMbps)}`}
+                  title={`${item.agentName} ${new Date(item.timestamp).toLocaleString()} 上传 ${formatMbps(item.uploadMbps)} / 下载 ${formatMbps(item.downloadMbps)}`}
                 >
                   <span
                     style={{ backgroundColor: agentColor, borderColor: item.success ? agentColor : 'var(--status-error-fg)' }}
@@ -143,7 +148,8 @@ function Iperf3ResultTimeline({
                   </span>
                   <span className="line-clamp-1 text-[11px] font-medium text-text-primary">{formatLatestSample(item.timestamp)}</span>
                   <span className="line-clamp-1 text-[10px] text-text-muted">{item.agentName}</span>
-                  <span className="font-mono text-[10px] text-text-dim">{formatMbps(item.throughputMbps)}</span>
+                  <span className="font-mono text-[10px] text-text-dim">↑ {formatMbps(item.uploadMbps)}</span>
+                  <span className="font-mono text-[10px] text-text-dim">↓ {formatMbps(item.downloadMbps)}</span>
                 </button>
               )
             })}
@@ -176,7 +182,7 @@ function Iperf3DetailPanel({
     return (
       <div className="rounded-xl border border-border bg-bg-surface p-8 text-center">
         <div className="text-sm font-medium text-text-primary">选择一个 iperf3 result</div>
-        <div className="mt-1 text-xs text-text-muted">从上方时间线选择一次执行结果后查看吞吐、重传和执行参数。</div>
+        <div className="mt-1 text-xs text-text-muted">从上方时间线选择一次执行结果后查看上传、下载、重传和执行参数。</div>
       </div>
     )
   }
@@ -202,15 +208,20 @@ function Iperf3DetailPanel({
       </div>
 
       <div className="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Iperf3DetailMetric label="吞吐" value={formatMbps(result.throughput_mbps)} icon={Gauge} prominent />
-        <Iperf3DetailMetric label="传输字节" value={formatBytes(result.bytes)} icon={HardDriveDownload} />
-        <Iperf3DetailMetric label="重传" value={result.retransmits === null || result.retransmits === undefined ? '-' : String(result.retransmits)} icon={RotateCcw} />
+        <Iperf3DetailMetric label="上传带宽" value={formatMbps(result.upload_mbps)} icon={Gauge} prominent />
+        <Iperf3DetailMetric label="下载带宽" value={formatMbps(result.download_mbps)} icon={HardDriveDownload} prominent />
+        <Iperf3DetailMetric label="上传字节" value={formatBytes(result.upload_bytes)} icon={HardDriveDownload} />
+        <Iperf3DetailMetric label="下载字节" value={formatBytes(result.download_bytes)} icon={HardDriveDownload} />
+        <Iperf3DetailMetric label="上传重传" value={result.upload_retransmits === null || result.upload_retransmits === undefined ? '-' : String(result.upload_retransmits)} icon={RotateCcw} />
+        <Iperf3DetailMetric label="下载重传" value={result.download_retransmits === null || result.download_retransmits === undefined ? '-' : String(result.download_retransmits)} icon={RotateCcw} />
         <Iperf3DetailMetric label="并发线程" value={String(result.parallel)} icon={GitBranch} />
         <Iperf3DetailMetric label="端口" value={String(result.port)} icon={RadioTower} />
         <Iperf3DetailMetric label="执行时长" value={`${result.duration_sec}s`} icon={Clock3} />
         <Iperf3DetailMetric label="Resolved IP" value={result.resolved_ip ?? '-'} icon={Activity} />
         <Iperf3DetailMetric label="运行状态" value={result.latest_run_status || '-'} icon={Activity} />
       </div>
+
+      <Iperf3ProcessPanel result={result} />
 
       <div className="border-t border-border px-4 py-3">
         <div className="grid gap-2 text-xs text-text-muted md:grid-cols-3">
@@ -219,6 +230,102 @@ function Iperf3DetailPanel({
           <span>Duration: {typeof result.duration_ms === 'number' ? `${result.duration_ms}ms` : '-'}</span>
         </div>
       </div>
+    </div>
+  )
+}
+
+function Iperf3ProcessPanel({ result }: { result: Iperf3ResultSummaryView }) {
+  const uploadCpu = readNestedNumber(result.upload_end, ['cpu_utilization_percent', 'host_total'])
+  const downloadCpu = readNestedNumber(result.download_end, ['cpu_utilization_percent', 'host_total'])
+  const uploadCongestion = readNestedString(result.upload_end, ['sender_tcp_congestion'])
+  const downloadCongestion = readNestedString(result.download_end, ['receiver_tcp_congestion'])
+
+  return (
+    <div className="border-t border-border p-4">
+      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_18rem]">
+        <Iperf3IntervalTable title="上传过程" intervals={result.upload_intervals} />
+        <Iperf3IntervalTable title="下载过程" intervals={result.download_intervals} />
+        <div className="rounded-lg border border-border bg-bg-surface-light p-3">
+          <div className="text-xs font-semibold text-text-primary">最终统计</div>
+          <div className="mt-3 space-y-2 text-xs text-text-muted">
+            <div className="flex justify-between gap-3">
+              <span>上传 CPU</span>
+              <span className="font-mono text-text-secondary">{formatPercent(uploadCpu)}</span>
+            </div>
+            <div className="flex justify-between gap-3">
+              <span>下载 CPU</span>
+              <span className="font-mono text-text-secondary">{formatPercent(downloadCpu)}</span>
+            </div>
+            <div className="flex justify-between gap-3">
+              <span>发送拥塞控制</span>
+              <span className="font-mono text-text-secondary">{uploadCongestion ?? '-'}</span>
+            </div>
+            <div className="flex justify-between gap-3">
+              <span>接收拥塞控制</span>
+              <span className="font-mono text-text-secondary">{downloadCongestion ?? '-'}</span>
+            </div>
+            <div className="flex justify-between gap-3">
+              <span>上传 interval</span>
+              <span className="font-mono text-text-secondary">{result.upload_intervals.length}</span>
+            </div>
+            <div className="flex justify-between gap-3">
+              <span>下载 interval</span>
+              <span className="font-mono text-text-secondary">{result.download_intervals.length}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function Iperf3IntervalTable({
+  title,
+  intervals,
+}: {
+  title: string
+  intervals: Iperf3ResultSummaryView['upload_intervals']
+}) {
+  const visibleIntervals = intervals.slice(0, 12)
+  return (
+    <div className="overflow-hidden rounded-lg border border-border bg-bg-surface-light">
+      <div className="flex items-center justify-between border-b border-border px-3 py-2">
+        <div className="text-xs font-semibold text-text-primary">{title}</div>
+        <div className="font-mono text-[11px] text-text-muted">{intervals.length} slices</div>
+      </div>
+      {visibleIntervals.length === 0 ? (
+        <div className="px-3 py-6 text-center text-xs text-text-muted">暂无过程切片。</div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[30rem] text-left text-[11px]">
+            <thead className="bg-bg-surface text-text-dim">
+              <tr>
+                <th className="px-3 py-2 font-medium">区间</th>
+                <th className="px-3 py-2 font-medium">带宽</th>
+                <th className="px-3 py-2 font-medium">字节</th>
+                <th className="px-3 py-2 font-medium">重传</th>
+                <th className="px-3 py-2 font-medium">RTT</th>
+                <th className="px-3 py-2 font-medium">RTTVar</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {visibleIntervals.map((interval, index) => (
+                <tr key={`${interval.start ?? index}-${interval.end ?? index}`} className="text-text-secondary">
+                  <td className="px-3 py-2 font-mono">{formatIntervalRange(interval.start, interval.end)}</td>
+                  <td className="px-3 py-2 font-mono">{formatMbps(interval.mbps)}</td>
+                  <td className="px-3 py-2 font-mono">{formatBytes(interval.bytes)}</td>
+                  <td className="px-3 py-2 font-mono">{formatOptionalNumber(interval.retransmits)}</td>
+                  <td className="px-3 py-2 font-mono">{formatMicroseconds(interval.rtt)}</td>
+                  <td className="px-3 py-2 font-mono">{formatMicroseconds(interval.rttvar)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {intervals.length > visibleIntervals.length && (
+        <div className="border-t border-border px-3 py-2 text-[11px] text-text-muted">仅展示前 {visibleIntervals.length} 个 interval。</div>
+      )}
     </div>
   )
 }
@@ -263,4 +370,40 @@ function formatBytes(value?: number | null): string {
     unitIndex += 1
   }
   return `${current.toFixed(unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`
+}
+
+function formatIntervalRange(start?: number | null, end?: number | null): string {
+  if (typeof start !== 'number' || typeof end !== 'number') return '-'
+  return `${start.toFixed(1)}-${end.toFixed(1)}s`
+}
+
+function formatOptionalNumber(value?: number | null): string {
+  return typeof value === 'number' && Number.isFinite(value) ? String(value) : '-'
+}
+
+function formatMicroseconds(value?: number | null): string {
+  return typeof value === 'number' && Number.isFinite(value) ? `${value} us` : '-'
+}
+
+function formatPercent(value?: number | null): string {
+  return typeof value === 'number' && Number.isFinite(value) ? `${value.toFixed(1)}%` : '-'
+}
+
+function readNestedNumber(source: Record<string, unknown>, path: string[]): number | null {
+  const value = readNestedValue(source, path)
+  return typeof value === 'number' && Number.isFinite(value) ? value : null
+}
+
+function readNestedString(source: Record<string, unknown>, path: string[]): string | null {
+  const value = readNestedValue(source, path)
+  return typeof value === 'string' ? value : null
+}
+
+function readNestedValue(source: Record<string, unknown>, path: string[]): unknown {
+  let current: unknown = source
+  for (const segment of path) {
+    if (!current || typeof current !== 'object' || Array.isArray(current)) return null
+    current = (current as Record<string, unknown>)[segment]
+  }
+  return current
 }
