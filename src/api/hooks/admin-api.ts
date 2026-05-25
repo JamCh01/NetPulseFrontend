@@ -33,7 +33,6 @@ export interface AdminTarget {
   is_anycast: boolean
   continent?: string | null
   country?: string | null
-  region?: string | null
   city?: string | null
   zip_code?: string | null
   carrier: string
@@ -53,7 +52,6 @@ export interface AdminAgent {
   ip_version: IpVersion
   continent: string
   country: string
-  region: string
   city: string
   zip_code: string
   carrier: string
@@ -185,6 +183,44 @@ export interface GeoCity {
   deleted_at?: string | null
 }
 
+export interface GeoTreeCity {
+  city_uuid: string
+  country_uuid: string
+  continent_uuid: string
+  name: string
+  code?: string | null
+  name_zh?: string | null
+  is_capital: boolean
+  popularity: number
+}
+
+export interface GeoTreeCountry {
+  country_uuid: string
+  continent_uuid: string
+  name: string
+  code?: string | null
+  name_zh?: string | null
+  city_count: number
+  cities: GeoTreeCity[]
+}
+
+export interface GeoTreeContinent {
+  continent_uuid: string
+  name: string
+  code?: string | null
+  name_zh?: string | null
+  country_count: number
+  city_count: number
+  countries: GeoTreeCountry[]
+}
+
+export interface GeoTreeData {
+  total_continent_count: number
+  total_country_count: number
+  total_city_count: number
+  items: GeoTreeContinent[]
+}
+
 export interface TargetCreatePayload {
   name: string
   target: string
@@ -192,7 +228,6 @@ export interface TargetCreatePayload {
   is_anycast?: boolean
   continent?: string | null
   country?: string | null
-  region?: string | null
   city?: string | null
   zip_code?: string | null
   carrier: string
@@ -208,7 +243,6 @@ export interface AgentCreatePayload {
   ip_version: IpVersion
   continent: string
   country: string
-  region: string
   city: string
   zip_code: string
   carrier: string
@@ -288,6 +322,7 @@ export interface ListGeoContinentsParams {
   keyword?: string
   include_deleted?: boolean
   limit?: number
+  enabled?: boolean
 }
 
 export interface ListGeoCountriesParams {
@@ -350,7 +385,10 @@ function appendParam(query: URLSearchParams, key: string, value: unknown) {
 
 export function buildQuery(params?: object) {
   const query = new URLSearchParams()
-  Object.entries(params ?? {}).forEach(([key, value]) => appendParam(query, key, value))
+  Object.entries(params ?? {}).forEach(([key, value]) => {
+    if (key === 'enabled') return
+    appendParam(query, key, value)
+  })
   const text = query.toString()
   return text ? `?${text}` : ''
 }
@@ -670,6 +708,7 @@ export function useGeoContinents(params?: ListGeoContinentsParams) {
   return useQuery({
     queryKey: geoKeys.continents(params),
     queryFn: () => adminRequest<AdminListResponse<GeoContinent>>(`/api/v1/geo/continents${buildQuery(params)}`),
+    enabled: params?.enabled ?? true,
   })
 }
 
@@ -686,6 +725,13 @@ export function useGeoCities(params?: ListGeoCitiesParams) {
     queryKey: geoKeys.cities(params),
     queryFn: () => adminRequest<AdminListResponse<GeoCity>>(`/api/v1/geo/cities${buildQuery(params)}`),
     enabled: !!params?.country_uuid,
+  })
+}
+
+export function useGeoTree(params?: { keyword?: string; include_deleted?: boolean }) {
+  return useQuery({
+    queryKey: [...geoKeys.all, 'tree', params] as const,
+    queryFn: () => adminRequest<GeoTreeData>(`/api/v1/geo/tree${buildQuery(params)}`),
   })
 }
 

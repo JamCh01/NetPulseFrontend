@@ -1,60 +1,85 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
+import { ChevronDown, ChevronRight, Pencil, Plus, Search, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 import {
-  type GeoCity,
   type GeoContinent,
   type GeoCountry,
+  type GeoTreeCity,
+  type GeoTreeContinent,
+  type GeoTreeCountry,
   useCreateGeoCity,
   useCreateGeoContinent,
   useCreateGeoCountry,
   useDeleteGeoCity,
   useDeleteGeoContinent,
   useDeleteGeoCountry,
-  useGeoCities,
   useGeoContinents,
   useGeoCountries,
+  useGeoTree,
   useUpdateGeoCity,
   useUpdateGeoContinent,
   useUpdateGeoCountry,
 } from '@/api/hooks/admin-api'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
-type GeoTab = 'continent' | 'country' | 'city'
+interface GeoFormState {
+  name: string
+  code: string
+  name_zh: string
+  continent_uuid: string
+  country_uuid: string
+  is_capital: boolean
+  popularity: string
+}
+
+type GeoDialogState =
+  | { mode: 'create'; type: 'continent'; parent?: never; item?: never }
+  | { mode: 'edit'; type: 'continent'; item: GeoTreeContinent; parent?: never }
+  | { mode: 'create'; type: 'country'; parent: GeoTreeContinent; item?: never }
+  | { mode: 'edit'; type: 'country'; item: GeoTreeCountry; parent?: never }
+  | { mode: 'create'; type: 'city'; parent: GeoTreeCountry; item?: never }
+  | { mode: 'edit'; type: 'city'; item: GeoTreeCity; parent?: never }
+
+const DEFAULT_FORM: GeoFormState = {
+  name: '',
+  code: '',
+  name_zh: '',
+  continent_uuid: '',
+  country_uuid: '',
+  is_capital: false,
+  popularity: '100',
+}
 
 export default function GeoManagementPage() {
-  const [tab, setTab] = useState<GeoTab>('continent')
   const [keyword, setKeyword] = useState('')
-  const [selectedContinentUuid, setSelectedContinentUuid] = useState('')
-  const [selectedCountryUuid, setSelectedCountryUuid] = useState('')
-  const continentsQuery = useGeoContinents({ keyword: tab === 'continent' ? keyword : undefined, limit: 500 })
-  const countriesQuery = useGeoCountries({
-    continent_uuid: selectedContinentUuid,
-    keyword: tab === 'country' ? keyword : undefined,
-    limit: 500,
-  })
-  const citiesQuery = useGeoCities({
-    country_uuid: selectedCountryUuid,
-    keyword: tab === 'city' ? keyword : undefined,
-    limit: 500,
-  })
+  const [expanded, setExpanded] = useState<Set<string>>(() => new Set())
+  const [dialog, setDialog] = useState<GeoDialogState | null>(null)
+  const treeQuery = useGeoTree({ keyword: keyword || undefined })
+  const data = treeQuery.data
 
-  const continents = continentsQuery.data?.items ?? []
-  const countries = countriesQuery.data?.items ?? []
-  const cities = citiesQuery.data?.items ?? []
-  const selectedContinent = useMemo(
-    () => continents.find((item) => item.continent_uuid === selectedContinentUuid),
-    [continents, selectedContinentUuid],
-  )
-  const selectedCountry = useMemo(
-    () => countries.find((item) => item.country_uuid === selectedCountryUuid),
-    [countries, selectedCountryUuid],
-  )
+  const toggle = (id: string) => {
+    setExpanded((current) => {
+      const next = new Set(current)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const openDialog = (state: GeoDialogState) => setDialog(state)
 
   return (
     <div className="space-y-5">
@@ -63,268 +88,363 @@ export default function GeoManagementPage() {
           <h1 className="text-2xl font-bold text-text-primary">GEO 管理</h1>
           <p className="text-sm text-text-muted">维护 Target 和 Agent 表单可检索的大洲、国家和城市目录。</p>
         </div>
-        <div className="flex rounded-lg border border-border bg-muted/20 p-1">
-          {(['continent', 'country', 'city'] as GeoTab[]).map((item) => (
-            <button
-              key={item}
-              type="button"
-              className={`rounded-md px-3 py-1.5 text-sm ${tab === item ? 'bg-accent text-accent-foreground' : 'text-text-muted hover:text-text-primary'}`}
-              onClick={() => setTab(item)}
-            >
-              {item === 'continent' ? '大洲' : item === 'country' ? '国家' : '城市'}
-            </button>
-          ))}
-        </div>
+        <Button onClick={() => openDialog({ mode: 'create', type: 'continent' })}>
+          <Plus className="size-4" />
+          新增大洲
+        </Button>
       </div>
 
-      <div className="glass-light rounded-xl p-4">
-        <div className="mb-4 grid gap-3 md:grid-cols-3">
-          <Input value={keyword} onChange={(event) => setKeyword(event.target.value)} placeholder="按名称、中文名或代码搜索" />
-          <Select value={selectedContinentUuid} onValueChange={(value) => {
-            setSelectedContinentUuid(value ?? '')
-            setSelectedCountryUuid('')
-          }}>
-            <SelectTrigger className="w-full"><SelectValue placeholder="选择大洲" /></SelectTrigger>
-            <SelectContent>
-              {continents.map((continent) => (
-                <SelectItem key={continent.continent_uuid} value={continent.continent_uuid}>
-                  {continent.name}{continent.name_zh ? ` / ${continent.name_zh}` : ''}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={selectedCountryUuid} onValueChange={(value) => setSelectedCountryUuid(value ?? '')} disabled={!selectedContinentUuid}>
-            <SelectTrigger className="w-full"><SelectValue placeholder="选择国家" /></SelectTrigger>
-            <SelectContent>
-              {countries.map((country) => (
-                <SelectItem key={country.country_uuid} value={country.country_uuid}>
-                  {country.name}{country.name_zh ? ` / ${country.name_zh}` : ''}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      <section className="glass-light rounded-xl p-4">
+        <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="relative md:w-96">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-dim" />
+            <Input
+              value={keyword}
+              onChange={(event) => setKeyword(event.target.value)}
+              placeholder="搜索大洲、国家、城市或代码"
+              className="pl-9"
+            />
+          </div>
+          <div className="flex flex-wrap gap-2 text-xs text-text-muted">
+            <span>大洲 {data?.total_continent_count ?? 0}</span>
+            <span>国家 {data?.total_country_count ?? 0}</span>
+            <span>城市 {data?.total_city_count ?? 0}</span>
+          </div>
         </div>
 
-        {tab === 'continent' && <ContinentPanel items={continents} isLoading={continentsQuery.isLoading} />}
-        {tab === 'country' && <CountryPanel continent={selectedContinent} items={countries} isLoading={countriesQuery.isLoading} />}
-        {tab === 'city' && <CityPanel country={selectedCountry} items={cities} isLoading={citiesQuery.isLoading} />}
-      </div>
+        {treeQuery.isLoading ? (
+          <div className="space-y-2">
+            {Array.from({ length: 7 }, (_, index) => <Skeleton key={index} className="h-11 w-full" />)}
+          </div>
+        ) : treeQuery.error ? (
+          <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-6 text-center text-sm text-red-300">GEO 树加载失败</div>
+        ) : !data?.items.length ? (
+          <div className="rounded-lg border border-border bg-muted/20 p-6 text-center text-sm text-text-muted">暂无 GEO 数据</div>
+        ) : (
+          <div aria-label="GEO 树形目录" className="overflow-hidden rounded-lg border border-border">
+            <div className="grid grid-cols-[minmax(0,1fr)_88px_116px] gap-3 border-b border-border bg-muted/30 px-3 py-2 text-xs font-medium text-text-muted">
+              <span>名称</span>
+              <span>代码</span>
+              <span className="text-right">操作</span>
+            </div>
+            <div className="divide-y divide-border/70">
+              {data.items.map((continent) => (
+                <GeoContinentRow
+                  key={continent.continent_uuid}
+                  continent={continent}
+                  expanded={expanded}
+                  onToggle={toggle}
+                  onOpenDialog={openDialog}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+      </section>
+
+      <GeoEditDialog dialog={dialog} onClose={() => setDialog(null)} />
     </div>
   )
 }
 
-function ContinentPanel({ items, isLoading }: { items: GeoContinent[]; isLoading: boolean }) {
-  const create = useCreateGeoContinent()
-  const [form, setForm] = useState({ name: '', code: '', name_zh: '' })
-
-  return (
-    <GeoTableShell
-      form={<>
-        <GeoText label="大洲英文名" value={form.name} onChange={(name) => setForm({ ...form, name })} />
-        <GeoText label="代码" value={form.code} onChange={(code) => setForm({ ...form, code })} />
-        <GeoText label="中文名" value={form.name_zh} onChange={(name_zh) => setForm({ ...form, name_zh })} />
-        <Button onClick={() => create.mutate(
-          { name: form.name, code: form.code || null, name_zh: form.name_zh || null },
-          {
-            onSuccess: () => {
-              toast.success('大洲已创建')
-              setForm({ name: '', code: '', name_zh: '' })
-            },
-            onError: (error) => toast.error(error.message || '创建失败'),
-          },
-        )}>新增大洲</Button>
-      </>}
-      isLoading={isLoading}
-      emptyText="暂无大洲"
-      hasItems={items.length > 0}
-    >
-      {items.map((item) => (
-        <ContinentRow key={item.continent_uuid} item={item} />
-      ))}
-    </GeoTableShell>
-  )
-}
-
-function ContinentRow({ item }: { item: GeoContinent }) {
-  const update = useUpdateGeoContinent()
-  const deleteItem = useDeleteGeoContinent()
-  const [draft, setDraft] = useState({ name: item.name, name_zh: item.name_zh ?? '', code: item.code ?? '' })
-
-  return (
-    <TableRow>
-      <TableCell><Input value={draft.name} onChange={(event) => setDraft({ ...draft, name: event.target.value })} /></TableCell>
-      <TableCell><Input value={draft.name_zh} onChange={(event) => setDraft({ ...draft, name_zh: event.target.value })} /></TableCell>
-      <TableCell><Input value={draft.code} onChange={(event) => setDraft({ ...draft, code: event.target.value })} /></TableCell>
-      <TableCell className="text-right">
-        <Button variant="ghost" size="sm" onClick={() => update.mutate(
-          { uuid: item.continent_uuid, data: { name: draft.name, code: draft.code || null, name_zh: draft.name_zh || null } },
-          {
-            onSuccess: () => toast.success('大洲已更新'),
-            onError: (error) => toast.error(error.message || '更新失败'),
-          },
-        )}>保存</Button>
-        <Button variant="ghost" size="sm" className="text-red-400" onClick={() => deleteItem.mutate(item.continent_uuid)}>删除</Button>
-      </TableCell>
-    </TableRow>
-  )
-}
-
-function CountryPanel({ continent, items, isLoading }: { continent?: GeoContinent; items: GeoCountry[]; isLoading: boolean }) {
-  const create = useCreateGeoCountry()
-  const [form, setForm] = useState({ name: '', code: '', name_zh: '' })
-  return (
-    <GeoTableShell
-      form={<>
-        <GeoText label="国家英文名" value={form.name} onChange={(name) => setForm({ ...form, name })} />
-        <GeoText label="代码" value={form.code} onChange={(code) => setForm({ ...form, code })} />
-        <GeoText label="中文名" value={form.name_zh} onChange={(name_zh) => setForm({ ...form, name_zh })} />
-        <Button disabled={!continent} onClick={() => continent && create.mutate(
-          { continent_uuid: continent.continent_uuid, name: form.name, code: form.code || null, name_zh: form.name_zh || null },
-          {
-            onSuccess: () => {
-              toast.success('国家已创建')
-              setForm({ name: '', code: '', name_zh: '' })
-            },
-            onError: (error) => toast.error(error.message || '创建失败'),
-          },
-        )}>新增国家</Button>
-      </>}
-      isLoading={isLoading}
-      emptyText={continent ? '暂无国家' : '请先选择大洲'}
-      hasItems={items.length > 0}
-    >
-      {items.map((item) => (
-        <CountryRow key={item.country_uuid} item={item} />
-      ))}
-    </GeoTableShell>
-  )
-}
-
-function CountryRow({ item }: { item: GeoCountry }) {
-  const update = useUpdateGeoCountry()
-  const deleteItem = useDeleteGeoCountry()
-  const [draft, setDraft] = useState({ name: item.name, name_zh: item.name_zh ?? '', code: item.code ?? '' })
-
-  return (
-    <TableRow>
-      <TableCell><Input value={draft.name} onChange={(event) => setDraft({ ...draft, name: event.target.value })} /></TableCell>
-      <TableCell><Input value={draft.name_zh} onChange={(event) => setDraft({ ...draft, name_zh: event.target.value })} /></TableCell>
-      <TableCell><Input value={draft.code} onChange={(event) => setDraft({ ...draft, code: event.target.value })} /></TableCell>
-      <TableCell className="text-right">
-        <Button variant="ghost" size="sm" onClick={() => update.mutate(
-          { uuid: item.country_uuid, data: { name: draft.name, code: draft.code || null, name_zh: draft.name_zh || null } },
-          {
-            onSuccess: () => toast.success('国家已更新'),
-            onError: (error) => toast.error(error.message || '更新失败'),
-          },
-        )}>保存</Button>
-        <Button variant="ghost" size="sm" className="text-red-400" onClick={() => deleteItem.mutate(item.country_uuid)}>删除</Button>
-      </TableCell>
-    </TableRow>
-  )
-}
-
-function CityPanel({ country, items, isLoading }: { country?: GeoCountry; items: GeoCity[]; isLoading: boolean }) {
-  const create = useCreateGeoCity()
-  const [form, setForm] = useState({ name: '', code: '', name_zh: '' })
-  return (
-    <GeoTableShell
-      form={<>
-        <GeoText label="城市英文名" value={form.name} onChange={(name) => setForm({ ...form, name })} />
-        <GeoText label="代码" value={form.code} onChange={(code) => setForm({ ...form, code })} />
-        <GeoText label="中文名" value={form.name_zh} onChange={(name_zh) => setForm({ ...form, name_zh })} />
-        <Button disabled={!country} onClick={() => country && create.mutate(
-          { country_uuid: country.country_uuid, name: form.name, code: form.code || null, name_zh: form.name_zh || null },
-          {
-            onSuccess: () => {
-              toast.success('城市已创建')
-              setForm({ name: '', code: '', name_zh: '' })
-            },
-            onError: (error) => toast.error(error.message || '创建失败'),
-          },
-        )}>新增城市</Button>
-      </>}
-      isLoading={isLoading}
-      emptyText={country ? '暂无城市' : '请先选择国家'}
-      hasItems={items.length > 0}
-    >
-      {items.map((item) => (
-        <CityRow key={item.city_uuid} item={item} />
-      ))}
-    </GeoTableShell>
-  )
-}
-
-function CityRow({ item }: { item: GeoCity }) {
-  const update = useUpdateGeoCity()
-  const deleteItem = useDeleteGeoCity()
-  const [draft, setDraft] = useState({ name: item.name, name_zh: item.name_zh ?? '', code: item.code ?? '' })
-
-  return (
-    <TableRow>
-      <TableCell><Input value={draft.name} onChange={(event) => setDraft({ ...draft, name: event.target.value })} /></TableCell>
-      <TableCell><Input value={draft.name_zh} onChange={(event) => setDraft({ ...draft, name_zh: event.target.value })} /></TableCell>
-      <TableCell><Input value={draft.code} onChange={(event) => setDraft({ ...draft, code: event.target.value })} /></TableCell>
-      <TableCell className="text-right">
-        <Button variant="ghost" size="sm" onClick={() => update.mutate(
-          { uuid: item.city_uuid, data: { name: draft.name, code: draft.code || null, name_zh: draft.name_zh || null } },
-          {
-            onSuccess: () => toast.success('城市已更新'),
-            onError: (error) => toast.error(error.message || '更新失败'),
-          },
-        )}>保存</Button>
-        <Button variant="ghost" size="sm" className="text-red-400" onClick={() => deleteItem.mutate(item.city_uuid)}>删除</Button>
-      </TableCell>
-    </TableRow>
-  )
-}
-
-function GeoTableShell({
-  form,
-  isLoading,
-  emptyText,
-  hasItems,
-  children,
+function GeoContinentRow({
+  continent,
+  expanded,
+  onToggle,
+  onOpenDialog,
 }: {
-  form: React.ReactNode
-  isLoading: boolean
-  emptyText: string
-  hasItems: boolean
-  children: React.ReactNode
+  continent: GeoTreeContinent
+  expanded: Set<string>
+  onToggle: (id: string) => void
+  onOpenDialog: (state: GeoDialogState) => void
+}) {
+  const id = `continent:${continent.continent_uuid}`
+  const isOpen = expanded.has(id)
+  const deleteContinent = useDeleteGeoContinent()
+  return (
+    <div>
+      <TreeLine
+        depth={0}
+        label={continent.name}
+        subLabel={continent.name_zh ?? undefined}
+        code={continent.code ?? '-'}
+        count={`${continent.country_count} 国家 / ${continent.city_count} 城市`}
+        isOpen={isOpen}
+        canExpand={continent.countries.length > 0}
+        onToggle={() => onToggle(id)}
+        onAdd={() => onOpenDialog({ mode: 'create', type: 'country', parent: continent })}
+        onEdit={() => onOpenDialog({ mode: 'edit', type: 'continent', item: continent })}
+        onDelete={() => deleteContinent.mutate(continent.continent_uuid, {
+          onSuccess: () => toast.success('大洲已删除'),
+          onError: (error) => toast.error(error.message || '删除失败'),
+        })}
+      />
+      {isOpen && continent.countries.map((country) => (
+        <GeoCountryRow
+          key={country.country_uuid}
+          country={country}
+          expanded={expanded}
+          onToggle={onToggle}
+          onOpenDialog={onOpenDialog}
+        />
+      ))}
+    </div>
+  )
+}
+
+function GeoCountryRow({
+  country,
+  expanded,
+  onToggle,
+  onOpenDialog,
+}: {
+  country: GeoTreeCountry
+  expanded: Set<string>
+  onToggle: (id: string) => void
+  onOpenDialog: (state: GeoDialogState) => void
+}) {
+  const id = `country:${country.country_uuid}`
+  const isOpen = expanded.has(id)
+  const deleteCountry = useDeleteGeoCountry()
+  return (
+    <div>
+      <TreeLine
+        depth={1}
+        label={country.name}
+        subLabel={country.name_zh ?? undefined}
+        code={country.code ?? '-'}
+        count={`${country.city_count} 城市`}
+        isOpen={isOpen}
+        canExpand={country.cities.length > 0}
+        onToggle={() => onToggle(id)}
+        onAdd={() => onOpenDialog({ mode: 'create', type: 'city', parent: country })}
+        onEdit={() => onOpenDialog({ mode: 'edit', type: 'country', item: country })}
+        onDelete={() => deleteCountry.mutate(country.country_uuid, {
+          onSuccess: () => toast.success('国家已删除'),
+          onError: (error) => toast.error(error.message || '删除失败'),
+        })}
+      />
+      {isOpen && country.cities.map((city) => (
+        <GeoCityRow key={city.city_uuid} city={city} onOpenDialog={onOpenDialog} />
+      ))}
+    </div>
+  )
+}
+
+function GeoCityRow({ city, onOpenDialog }: { city: GeoTreeCity; onOpenDialog: (state: GeoDialogState) => void }) {
+  const deleteCity = useDeleteGeoCity()
+  return (
+    <TreeLine
+      depth={2}
+      label={city.name}
+      subLabel={city.name_zh ?? undefined}
+      code={city.code ?? '-'}
+      count={city.is_capital ? '首都 / 首府' : `权重 ${city.popularity}`}
+      canExpand={false}
+      onEdit={() => onOpenDialog({ mode: 'edit', type: 'city', item: city })}
+      onDelete={() => deleteCity.mutate(city.city_uuid, {
+        onSuccess: () => toast.success('城市已删除'),
+        onError: (error) => toast.error(error.message || '删除失败'),
+      })}
+    />
+  )
+}
+
+function TreeLine({
+  depth,
+  label,
+  subLabel,
+  code,
+  count,
+  canExpand,
+  isOpen = false,
+  onToggle,
+  onAdd,
+  onEdit,
+  onDelete,
+}: {
+  depth: number
+  label: string
+  subLabel?: string
+  code: string
+  count: string
+  canExpand: boolean
+  isOpen?: boolean
+  onToggle?: () => void
+  onAdd?: () => void
+  onEdit: () => void
+  onDelete: () => void
 }) {
   return (
-    <div className="space-y-4">
-      <div className="grid gap-3 rounded-lg border border-border bg-muted/20 p-3 md:grid-cols-4 md:items-end">
-        {form}
-      </div>
-      {isLoading ? (
-        <div className="space-y-3">
-          {Array.from({ length: 5 }, (_, index) => <Skeleton key={index} className="h-10 w-full" />)}
+    <div className="grid grid-cols-[minmax(0,1fr)_88px_116px] items-center gap-3 px-3 py-2.5 text-sm hover:bg-muted/20">
+      <div className="flex min-w-0 items-center gap-2" style={{ paddingLeft: depth * 20 }}>
+        {canExpand ? (
+          <button type="button" className="rounded p-1 text-text-muted hover:bg-muted hover:text-text-primary" onClick={onToggle}>
+            {isOpen ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
+          </button>
+        ) : (
+          <span className="size-6" />
+        )}
+        <div className="min-w-0">
+          <button type="button" className="block truncate text-left font-medium text-text-primary hover:text-cyan-300" onClick={canExpand ? onToggle : onEdit}>
+            {label}
+          </button>
+          <div className="truncate text-xs text-text-muted">{[subLabel, count].filter(Boolean).join(' · ')}</div>
         </div>
-      ) : hasItems ? (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>英文名</TableHead>
-              <TableHead>中文名</TableHead>
-              <TableHead>代码</TableHead>
-              <TableHead className="text-right">操作</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>{children}</TableBody>
-        </Table>
-      ) : (
-        <div className="p-6 text-center text-sm text-text-muted">{emptyText}</div>
-      )}
+      </div>
+      <div className="font-[family-name:var(--font-mono)] text-xs text-text-secondary">{code}</div>
+      <div className="flex justify-end gap-1">
+        {onAdd && (
+          <Button variant="ghost" size="icon" aria-label={`新增 ${label} 下级`} onClick={onAdd}>
+            <Plus className="size-4" />
+          </Button>
+        )}
+        <Button variant="ghost" size="icon" aria-label={`编辑 ${label}`} onClick={onEdit}>
+          <Pencil className="size-4" />
+        </Button>
+        <Button variant="ghost" size="icon" aria-label={`删除 ${label}`} className="text-red-400 hover:text-red-300" onClick={onDelete}>
+          <Trash2 className="size-4" />
+        </Button>
+      </div>
     </div>
   )
 }
 
-function GeoText({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
+function GeoEditDialog({ dialog, onClose }: { dialog: GeoDialogState | null; onClose: () => void }) {
+  const [form, setForm] = useState<GeoFormState>(DEFAULT_FORM)
+  const continentsQuery = useGeoContinents({ limit: 500, enabled: !!dialog })
+  const countriesQuery = useGeoCountries({ continent_uuid: form.continent_uuid, limit: 500 })
+  const createContinent = useCreateGeoContinent()
+  const updateContinent = useUpdateGeoContinent()
+  const createCountry = useCreateGeoCountry()
+  const updateCountry = useUpdateGeoCountry()
+  const createCity = useCreateGeoCity()
+  const updateCity = useUpdateGeoCity()
+
+  useEffect(() => {
+    if (!dialog) {
+      setForm({ ...DEFAULT_FORM })
+      return
+    }
+    if (dialog.mode === 'create') {
+      setForm({
+        ...DEFAULT_FORM,
+        continent_uuid: dialog.type === 'country' ? dialog.parent.continent_uuid : '',
+        country_uuid: dialog.type === 'city' ? dialog.parent.country_uuid : '',
+      })
+      return
+    }
+    setForm({
+      name: dialog.item.name,
+      code: dialog.item.code ?? '',
+      name_zh: dialog.item.name_zh ?? '',
+      continent_uuid: dialog.type === 'country' || dialog.type === 'city' ? dialog.item.continent_uuid : '',
+      country_uuid: dialog.type === 'city' ? dialog.item.country_uuid : '',
+      is_capital: dialog.type === 'city' ? dialog.item.is_capital : false,
+      popularity: dialog.type === 'city' ? String(dialog.item.popularity) : '100',
+    })
+  }, [dialog])
+
+  const title = dialog ? `${dialog.mode === 'create' ? '新增' : '编辑'}${typeLabel(dialog.type)}` : ''
+
+  const submit = (event: React.FormEvent) => {
+    event.preventDefault()
+    if (!dialog) return
+    const common = { name: form.name, code: form.code || null, name_zh: form.name_zh || null }
+    const options = {
+      onSuccess: () => {
+        toast.success(`${typeLabel(dialog.type)}已保存`)
+        onClose()
+      },
+      onError: (error: Error) => toast.error(error.message || '保存失败'),
+    }
+    if (dialog.type === 'continent') {
+      if (dialog.mode === 'create') createContinent.mutate(common, options)
+      else updateContinent.mutate({ uuid: dialog.item.continent_uuid, data: common }, options)
+      return
+    }
+    if (dialog.type === 'country') {
+      const continentUuid = dialog.mode === 'create' ? dialog.parent.continent_uuid : form.continent_uuid
+      const payload = { ...common, continent_uuid: continentUuid }
+      if (dialog.mode === 'create') createCountry.mutate(payload, options)
+      else updateCountry.mutate({ uuid: dialog.item.country_uuid, data: payload }, options)
+      return
+    }
+    const countryUuid = dialog.mode === 'create' ? dialog.parent.country_uuid : form.country_uuid
+    const payload = { ...common, country_uuid: countryUuid, is_capital: form.is_capital, popularity: Number(form.popularity) || 100 }
+    if (dialog.mode === 'create') createCity.mutate(payload, options)
+    else updateCity.mutate({ uuid: dialog.item.city_uuid, data: payload }, options)
+  }
+
+  return (
+    <Dialog open={!!dialog} onOpenChange={(open) => { if (!open) onClose() }}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>维护 GEO 树节点，保存后 Target 和 Agent 表单会立即使用最新检索数据。</DialogDescription>
+        </DialogHeader>
+        <form onSubmit={submit} className="space-y-4">
+          {dialog?.type === 'country' && dialog.mode === 'edit' && (
+            <div>
+              <Label className="mb-1.5 text-xs text-text-secondary">所属大洲</Label>
+              <Select value={form.continent_uuid || undefined} onValueChange={(value) => setForm({ ...form, continent_uuid: value ?? '' })}>
+                <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {(continentsQuery.data?.items ?? []).map((continent: GeoContinent) => (
+                    <SelectItem key={continent.continent_uuid} value={continent.continent_uuid}>{continent.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+          {dialog?.type === 'city' && dialog.mode === 'edit' && (
+            <div>
+              <Label className="mb-1.5 text-xs text-text-secondary">所属国家</Label>
+              <Select value={form.country_uuid || undefined} onValueChange={(value) => setForm({ ...form, country_uuid: value ?? '' })}>
+                <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {(countriesQuery.data?.items ?? []).map((country: GeoCountry) => (
+                    <SelectItem key={country.country_uuid} value={country.country_uuid}>{country.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+          <div className="grid gap-3 md:grid-cols-2">
+            <GeoText label="英文名" value={form.name} onChange={(name) => setForm({ ...form, name })} required />
+            <GeoText label="代码" value={form.code} onChange={(code) => setForm({ ...form, code })} />
+            <GeoText label="中文名" value={form.name_zh} onChange={(name_zh) => setForm({ ...form, name_zh })} />
+            {dialog?.type === 'city' && (
+              <GeoText label="排序权重" value={form.popularity} onChange={(popularity) => setForm({ ...form, popularity })} />
+            )}
+          </div>
+          {dialog?.type === 'city' && (
+            <label className="flex items-center gap-2 text-sm text-text-secondary">
+              <input type="checkbox" checked={form.is_capital} onChange={(event) => setForm({ ...form, is_capital: event.target.checked })} />
+              首都 / 行政首府
+            </label>
+          )}
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose}>取消</Button>
+            <Button type="submit">保存</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+function GeoText({ label, value, onChange, required = false }: { label: string; value: string; onChange: (value: string) => void; required?: boolean }) {
   return (
     <div>
       <Label className="mb-1.5 text-xs text-text-secondary">{label}</Label>
-      <Input value={value} onChange={(event) => onChange(event.target.value)} />
+      <Input value={value} onChange={(event) => onChange(event.target.value)} required={required} />
     </div>
   )
+}
+
+function typeLabel(type: GeoDialogState['type']) {
+  if (type === 'continent') return '大洲'
+  if (type === 'country') return '国家'
+  return '城市'
 }

@@ -7,8 +7,8 @@ export function csvToList(value: string): string[] {
     .filter(Boolean)
 }
 
-export function joinLocation(item: Pick<AdminAgent | AdminTarget, 'continent' | 'country' | 'region' | 'city'>) {
-  return [item.continent, item.country, item.region, item.city].filter(Boolean).join(' / ') || '-'
+export function joinLocation(item: Pick<AdminAgent | AdminTarget, 'continent' | 'country' | 'city'>) {
+  return [item.continent, item.country, item.city].filter(Boolean).join(' / ') || '-'
 }
 
 export function formatDateTime(value?: string | null) {

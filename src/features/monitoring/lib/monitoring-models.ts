@@ -11,7 +11,6 @@ export interface MonitoringTarget {
   is_anycast: boolean
   continent?: string | null
   country?: string | null
-  region?: string | null
   city?: string | null
   carrier?: string | null
 }
@@ -22,7 +21,6 @@ export interface MonitoringAgent {
   ip_version?: string | null
   continent?: string | null
   country?: string | null
-  region?: string | null
   city?: string | null
   carrier?: string | null
   status?: string | null
@@ -209,7 +207,6 @@ export function normalizeMonitoringTask(raw: unknown): MonitoringTask {
       is_anycast: readBoolean(rawTarget.is_anycast),
       continent: readNullableString(rawTarget.continent),
       country: readNullableString(rawTarget.country),
-      region: readNullableString(rawTarget.region),
       city: readNullableString(rawTarget.city),
       carrier: readNullableString(rawTarget.carrier),
     },
@@ -220,7 +217,6 @@ export function normalizeMonitoringTask(raw: unknown): MonitoringTask {
           ip_version: readNullableString(rawAgent.ip_version),
           continent: readNullableString(rawAgent.continent),
           country: readNullableString(rawAgent.country),
-          region: readNullableString(rawAgent.region),
           city: readNullableString(rawAgent.city),
           carrier: readNullableString(rawAgent.carrier),
           status: readNullableString(rawAgent.status),
@@ -309,7 +305,7 @@ export function groupMonitoringTasksByTarget(tasks: MonitoringTask[]): Monitorin
 }
 
 export function formatTargetLocation(target: MonitoringTarget): string {
-  return [target.city, target.region, target.country, target.continent].filter(Boolean).join(', ') || '位置未知'
+  return [target.city, target.country, target.continent].filter(Boolean).join(', ') || '位置未知'
 }
 
 export function formatAgentLocation(agent: MonitoringAgent | null | undefined): string {

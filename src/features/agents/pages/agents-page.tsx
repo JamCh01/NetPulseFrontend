@@ -49,7 +49,6 @@ export default function AgentsPage() {
     ip_version: '4+6' as IpVersion,
     continent: '',
     country: '',
-    region: '',
     city: '',
     zip_code: 'UNKNOWN',
     carrier: '',
@@ -79,7 +78,6 @@ export default function AgentsPage() {
       ip_version: '4+6',
       continent: '',
       country: '',
-      region: '',
       city: '',
       zip_code: 'UNKNOWN',
       carrier: '',
@@ -100,7 +98,6 @@ export default function AgentsPage() {
       ip_version: agent.ip_version,
       continent: agent.continent,
       country: agent.country,
-      region: agent.region,
       city: agent.city,
       zip_code: agent.zip_code,
       carrier: agent.carrier,
@@ -116,7 +113,6 @@ export default function AgentsPage() {
       ip_version: form.ip_version,
       continent: form.continent,
       country: form.country,
-      region: form.region || form.city || form.country,
       city: form.city,
       zip_code: form.zip_code || 'UNKNOWN',
       carrier: form.carrier,
@@ -317,10 +313,6 @@ export default function AgentsPage() {
               required
             />
 
-            <div>
-              <Label className="mb-1.5 text-xs text-text-secondary">区域 / 省州</Label>
-              <Input placeholder="区域" value={form.region} onChange={(event) => setForm({ ...form, region: event.target.value })} required />
-            </div>
             <div className="grid gap-3 md:grid-cols-2">
               <Input placeholder="邮编，未知填 UNKNOWN" value={form.zip_code} onChange={(event) => setForm({ ...form, zip_code: event.target.value })} required />
               <Input placeholder="运营商 / 机房 / 云厂商" value={form.carrier} onChange={(event) => setForm({ ...form, carrier: event.target.value })} required />

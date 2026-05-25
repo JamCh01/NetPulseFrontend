@@ -53,7 +53,6 @@ export default function TargetsPage() {
     is_anycast: false,
     continent: '',
     country: '',
-    region: '',
     city: '',
     zip_code: 'UNKNOWN',
     carrier: '',
@@ -82,7 +81,6 @@ export default function TargetsPage() {
       is_anycast: false,
       continent: '',
       country: '',
-      region: '',
       city: '',
       zip_code: 'UNKNOWN',
       carrier: '',
@@ -106,7 +104,6 @@ export default function TargetsPage() {
       is_anycast: target.is_anycast,
       continent: target.continent ?? '',
       country: target.country ?? '',
-      region: target.region ?? '',
       city: target.city ?? '',
       zip_code: target.zip_code ?? 'UNKNOWN',
       carrier: target.carrier,
@@ -134,7 +131,6 @@ export default function TargetsPage() {
     is_anycast: form.is_anycast,
     continent: form.continent || null,
     country: form.country || null,
-    region: form.region || null,
     city: form.city || null,
     zip_code: form.zip_code || 'UNKNOWN',
     carrier: form.carrier,
@@ -335,11 +331,6 @@ export default function TargetsPage() {
               value={{ continent: form.continent, country: form.country, city: form.city }}
               onChange={(geo) => setForm({ ...form, ...geo })}
             />
-
-            <div>
-              <Label className="mb-1.5 text-xs text-text-secondary">区域 / 省州</Label>
-              <Input placeholder="区域" value={form.region} onChange={(event) => setForm({ ...form, region: event.target.value })} />
-            </div>
 
             <div>
               <Label className="mb-1.5 text-xs text-text-secondary">支持协议</Label>
