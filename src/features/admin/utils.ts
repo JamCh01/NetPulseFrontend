@@ -1,4 +1,5 @@
 import type { AdminAgent, AdminTarget, IpFamily, TaskCreatePayload, TaskType } from '@/api/hooks/admin-api'
+import { MONITORING_PROTOCOLS, type MonitoringProtocolName } from '@/lib/constants'
 
 export function csvToList(value: string): string[] {
   return value
@@ -23,7 +24,10 @@ export function formatDateTime(value?: string | null) {
 }
 
 export function protocolOptionsForTarget(target?: AdminTarget | null): TaskType[] {
-  return target?.supported_protocols?.length ? target.supported_protocols : ['icmp', 'tcp', 'mtr']
+  const supported = target?.supported_protocols?.length ? target.supported_protocols : [...MONITORING_PROTOCOLS]
+  return supported.filter((protocol): protocol is MonitoringProtocolName =>
+    MONITORING_PROTOCOLS.includes(protocol as MonitoringProtocolName),
+  )
 }
 
 export function buildTaskPayload(input: {

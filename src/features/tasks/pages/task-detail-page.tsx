@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CheckableList } from '@/components/ui/checkable-list'
 import type { TaskResponse, AgentResponse } from '@/api/generated/types.gen'
-import { PROTOCOL_COLORS } from '@/lib/constants'
+import { PROTOCOL_COLORS, protocolLabel } from '@/lib/constants'
 
 export default function TaskDetailPage() {
   const { taskUuid } = useParams()
@@ -141,7 +141,7 @@ export default function TaskDetailPage() {
           </button>
           <h1 className="text-2xl font-bold text-text-primary">{task.task_name}</h1>
           <Badge className={`border text-xs uppercase ${PROTOCOL_COLORS[task.protocol] ?? ''}`}>
-            {task.protocol}
+            {protocolLabel(task.protocol)}
           </Badge>
           <Badge variant={task.is_active ? 'success' : 'inactive'}>
             {task.is_active ? t('common.active') : t('common.inactive')}

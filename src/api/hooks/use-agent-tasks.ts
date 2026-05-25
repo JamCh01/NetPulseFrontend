@@ -7,18 +7,23 @@ import {
   unassignTaskEndpointApiV1TasksTaskUuidAgentsAgentUuidDelete,
 } from '@/api/generated/sdk.gen'
 import type { AgentTaskAssign } from '@/api/generated/types.gen'
+import { useAuthStore } from '@/stores/auth-store'
 
 export function useAgentTasks(agentUuid: string) {
+  const accessToken = useAuthStore((state) => state.accessToken)
   return useQuery({
     queryKey: agentKeys.tasks(agentUuid),
     queryFn: async () => {
       const { data, error } = await getAgentTasksApiV1AgentsAgentUuidTasksGet({
+        headers: {
+          'X-Access-Key': accessToken ?? '',
+        },
         path: { agent_uuid: agentUuid },
-      } as any)
+      })
       if (error) throw error
       return data
     },
-    enabled: !!agentUuid,
+    enabled: !!agentUuid && !!accessToken,
   })
 }
 

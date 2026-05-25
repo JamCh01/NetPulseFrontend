@@ -185,7 +185,7 @@ export default function MonitoringDetailPage() {
               </button>
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="truncate text-xl font-semibold text-text-primary">{task.name}</h1>
-                <Badge className={`border text-xs uppercase ${PROTOCOL_COLORS[task.task_type] ?? ''}`}>
+                <Badge className={`border text-xs ${PROTOCOL_COLORS[task.task_type] ?? ''}`}>
                   {protocolLabel(task.task_type)}
                 </Badge>
                 <Badge variant={status.variant}>{status.label}</Badge>

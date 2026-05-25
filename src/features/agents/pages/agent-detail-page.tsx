@@ -21,7 +21,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import type { AgentResponse, TaskResponse } from '@/api/generated/types.gen'
-import { AGENT_STATUS_COLORS, PROTOCOL_COLORS } from '@/lib/constants'
+import { AGENT_STATUS_COLORS, PROTOCOL_COLORS, protocolLabel } from '@/lib/constants'
 import { GeoCascader } from '@/features/agents/components/geo-cascader'
 
 function parseTag(tag: string): { key: string; value: string } {
@@ -299,7 +299,7 @@ export default function AgentDetailPage() {
                 items={availableTasks.map((tk) => ({
                   id: tk.task_uuid,
                   label: tk.task_name,
-                  sublabel: `${tk.protocol.toUpperCase()} - ${tk.target}`,
+                  sublabel: `${protocolLabel(tk.protocol)} - ${tk.target}`,
                 }))}
                 selectedIds={tasksToAdd}
                 onToggle={(id) => {
@@ -332,7 +332,7 @@ export default function AgentDetailPage() {
                 items={agentTasks.map((tk) => ({
                   id: tk.task_uuid,
                   label: tk.task_name,
-                  sublabel: `${tk.protocol.toUpperCase()} - ${tk.target}`,
+                  sublabel: `${protocolLabel(tk.protocol)} - ${tk.target}`,
                 }))}
                 selectedIds={tasksToRemove}
                 onToggle={(id) => {
@@ -358,7 +358,7 @@ export default function AgentDetailPage() {
               >
                 <span className="text-sm text-foreground font-medium">{tk.task_name}</span>
                 <Badge className={`border text-[10px] uppercase ${PROTOCOL_COLORS[tk.protocol] ?? ''}`}>
-                  {tk.protocol}
+                  {protocolLabel(tk.protocol)}
                 </Badge>
                 <span className="text-xs text-muted-foreground font-[family-name:var(--font-mono)]">{tk.target}</span>
               </div>

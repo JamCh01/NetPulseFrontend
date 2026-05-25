@@ -34,10 +34,10 @@ import { Textarea } from '@/components/ui/textarea'
 import { GeoInput } from '@/features/admin/geo-input'
 import { TagInput } from '@/features/admin/tag-input'
 import { csvToList, formatDateTime, joinLocation } from '@/features/admin/utils'
-import { PROTOCOL_COLORS } from '@/lib/constants'
+import { MONITORING_PROTOCOLS, PROTOCOL_COLORS, protocolLabel } from '@/lib/constants'
 
 const PAGE_SIZE = 100
-const PROTOCOLS: TargetProtocol[] = ['icmp', 'tcp', 'mtr', 'iperf3']
+const PROTOCOLS: TargetProtocol[] = [...MONITORING_PROTOCOLS]
 
 export default function TargetsPage() {
   const [page, setPage] = useState(1)
@@ -58,7 +58,7 @@ export default function TargetsPage() {
     carrier: '',
     tags: '',
     comment: '',
-    supported_protocols: ['icmp', 'tcp', 'mtr'] as TargetProtocol[],
+    supported_protocols: [...PROTOCOLS],
   })
 
   const targetsQuery = useTargets({ page, page_size: PAGE_SIZE, keyword, sort_by: 'name', sort_order: 'asc' })
@@ -86,7 +86,7 @@ export default function TargetsPage() {
       carrier: '',
       tags: '',
       comment: '',
-      supported_protocols: ['icmp', 'tcp', 'mtr'],
+      supported_protocols: [...PROTOCOLS],
     })
   }
 
@@ -239,7 +239,7 @@ export default function TargetsPage() {
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
                       {target.supported_protocols.map((protocol) => (
-                        <Badge key={protocol} className={`border uppercase ${PROTOCOL_COLORS[protocol] ?? ''}`}>{protocol}</Badge>
+                        <Badge key={protocol} className={`border ${PROTOCOL_COLORS[protocol] ?? ''}`}>{protocolLabel(protocol)}</Badge>
                       ))}
                     </div>
                   </TableCell>
@@ -343,7 +343,7 @@ export default function TargetsPage() {
                     size="sm"
                     onClick={() => toggleProtocol(protocol)}
                   >
-                    {protocol.toUpperCase()}
+                    {protocolLabel(protocol)}
                   </Button>
                 ))}
               </div>

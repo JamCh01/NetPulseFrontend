@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { ArrowLeft, Clock3, MapPin, Radio, Waypoints } from 'lucide-react'
 import { useMonitoringTaskDetail } from '@/api/hooks/use-monitoring-task-detail'
@@ -50,13 +50,11 @@ export default function MtrDetailPage() {
     selectedAgentUuid || undefined,
     { start: timeRange.start, end: timeRange.end },
   )
-  const { data: mtrDetailData, isLoading: mtrDetailLoading } = useMtrDetail(selectedResultUuid ?? '')
-
-  useEffect(() => {
-    if (!selectedResultUuid && mtrListData?.results.length) {
-      setSelectedResultUuid(mtrListData.results[0].result_uuid)
-    }
+  const activeResultUuid = useMemo(() => {
+    if (selectedResultUuid) return selectedResultUuid
+    return mtrListData?.results[0]?.result_uuid
   }, [mtrListData?.results, selectedResultUuid])
+  const { data: mtrDetailData, isLoading: mtrDetailLoading } = useMtrDetail(activeResultUuid ?? '')
 
   const handleSelectResult = useCallback((resultUuid: string) => {
     setSelectedResultUuid(resultUuid)
@@ -179,13 +177,13 @@ export default function MtrDetailPage() {
             results={mtrListData?.results ?? []}
             isLoading={mtrListLoading}
             onSelectResult={handleSelectResult}
-            selectedResultUuid={selectedResultUuid}
+            selectedResultUuid={activeResultUuid}
             height={220}
           />
         </div>
       )}
 
-      <MtrDetailTable result={selectedResultUuid ? mtrDetailData : undefined} isLoading={selectedResultUuid ? mtrDetailLoading : false} />
+      <MtrDetailTable result={activeResultUuid ? mtrDetailData : undefined} isLoading={activeResultUuid ? mtrDetailLoading : false} />
     </div>
   )
 }

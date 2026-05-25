@@ -7,6 +7,22 @@ export const PROTOCOL_COLORS: Record<string, string> = {
   mtr: 'bg-sky-500/10 text-sky-700 border-sky-500/25 dark:text-sky-300 dark:border-sky-400/30',
 }
 
+export const MONITORING_PROTOCOLS = ['icmp', 'tcp', 'mtr', 'iperf3'] as const
+
+export type MonitoringProtocolName = (typeof MONITORING_PROTOCOLS)[number]
+
+export const PROTOCOL_LABELS: Record<MonitoringProtocolName, string> = {
+  icmp: 'ICMP',
+  tcp: 'TCP',
+  mtr: 'MTR',
+  iperf3: 'IPERF3',
+}
+
+export function protocolLabel(protocol: string): string {
+  const normalized = protocol.toLowerCase()
+  return PROTOCOL_LABELS[normalized as MonitoringProtocolName] ?? normalized.toUpperCase()
+}
+
 export const PROTOCOL_ICON_COLORS: Record<string, string> = {
   icmp: 'text-cyan-600 dark:text-cyan-400',
   tcp: 'text-purple-600 dark:text-purple-400',

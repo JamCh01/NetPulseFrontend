@@ -1,3 +1,5 @@
+import { MONITORING_PROTOCOLS, protocolLabel as formatProtocolLabel } from '@/lib/constants'
+
 export type MonitoringProtocol = 'icmp' | 'tcp' | 'mtr' | string
 
 export type LatestResultState = 'ok' | 'missing' | 'failed' | 'unknown'
@@ -279,7 +281,10 @@ export function groupMonitoringTasksByTarget(tasks: MonitoringTask[]): Monitorin
       group.agents.push(task.agent)
     }
 
-    if (!group.protocols.includes(task.task_type)) {
+    const protocol = task.task_type.toLowerCase()
+    if (MONITORING_PROTOCOLS.includes(protocol as (typeof MONITORING_PROTOCOLS)[number]) && !group.protocols.includes(protocol)) {
+      group.protocols.push(protocol)
+    } else if (!MONITORING_PROTOCOLS.includes(protocol as (typeof MONITORING_PROTOCOLS)[number]) && !group.protocols.includes(task.task_type)) {
       group.protocols.push(task.task_type)
     }
 
@@ -324,7 +329,7 @@ export function formatLatestSample(timestamp?: string | null): string {
 }
 
 export function protocolLabel(protocol: MonitoringProtocol): string {
-  return protocol.toUpperCase()
+  return formatProtocolLabel(protocol)
 }
 
 export function normalizeMtrListItem(raw: unknown): MtrResultSummaryView {

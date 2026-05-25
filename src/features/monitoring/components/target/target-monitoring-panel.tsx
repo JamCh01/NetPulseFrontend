@@ -345,7 +345,7 @@ function MetricsProtocolPanel({
         onSelectedAgentUuidsChange={setSelectedAgentUuids}
       />
       {tasks.length === 0 ? (
-        <EmptyProtocolState protocol={protocol.toUpperCase()} />
+        <EmptyProtocolState protocol={protocolLabel(protocol)} />
       ) : filteredTasks.length === 0 ? (
         <div className="p-8 text-center">
           <Users className="mx-auto h-7 w-7 text-text-dim" />
@@ -471,7 +471,7 @@ function Iperf3ProtocolPanel({
         onSelectedAgentUuidsChange={setSelectedAgentUuids}
       />
       {tasks.length === 0 ? (
-        <EmptyProtocolState protocol="iperf3" />
+        <EmptyProtocolState protocol={protocolLabel('iperf3')} />
       ) : filteredTasks.length === 0 ? (
         <div className="p-8 text-center">
           <Users className="mx-auto h-7 w-7 text-text-dim" />
@@ -528,7 +528,7 @@ function TargetSummary({ group }: { group: MonitoringTargetGroup }) {
       <div className="grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-4">
         <SummaryMetric label="任务数" value={String(group.tasks.length)} />
         <SummaryMetric label="Agent" value={String(group.agents.length)} />
-        <SummaryMetric label="协议" value={group.protocols.map((item) => item.toUpperCase()).join(' / ') || '-'} />
+        <SummaryMetric label="协议" value={group.protocols.map((item) => protocolLabel(item)).join(' / ') || '-'} />
         <SummaryMetric label="最新样本" value={formatLatestSample(group.latest_sample_at)} />
       </div>
     </section>

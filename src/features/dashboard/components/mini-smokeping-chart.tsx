@@ -5,7 +5,7 @@ import type { MonitoringDataPoint } from '@/api/generated/types.gen'
 import { LazyECharts } from '@/components/charts/lazy-echarts'
 import { useChartTheme } from '@/features/monitoring/lib/chart-theme'
 import { transformToChartData } from '@/features/monitoring/lib/transform-chart-data'
-import { PROTOCOL_COLORS } from '@/lib/constants'
+import { PROTOCOL_COLORS, protocolLabel } from '@/lib/constants'
 
 interface MiniSmokePingChartProps {
   taskUuid: string
@@ -109,7 +109,7 @@ function MiniSmokePingChartInner({
 
   const normalizedProtocol = (protocol ?? 'icmp').toLowerCase()
   const protoClass = PROTOCOL_COLORS[normalizedProtocol] ?? PROTOCOL_COLORS.icmp
-  const protocolLabel = normalizedProtocol.toUpperCase()
+  const formattedProtocol = protocolLabel(normalizedProtocol)
 
   if (isLoading) {
     return (
@@ -125,7 +125,7 @@ function MiniSmokePingChartInner({
       <div className="flex items-center justify-between mb-2">
         <span className="text-[10px] font-medium text-text-primary truncate">{taskName}</span>
         <span className={`text-[9px] px-1.5 py-0.5 rounded font-medium border uppercase ${protoClass}`}>
-          {protocolLabel}
+          {formattedProtocol}
         </span>
       </div>
 

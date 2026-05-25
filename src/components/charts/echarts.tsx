@@ -7,10 +7,10 @@ import {
   TitleComponent,
   TooltipComponent,
 } from 'echarts/components'
-import { init, use, type EChartsCoreOption, type EChartsType } from 'echarts/core'
+import { init, use as registerEChartsModules, type EChartsCoreOption, type EChartsType } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 
-use([
+registerEChartsModules([
   BarChart,
   LineChart,
   ScatterChart,

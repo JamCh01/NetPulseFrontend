@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { ChevronDown, ChevronRight, Pencil, Plus, Search, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -142,7 +142,7 @@ export default function GeoManagementPage() {
         )}
       </section>
 
-      <GeoEditDialog dialog={dialog} onClose={() => setDialog(null)} />
+      {dialog && <GeoEditDialog key={dialogKey(dialog)} dialog={dialog} onClose={() => setDialog(null)} />}
     </div>
   )
 }
@@ -310,9 +310,40 @@ function TreeLine({
   )
 }
 
-function GeoEditDialog({ dialog, onClose }: { dialog: GeoDialogState | null; onClose: () => void }) {
-  const [form, setForm] = useState<GeoFormState>(DEFAULT_FORM)
-  const continentsQuery = useGeoContinents({ limit: 500, enabled: !!dialog })
+function initialGeoForm(dialog: GeoDialogState): GeoFormState {
+  if (dialog.mode === 'create') {
+    return {
+      ...DEFAULT_FORM,
+      continent_uuid: dialog.type === 'country' ? dialog.parent.continent_uuid : '',
+      country_uuid: dialog.type === 'city' ? dialog.parent.country_uuid : '',
+    }
+  }
+
+  return {
+    name: dialog.item.name,
+    code: dialog.item.code ?? '',
+    name_zh: dialog.item.name_zh ?? '',
+    continent_uuid: dialog.type === 'country' || dialog.type === 'city' ? dialog.item.continent_uuid : '',
+    country_uuid: dialog.type === 'city' ? dialog.item.country_uuid : '',
+    is_capital: dialog.type === 'city' ? dialog.item.is_capital : false,
+    popularity: dialog.type === 'city' ? String(dialog.item.popularity) : '100',
+  }
+}
+
+function dialogKey(dialog: GeoDialogState): string {
+  if (dialog.mode === 'create') {
+    if (dialog.type === 'country') return `create-country:${dialog.parent.continent_uuid}`
+    if (dialog.type === 'city') return `create-city:${dialog.parent.country_uuid}`
+    return 'create-continent'
+  }
+  if (dialog.type === 'continent') return `edit-continent:${dialog.item.continent_uuid}`
+  if (dialog.type === 'country') return `edit-country:${dialog.item.country_uuid}`
+  return `edit-city:${dialog.item.city_uuid}`
+}
+
+function GeoEditDialog({ dialog, onClose }: { dialog: GeoDialogState; onClose: () => void }) {
+  const [form, setForm] = useState<GeoFormState>(() => initialGeoForm(dialog))
+  const continentsQuery = useGeoContinents({ limit: 500, enabled: true })
   const countriesQuery = useGeoCountries({ continent_uuid: form.continent_uuid, limit: 500 })
   const createContinent = useCreateGeoContinent()
   const updateContinent = useUpdateGeoContinent()
@@ -321,35 +352,10 @@ function GeoEditDialog({ dialog, onClose }: { dialog: GeoDialogState | null; onC
   const createCity = useCreateGeoCity()
   const updateCity = useUpdateGeoCity()
 
-  useEffect(() => {
-    if (!dialog) {
-      setForm({ ...DEFAULT_FORM })
-      return
-    }
-    if (dialog.mode === 'create') {
-      setForm({
-        ...DEFAULT_FORM,
-        continent_uuid: dialog.type === 'country' ? dialog.parent.continent_uuid : '',
-        country_uuid: dialog.type === 'city' ? dialog.parent.country_uuid : '',
-      })
-      return
-    }
-    setForm({
-      name: dialog.item.name,
-      code: dialog.item.code ?? '',
-      name_zh: dialog.item.name_zh ?? '',
-      continent_uuid: dialog.type === 'country' || dialog.type === 'city' ? dialog.item.continent_uuid : '',
-      country_uuid: dialog.type === 'city' ? dialog.item.country_uuid : '',
-      is_capital: dialog.type === 'city' ? dialog.item.is_capital : false,
-      popularity: dialog.type === 'city' ? String(dialog.item.popularity) : '100',
-    })
-  }, [dialog])
-
-  const title = dialog ? `${dialog.mode === 'create' ? '新增' : '编辑'}${typeLabel(dialog.type)}` : ''
+  const title = `${dialog.mode === 'create' ? '新增' : '编辑'}${typeLabel(dialog.type)}`
 
   const submit = (event: React.FormEvent) => {
     event.preventDefault()
-    if (!dialog) return
     const common = { name: form.name, code: form.code || null, name_zh: form.name_zh || null }
     const options = {
       onSuccess: () => {
@@ -377,7 +383,7 @@ function GeoEditDialog({ dialog, onClose }: { dialog: GeoDialogState | null; onC
   }
 
   return (
-    <Dialog open={!!dialog} onOpenChange={(open) => { if (!open) onClose() }}>
+    <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>

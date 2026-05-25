@@ -17,7 +17,7 @@ import { usePublicMonitoringTasks } from '@/api/hooks/use-public-monitoring-task
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { PROTOCOL_COLORS } from '@/lib/constants'
+import { MONITORING_PROTOCOLS, PROTOCOL_COLORS } from '@/lib/constants'
 import {
   classifyTaskStatus,
   formatAgentLocation,
@@ -42,7 +42,8 @@ function attentionWeight(task: MonitoringTask) {
   if (status === 'missing') return 1
   if (status === 'unknown') return 2
   if (task.task_type === 'mtr') return 3
-  return 4
+  if (task.task_type === 'iperf3') return 4
+  return 5
 }
 
 function taskHref(task: MonitoringTask) {
@@ -79,7 +80,7 @@ function CoverageRow({ group, selected, onSelect }: { group: MonitoringTargetGro
         <Badge variant={status.variant}>{status.label}</Badge>
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-1.5">
-        {['icmp', 'tcp', 'mtr'].map((protocol) => {
+        {MONITORING_PROTOCOLS.map((protocol) => {
           const count = group.tasks.filter((task) => task.task_type === protocol).length
           return (
             <span
@@ -88,7 +89,7 @@ function CoverageRow({ group, selected, onSelect }: { group: MonitoringTargetGro
                 count > 0 ? PROTOCOL_COLORS[protocol] : 'border-border bg-muted/30 text-text-dim'
               }`}
             >
-              {protocol} {count}
+              {protocolLabel(protocol)} {count}
             </span>
           )
         })}
@@ -110,7 +111,7 @@ function AttentionRow({ task }: { task: MonitoringTask }) {
       <div className="min-w-0">
         <div className="flex items-center gap-2">
           <span className={`rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase ${PROTOCOL_COLORS[task.task_type] ?? 'bg-muted text-text-muted border-border'}`}>
-            {task.task_type}
+            {protocolLabel(task.task_type)}
           </span>
           <span className="truncate text-sm font-medium text-text-primary">{task.name}</span>
         </div>
@@ -160,7 +161,7 @@ function EvidencePanel({ group }: { group?: MonitoringTargetGroup }) {
         <div>
           <div className="mb-2 text-xs font-medium uppercase text-text-muted">协议覆盖</div>
           <div className="grid grid-cols-3 gap-2">
-            {['icmp', 'tcp', 'mtr'].map((protocol) => (
+            {MONITORING_PROTOCOLS.map((protocol) => (
               <div key={protocol} className="rounded-lg border border-border bg-bg-surface-light p-2">
                 <div className="text-[10px] uppercase text-text-dim">{protocolLabel(protocol)}</div>
                 <div className="mt-1 font-mono text-lg font-semibold text-text-primary">
@@ -209,8 +210,8 @@ function EvidencePanel({ group }: { group?: MonitoringTargetGroup }) {
 
 export default function DashboardPage() {
   const { data, isLoading, error, refetch } = usePublicMonitoringTasks(100)
-  const groups = data?.groups ?? []
-  const tasks = data?.tasks ?? []
+  const groups = useMemo(() => data?.groups ?? [], [data?.groups])
+  const tasks = useMemo(() => data?.tasks ?? [], [data?.tasks])
   const [selectedTargetUuid, setSelectedTargetUuid] = useState<string | null>(null)
 
   const selectedGroup = useMemo(() => {
@@ -324,12 +325,12 @@ export default function DashboardPage() {
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-sm font-semibold text-text-primary">协议任务分布</h2>
-            <p className="mt-1 text-xs text-text-muted">用于确认 Target 是否具备 ICMP/TCP/MTR 完整检测链路。</p>
+            <p className="mt-1 text-xs text-text-muted">用于确认 Target 是否具备 ICMP/TCP/MTR/IPERF3 完整检测链路。</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            {['icmp', 'tcp', 'mtr'].map((protocol) => (
+            {MONITORING_PROTOCOLS.map((protocol) => (
               <span key={protocol} className={`rounded-md border px-2 py-1 text-xs font-semibold uppercase ${PROTOCOL_COLORS[protocol]}`}>
-                {protocol} {tasks.filter((task) => task.task_type === protocol).length}
+                {protocolLabel(protocol)} {tasks.filter((task) => task.task_type === protocol).length}
               </span>
             ))}
           </div>

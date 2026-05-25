@@ -825,7 +825,7 @@ export type PlatformEnum = 'x86_64-linux-musl' | 'aarch64-linux-musl' | 'x86_64-
 /**
  * ProtocolEnum
  */
-export type ProtocolEnum = 'icmp' | 'tcp' | 'udp' | 'http' | 'mtr';
+export type ProtocolEnum = 'icmp' | 'tcp' | 'mtr' | 'iperf3';
 
 /**
  * RefreshRequest

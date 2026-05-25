@@ -20,13 +20,14 @@ import {
   type MonitoringTask,
 } from '@/features/monitoring/lib/monitoring-models'
 
-type ProtocolFilter = 'all' | 'icmp' | 'tcp' | 'mtr'
+type ProtocolFilter = 'all' | 'icmp' | 'tcp' | 'mtr' | 'iperf3'
 
 const protocolFilters: Array<{ value: ProtocolFilter; label: string }> = [
   { value: 'all', label: '全部' },
   { value: 'icmp', label: 'ICMP' },
   { value: 'tcp', label: 'TCP' },
   { value: 'mtr', label: 'MTR' },
+  { value: 'iperf3', label: 'IPERF3' },
 ]
 
 const statusCopy: Record<LatestResultState, { label: string; variant: 'success' | 'warning' | 'error' | 'inactive' }> = {
@@ -64,7 +65,7 @@ function TaskRow({ task, basePath }: { task: MonitoringTask; basePath: string })
       <div className="min-w-0">
         <div className="flex items-center gap-2">
           <span className={`rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase ${PROTOCOL_COLORS[task.task_type] ?? 'bg-muted text-text-muted border-border'}`}>
-            {task.task_type}
+            {protocolLabel(task.task_type)}
           </span>
           <span className="truncate text-sm font-medium text-text-primary">{task.name}</span>
         </div>
@@ -89,7 +90,7 @@ function TaskRow({ task, basePath }: { task: MonitoringTask; basePath: string })
 function TargetGroupPanel({ group, basePath }: { group: MonitoringTargetGroup; basePath: string }) {
   const status = statusCopy[group.status]
   const sortedTasks = [...group.tasks].sort((a, b) => {
-    const order: Record<string, number> = { icmp: 0, tcp: 1, mtr: 2 }
+    const order: Record<string, number> = { icmp: 0, tcp: 1, mtr: 2, iperf3: 3 }
     return (order[a.task_type] ?? 10) - (order[b.task_type] ?? 10) || a.name.localeCompare(b.name)
   })
 
@@ -113,6 +114,7 @@ function TargetGroupPanel({ group, basePath }: { group: MonitoringTargetGroup; b
             {protocolCoverage(group, 'icmp')}
             {protocolCoverage(group, 'tcp')}
             {protocolCoverage(group, 'mtr')}
+            {protocolCoverage(group, 'iperf3')}
             <span className="inline-flex h-6 items-center rounded-md border border-border bg-muted/30 px-2 text-[11px] text-text-muted">
               {group.agents.length} Agent
             </span>
@@ -136,7 +138,7 @@ export default function MonitoringIndexPage() {
   const [protocol, setProtocol] = useState<ProtocolFilter>('all')
   const selectedTargetUuid = new URLSearchParams(location.search).get('target_uuid')
 
-  const groups = data?.groups ?? []
+  const groups = useMemo(() => data?.groups ?? [], [data?.groups])
   const selectedTargetName = selectedTargetUuid
     ? groups.find((group) => group.target.target_uuid === selectedTargetUuid)?.target.name
     : null

@@ -3,7 +3,7 @@ import { createMockTask, createMockAgent } from '@/test/mocks/data/factories'
 
 export const taskHandlers = [
   http.get('*/api/v1/tasks/', () => {
-    return HttpResponse.json({ items: [createMockTask(), createMockTask({ protocol: 'http', port: 443 })] })
+    return HttpResponse.json({ items: [createMockTask(), createMockTask({ protocol: 'iperf3', port: 5201 })] })
   }),
 
   http.get('*/api/v1/tasks/:taskUuid', () => {
