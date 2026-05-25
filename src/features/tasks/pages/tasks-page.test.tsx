@@ -76,6 +76,67 @@ const iperf3Task = {
 }
 
 describe('TasksPage', () => {
+  it('shows only fields related to the selected protocol when creating tasks', async () => {
+    const user = userEvent.setup()
+    server.use(
+      http.get('*/api/v1/tasks', () => HttpResponse.json({ items: [] })),
+      http.get('*/api/v1/targets', () => HttpResponse.json({ items: [target] })),
+      http.get('*/api/v1/agents', () => HttpResponse.json({ items: [agent] })),
+    )
+
+    renderWithProviders(<TasksPage />)
+
+    await user.click(screen.getByRole('button', { name: '新增 Task' }))
+    const dialog = await screen.findByRole('dialog', { name: '新增 Task' })
+    await user.click(within(dialog).getByRole('combobox', { name: 'Target' }))
+    await user.click(await screen.findByRole('option', { name: /Tokyo iperf3 Target/ }))
+
+    expect(within(dialog).getByText('ICMP 参数')).toBeInTheDocument()
+    expect(within(dialog).getByLabelText('调度间隔')).toBeInTheDocument()
+    expect(within(dialog).getByLabelText('超时时间')).toBeInTheDocument()
+    expect(within(dialog).getByLabelText('包数量')).toBeInTheDocument()
+    expect(within(dialog).getByLabelText('载荷大小')).toHaveValue(64)
+    expect(within(dialog).getByLabelText('TTL')).toBeInTheDocument()
+    expect(within(dialog).getByRole('switch', { name: '禁止分片' })).toBeInTheDocument()
+    expect(within(dialog).queryByLabelText('端口')).not.toBeInTheDocument()
+    expect(within(dialog).queryByLabelText('iperf3 线程模式')).not.toBeInTheDocument()
+
+    await user.click(within(dialog).getByRole('combobox', { name: '协议类型' }))
+    await user.click(await screen.findByRole('option', { name: 'TCP' }))
+
+    expect(within(dialog).getByText('TCP 参数')).toBeInTheDocument()
+    expect(within(dialog).getByLabelText('端口')).toBeInTheDocument()
+    expect(within(dialog).getByLabelText('端口')).toHaveValue(443)
+    expect(within(dialog).getByLabelText('载荷大小')).toHaveValue(64)
+    expect(within(dialog).queryByLabelText('iperf3 执行时长')).not.toBeInTheDocument()
+
+    await user.click(within(dialog).getByRole('combobox', { name: '协议类型' }))
+    await user.click(await screen.findByRole('option', { name: 'MTR' }))
+
+    expect(within(dialog).getByText('MTR 参数')).toBeInTheDocument()
+    expect(within(dialog).getByRole('combobox', { name: 'MTR 探测协议' })).toHaveTextContent('ICMP Echo')
+    expect(within(dialog).getByLabelText('最大跳数')).toHaveValue(30)
+    expect(within(dialog).getByLabelText('载荷大小')).toHaveValue(64)
+    expect(within(dialog).getByLabelText('包数量')).toHaveValue(10)
+    expect(within(dialog).getByRole('switch', { name: '启用 MTR 重试' })).toBeInTheDocument()
+    expect(within(dialog).queryByLabelText('端口')).not.toBeInTheDocument()
+
+    await user.click(within(dialog).getByRole('combobox', { name: 'MTR 探测协议' }))
+    await user.click(await screen.findByRole('option', { name: 'TCP' }))
+    expect(within(dialog).getByLabelText('端口')).toHaveValue(443)
+
+    await user.click(within(dialog).getByRole('combobox', { name: '协议类型' }))
+    await user.click(await screen.findByRole('option', { name: 'IPERF3' }))
+
+    expect(within(dialog).getByText('IPERF3 参数')).toBeInTheDocument()
+    expect(within(dialog).getByLabelText('端口')).toBeInTheDocument()
+    expect(within(dialog).getByLabelText('端口')).toHaveValue(5201)
+    expect(within(dialog).getByLabelText('iperf3 线程模式')).toBeInTheDocument()
+    expect(within(dialog).getByLabelText('iperf3 执行时长')).toBeInTheDocument()
+    expect(within(dialog).queryByLabelText('调度间隔')).not.toBeInTheDocument()
+    expect(within(dialog).queryByLabelText('包数量')).not.toBeInTheDocument()
+  })
+
   it('edits iperf3 tasks with one canonical protocol label and described two-column fields', async () => {
     const user = userEvent.setup()
     server.use(
@@ -102,7 +163,7 @@ describe('TasksPage', () => {
     expect(within(dialog).getByText('单次上传和下载动作各自运行的秒数，后端五分钟 claim 窗口覆盖两段动作。')).toBeInTheDocument()
 
     const config = within(dialog).getByLabelText('任务配置')
-    expect(config).toHaveClass('divide-y')
+    expect(config).toHaveClass('overflow-y-auto')
     expect(within(config).getByLabelText('端口')).toHaveValue(5201)
     expect(within(config).getByLabelText('iperf3 执行时长')).toHaveValue(10)
   })

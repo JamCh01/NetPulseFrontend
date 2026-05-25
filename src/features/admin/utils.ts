@@ -40,6 +40,15 @@ export function buildTaskPayload(input: {
   timeout: number
   packet_count: number
   port?: number
+  payloadSize?: number
+  ttl?: number
+  dontFragment?: boolean
+  mtrProbeProtocol?: 'icmp_echo' | 'tcp' | 'udp'
+  mtrMaxHops?: number
+  mtrRetryEnabled?: boolean
+  mtrLossThresholdPct?: number
+  mtrCooldownDurationSec?: number
+  mtrMaxRetryCount?: number
   iperf3Mode?: 'single_thread' | 'multi_thread'
   iperf3Duration?: number
 }): TaskCreatePayload {
@@ -56,12 +65,25 @@ export function buildTaskPayload(input: {
   }
 
   if (input.task_type === 'tcp') {
-    base.probe_config = { port: input.port ?? 443 }
-  } else if (input.task_type === 'mtr') {
     base.probe_config = {
-      probe_protocol: 'icmp_echo',
-      max_hops: 30,
-      payload_size: 64,
+      port: input.port ?? 443,
+      payload_size: input.payloadSize ?? 64,
+    }
+  } else if (input.task_type === 'mtr') {
+    const probeProtocol = input.mtrProbeProtocol ?? 'icmp_echo'
+    base.probe_config = {
+      probe_protocol: probeProtocol,
+      max_hops: input.mtrMaxHops ?? 30,
+      payload_size: input.payloadSize ?? 64,
+    }
+    if ((probeProtocol === 'tcp' || probeProtocol === 'udp') && input.port) {
+      base.probe_config.port = input.port
+    }
+    base.mtr_retry_config = {
+      enabled: input.mtrRetryEnabled ?? true,
+      loss_threshold_pct: input.mtrLossThresholdPct ?? 10,
+      cooldown_duration_sec: input.mtrCooldownDurationSec ?? 300,
+      max_retry_count: input.mtrMaxRetryCount ?? 3,
     }
   } else if (input.task_type === 'iperf3') {
     const mode = input.iperf3Mode ?? 'single_thread'
@@ -76,7 +98,9 @@ export function buildTaskPayload(input: {
     }
   } else {
     base.probe_config = {
-      payload_size: 64,
+      payload_size: input.payloadSize ?? 64,
+      ttl: input.ttl ?? null,
+      dont_fragment: input.dontFragment ?? false,
     }
   }
 

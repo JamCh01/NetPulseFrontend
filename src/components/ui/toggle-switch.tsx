@@ -16,6 +16,7 @@ function ToggleSwitch({
   labelRight,
   disabled = false,
   className,
+  "aria-label": ariaLabel,
   ...props
 }: ToggleSwitchProps) {
   return (
@@ -38,6 +39,7 @@ function ToggleSwitch({
       <button
         type="button"
         role="switch"
+        aria-label={ariaLabel}
         aria-checked={checked}
         disabled={disabled}
         onClick={() => !disabled && onChange(!checked)}
