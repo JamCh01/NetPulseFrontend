@@ -1,25 +1,31 @@
 import { http, HttpResponse } from 'msw'
-import { createMockRelease } from '@/test/mocks/data/factories'
+import { createMockAgentArtifact } from '@/test/mocks/data/factories'
 
 export const releaseHandlers = [
-  http.get('*/api/v1/agents/releases/', () => {
+  http.get('*/api/v1/artifacts/agents', () => {
     return HttpResponse.json({
-      releases: [
-        createMockRelease(),
-        createMockRelease({ version: '0.9.0', is_latest: false, platform: 'aarch64-linux-musl' }),
-      ],
+      data: {
+        items: [
+          createMockAgentArtifact(),
+          createMockAgentArtifact({ version: '0.9.0', is_active: false, arch: 'aarch64' }),
+        ],
+      },
     })
   }),
 
-  http.post('*/api/v1/agents/releases/upload', () => {
-    return HttpResponse.json(createMockRelease(), { status: 201 })
+  http.post('*/api/v1/artifacts/agents', () => {
+    return HttpResponse.json({ data: createMockAgentArtifact() }, { status: 201 })
   }),
 
-  http.delete('*/api/v1/agents/releases/:releaseUuid', () => {
-    return new HttpResponse(null, { status: 204 })
+  http.patch('*/api/v1/artifacts/agents/:artifactUuid', () => {
+    return HttpResponse.json({ data: createMockAgentArtifact() })
   }),
 
-  http.post('*/api/v1/agents/releases/:releaseUuid/push', () => {
-    return HttpResponse.json({ pushed: 5 })
+  http.delete('*/api/v1/artifacts/agents/:artifactUuid', () => {
+    return HttpResponse.json({ data: createMockAgentArtifact({ is_deleted: true }) })
+  }),
+
+  http.get('*/api/v1/artifacts/agents/:artifactUuid/download', () => {
+    return HttpResponse.json({ data: { download_url: 'https://artifacts.example.com/netpulse-agent' } })
   }),
 ]

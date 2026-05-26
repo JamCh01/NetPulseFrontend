@@ -21,6 +21,7 @@ const AgentDetailPage = lazy(() => import('@/features/agents/pages/agent-detail-
 const ReleasesPage = lazy(() => import('@/features/agents/pages/releases-page'))
 const ResultIngestionEventsPage = lazy(() => import('@/features/results/pages/result-ingestion-events-page'))
 const GeoManagementPage = lazy(() => import('@/features/admin/pages/geo-management-page'))
+const SettingsPage = lazy(() => import('@/features/admin/pages/settings-page'))
 const MonitoringIndexPage = lazy(() => import('@/features/monitoring/pages/monitoring-index-page'))
 const MonitoringDetailPage = lazy(() => import('@/features/monitoring/pages/monitoring-detail-page'))
 const MtrDetailPage = lazy(() => import('@/features/monitoring/pages/mtr-detail-page'))
@@ -64,6 +65,7 @@ export function AppRouter() {
               <Route path="/agents/releases" element={<ReleasesPage />} />
               <Route path="/agents/:agentUuid" element={<AgentDetailPage />} />
               <Route path="/geo" element={<GeoManagementPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
               <Route path="/results/ingestion-events" element={<ResultIngestionEventsPage />} />
             </Route>
           </Route>

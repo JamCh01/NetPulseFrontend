@@ -1,4 +1,4 @@
-import type { MonitoringDataPoint } from '@/api/generated/types.gen'
+import type { MonitoringDataPoint } from '@/features/monitoring/lib/monitoring-data-point'
 
 // Maximum gap between data points before we show a break in the chart (5 minutes)
 const MAX_GAP_MS = 5 * 60 * 1000

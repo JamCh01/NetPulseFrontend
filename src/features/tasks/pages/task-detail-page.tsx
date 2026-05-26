@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CheckableList } from '@/components/ui/checkable-list'
-import type { TaskResponse, AgentResponse } from '@/api/generated/types.gen'
+import type { AdminAgent, AdminTask } from '@/api/hooks/admin-api'
 import { PROTOCOL_COLORS, protocolLabel } from '@/lib/constants'
 
 export default function TaskDetailPage() {
@@ -28,9 +28,9 @@ export default function TaskDetailPage() {
   const assignAgents = useAssignAgents()
   const unassignAgent = useUnassignAgent()
 
-  const task = taskData as TaskResponse | undefined
-  const taskAgents = (taskAgentsData ?? []) as AgentResponse[]
-  const allAgents = ((allAgentsData as { items?: AgentResponse[] })?.items ?? []) as AgentResponse[]
+  const task = taskData as AdminTask | undefined
+  const taskAgents = (taskAgentsData ?? []) as AdminAgent[]
+  const allAgents = ((allAgentsData as { items?: AdminAgent[] })?.items ?? []) as AdminAgent[]
 
   const [editing, setEditing] = useState(false)
   const [editName, setEditName] = useState('')
@@ -43,7 +43,7 @@ export default function TaskDetailPage() {
   const startEditing = () => {
     if (!task) return
     setEditName(task.task_name)
-    setEditTarget(task.target)
+    setEditTarget(task.target_label)
     setEditInterval(String(task.interval))
     setEditing(true)
   }
@@ -204,7 +204,7 @@ export default function TaskDetailPage() {
               </div>
               <div>
                 <dt className="text-xs text-text-muted">{t('tasks.target')}</dt>
-                <dd className="text-sm text-text-primary font-[family-name:var(--font-mono)]">{task.target}</dd>
+                <dd className="text-sm text-text-primary font-[family-name:var(--font-mono)]">{task.target_label}</dd>
               </div>
               <div>
                 <dt className="text-xs text-text-muted">{t('tasks.port')}</dt>

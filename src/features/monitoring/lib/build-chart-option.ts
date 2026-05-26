@@ -1,5 +1,5 @@
 import type { EChartsOption } from 'echarts'
-import type { MonitoringDataPoint } from '@/api/generated/types.gen'
+import type { MonitoringDataPoint } from '@/features/monitoring/lib/monitoring-data-point'
 import type { ChartBandData } from './transform-chart-data'
 import type { ChartThemeConfig } from './chart-theme'
 import { buildDataIndex, createTooltipFormatter } from './tooltip-formatter'

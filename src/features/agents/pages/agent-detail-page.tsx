@@ -20,7 +20,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
-import type { AgentResponse, TaskResponse } from '@/api/generated/types.gen'
+import type { AdminAgent, AdminTask } from '@/api/hooks/admin-api'
 import { AGENT_STATUS_COLORS, PROTOCOL_COLORS, protocolLabel } from '@/lib/constants'
 import { GeoCascader } from '@/features/agents/components/geo-cascader'
 
@@ -38,7 +38,7 @@ export default function AgentDetailPage() {
   const updateAgent = useUpdateAgent()
   const disableAgent = useDisableAgent()
 
-  const agent = data as AgentResponse | undefined
+  const agent = data as AdminAgent | undefined
   const isAdmin = useAuthStore((s) => s.isAdmin())
 
   const { data: agentTasksData, isLoading: tasksLoading } = useAgentTasks(agentUuid ?? '')
@@ -46,11 +46,11 @@ export default function AgentDetailPage() {
   const assignTasks = useAssignTasksFromAgent()
   const unassignTask = useUnassignTaskFromAgent()
 
-  const agentTasksRaw = agentTasksData as { tasks?: TaskResponse[] } | TaskResponse[] | undefined
-  const agentTasks: TaskResponse[] = Array.isArray(agentTasksRaw)
+  const agentTasksRaw = agentTasksData as { tasks?: AdminTask[] } | AdminTask[] | undefined
+  const agentTasks: AdminTask[] = Array.isArray(agentTasksRaw)
     ? agentTasksRaw
     : (agentTasksRaw?.tasks ?? [])
-  const allTasks = ((allTasksData as unknown as { items?: TaskResponse[] })?.items ?? []) as TaskResponse[]
+  const allTasks = ((allTasksData as unknown as { items?: AdminTask[] })?.items ?? []) as AdminTask[]
   const assignedTaskUuids = new Set(agentTasks.map((tk) => tk.task_uuid))
   const availableTasks = allTasks.filter((tk) => !assignedTaskUuids.has(tk.task_uuid) && tk.is_active)
 
@@ -360,7 +360,7 @@ export default function AgentDetailPage() {
                 <Badge className={`border text-[10px] uppercase ${PROTOCOL_COLORS[tk.protocol] ?? ''}`}>
                   {protocolLabel(tk.protocol)}
                 </Badge>
-                <span className="text-xs text-muted-foreground font-[family-name:var(--font-mono)]">{tk.target}</span>
+                <span className="text-xs text-muted-foreground font-[family-name:var(--font-mono)]">{tk.target_label}</span>
               </div>
             ))}
           </div>

@@ -114,24 +114,25 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       try {
         const res = await fetch(buildApiUrl('/api/v1/auth/refresh'), {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ refresh_token: storedRefresh }),
+          headers: { Authorization: `Bearer ${storedRefresh}` },
         })
         if (res.ok) {
-          const data = await res.json()
-          const payload = decodeJwt(data.access_token)
+          const body = await res.json()
+          const data = body?.data ?? body
+          const accessToken = data.access_token
+          const payload = decodeJwt(accessToken)
           if (payload) {
             const user: AuthUser = {
               uuid: payload.sub,
               username: storedUser ? (parseAuthUser(storedUser)?.username ?? 'user') : 'user',
               role: payload.role,
             }
-            localStorage.setItem(ACCESS_TOKEN_KEY, data.access_token)
-            localStorage.setItem(REFRESH_TOKEN_KEY, data.refresh_token)
+            localStorage.setItem(ACCESS_TOKEN_KEY, accessToken)
+            localStorage.setItem(REFRESH_TOKEN_KEY, accessToken)
             localStorage.setItem(USER_KEY, JSON.stringify(user))
             set({
-              accessToken: data.access_token,
-              refreshToken: data.refresh_token,
+              accessToken,
+              refreshToken: accessToken,
               user,
               initialized: true,
             })

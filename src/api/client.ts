@@ -1,6 +1,6 @@
 import { client } from '@/api/generated/client.gen'
 import { useAuthStore } from '@/stores/auth-store'
-import { refreshRouteApiV1AuthRefreshPost } from '@/api/generated/sdk.gen'
+import { postV1AuthRefreshApiV1AuthRefreshPost } from '@/api/generated/sdk.gen'
 
 let isRefreshing = false
 let refreshPromise: Promise<boolean> | null = null
@@ -14,7 +14,7 @@ function extractTokens(data: unknown): { accessToken: string; refreshToken: stri
   const source = nested ?? root
   const accessToken = typeof source.access_token === 'string' ? source.access_token : null
   if (!accessToken) return null
-  const refreshToken = typeof source.refresh_token === 'string' ? source.refresh_token : accessToken
+  const refreshToken = accessToken
   return { accessToken, refreshToken }
 }
 
@@ -26,8 +26,7 @@ async function doRefresh(): Promise<boolean> {
   if (!currentToken) return false
 
   try {
-    const { data, error } = await refreshRouteApiV1AuthRefreshPost({
-      body: { refresh_token: refreshToken ?? currentToken },
+    const { data, error } = await postV1AuthRefreshApiV1AuthRefreshPost({
       headers: { authorization: `Bearer ${currentToken}` },
     })
     if (error) {
@@ -45,7 +44,8 @@ async function doRefresh(): Promise<boolean> {
 }
 
 export function configureApiClient() {
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || ''
+  const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL || ''
+  const baseUrl = configuredBaseUrl || window.location.origin
 
   client.setConfig({ baseUrl })
 

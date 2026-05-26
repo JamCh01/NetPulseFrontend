@@ -2,7 +2,7 @@ import { keepPreviousData, useQuery, useQueries } from '@tanstack/react-query'
 import { monitoringKeys } from './keys'
 import { buildApiUrl } from '@/api/base-url'
 import type { MonitoringTask } from '@/features/monitoring/lib/monitoring-models'
-import type { GranularityEnum, MonitoringDataPoint } from '@/api/generated/types.gen'
+import type { MonitoringDataPoint, MonitoringGranularity } from '@/features/monitoring/lib/monitoring-data-point'
 
 interface TimeRange {
   start: number
@@ -11,7 +11,7 @@ interface TimeRange {
 }
 
 interface GranularityConfig {
-  granularity: GranularityEnum
+  granularity: MonitoringGranularity
   staleTime: number
   stepSec: number
 }

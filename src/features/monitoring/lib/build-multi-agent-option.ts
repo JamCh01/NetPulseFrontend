@@ -1,5 +1,5 @@
 import type { EChartsOption } from 'echarts'
-import type { MonitoringDataPoint } from '@/api/generated/types.gen'
+import type { MonitoringDataPoint } from '@/features/monitoring/lib/monitoring-data-point'
 import type { ChartThemeConfig } from './chart-theme'
 import { getAgentColor } from './agent-colors'
 import { formatChartTime } from '@/lib/format'

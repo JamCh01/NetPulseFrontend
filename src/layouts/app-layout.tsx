@@ -24,6 +24,7 @@ import {
   Crosshair,
   DatabaseZap,
   Map,
+  Settings as SettingsIcon,
 } from 'lucide-react'
 
 import {
@@ -66,6 +67,7 @@ export function AppLayout() {
     { label: 'Tasks', path: '/tasks', icon: <ListChecks className="w-4 h-4" />, adminOnly: true },
     { label: 'GEO', path: '/geo', icon: <Map className="w-4 h-4" />, adminOnly: true },
     { label: 'Results', path: '/results/ingestion-events', icon: <DatabaseZap className="w-4 h-4" />, adminOnly: true },
+    { label: 'Settings', path: '/settings', icon: <SettingsIcon className="w-4 h-4" />, adminOnly: true },
   ]
 
   const handleLogout = () => {

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router'
+import { Link } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useRegister } from '@/api/hooks/use-auth'
@@ -11,7 +11,6 @@ export default function RegisterPage() {
   const [form, setForm] = useState({ username: '', email: '', password: '' })
   const [cooldown, setCooldown] = useState(false)
   const { t } = useTranslation()
-  const navigate = useNavigate()
   const register = useRegister()
 
   function getErrorMessage(error: unknown): string {
@@ -31,17 +30,11 @@ export default function RegisterPage() {
     e.preventDefault()
     setCooldown(true)
     setTimeout(() => setCooldown(false), 3000)
-    register.mutate(
-      { username: form.username, email: form.email, password: form.password, role: 'subscriber' },
-      {
-        onSuccess: () => {
-          navigate('/login?registered=true')
-        },
-        onError: (err) => {
-          toast.error(getErrorMessage(err))
-        },
-      }
-    )
+    register.mutate(undefined, {
+      onError: (err) => {
+        toast.error(getErrorMessage(err))
+      },
+    })
   }
 
   return (
@@ -105,4 +98,3 @@ export default function RegisterPage() {
     </div>
   )
 }
-

@@ -25,7 +25,7 @@ import {
   refreshRelativeTimeRange,
   type MonitoringTimeRange,
 } from '@/features/monitoring/lib/time-range'
-import type { MonitoringDataPoint } from '@/api/generated/types.gen'
+import type { MonitoringDataPoint } from '@/features/monitoring/lib/monitoring-data-point'
 
 type ChartStyle = 'basic' | 'smoke'
 

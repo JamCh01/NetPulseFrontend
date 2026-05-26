@@ -3,7 +3,7 @@
  * Uses a pre-built timestamp→data index for reliable value lookup.
  */
 
-import type { MonitoringDataPoint } from '@/api/generated/types.gen'
+import type { MonitoringDataPoint } from '@/features/monitoring/lib/monitoring-data-point'
 import type { ChartThemeConfig } from './chart-theme'
 import { formatChartTime } from '@/lib/format'
 

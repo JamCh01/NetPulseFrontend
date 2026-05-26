@@ -2,28 +2,24 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { agentKeys, taskKeys } from './keys'
 import {
-  getAgentTasksApiV1AgentsAgentUuidTasksGet,
-  assignTaskEndpointApiV1TasksTaskUuidAssignPost,
-  unassignTaskEndpointApiV1TasksTaskUuidAgentsAgentUuidDelete,
-} from '@/api/generated/sdk.gen'
-import type { AgentTaskAssign } from '@/api/generated/types.gen'
-import { useAuthStore } from '@/stores/auth-store'
+  adminRequest,
+  normalizeTask,
+  type AdminAgent,
+  type AdminTask,
+} from './admin-api'
+
+export interface AgentTaskAssign {
+  agent_uuids: string[]
+}
 
 export function useAgentTasks(agentUuid: string) {
-  const accessToken = useAuthStore((state) => state.accessToken)
   return useQuery({
     queryKey: agentKeys.tasks(agentUuid),
     queryFn: async () => {
-      const { data, error } = await getAgentTasksApiV1AgentsAgentUuidTasksGet({
-        headers: {
-          'X-Access-Key': accessToken ?? '',
-        },
-        path: { agent_uuid: agentUuid },
-      })
-      if (error) throw error
-      return data
+      const tasks = await adminRequest<AdminTask[]>(`/api/v1/agents/${agentUuid}/tasks`)
+      return tasks.map(normalizeTask)
     },
-    enabled: !!agentUuid && !!accessToken,
+    enabled: !!agentUuid,
   })
 }
 
@@ -38,12 +34,10 @@ export function useAssignTasksFromAgent() {
       agentUuid: string
       data: AgentTaskAssign
     }) => {
-      const { data, error } = await assignTaskEndpointApiV1TasksTaskUuidAssignPost({
-        path: { task_uuid: taskUuid },
-        body,
+      return adminRequest<AdminAgent[]>(`/api/v1/tasks/${taskUuid}/assign`, {
+        method: 'POST',
+        body: JSON.stringify(body),
       })
-      if (error) throw error
-      return data
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: taskKeys.agents(variables.taskUuid) })
@@ -56,11 +50,7 @@ export function useUnassignTaskFromAgent() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async ({ taskUuid, agentUuid }: { taskUuid: string; agentUuid: string }) => {
-      const { data, error } = await unassignTaskEndpointApiV1TasksTaskUuidAgentsAgentUuidDelete({
-        path: { task_uuid: taskUuid, agent_uuid: agentUuid },
-      })
-      if (error) throw error
-      return data
+      return adminRequest<void>(`/api/v1/tasks/${taskUuid}/agents/${agentUuid}`, { method: 'DELETE' })
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: taskKeys.agents(variables.taskUuid) })

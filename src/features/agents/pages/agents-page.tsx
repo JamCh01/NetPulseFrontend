@@ -165,7 +165,7 @@ export default function AgentsPage() {
           <p className="text-sm text-text-muted">通过 /api/v1/agents/* 管理探针、状态和配置同步信息。</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => navigate('/agents/releases')}>版本发布</Button>
+          <Button variant="outline" onClick={() => navigate('/agents/releases')}>Agent Artifact</Button>
           <Button onClick={() => {
             setEditingAgent(null)
             resetForm()

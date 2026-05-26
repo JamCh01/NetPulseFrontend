@@ -1,25 +1,35 @@
-import { useState, useRef } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
-import { useTranslation } from 'react-i18next'
-import { useReleases, useUploadRelease, useDeleteRelease, usePushUpdate } from '@/api/hooks/use-releases'
+import { Download, Pencil, Plus, Trash2, Upload } from 'lucide-react'
+
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from '@/components/ui/table'
+  useAgentArtifacts,
+  useDeleteAgentArtifact,
+  useDownloadAgentArtifact,
+  useUpdateAgentArtifact,
+  useUploadAgentArtifact,
+} from '@/api/hooks/use-agent-artifacts'
+import type { AgentArtifactResponse } from '@/api/generated/types.gen'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
-import type { ReleaseResponse, ReleaseListResponse } from '@/api/generated/types.gen'
-import { PLATFORM_OPTIONS } from '@/lib/constants'
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from '@/components/ui/table'
+import { Textarea } from '@/components/ui/textarea'
+import { ToggleSwitch } from '@/components/ui/toggle-switch'
 import { formatDateTime } from '@/lib/format'
+
+const OS_OPTIONS = ['linux', 'darwin', 'windows']
+const ARCH_OPTIONS = ['x86_64', 'aarch64', 'arm64', 'amd64']
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
@@ -27,205 +37,248 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
+function shortSha(sha: string): string {
+  return `${sha.slice(0, 12)}...${sha.slice(-6)}`
+}
+
+function artifactPlatform(artifact: AgentArtifactResponse): string {
+  return `${artifact.os} / ${artifact.arch}`
+}
+
 export default function ReleasesPage() {
   const navigate = useNavigate()
-  const { t, i18n } = useTranslation()
+  const [osFilter, setOsFilter] = useState('linux')
+  const [archFilter, setArchFilter] = useState('')
+  const [versionFilter, setVersionFilter] = useState('')
+  const [activeFilter, setActiveFilter] = useState<'all' | 'active' | 'inactive'>('all')
 
-  const [platformFilter, setPlatformFilter] = useState<string>('')
-  const { data, isLoading, error } = useReleases(platformFilter || undefined)
-  const releases = ((data as ReleaseListResponse)?.releases ?? []) as ReleaseResponse[]
+  const queryFilters = useMemo(() => ({
+    os: osFilter || undefined,
+    arch: archFilter || undefined,
+    version: versionFilter || undefined,
+    is_active: activeFilter === 'all' ? undefined : activeFilter === 'active',
+  }), [activeFilter, archFilter, osFilter, versionFilter])
 
-  // Upload dialog
+  const { data, isLoading, error } = useAgentArtifacts(queryFilters)
+  const artifacts = (data?.data.items ?? []) as AgentArtifactResponse[]
+
   const [uploadOpen, setUploadOpen] = useState(false)
   const [uploadVersion, setUploadVersion] = useState('')
-  const [uploadPlatform, setUploadPlatform] = useState('')
-  const [uploadNotes, setUploadNotes] = useState('')
+  const [uploadOs, setUploadOs] = useState('linux')
+  const [uploadArch, setUploadArch] = useState('x86_64')
+  const [uploadActive, setUploadActive] = useState(true)
+  const [uploadComment, setUploadComment] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const uploadRelease = useUploadRelease()
+  const uploadArtifact = useUploadAgentArtifact()
 
-  // Delete dialog
-  const [deleteUuid, setDeleteUuid] = useState<string | null>(null)
-  const deleteTarget = deleteUuid ? releases.find((r) => r.release_uuid === deleteUuid) : null
-  const deleteRelease = useDeleteRelease()
+  const [editing, setEditing] = useState<AgentArtifactResponse | null>(null)
+  const updateArtifact = useUpdateAgentArtifact()
 
-  // Push dialog
-  const [pushUuid, setPushUuid] = useState<string | null>(null)
-  const pushTarget = pushUuid ? releases.find((r) => r.release_uuid === pushUuid) : null
-  const pushUpdate = usePushUpdate()
-  const [pushResult, setPushResult] = useState<number | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<AgentArtifactResponse | null>(null)
+  const deleteArtifact = useDeleteAgentArtifact()
+  const downloadArtifact = useDownloadAgentArtifact()
 
-  const handleUpload = (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleUpload = (event: React.FormEvent) => {
+    event.preventDefault()
     const file = fileInputRef.current?.files?.[0]
-    if (!file || !uploadVersion || !uploadPlatform) return
+    if (!file || !uploadVersion.trim()) return
 
-    uploadRelease.mutate(
+    uploadArtifact.mutate(
       {
         file,
-        version: uploadVersion,
-        platform: uploadPlatform,
-        release_notes: uploadNotes.trim() || undefined,
+        version: uploadVersion.trim(),
+        os: uploadOs,
+        arch: uploadArch,
+        is_active: uploadActive,
+        comment: uploadComment.trim() || undefined,
       },
       {
         onSuccess: () => {
           setUploadOpen(false)
           setUploadVersion('')
-          setUploadPlatform('')
-          setUploadNotes('')
+          setUploadOs('linux')
+          setUploadArch('x86_64')
+          setUploadActive(true)
+          setUploadComment('')
           if (fileInputRef.current) fileInputRef.current.value = ''
         },
       },
     )
   }
 
-  const handleDelete = () => {
-    if (!deleteUuid) return
-    deleteRelease.mutate(deleteUuid, { onSuccess: () => setDeleteUuid(null) })
+  const handleUpdate = (event: React.FormEvent) => {
+    event.preventDefault()
+    if (!editing) return
+    updateArtifact.mutate(
+      {
+        artifactUuid: editing.artifact_uuid,
+        body: {
+          version: editing.version,
+          os: editing.os,
+          arch: editing.arch,
+          is_active: editing.is_active,
+          comment: editing.comment ?? null,
+        },
+      },
+      {
+        onSuccess: () => setEditing(null),
+      },
+    )
   }
 
-  const handlePush = () => {
-    if (!pushUuid) return
-    pushUpdate.mutate(pushUuid, {
-      onSuccess: (result) => {
-        const res = result as { pushed?: number }
-        setPushResult(res?.pushed ?? 0)
+  const handleDelete = () => {
+    if (!deleteTarget) return
+    deleteArtifact.mutate(deleteTarget.artifact_uuid, {
+      onSuccess: () => setDeleteTarget(null),
+    })
+  }
+
+  const handleDownload = (artifact: AgentArtifactResponse) => {
+    downloadArtifact.mutate(artifact.artifact_uuid, {
+      onSuccess: (response) => {
+        const data = response as { data?: { download_url?: string } } | undefined
+        const url = data?.data?.download_url
+        if (url) window.open(url, '_blank', 'noopener,noreferrer')
       },
     })
   }
 
-  const getPlatformLabel = (platform: string): string => {
-    const opt = PLATFORM_OPTIONS.find((p) => p.value === platform)
-    return opt ? t(opt.labelKey) : platform
-  }
-
-  const handleCopySha = async (sha: string) => {
-    try {
-      await navigator.clipboard.writeText(sha)
-    } catch { /* clipboard not available */ }
-  }
-
   return (
-    <div>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
+    <div className="p-6 space-y-5">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div>
           <button
             onClick={() => navigate('/agents')}
-            className="text-text-muted hover:text-text-primary transition-colors text-sm"
+            className="text-sm text-text-muted hover:text-text-primary transition-colors"
           >
-            {t('agents.title')} /
+            Agents /
           </button>
-          <h1 className="text-2xl font-bold text-text-primary">{t('agents.releases')}</h1>
+          <h1 className="text-2xl font-semibold text-text-primary">Agent Artifacts</h1>
+          <p className="mt-1 text-sm text-text-muted">管理 Agent 可执行文件版本、平台元数据和 Cloudflare R2 下载入口。</p>
         </div>
-        <Button
-          
-          onClick={() => setUploadOpen(true)}
-        >
-          {t('agents.uploadRelease')}
+        <Button onClick={() => setUploadOpen(true)}>
+          <Upload className="w-4 h-4" />
+          上传 Artifact
         </Button>
       </div>
 
-      {/* Platform filter */}
-      <div className="flex items-center gap-2 mb-4">
-        <span className="text-xs text-text-muted">{t('agents.platform')}:</span>
-        <Select
-          value={platformFilter}
-          onValueChange={(val) => setPlatformFilter(val === '__all__' ? '' : (val ?? ''))}
-        >
-          <SelectTrigger className="w-48">
-            <SelectValue>
-              {(value: string | null) =>
-                value && value !== '__all__' ? getPlatformLabel(value) : t('agents.allPlatforms')
-              }
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="__all__">{t('agents.allPlatforms')}</SelectItem>
-            {PLATFORM_OPTIONS.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>
-                {t(opt.labelKey)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <section className="glass-light rounded-lg border border-border/60 p-4">
+        <div className="grid gap-3 md:grid-cols-[160px_160px_1fr_160px]">
+          <div>
+            <Label htmlFor="artifact-os-filter" className="mb-1.5 text-xs text-text-muted">OS</Label>
+            <Select value={osFilter || '__all__'} onValueChange={(value) => setOsFilter(value === '__all__' ? '' : (value ?? ''))}>
+              <SelectTrigger id="artifact-os-filter" aria-label="OS" className="w-full bg-background/95">
+                <SelectValue>{(value: string | null) => value === '__all__' || !value ? '全部 OS' : value}</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">全部 OS</SelectItem>
+                {OS_OPTIONS.map((os) => <SelectItem key={os} value={os}>{os}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="artifact-arch-filter" className="mb-1.5 text-xs text-text-muted">Arch</Label>
+            <Select value={archFilter || '__all__'} onValueChange={(value) => setArchFilter(value === '__all__' ? '' : (value ?? ''))}>
+              <SelectTrigger id="artifact-arch-filter" aria-label="Arch" className="w-full bg-background/95">
+                <SelectValue>{(value: string | null) => value === '__all__' || !value ? '全部 Arch' : value}</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">全部 Arch</SelectItem>
+                {ARCH_OPTIONS.map((arch) => <SelectItem key={arch} value={arch}>{arch}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="artifact-version-filter" className="mb-1.5 text-xs text-text-muted">Version</Label>
+            <Input
+              id="artifact-version-filter"
+              value={versionFilter}
+              onChange={(event) => setVersionFilter(event.target.value)}
+              placeholder="例如 1.2.3"
+              className="bg-background/95"
+            />
+          </div>
+          <div>
+            <Label htmlFor="artifact-active-filter" className="mb-1.5 text-xs text-text-muted">状态</Label>
+            <Select value={activeFilter} onValueChange={(value) => setActiveFilter((value as typeof activeFilter) ?? 'all')}>
+              <SelectTrigger id="artifact-active-filter" aria-label="状态" className="w-full bg-background/95">
+                <SelectValue>{(value: string | null) => value === 'active' ? '启用' : value === 'inactive' ? '停用' : '全部'}</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">全部</SelectItem>
+                <SelectItem value="active">启用</SelectItem>
+                <SelectItem value="inactive">停用</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </section>
 
-      {/* Release list */}
-      <div className="glass-light rounded-xl p-1">
+      <section className="glass-light rounded-lg border border-border/60 overflow-hidden">
         {isLoading ? (
           <div className="p-6 space-y-3">
-            {Array.from({ length: 3 }, (_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+            {Array.from({ length: 4 }, (_, index) => <Skeleton key={index} className="h-10 w-full" />)}
           </div>
         ) : error ? (
-          <div className="p-6 text-center">
-            <p className="text-red-400 text-sm">{t('agents.failedToLoad')}</p>
-          </div>
-        ) : releases.length === 0 ? (
-          <div className="p-6 text-center">
-            <p className="text-text-muted text-sm">{t('agents.noReleases')}</p>
-          </div>
+          <div className="p-8 text-center text-sm text-red-400">Artifact 列表加载失败。</div>
+        ) : artifacts.length === 0 ? (
+          <div className="p-8 text-center text-sm text-text-muted">暂无 Agent Artifact。</div>
         ) : (
           <Table>
             <TableHeader>
-              <TableRow className="border-white/5 hover:bg-transparent">
-                <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('agents.versionLabel')}</TableHead>
-                <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('agents.platform')}</TableHead>
-                <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('agents.filename')}</TableHead>
-                <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('agents.fileSize')}</TableHead>
-                <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('agents.sha256')}</TableHead>
-                <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('agents.releaseNotes')}</TableHead>
-                <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('common.createdAt')}</TableHead>
-                <TableHead className="text-text-muted text-xs uppercase tracking-wider">{t('common.actions')}</TableHead>
+              <TableRow>
+                <TableHead>版本</TableHead>
+                <TableHead>平台</TableHead>
+                <TableHead>文件</TableHead>
+                <TableHead>大小</TableHead>
+                <TableHead>SHA256</TableHead>
+                <TableHead>存储</TableHead>
+                <TableHead>状态</TableHead>
+                <TableHead>创建时间</TableHead>
+                <TableHead>操作</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {releases.map((release) => (
-                <TableRow key={release.release_uuid} className="border-white/5 hover:bg-white/5">
+              {artifacts.map((artifact) => (
+                <TableRow key={artifact.artifact_uuid}>
+                  <TableCell className="font-mono text-sm text-text-primary">{artifact.version}</TableCell>
+                  <TableCell className="text-sm text-text-secondary">{artifactPlatform(artifact)}</TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
-                      <span className="text-text-primary font-medium font-mono text-sm">v{release.version}</span>
-                      {release.is_latest && (
-                        <Badge className="border text-[9px] bg-emerald-500/15 text-emerald-400 border-emerald-500/30">
-                          {t('agents.latest')}
-                        </Badge>
-                      )}
+                    <div className="max-w-[220px] truncate text-sm text-text-secondary" title={artifact.filename}>
+                      {artifact.filename}
                     </div>
+                    {artifact.comment && <div className="max-w-[220px] truncate text-xs text-text-muted">{artifact.comment}</div>}
                   </TableCell>
-                  <TableCell className="text-text-secondary text-xs">{getPlatformLabel(release.platform)}</TableCell>
-                  <TableCell className="text-text-secondary text-xs font-mono max-w-[200px] truncate">{release.filename}</TableCell>
-                  <TableCell className="text-text-secondary text-xs font-mono">{formatFileSize(release.file_size)}</TableCell>
+                  <TableCell className="font-mono text-xs text-text-secondary">{formatFileSize(artifact.size_bytes)}</TableCell>
                   <TableCell>
                     <button
-                      onClick={() => handleCopySha(release.sha256)}
-                      className="text-text-dim text-[10px] font-mono hover:text-text-secondary transition-colors cursor-pointer"
-                      title={release.sha256}
+                      onClick={() => navigator.clipboard?.writeText(artifact.sha256)}
+                      className="font-mono text-xs text-text-muted hover:text-text-primary"
+                      title={artifact.sha256}
                     >
-                      {release.sha256.slice(0, 12)}...
+                      {shortSha(artifact.sha256)}
                     </button>
                   </TableCell>
-                  <TableCell className="text-text-secondary text-xs max-w-[160px] truncate">
-                    {release.release_notes ?? '-'}
-                  </TableCell>
-                  <TableCell className="text-text-secondary text-xs font-mono">
-                    {formatDateTime(release.created_at, i18n.language)}
+                  <TableCell>
+                    <div className="text-xs text-text-secondary">{artifact.storage_provider}</div>
+                    <div className="max-w-[180px] truncate text-xs text-text-muted" title={artifact.storage_bucket}>{artifact.storage_bucket}</div>
                   </TableCell>
                   <TableCell>
+                    <Badge className={artifact.is_active ? 'border border-emerald-500/30 bg-emerald-500/15 text-emerald-300' : 'border border-border bg-muted text-text-muted'}>
+                      {artifact.is_active ? '启用' : '停用'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="font-mono text-xs text-text-secondary">{formatDateTime(artifact.created_at, 'zh')}</TableCell>
+                  <TableCell>
                     <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-xs h-7 px-2 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
-                        onClick={() => { setPushResult(null); setPushUuid(release.release_uuid) }}
-                      >
-                        {t('agents.pushUpdate')}
+                      <Button variant="ghost" size="icon-sm" aria-label="下载" onClick={() => handleDownload(artifact)}>
+                        <Download className="w-4 h-4" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-xs h-7 px-2 text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                        onClick={() => setDeleteUuid(release.release_uuid)}
-                      >
-                        {t('common.delete')}
+                      <Button variant="ghost" size="icon-sm" aria-label="编辑" onClick={() => setEditing(artifact)}>
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon-sm" aria-label="删除" className="text-red-400" onClick={() => setDeleteTarget(artifact)}>
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
                   </TableCell>
@@ -234,133 +287,125 @@ export default function ReleasesPage() {
             </TableBody>
           </Table>
         )}
-      </div>
+      </section>
 
-      {/* Upload Dialog */}
       <Dialog open={uploadOpen} onOpenChange={setUploadOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>{t('agents.uploadRelease')}</DialogTitle>
-            <DialogDescription>{t('agents.uploadReleaseDesc')}</DialogDescription>
+            <DialogTitle>上传 Agent Artifact</DialogTitle>
+            <DialogDescription>选择 Agent 可执行文件并填写版本与平台信息，后端会上传到 Cloudflare R2。</DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleUpload} className="space-y-4 mt-2">
+          <form onSubmit={handleUpload} className="space-y-4">
             <div>
-              <Label className="text-xs text-text-secondary mb-1.5">{t('agents.file')}</Label>
+              <Label htmlFor="artifact-file" className="mb-1.5 text-xs text-text-muted">文件</Label>
               <input
                 ref={fileInputRef}
+                id="artifact-file"
                 type="file"
                 required
-                className="w-full text-sm text-text-secondary file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-white/10 file:text-text-primary hover:file:bg-white/15 file:cursor-pointer"
+                className="w-full rounded-lg border border-input bg-background/95 px-3 py-2 text-sm text-text-secondary file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-1.5 file:text-text-primary"
               />
             </div>
-            <div>
-              <Label className="text-xs text-text-secondary mb-1.5">{t('agents.versionLabel')}</Label>
-              <Input
-                value={uploadVersion}
-                onChange={(e) => setUploadVersion(e.target.value)}
-                placeholder={t('agents.versionPlaceholder')}
-                required
-              />
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div>
+                <Label htmlFor="artifact-upload-version" className="mb-1.5 text-xs text-text-muted">版本</Label>
+                <Input id="artifact-upload-version" value={uploadVersion} onChange={(event) => setUploadVersion(event.target.value)} required />
+              </div>
+              <div>
+                <Label htmlFor="artifact-upload-os" className="mb-1.5 text-xs text-text-muted">OS</Label>
+                <Select value={uploadOs} onValueChange={(value) => setUploadOs(value ?? 'linux')}>
+                  <SelectTrigger id="artifact-upload-os" aria-label="上传 OS" className="w-full bg-background/95">
+                    <SelectValue>{(value: string | null) => value ?? 'linux'}</SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>{OS_OPTIONS.map((os) => <SelectItem key={os} value={os}>{os}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="artifact-upload-arch" className="mb-1.5 text-xs text-text-muted">Arch</Label>
+                <Select value={uploadArch} onValueChange={(value) => setUploadArch(value ?? 'x86_64')}>
+                  <SelectTrigger id="artifact-upload-arch" aria-label="上传 Arch" className="w-full bg-background/95">
+                    <SelectValue>{(value: string | null) => value ?? 'x86_64'}</SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>{ARCH_OPTIONS.map((arch) => <SelectItem key={arch} value={arch}>{arch}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex items-center justify-between rounded-lg border border-border/70 p-3">
+              <div>
+                <div className="text-sm font-medium text-text-primary">启用版本</div>
+                <div className="text-xs text-text-muted">启用后会出现在默认下载候选列表中。</div>
+              </div>
+              <ToggleSwitch aria-label="启用版本" checked={uploadActive} onChange={setUploadActive} />
             </div>
             <div>
-              <Label className="text-xs text-text-secondary mb-1.5">{t('agents.platform')}</Label>
-              <Select value={uploadPlatform} onValueChange={(val) => setUploadPlatform(val ?? '')}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t('agents.selectPlatform')}>
-                    {(value: string | null) => value ? getPlatformLabel(value) : t('agents.selectPlatform')}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {PLATFORM_OPTIONS.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {t(opt.labelKey)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label className="text-xs text-text-secondary mb-1.5">{t('agents.releaseNotes')}</Label>
-              <Textarea
-                value={uploadNotes}
-                onChange={(e) => setUploadNotes(e.target.value)}
-                placeholder={t('agents.releaseNotesPlaceholder')}
-                className="text-xs min-h-[80px]"
-                rows={3}
-              />
+              <Label htmlFor="artifact-upload-comment" className="mb-1.5 text-xs text-text-muted">备注</Label>
+              <Textarea id="artifact-upload-comment" value={uploadComment} onChange={(event) => setUploadComment(event.target.value)} rows={3} />
             </div>
             <DialogFooter>
-              <Button
-                type="submit"
-                disabled={uploadRelease.isPending}
-                
-              >
-                {uploadRelease.isPending ? t('common.creating') : t('agents.uploadRelease')}
+              <Button type="submit" disabled={uploadArtifact.isPending}>
+                <Plus className="w-4 h-4" />
+                {uploadArtifact.isPending ? '上传中' : '上传'}
               </Button>
             </DialogFooter>
-            {uploadRelease.isError && (
-              <p className="text-red-400 text-xs">{t('agents.uploadFailed')}</p>
-            )}
           </form>
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation */}
-      <Dialog open={deleteUuid !== null} onOpenChange={(open) => { if (!open) setDeleteUuid(null) }}>
-        <DialogContent>
+      <Dialog open={editing !== null} onOpenChange={(open) => { if (!open) setEditing(null) }}>
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>{t('agents.deleteRelease')}</DialogTitle>
-            <DialogDescription>
-              {t('agents.deleteReleaseConfirm', {
-                version: deleteTarget?.version ?? '',
-                platform: deleteTarget ? getPlatformLabel(deleteTarget.platform) : '',
-              })}
-            </DialogDescription>
+            <DialogTitle>编辑 Artifact</DialogTitle>
+            <DialogDescription>只修改元数据，不会变更 Cloudflare R2 中的文件本体。</DialogDescription>
           </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteUuid(null)}>{t('common.cancel')}</Button>
-            <Button variant="destructive" onClick={handleDelete} disabled={deleteRelease.isPending}>
-              {deleteRelease.isPending ? t('common.deleting') : t('common.delete')}
-            </Button>
-          </DialogFooter>
-          {deleteRelease.isError && (
-            <p className="text-red-400 text-xs">{t('agents.deleteFailed')}</p>
+          {editing && (
+            <form onSubmit={handleUpdate} className="space-y-4">
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div>
+                  <Label htmlFor="artifact-edit-version" className="mb-1.5 text-xs text-text-muted">版本</Label>
+                  <Input id="artifact-edit-version" value={editing.version} onChange={(event) => setEditing({ ...editing, version: event.target.value })} required />
+                </div>
+                <div>
+                  <Label htmlFor="artifact-edit-os" className="mb-1.5 text-xs text-text-muted">OS</Label>
+                  <Input id="artifact-edit-os" value={editing.os} onChange={(event) => setEditing({ ...editing, os: event.target.value })} required />
+                </div>
+                <div>
+                  <Label htmlFor="artifact-edit-arch" className="mb-1.5 text-xs text-text-muted">Arch</Label>
+                  <Input id="artifact-edit-arch" value={editing.arch} onChange={(event) => setEditing({ ...editing, arch: event.target.value })} required />
+                </div>
+              </div>
+              <div className="flex items-center justify-between rounded-lg border border-border/70 p-3">
+                <div>
+                  <div className="text-sm font-medium text-text-primary">启用状态</div>
+                  <div className="text-xs text-text-muted">停用后保留记录但不作为可用版本展示。</div>
+                </div>
+                <ToggleSwitch aria-label="启用状态" checked={editing.is_active} onChange={(checked) => setEditing({ ...editing, is_active: checked })} />
+              </div>
+              <div>
+                <Label htmlFor="artifact-edit-comment" className="mb-1.5 text-xs text-text-muted">备注</Label>
+                <Textarea id="artifact-edit-comment" value={editing.comment ?? ''} onChange={(event) => setEditing({ ...editing, comment: event.target.value })} rows={3} />
+              </div>
+              <DialogFooter>
+                <Button variant="outline" type="button" onClick={() => setEditing(null)}>取消</Button>
+                <Button type="submit" disabled={updateArtifact.isPending}>{updateArtifact.isPending ? '保存中' : '保存'}</Button>
+              </DialogFooter>
+            </form>
           )}
         </DialogContent>
       </Dialog>
 
-      {/* Push Confirmation */}
-      <Dialog open={pushUuid !== null} onOpenChange={(open) => { if (!open) { setPushUuid(null); setPushResult(null) } }}>
+      <Dialog open={deleteTarget !== null} onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t('agents.pushUpdate')}</DialogTitle>
+            <DialogTitle>删除 Artifact</DialogTitle>
             <DialogDescription>
-              {pushResult === null
-                ? t('agents.pushConfirm', {
-                    version: pushTarget?.version ?? '',
-                    platform: pushTarget ? getPlatformLabel(pushTarget.platform) : '',
-                  })
-                : t('agents.pushSuccess', { count: pushResult })
-              }
+              确认删除 {deleteTarget?.version} ({deleteTarget ? artifactPlatform(deleteTarget) : ''})？该操作会软删除记录并尝试删除 R2 对象。
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            {pushResult === null ? (
-              <>
-                <Button variant="outline" onClick={() => setPushUuid(null)}>{t('common.cancel')}</Button>
-                <Button
-                  onClick={handlePush}
-                  disabled={pushUpdate.isPending}
-                  
-                >
-                  {pushUpdate.isPending ? t('common.loading') : t('agents.pushUpdate')}
-                </Button>
-              </>
-            ) : (
-              <Button onClick={() => { setPushUuid(null); setPushResult(null) }}>
-                {t('common.done')}
-              </Button>
-            )}
+            <Button variant="outline" onClick={() => setDeleteTarget(null)}>取消</Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleteArtifact.isPending}>
+              {deleteArtifact.isPending ? '删除中' : '删除'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

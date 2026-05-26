@@ -1,15 +1,8 @@
 import type {
-  UserResponse,
-  AgentResponse,
-  TaskResponse,
-  MonitoringDataPoint,
-  AlertRuleResponse,
-  AlertEventResponse,
-  WebhookResponse,
-  GroupResponse,
-  ReleaseResponse,
-  TokenResponse,
+  AgentArtifactResponse,
 } from '@/api/generated/types.gen'
+import type { AdminAgent, AdminTask } from '@/api/hooks/admin-api'
+import type { MonitoringDataPoint } from '@/features/monitoring/lib/monitoring-data-point'
 import type { DashboardStats } from '@/api/types'
 
 export type { DashboardStats }
@@ -24,7 +17,16 @@ export function paginate<T>(items: T[], skip = 0, limit = 50) {
   return { items, total: items.length, skip, limit }
 }
 
-export function createMockUser(overrides?: Partial<UserResponse>): UserResponse {
+export interface MockUserResponse {
+  user_uuid: string
+  username: string
+  email: string
+  role: 'admin' | 'subscriber'
+  is_active: boolean
+  created_at: string
+}
+
+export function createMockUser(overrides?: Partial<MockUserResponse>): MockUserResponse {
   return {
     user_uuid: uuid(),
     username: `user_${counter}`,
@@ -36,33 +38,74 @@ export function createMockUser(overrides?: Partial<UserResponse>): UserResponse 
   }
 }
 
-export function createMockAgent(overrides?: Partial<AgentResponse>): AgentResponse {
+export function createMockAgent(overrides?: Partial<AdminAgent>): AdminAgent {
   return {
     agent_uuid: uuid(),
+    name: `agent-${counter}`,
     agent_name: `agent-${counter}`,
+    ip_version: '4',
+    continent: 'Europe',
+    country: 'Germany',
+    city: 'Frankfurt',
+    zip_code: '',
+    carrier: 'SnapStack',
+    comment: null,
     tags: ['continent:eu', 'country:german', 'city:FRA', 'isp:SnapStack'],
+    is_enabled: true,
+    is_deleted: false,
     status: 'online',
+    last_heartbeat_at: null,
+    last_reported_ip: null,
+    hostname: null,
+    version: null,
+    os: 'linux',
+    arch: 'x86_64',
+    runtime_id: null,
+    expected_config_version: 1,
+    applied_config_version: 1,
+    scheduler_stats: null,
+    last_snapshot_sent_at: null,
+    last_snapshot_ack_at: null,
+    last_snapshot_ack_status: null,
     created_at: '2026-01-01T00:00:00Z',
+    updated_at: '2026-01-01T00:00:00Z',
+    deleted_at: null,
+    agent_version: null,
+    platform: 'linux/x86_64',
     ...overrides,
   }
 }
 
-export function createMockTask(overrides?: Partial<TaskResponse>): TaskResponse {
+export function createMockTask(overrides?: Partial<AdminTask>): AdminTask {
   return {
     task_uuid: uuid(),
+    name: `task-${counter}`,
     task_name: `task-${counter}`,
+    description: null,
+    target_uuid: uuid(),
+    agent_uuid: uuid(),
+    agent: null,
+    task_type: 'icmp',
     protocol: 'icmp',
-    target: '8.8.8.8',
+    ip_family: '4',
+    target: null,
+    target_label: '8.8.8.8',
     port: null,
     interval: 60,
     packet_count: 20,
     timeout: 5,
-    max_hops: null,
-    loss_threshold: null,
-    cooldown_secs: null,
-    max_retries: null,
+    probe_config: {},
+    probe_config_hash: '',
+    task_revision: 1,
+    mtr_retry_config: null,
+    schedule_jitter_ms: 0,
+    is_enabled: true,
+    is_deleted: false,
+    created_by_relation: false,
     is_active: true,
     created_at: '2026-01-01T00:00:00Z',
+    updated_at: '2026-01-01T00:00:00Z',
+    deleted_at: null,
     ...overrides,
   }
 }
@@ -83,7 +126,22 @@ export function createMockMonitoringDataPoint(
   }
 }
 
-export function createMockAlertRule(overrides?: Partial<AlertRuleResponse>): AlertRuleResponse {
+export interface MockAlertRuleResponse {
+  rule_uuid: string
+  rule_name: string
+  task_uuid: string
+  user_uuid: string
+  metric_type: string
+  threshold: number
+  operator: string
+  m_count: number
+  n_count: number
+  is_active: boolean
+  is_deleted: boolean
+  created_at: string
+}
+
+export function createMockAlertRule(overrides?: Partial<MockAlertRuleResponse>): MockAlertRuleResponse {
   return {
     rule_uuid: uuid(),
     rule_name: `alert-rule-${counter}`,
@@ -101,7 +159,20 @@ export function createMockAlertRule(overrides?: Partial<AlertRuleResponse>): Ale
   }
 }
 
-export function createMockWebhook(overrides?: Partial<WebhookResponse>): WebhookResponse {
+export interface MockWebhookResponse {
+  webhook_uuid: string
+  user_uuid: string
+  name: string
+  url: string
+  is_active: boolean
+  is_deleted: boolean
+  consecutive_failures: number
+  body_template: string | null
+  custom_headers: Record<string, string> | null
+  created_at: string
+}
+
+export function createMockWebhook(overrides?: Partial<MockWebhookResponse>): MockWebhookResponse {
   return {
     webhook_uuid: uuid(),
     user_uuid: uuid(),
@@ -127,16 +198,35 @@ export function createMockDashboardStats(
   }
 }
 
-export function createMockTokenResponse(overrides?: Partial<TokenResponse>): TokenResponse {
+export interface MockTokenResponse {
+  access_token: string
+  token_type: 'bearer'
+  expires_at: string
+  admin: { username: string }
+}
+
+export function createMockTokenResponse(overrides?: Partial<MockTokenResponse>): MockTokenResponse {
   return {
     access_token: 'mock-access-token',
-    refresh_token: 'mock-refresh-token',
     token_type: 'bearer',
+    expires_at: '2026-01-01T01:00:00Z',
+    admin: { username: 'admin' },
     ...overrides,
   }
 }
 
-export function createMockAlertEvent(overrides?: Partial<AlertEventResponse>): AlertEventResponse {
+export interface MockAlertEventResponse {
+  event_uuid: string
+  rule_uuid: string
+  agent_uuid: string
+  task_uuid: string
+  triggered_value: number
+  status: string
+  triggered_at: string
+  resolved_at: string | null
+}
+
+export function createMockAlertEvent(overrides?: Partial<MockAlertEventResponse>): MockAlertEventResponse {
   return {
     event_uuid: uuid(),
     rule_uuid: uuid(),
@@ -150,7 +240,14 @@ export function createMockAlertEvent(overrides?: Partial<AlertEventResponse>): A
   }
 }
 
-export function createMockGroup(overrides?: Partial<GroupResponse>): GroupResponse {
+export interface MockGroupResponse {
+  group_uuid: string
+  group_name: string
+  description: string | null
+  created_at: string
+}
+
+export function createMockGroup(overrides?: Partial<MockGroupResponse>): MockGroupResponse {
   return {
     group_uuid: uuid(),
     group_name: `group-${counter}`,
@@ -187,17 +284,26 @@ export function createMockAuditLog(overrides?: Partial<MockAuditLog>): MockAudit
   }
 }
 
-export function createMockRelease(overrides?: Partial<ReleaseResponse>): ReleaseResponse {
+export function createMockAgentArtifact(overrides?: Partial<AgentArtifactResponse>): AgentArtifactResponse {
   return {
-    release_uuid: uuid(),
+    artifact_uuid: uuid(),
+    artifact_type: 'agent_binary',
     version: '1.0.0',
-    platform: 'x86_64-linux-musl',
-    filename: `netpulse-agent-x86_64-linux-musl-v1.0.0`,
-    file_size: 10485760,
+    os: 'linux',
+    arch: 'x86_64',
+    filename: 'netpulse-agent-linux-x86_64',
+    content_type: 'application/octet-stream',
+    size_bytes: 10485760,
     sha256: 'abc123def456',
-    release_notes: null,
-    is_latest: true,
+    storage_provider: 'cloudflare_r2',
+    storage_bucket: 'netpulse-artifacts',
+    storage_key: 'agent-binaries/linux/x86_64/netpulse-agent',
+    is_active: true,
+    is_deleted: false,
+    comment: null,
     created_at: '2026-01-01T00:00:00Z',
+    updated_at: '2026-01-01T00:00:00Z',
+    deleted_at: null,
     ...overrides,
   }
 }

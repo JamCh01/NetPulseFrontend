@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { buildSmokePingOption } from './build-chart-option'
 import { transformToChartData } from './transform-chart-data'
 import type { ChartThemeConfig } from './chart-theme'
-import type { MonitoringDataPoint } from '@/api/generated/types.gen'
+import type { MonitoringDataPoint } from '@/features/monitoring/lib/monitoring-data-point'
 
 const testTheme: ChartThemeConfig = {
   medianColor: '#00dcc8',

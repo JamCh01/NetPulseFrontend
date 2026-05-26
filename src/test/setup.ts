@@ -2,8 +2,12 @@ import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
 import { afterAll, afterEach, beforeAll } from 'vitest'
 import { server } from './mocks/server'
+import { configureApiClient } from '@/api/client'
 
-beforeAll(() => server.listen({ onUnhandledRequest: 'warn' }))
+beforeAll(() => {
+  configureApiClient()
+  server.listen({ onUnhandledRequest: 'warn' })
+})
 afterEach(() => {
   server.resetHandlers()
   cleanup()

@@ -78,8 +78,13 @@ export const dashboardKeys = {
   stats: () => [...dashboardKeys.all, 'stats'] as const,
 }
 
-export const releaseKeys = {
-  all: ['releases'] as const,
-  list: (platform?: string | null) => [...releaseKeys.all, 'list', platform] as const,
-  detail: (uuid: string) => [...releaseKeys.all, 'detail', uuid] as const,
+export const artifactKeys = {
+  all: ['artifacts'] as const,
+  agents: (params?: unknown) => [...artifactKeys.all, 'agents', params] as const,
+  agentDetail: (uuid: string) => [...artifactKeys.all, 'agents', 'detail', uuid] as const,
+}
+
+export const settingsKeys = {
+  all: ['settings'] as const,
+  detail: () => [...settingsKeys.all, 'detail'] as const,
 }

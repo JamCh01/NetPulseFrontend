@@ -1,13 +1,12 @@
 import { useMutation } from '@tanstack/react-query'
 import {
-  loginRouteApiV1AuthLoginPost,
-  logoutRouteApiV1AuthLogoutPost,
-  refreshRouteApiV1AuthRefreshPost,
-  registerRouteApiV1AuthRegisterPost,
+  postAuthLoginApiV1AuthLoginPost,
+  postAuthLogoutApiV1AuthLogoutPost,
+  postV1AuthRefreshApiV1AuthRefreshPost,
 } from '@/api/generated/sdk.gen'
 import { useAuthStore } from '@/stores/auth-store'
 import { decodeJwt } from '@/lib/jwt'
-import type { LoginRequest, UserCreate } from '@/api/generated/types.gen'
+import type { AdminLoginRequest } from '@/api/generated/types.gen'
 
 interface NormalizedAuthResponse {
   accessToken: string
@@ -29,7 +28,7 @@ function normalizeAuthResponse(data: unknown, fallbackUsername: string): Normali
   if (!accessToken) {
     throw new Error('Invalid auth response')
   }
-  const refreshToken = typeof source.refresh_token === 'string' ? source.refresh_token : accessToken
+  const refreshToken = accessToken
   const admin = typeof source.admin === 'object' && source.admin !== null
     ? (source.admin as Record<string, unknown>)
     : null
@@ -43,8 +42,8 @@ export function useLogin() {
   const setUser = useAuthStore((s) => s.setUser)
 
   return useMutation({
-    mutationFn: async (credentials: LoginRequest) => {
-      const { data, error } = await loginRouteApiV1AuthLoginPost({
+    mutationFn: async (credentials: AdminLoginRequest) => {
+      const { data, error } = await postAuthLoginApiV1AuthLoginPost({
         body: credentials,
       })
       if (error) {
@@ -77,11 +76,8 @@ export function useLogout() {
 
   return useMutation({
     mutationFn: async () => {
-      const refreshToken = useAuthStore.getState().refreshToken
       try {
-        await logoutRouteApiV1AuthLogoutPost({
-          body: refreshToken ? { refresh_token: refreshToken } : undefined,
-        })
+        await postAuthLogoutApiV1AuthLogoutPost()
       } catch {
         // Ignore errors — we always clear local state
       }
@@ -94,14 +90,8 @@ export function useLogout() {
 
 export function useRegister() {
   return useMutation({
-    mutationFn: async (userData: UserCreate) => {
-      const { data, error } = await registerRouteApiV1AuthRegisterPost({
-        body: userData,
-      })
-      if (error) {
-        throw error
-      }
-      return data
+    mutationFn: async () => {
+      throw new Error('注册接口已被后端移除，请使用管理员账号登录。')
     },
   })
 }
@@ -117,8 +107,7 @@ export function useRefreshSession() {
       if (!currentToken) {
         throw new Error('No token available')
       }
-      const { data, error } = await refreshRouteApiV1AuthRefreshPost({
-        body: { refresh_token: state.refreshToken ?? currentToken },
+      const { data, error } = await postV1AuthRefreshApiV1AuthRefreshPost({
         headers: { authorization: `Bearer ${currentToken}` },
       })
       if (error) {

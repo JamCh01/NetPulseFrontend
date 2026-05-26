@@ -432,7 +432,7 @@ export async function adminRequest<T>(path: string, init?: RequestInit): Promise
   return parseApiResponse<T>(response)
 }
 
-function normalizeAgent(raw: AdminAgent): AdminAgent {
+export function normalizeAgent(raw: AdminAgent): AdminAgent {
   const platform = [raw.os, raw.arch].filter(Boolean).join('/')
   return {
     ...raw,
@@ -442,7 +442,7 @@ function normalizeAgent(raw: AdminAgent): AdminAgent {
   }
 }
 
-function normalizeTask(raw: AdminTask): AdminTask {
+export function normalizeTask(raw: AdminTask): AdminTask {
   const probeConfig = raw.probe_config ?? {}
   const port = typeof probeConfig.port === 'number' ? probeConfig.port : raw.port
   return {

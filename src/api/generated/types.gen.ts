@@ -5,58 +5,634 @@ export type ClientOptions = {
 };
 
 /**
+ * AdminInfo
+ */
+export type AdminInfo = {
+    /**
+     * Username
+     */
+    username: string;
+};
+
+/**
+ * AdminLoginEnvelope
+ */
+export type AdminLoginEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: AdminLoginResponse;
+};
+
+/**
+ * AdminLoginRequest
+ */
+export type AdminLoginRequest = {
+    /**
+     * Username
+     *
+     * 管理员用户名。
+     */
+    username: string;
+    /**
+     * Password
+     *
+     * 管理员密码。
+     */
+    password: string;
+};
+
+/**
+ * AdminLoginResponse
+ */
+export type AdminLoginResponse = {
+    /**
+     * Access Token
+     */
+    access_token: string;
+    /**
+     * Token Type
+     */
+    token_type: 'bearer';
+    /**
+     * Expires At
+     */
+    expires_at: string;
+    admin: AdminInfo;
+};
+
+/**
+ * AdminLogoutEnvelope
+ */
+export type AdminLogoutEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: AdminLogoutResponse;
+};
+
+/**
+ * AdminLogoutResponse
+ */
+export type AdminLogoutResponse = {
+    /**
+     * Revoked
+     */
+    revoked: boolean;
+};
+
+/**
+ * AdminMeEnvelope
+ */
+export type AdminMeEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: AdminInfo;
+};
+
+/**
+ * AgentArtifactEnvelope
+ */
+export type AgentArtifactEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: AgentArtifactResponse;
+};
+
+/**
+ * AgentArtifactListData
+ */
+export type AgentArtifactListData = {
+    /**
+     * Items
+     */
+    items: Array<AgentArtifactResponse>;
+};
+
+/**
+ * AgentArtifactListEnvelope
+ */
+export type AgentArtifactListEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: AgentArtifactListData;
+};
+
+/**
+ * AgentArtifactResponse
+ */
+export type AgentArtifactResponse = {
+    /**
+     * Artifact Uuid
+     */
+    artifact_uuid: string;
+    /**
+     * Artifact Type
+     */
+    artifact_type: 'agent_binary';
+    /**
+     * Version
+     */
+    version: string;
+    /**
+     * Os
+     */
+    os: string;
+    /**
+     * Arch
+     */
+    arch: string;
+    /**
+     * Filename
+     */
+    filename: string;
+    /**
+     * Content Type
+     */
+    content_type: string;
+    /**
+     * Size Bytes
+     */
+    size_bytes: number;
+    /**
+     * Sha256
+     */
+    sha256: string;
+    /**
+     * Storage Provider
+     */
+    storage_provider: string;
+    /**
+     * Storage Bucket
+     */
+    storage_bucket: string;
+    /**
+     * Storage Key
+     */
+    storage_key: string;
+    /**
+     * Is Active
+     */
+    is_active: boolean;
+    /**
+     * Is Deleted
+     */
+    is_deleted: boolean;
+    /**
+     * Comment
+     */
+    comment?: string | null;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+    /**
+     * Deleted At
+     */
+    deleted_at?: string | null;
+};
+
+/**
+ * AgentArtifactUpdate
+ */
+export type AgentArtifactUpdate = {
+    /**
+     * Version
+     *
+     * 新的 Agent Artifact 版本号；不传则保持不变。
+     */
+    version?: string | null;
+    /**
+     * Os
+     *
+     * 新的适用操作系统；不传则保持不变。
+     */
+    os?: string | null;
+    /**
+     * Arch
+     *
+     * 新的适用 CPU 架构；不传则保持不变。
+     */
+    arch?: string | null;
+    /**
+     * Is Active
+     *
+     * 是否启用该 Artifact；不传则保持不变。
+     */
+    is_active?: boolean | null;
+    /**
+     * Comment
+     *
+     * 新的备注；不传则保持不变。
+     */
+    comment?: string | null;
+};
+
+/**
  * AgentCreate
  */
 export type AgentCreate = {
     /**
-     * Agent Name
+     * Name
+     *
+     * Agent 显示名称。
      */
-    agent_name: string;
+    name: string;
+    /**
+     * Ip Version
+     *
+     * Agent 支持的 IP 版本，可选 `4`、`6` 或 `4+6`。
+     */
+    ip_version: '4' | '6' | '4+6';
+    /**
+     * Continent
+     *
+     * Agent 所在大洲。
+     */
+    continent: string;
+    /**
+     * Country
+     *
+     * Agent 所在国家。
+     */
+    country: string;
+    /**
+     * City
+     *
+     * Agent 所在城市。
+     */
+    city: string;
+    /**
+     * Zip Code
+     *
+     * Agent 所在地邮编；未知时可传 `UNKNOWN`。
+     */
+    zip_code: string;
+    /**
+     * Carrier
+     *
+     * Agent 所属运营商、机房、云厂商或网络提供方。
+     */
+    carrier: string;
+    /**
+     * Comment
+     *
+     * Agent 备注信息。
+     */
+    comment?: string | null;
     /**
      * Tags
+     *
+     * Agent 标签列表，用于分类和筛选。
      */
-    tags: Array<string>;
-    platform?: PlatformEnum | null;
+    tags?: Array<string>;
 };
 
 /**
- * AgentRegisterRequest
+ * AgentCreateEnvelope
  */
-export type AgentRegisterRequest = {
+export type AgentCreateEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: AgentCreateResponse;
+};
+
+/**
+ * AgentCreateResponse
+ */
+export type AgentCreateResponse = {
     /**
      * Agent Uuid
      */
     agent_uuid: string;
     /**
-     * Access Key
+     * Name
      */
-    access_key: string;
+    name: string;
     /**
-     * Platform
+     * Ip Version
      */
-    platform?: string | null;
+    ip_version: '4' | '6' | '4+6';
     /**
-     * Agent Version
+     * Continent
      */
-    agent_version?: string | null;
+    continent: string;
+    /**
+     * Country
+     */
+    country: string;
+    /**
+     * City
+     */
+    city: string;
+    /**
+     * Zip Code
+     */
+    zip_code: string;
+    /**
+     * Carrier
+     */
+    carrier: string;
+    /**
+     * Comment
+     */
+    comment?: string | null;
+    /**
+     * Tags
+     */
+    tags: Array<string>;
+    /**
+     * Is Enabled
+     */
+    is_enabled: boolean;
+    /**
+     * Is Deleted
+     */
+    is_deleted: boolean;
+    /**
+     * Status
+     */
+    status: 'online' | 'offline' | 'disabled';
+    /**
+     * Last Heartbeat At
+     */
+    last_heartbeat_at?: string | null;
+    /**
+     * Last Reported Ip
+     */
+    last_reported_ip?: string | null;
+    /**
+     * Hostname
+     */
+    hostname?: string | null;
+    /**
+     * Version
+     */
+    version?: string | null;
+    /**
+     * Os
+     */
+    os?: string | null;
+    /**
+     * Arch
+     */
+    arch?: string | null;
+    /**
+     * Runtime Id
+     */
+    runtime_id?: string | null;
+    /**
+     * Expected Config Version
+     */
+    expected_config_version: number;
+    /**
+     * Applied Config Version
+     */
+    applied_config_version: number;
+    /**
+     * Scheduler Stats
+     */
+    scheduler_stats?: {
+        [key: string]: unknown;
+    } | null;
+    /**
+     * Last Snapshot Sent At
+     */
+    last_snapshot_sent_at?: string | null;
+    /**
+     * Last Snapshot Ack At
+     */
+    last_snapshot_ack_at?: string | null;
+    /**
+     * Last Snapshot Ack Status
+     */
+    last_snapshot_ack_status?: string | null;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+    /**
+     * Deleted At
+     */
+    deleted_at?: string | null;
+    /**
+     * Auth Token
+     */
+    auth_token: string;
 };
 
 /**
- * AgentRegisterResponse
+ * AgentEnvelope
  */
-export type AgentRegisterResponse = {
+export type AgentEnvelope = {
     /**
-     * Nats Url
+     * Code
      */
-    nats_url: string;
+    code: string;
     /**
-     * Nats Token
+     * Message
      */
-    nats_token: string;
+    message: string;
     /**
-     * Subscriptions
+     * Request Id
      */
-    subscriptions: Array<string>;
+    request_id: string;
+    data: AgentResponse;
+};
+
+/**
+ * AgentHeartbeat
+ */
+export type AgentHeartbeat = {
+    /**
+     * Runtime Id
+     *
+     * Agent 当前运行实例 ID，用于区分重启后的不同运行周期。
+     */
+    runtime_id: string;
+    /**
+     * Hostname
+     *
+     * Agent 主机名。
+     */
+    hostname?: string | null;
+    /**
+     * Version
+     *
+     * Agent 程序版本。
+     */
+    version?: string | null;
+    /**
+     * Os
+     *
+     * Agent 所在操作系统。
+     */
+    os?: string | null;
+    /**
+     * Arch
+     *
+     * Agent 运行架构，例如 `x86_64` 或 `aarch64`。
+     */
+    arch?: string | null;
+    /**
+     * Supported Ip Version
+     *
+     * Agent 当前支持的 IP 版本，可选 `4`、`6` 或 `4+6`。
+     */
+    supported_ip_version?: '4' | '6' | '4+6' | null;
+    /**
+     * Applied Config Version
+     *
+     * Agent 已应用的任务配置版本号。
+     */
+    applied_config_version?: number;
+    /**
+     * Running Task Count
+     *
+     * Agent 当前正在调度或运行的任务数量。
+     */
+    running_task_count?: number;
+    /**
+     * Local Time
+     *
+     * Agent 本地时间，用于排查时钟偏移。
+     */
+    local_time?: string | null;
+    /**
+     * Cpu Usage Pct
+     *
+     * Agent 主机 CPU 使用率百分比。
+     */
+    cpu_usage_pct?: number | null;
+    /**
+     * Memory Usage Bytes
+     *
+     * Agent 进程或主机内存使用量，单位为字节。
+     */
+    memory_usage_bytes?: number | null;
+    /**
+     * Scheduler Stats
+     *
+     * Agent 调度器运行统计信息。
+     */
+    scheduler_stats?: {
+        [key: string]: unknown;
+    } | null;
+};
+
+/**
+ * AgentHeartbeatEnvelope
+ */
+export type AgentHeartbeatEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: AgentResponse;
+};
+
+/**
+ * AgentListData
+ */
+export type AgentListData = {
+    /**
+     * Items
+     */
+    items: Array<AgentResponse>;
+    pagination: MonitoringPagination;
+};
+
+/**
+ * AgentListEnvelope
+ */
+export type AgentListEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: AgentListData;
 };
 
 /**
@@ -68,39 +644,168 @@ export type AgentResponse = {
      */
     agent_uuid: string;
     /**
-     * Agent Name
+     * Name
      */
-    agent_name: string;
+    name: string;
+    /**
+     * Ip Version
+     */
+    ip_version: '4' | '6' | '4+6';
+    /**
+     * Continent
+     */
+    continent: string;
+    /**
+     * Country
+     */
+    country: string;
+    /**
+     * City
+     */
+    city: string;
+    /**
+     * Zip Code
+     */
+    zip_code: string;
+    /**
+     * Carrier
+     */
+    carrier: string;
+    /**
+     * Comment
+     */
+    comment?: string | null;
     /**
      * Tags
      */
     tags: Array<string>;
     /**
+     * Is Enabled
+     */
+    is_enabled: boolean;
+    /**
+     * Is Deleted
+     */
+    is_deleted: boolean;
+    /**
      * Status
      */
-    status: string;
+    status: 'online' | 'offline' | 'disabled';
     /**
-     * Agent Version
+     * Last Heartbeat At
      */
-    agent_version?: string | null;
+    last_heartbeat_at?: string | null;
     /**
-     * Platform
+     * Last Reported Ip
      */
-    platform?: string | null;
+    last_reported_ip?: string | null;
+    /**
+     * Hostname
+     */
+    hostname?: string | null;
+    /**
+     * Version
+     */
+    version?: string | null;
+    /**
+     * Os
+     */
+    os?: string | null;
+    /**
+     * Arch
+     */
+    arch?: string | null;
+    /**
+     * Runtime Id
+     */
+    runtime_id?: string | null;
+    /**
+     * Expected Config Version
+     */
+    expected_config_version: number;
+    /**
+     * Applied Config Version
+     */
+    applied_config_version: number;
+    /**
+     * Scheduler Stats
+     */
+    scheduler_stats?: {
+        [key: string]: unknown;
+    } | null;
+    /**
+     * Last Snapshot Sent At
+     */
+    last_snapshot_sent_at?: string | null;
+    /**
+     * Last Snapshot Ack At
+     */
+    last_snapshot_ack_at?: string | null;
+    /**
+     * Last Snapshot Ack Status
+     */
+    last_snapshot_ack_status?: string | null;
     /**
      * Created At
      */
     created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+    /**
+     * Deleted At
+     */
+    deleted_at?: string | null;
 };
 
 /**
- * AgentTaskAssign
+ * AgentTokenRotateEnvelope
  */
-export type AgentTaskAssign = {
+export type AgentTokenRotateEnvelope = {
     /**
-     * Agent Uuids
+     * Code
      */
-    agent_uuids: Array<string>;
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: AgentTokenRotateResponse;
+};
+
+/**
+ * AgentTokenRotateResponse
+ */
+export type AgentTokenRotateResponse = {
+    /**
+     * Agent Uuid
+     */
+    agent_uuid: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Expected Config Version
+     */
+    expected_config_version: number;
+    /**
+     * Applied Config Version
+     */
+    applied_config_version: number;
+    /**
+     * Last Snapshot Sent At
+     */
+    last_snapshot_sent_at?: string | null;
+    /**
+     * Auth Token
+     */
+    auth_token: string;
 };
 
 /**
@@ -108,133 +813,486 @@ export type AgentTaskAssign = {
  */
 export type AgentUpdate = {
     /**
-     * Agent Name
+     * Name
+     *
+     * 新的 Agent 显示名称；不传则保持不变。
      */
-    agent_name?: string | null;
+    name?: string | null;
+    /**
+     * Ip Version
+     *
+     * 新的 Agent IP 版本，可选 `4`、`6` 或 `4+6`；不传则保持不变。
+     */
+    ip_version?: '4' | '6' | '4+6' | null;
+    /**
+     * Continent
+     *
+     * 新的 Agent 所在大洲；不传则保持不变。
+     */
+    continent?: string | null;
+    /**
+     * Country
+     *
+     * 新的 Agent 所在国家；不传则保持不变。
+     */
+    country?: string | null;
+    /**
+     * City
+     *
+     * 新的 Agent 所在城市；不传则保持不变。
+     */
+    city?: string | null;
+    /**
+     * Zip Code
+     *
+     * 新的 Agent 所在地邮编；不传则保持不变。
+     */
+    zip_code?: string | null;
+    /**
+     * Carrier
+     *
+     * 新的运营商、机房、云厂商或网络提供方；不传则保持不变。
+     */
+    carrier?: string | null;
+    /**
+     * Comment
+     *
+     * 新的 Agent 备注；不传则保持不变。
+     */
+    comment?: string | null;
     /**
      * Tags
+     *
+     * 新的 Agent 标签列表；不传则保持不变。
      */
     tags?: Array<string> | null;
-    /**
-     * Status
-     */
-    status?: string | null;
 };
 
 /**
- * AlertEventResponse
+ * AppSettingsEnvelope
  */
-export type AlertEventResponse = {
+export type AppSettingsEnvelope = {
     /**
-     * Event Uuid
+     * Code
      */
-    event_uuid: string;
+    code: string;
     /**
-     * Rule Uuid
+     * Message
      */
-    rule_uuid: string;
+    message: string;
     /**
-     * Agent Uuid
+     * Request Id
      */
-    agent_uuid: string;
-    /**
-     * Task Uuid
-     */
-    task_uuid: string;
-    /**
-     * Triggered Value
-     */
-    triggered_value: number;
-    /**
-     * Status
-     */
-    status: string;
-    /**
-     * Triggered At
-     */
-    triggered_at: string;
-    /**
-     * Resolved At
-     */
-    resolved_at: string | null;
+    request_id: string;
+    data: AppSettingsResponse;
 };
 
 /**
- * AlertRuleCreate
+ * AppSettingsResponse
  */
-export type AlertRuleCreate = {
+export type AppSettingsResponse = {
     /**
-     * Rule Name
+     * Victoriametrics Write Url
      */
-    rule_name: string;
+    victoriametrics_write_url: string;
     /**
-     * Task Uuid
+     * Victoriametrics Query Url
      */
-    task_uuid: string;
-    metric_type: MetricTypeEnum;
+    victoriametrics_query_url?: string | null;
     /**
-     * Threshold
+     * Worker Fetch Batch Size
      */
-    threshold: number;
-    operator: OperatorEnum;
+    worker_fetch_batch_size: number;
     /**
-     * M Count
+     * Worker Fetch Timeout Sec
      */
-    m_count: number;
+    worker_fetch_timeout_sec: number;
     /**
-     * N Count
+     * Worker Processing Concurrency
      */
-    n_count: number;
+    worker_processing_concurrency: number;
     /**
-     * Webhook Uuids
+     * Agent State Worker Fetch Batch Size
      */
-    webhook_uuids?: Array<string> | null;
+    agent_state_worker_fetch_batch_size: number;
+    /**
+     * Agent State Worker Fetch Timeout Sec
+     */
+    agent_state_worker_fetch_timeout_sec: number;
+    /**
+     * Agent Offline After Sec
+     */
+    agent_offline_after_sec: number;
+    /**
+     * Agent Status Sweep Interval Sec
+     */
+    agent_status_sweep_interval_sec: number;
+    /**
+     * Agent Status Singleton Lock Enabled
+     */
+    agent_status_singleton_lock_enabled: boolean;
+    /**
+     * Asn Enrichment Sweep Interval Sec
+     */
+    asn_enrichment_sweep_interval_sec: number;
+    /**
+     * Asn Enrichment Batch Size
+     */
+    asn_enrichment_batch_size: number;
+    /**
+     * Asn Enrichment Claim Stale After Sec
+     */
+    asn_enrichment_claim_stale_after_sec: number;
+    /**
+     * Asn Enrichment Singleton Lock Enabled
+     */
+    asn_enrichment_singleton_lock_enabled: boolean;
+    /**
+     * Result Ingestion Event Retention Days
+     */
+    result_ingestion_event_retention_days: number;
+    /**
+     * Artifact Storage Provider
+     */
+    artifact_storage_provider: string;
+    /**
+     * Artifact R2 Endpoint Url
+     */
+    artifact_r2_endpoint_url?: string | null;
+    /**
+     * Artifact R2 Access Key Id
+     */
+    artifact_r2_access_key_id?: string | null;
+    /**
+     * Artifact R2 Secret Access Key Configured
+     */
+    artifact_r2_secret_access_key_configured: boolean;
+    /**
+     * Artifact R2 Bucket
+     */
+    artifact_r2_bucket: string;
+    /**
+     * Artifact R2 Public Base Url
+     */
+    artifact_r2_public_base_url?: string | null;
+    /**
+     * Artifact Download Url Ttl Sec
+     */
+    artifact_download_url_ttl_sec: number;
+    /**
+     * Artifact Upload Max Bytes
+     */
+    artifact_upload_max_bytes: number;
 };
 
 /**
- * AlertRuleResponse
+ * AppSettingsUpdate
  */
-export type AlertRuleResponse = {
+export type AppSettingsUpdate = {
     /**
-     * Rule Uuid
+     * Victoriametrics Write Url
+     *
+     * VictoriaMetrics 写入地址，用于 worker 写入 ICMP/TCP 指标。
      */
-    rule_uuid: string;
+    victoriametrics_write_url?: string | null;
     /**
-     * Rule Name
+     * Victoriametrics Query Url
+     *
+     * VictoriaMetrics 查询地址，用于 API 查询 ICMP/TCP 指标。
      */
-    rule_name: string;
+    victoriametrics_query_url?: string | null;
     /**
-     * Task Uuid
+     * Worker Fetch Batch Size
+     *
+     * 结果 worker 每次从 NATS 拉取的消息数量。
      */
-    task_uuid: string;
+    worker_fetch_batch_size?: number | null;
     /**
-     * User Uuid
+     * Worker Fetch Timeout Sec
+     *
+     * 结果 worker 从 NATS 拉取消息的超时时间，单位秒。
      */
-    user_uuid: string;
+    worker_fetch_timeout_sec?: number | null;
     /**
-     * Metric Type
+     * Worker Processing Concurrency
+     *
+     * 结果 worker 单进程内并发处理消息数量。
      */
-    metric_type: string;
+    worker_processing_concurrency?: number | null;
     /**
-     * Threshold
+     * Agent State Worker Fetch Batch Size
+     *
+     * Agent 状态 worker 每次从 NATS 拉取的消息数量。
      */
-    threshold: number;
+    agent_state_worker_fetch_batch_size?: number | null;
     /**
-     * Operator
+     * Agent State Worker Fetch Timeout Sec
+     *
+     * Agent 状态 worker 从 NATS 拉取消息的超时时间，单位秒。
      */
-    operator: string;
+    agent_state_worker_fetch_timeout_sec?: number | null;
     /**
-     * M Count
+     * Agent Offline After Sec
+     *
+     * Agent 超过多少秒没有心跳后标记为离线。
      */
-    m_count: number;
+    agent_offline_after_sec?: number | null;
     /**
-     * N Count
+     * Agent Status Sweep Interval Sec
+     *
+     * Agent 状态扫描间隔，单位秒。
      */
-    n_count: number;
+    agent_status_sweep_interval_sec?: number | null;
+    /**
+     * Agent Status Singleton Lock Enabled
+     *
+     * Agent 状态扫描是否启用 PostgreSQL advisory lock 单实例保护。
+     */
+    agent_status_singleton_lock_enabled?: boolean | null;
+    /**
+     * Asn Enrichment Sweep Interval Sec
+     *
+     * ASN enrichment worker 扫描间隔，单位秒。
+     */
+    asn_enrichment_sweep_interval_sec?: number | null;
+    /**
+     * Asn Enrichment Batch Size
+     *
+     * ASN enrichment worker 每批 claim 的 MTR result 数量。
+     */
+    asn_enrichment_batch_size?: number | null;
+    /**
+     * Asn Enrichment Claim Stale After Sec
+     *
+     * ASN enrichment claim 超过多少秒可被其他 worker 回收。
+     */
+    asn_enrichment_claim_stale_after_sec?: number | null;
+    /**
+     * Asn Enrichment Singleton Lock Enabled
+     *
+     * ASN enrichment worker 是否强制启用单实例 advisory lock。
+     */
+    asn_enrichment_singleton_lock_enabled?: boolean | null;
+    /**
+     * Result Ingestion Event Retention Days
+     *
+     * 结果入库事件保留天数，用于清理诊断事件。
+     */
+    result_ingestion_event_retention_days?: number | null;
+    /**
+     * Artifact Storage Provider
+     *
+     * Artifact 对象存储提供方，当前支持 `cloudflare_r2`。
+     */
+    artifact_storage_provider?: string | null;
+    /**
+     * Artifact R2 Endpoint Url
+     *
+     * Cloudflare R2 的 S3 API endpoint URL。
+     */
+    artifact_r2_endpoint_url?: string | null;
+    /**
+     * Artifact R2 Access Key Id
+     *
+     * Cloudflare R2 的 Access Key ID。
+     */
+    artifact_r2_access_key_id?: string | null;
+    /**
+     * Artifact R2 Secret Access Key
+     *
+     * Cloudflare R2 Secret Access Key；查询接口不会返回明文。
+     */
+    artifact_r2_secret_access_key?: string | null;
+    /**
+     * Artifact R2 Bucket
+     *
+     * Cloudflare R2 Bucket 名称。
+     */
+    artifact_r2_bucket?: string | null;
+    /**
+     * Artifact R2 Public Base Url
+     *
+     * 可选的公开下载基础 URL；不传时使用预签名 S3 URL。
+     */
+    artifact_r2_public_base_url?: string | null;
+    /**
+     * Artifact Download Url Ttl Sec
+     *
+     * 下载 URL 有效期，单位秒。
+     */
+    artifact_download_url_ttl_sec?: number | null;
+    /**
+     * Artifact Upload Max Bytes
+     *
+     * Agent Artifact 上传大小上限，单位字节。
+     */
+    artifact_upload_max_bytes?: number | null;
+};
+
+/**
+ * Body_post_agent_artifact_api_v1_artifacts_agents_post
+ */
+export type BodyPostAgentArtifactApiV1ArtifactsAgentsPost = {
+    /**
+     * Version
+     *
+     * Agent 可执行文件版本号，例如 `1.2.3`。
+     */
+    version: string;
+    /**
+     * Os
+     *
+     * 适用操作系统，例如 `linux`。
+     */
+    os: string;
+    /**
+     * Arch
+     *
+     * 适用 CPU 架构，例如 `x86_64` 或 `aarch64`。
+     */
+    arch: string;
+    /**
+     * File
+     *
+     * Agent 可执行文件本体，后端会上传到 Cloudflare R2。
+     */
+    file: Blob | File;
     /**
      * Is Active
+     *
+     * 上传后是否标记为启用版本。
      */
-    is_active: boolean;
+    is_active?: boolean;
+    /**
+     * Comment
+     *
+     * Artifact 备注。
+     */
+    comment?: string | null;
+};
+
+/**
+ * GeoCityCreate
+ */
+export type GeoCityCreate = {
+    /**
+     * Country Uuid
+     *
+     * 所属国家 UUID，必须关联已存在且未删除的国家。
+     */
+    country_uuid: string;
+    /**
+     * Name
+     *
+     * 城市英文名称，例如 `Tokyo`。
+     */
+    name: string;
+    /**
+     * Code
+     *
+     * 城市代码，例如机场城市码 `TYO`。
+     */
+    code?: string | null;
+    /**
+     * Name Zh
+     *
+     * 城市中文名称，例如 `东京`。
+     */
+    name_zh?: string | null;
+    /**
+     * Is Capital
+     *
+     * 是否为首都或行政首府。
+     */
+    is_capital?: boolean;
+    /**
+     * Popularity
+     *
+     * 城市检索排序权重，数值越大越靠前。
+     */
+    popularity?: number;
+};
+
+/**
+ * GeoCityEnvelope
+ */
+export type GeoCityEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: GeoCityResponse;
+};
+
+/**
+ * GeoCityListData
+ */
+export type GeoCityListData = {
+    /**
+     * Items
+     */
+    items: Array<GeoCityResponse>;
+};
+
+/**
+ * GeoCityListEnvelope
+ */
+export type GeoCityListEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: GeoCityListData;
+};
+
+/**
+ * GeoCityResponse
+ */
+export type GeoCityResponse = {
+    /**
+     * City Uuid
+     */
+    city_uuid: string;
+    /**
+     * Country Uuid
+     */
+    country_uuid: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Code
+     */
+    code?: string | null;
+    /**
+     * Name Zh
+     */
+    name_zh?: string | null;
+    /**
+     * Is Capital
+     */
+    is_capital: boolean;
+    /**
+     * Popularity
+     */
+    popularity: number;
     /**
      * Is Deleted
      */
@@ -243,110 +1301,505 @@ export type AlertRuleResponse = {
      * Created At
      */
     created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+    /**
+     * Deleted At
+     */
+    deleted_at?: string | null;
 };
 
 /**
- * AlertRuleUpdate
+ * GeoCityUpdate
  */
-export type AlertRuleUpdate = {
+export type GeoCityUpdate = {
     /**
-     * Rule Name
+     * Country Uuid
+     *
+     * 新的所属国家 UUID；不传则保持不变。
      */
-    rule_name?: string | null;
+    country_uuid?: string | null;
     /**
-     * Threshold
+     * Name
+     *
+     * 新的城市英文名称；不传则保持不变。
      */
-    threshold?: number | null;
-    operator?: OperatorEnum | null;
+    name?: string | null;
     /**
-     * M Count
+     * Code
+     *
+     * 新的城市代码；不传则保持不变。
      */
-    m_count?: number | null;
+    code?: string | null;
     /**
-     * N Count
+     * Name Zh
+     *
+     * 新的城市中文名称；不传则保持不变。
      */
-    n_count?: number | null;
+    name_zh?: string | null;
     /**
-     * Is Active
+     * Is Capital
+     *
+     * 是否为首都或行政首府。
      */
-    is_active?: boolean | null;
+    is_capital?: boolean | null;
+    /**
+     * Popularity
+     *
+     * 新的城市检索排序权重。
+     */
+    popularity?: number | null;
+    /**
+     * Is Deleted
+     *
+     * 是否标记为删除。
+     */
+    is_deleted?: boolean | null;
 };
 
 /**
- * Body_upload_release_api_v1_agents_releases_upload_post
+ * GeoContinentCreate
  */
-export type BodyUploadReleaseApiV1AgentsReleasesUploadPost = {
+export type GeoContinentCreate = {
     /**
-     * File
+     * Name
+     *
+     * 大洲英文名称，例如 `Asia`。
      */
-    file: Blob | File;
+    name: string;
     /**
-     * Version
+     * Code
+     *
+     * 大洲代码，例如 `AS`、`EU`。
      */
-    version: string;
+    code?: string | null;
     /**
-     * Platform
+     * Name Zh
+     *
+     * 大洲中文名称，例如 `亚洲`。
      */
-    platform: string;
-    /**
-     * Release Notes
-     */
-    release_notes?: string | null;
+    name_zh?: string | null;
 };
 
 /**
- * GranularityEnum
+ * GeoContinentEnvelope
  */
-export type GranularityEnum = 'raw' | 'hourly' | 'daily';
-
-/**
- * GroupCreate
- */
-export type GroupCreate = {
+export type GeoContinentEnvelope = {
     /**
-     * Group Name
+     * Code
      */
-    group_name: string;
+    code: string;
     /**
-     * Description
+     * Message
      */
-    description?: string | null;
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: GeoContinentResponse;
 };
 
 /**
- * GroupResponse
+ * GeoContinentListData
  */
-export type GroupResponse = {
+export type GeoContinentListData = {
     /**
-     * Group Uuid
+     * Items
      */
-    group_uuid: string;
+    items: Array<GeoContinentResponse>;
+};
+
+/**
+ * GeoContinentListEnvelope
+ */
+export type GeoContinentListEnvelope = {
     /**
-     * Group Name
+     * Code
      */
-    group_name: string;
+    code: string;
     /**
-     * Description
+     * Message
      */
-    description: string | null;
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: GeoContinentListData;
+};
+
+/**
+ * GeoContinentResponse
+ */
+export type GeoContinentResponse = {
+    /**
+     * Continent Uuid
+     */
+    continent_uuid: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Code
+     */
+    code?: string | null;
+    /**
+     * Name Zh
+     */
+    name_zh?: string | null;
+    /**
+     * Is Deleted
+     */
+    is_deleted: boolean;
     /**
      * Created At
      */
     created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+    /**
+     * Deleted At
+     */
+    deleted_at?: string | null;
 };
 
 /**
- * GroupUpdate
+ * GeoContinentUpdate
  */
-export type GroupUpdate = {
+export type GeoContinentUpdate = {
     /**
-     * Group Name
+     * Name
+     *
+     * 新的大洲英文名称；不传则保持不变。
      */
-    group_name?: string | null;
+    name?: string | null;
     /**
-     * Description
+     * Code
+     *
+     * 新的大洲代码；不传则保持不变。
      */
-    description?: string | null;
+    code?: string | null;
+    /**
+     * Name Zh
+     *
+     * 新的大洲中文名称；不传则保持不变。
+     */
+    name_zh?: string | null;
+    /**
+     * Is Deleted
+     *
+     * 是否标记为删除。
+     */
+    is_deleted?: boolean | null;
+};
+
+/**
+ * GeoCountryCreate
+ */
+export type GeoCountryCreate = {
+    /**
+     * Continent Uuid
+     *
+     * 所属大洲 UUID，必须关联已存在且未删除的大洲。
+     */
+    continent_uuid: string;
+    /**
+     * Name
+     *
+     * 国家英文名称，例如 `Japan`。
+     */
+    name: string;
+    /**
+     * Code
+     *
+     * 国家或地区代码，例如 ISO 3166-1 alpha-2 `JP`。
+     */
+    code?: string | null;
+    /**
+     * Name Zh
+     *
+     * 国家中文名称，例如 `日本`。
+     */
+    name_zh?: string | null;
+};
+
+/**
+ * GeoCountryEnvelope
+ */
+export type GeoCountryEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: GeoCountryResponse;
+};
+
+/**
+ * GeoCountryListData
+ */
+export type GeoCountryListData = {
+    /**
+     * Items
+     */
+    items: Array<GeoCountryResponse>;
+};
+
+/**
+ * GeoCountryListEnvelope
+ */
+export type GeoCountryListEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: GeoCountryListData;
+};
+
+/**
+ * GeoCountryResponse
+ */
+export type GeoCountryResponse = {
+    /**
+     * Country Uuid
+     */
+    country_uuid: string;
+    /**
+     * Continent Uuid
+     */
+    continent_uuid: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Code
+     */
+    code?: string | null;
+    /**
+     * Name Zh
+     */
+    name_zh?: string | null;
+    /**
+     * Is Deleted
+     */
+    is_deleted: boolean;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+    /**
+     * Deleted At
+     */
+    deleted_at?: string | null;
+};
+
+/**
+ * GeoCountryUpdate
+ */
+export type GeoCountryUpdate = {
+    /**
+     * Continent Uuid
+     *
+     * 新的所属大洲 UUID；不传则保持不变。
+     */
+    continent_uuid?: string | null;
+    /**
+     * Name
+     *
+     * 新的国家英文名称；不传则保持不变。
+     */
+    name?: string | null;
+    /**
+     * Code
+     *
+     * 新的国家或地区代码；不传则保持不变。
+     */
+    code?: string | null;
+    /**
+     * Name Zh
+     *
+     * 新的国家中文名称；不传则保持不变。
+     */
+    name_zh?: string | null;
+    /**
+     * Is Deleted
+     *
+     * 是否标记为删除。
+     */
+    is_deleted?: boolean | null;
+};
+
+/**
+ * GeoTreeCity
+ */
+export type GeoTreeCity = {
+    /**
+     * City Uuid
+     */
+    city_uuid: string;
+    /**
+     * Country Uuid
+     */
+    country_uuid: string;
+    /**
+     * Continent Uuid
+     */
+    continent_uuid: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Code
+     */
+    code?: string | null;
+    /**
+     * Name Zh
+     */
+    name_zh?: string | null;
+    /**
+     * Is Capital
+     */
+    is_capital: boolean;
+    /**
+     * Popularity
+     */
+    popularity: number;
+};
+
+/**
+ * GeoTreeContinent
+ */
+export type GeoTreeContinent = {
+    /**
+     * Continent Uuid
+     */
+    continent_uuid: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Code
+     */
+    code?: string | null;
+    /**
+     * Name Zh
+     */
+    name_zh?: string | null;
+    /**
+     * Country Count
+     */
+    country_count: number;
+    /**
+     * City Count
+     */
+    city_count: number;
+    /**
+     * Countries
+     */
+    countries: Array<GeoTreeCountry>;
+};
+
+/**
+ * GeoTreeCountry
+ */
+export type GeoTreeCountry = {
+    /**
+     * Country Uuid
+     */
+    country_uuid: string;
+    /**
+     * Continent Uuid
+     */
+    continent_uuid: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Code
+     */
+    code?: string | null;
+    /**
+     * Name Zh
+     */
+    name_zh?: string | null;
+    /**
+     * City Count
+     */
+    city_count: number;
+    /**
+     * Cities
+     */
+    cities: Array<GeoTreeCity>;
+};
+
+/**
+ * GeoTreeData
+ */
+export type GeoTreeData = {
+    /**
+     * Total Continent Count
+     */
+    total_continent_count: number;
+    /**
+     * Total Country Count
+     */
+    total_country_count: number;
+    /**
+     * Total City Count
+     */
+    total_city_count: number;
+    /**
+     * Items
+     */
+    items: Array<GeoTreeContinent>;
+};
+
+/**
+ * GeoTreeEnvelope
+ */
+export type GeoTreeEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: GeoTreeData;
 };
 
 /**
@@ -360,529 +1813,850 @@ export type HttpValidationError = {
 };
 
 /**
- * HeartbeatRequest
+ * HealthResponse
  */
-export type HeartbeatRequest = {
+export type HealthResponse = {
     /**
-     * Load
+     * Status
      */
-    load: number;
+    status: 'ok';
+};
+
+/**
+ * Iperf3ExecutionClaimEnvelope
+ */
+export type Iperf3ExecutionClaimEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: Iperf3ExecutionClaimResponse;
+};
+
+/**
+ * Iperf3ExecutionClaimRequest
+ */
+export type Iperf3ExecutionClaimRequest = {
+    /**
+     * Task Uuid
+     *
+     * 准备执行的 iperf3 任务 UUID。
+     */
+    task_uuid: string;
+};
+
+/**
+ * Iperf3ExecutionClaimResponse
+ */
+export type Iperf3ExecutionClaimResponse = {
+    /**
+     * Granted
+     */
+    granted: boolean;
+    /**
+     * Claim Uuid
+     */
+    claim_uuid?: string | null;
+    /**
+     * Task Uuid
+     */
+    task_uuid: string;
+    /**
+     * Target Uuid
+     */
+    target_uuid: string;
+    /**
+     * Agent Uuid
+     */
+    agent_uuid: string;
+    /**
+     * Window Started At
+     */
+    window_started_at: string;
+    /**
+     * Expires At
+     */
+    expires_at: string;
+    /**
+     * Reason
+     */
+    reason?: string | null;
+    /**
+     * Retry After Sec
+     */
+    retry_after_sec?: number | null;
+};
+
+/**
+ * ManagementSortByOptions
+ */
+export type ManagementSortByOptions = {
+    /**
+     * Agents
+     */
+    agents: Array<string>;
+    /**
+     * Targets
+     */
+    targets: Array<string>;
+    /**
+     * Tasks
+     */
+    tasks: Array<string>;
+};
+
+/**
+ * MetadataEnumsEnvelope
+ */
+export type MetadataEnumsEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: MetadataEnumsResponse;
+};
+
+/**
+ * MetadataEnumsResponse
+ */
+export type MetadataEnumsResponse = {
+    /**
+     * Task Type
+     */
+    task_type: Array<'icmp' | 'tcp' | 'mtr' | 'iperf3'>;
+    /**
+     * Ip Family
+     */
+    ip_family: Array<'4' | '6'>;
+    /**
+     * Ip Version
+     */
+    ip_version: Array<'4' | '6' | '4+6'>;
+    /**
+     * Target Type
+     */
+    target_type: Array<'ip' | 'domain'>;
+    /**
+     * Agent Status
+     */
+    agent_status: Array<'online' | 'offline' | 'disabled'>;
+    /**
+     * Mtr Probe Protocol
+     */
+    mtr_probe_protocol: Array<'icmp_echo' | 'tcp' | 'udp'>;
+    /**
+     * Iperf3 Mode
+     */
+    iperf3_mode: Array<'single_thread' | 'multi_thread'>;
+    /**
+     * Sort Order
+     */
+    sort_order: Array<'asc' | 'desc'>;
+    management_sort_by: ManagementSortByOptions;
+};
+
+/**
+ * MonitoringAgentEnvelope
+ */
+export type MonitoringAgentEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: MonitoringAgentPublic;
+};
+
+/**
+ * MonitoringAgentInfo
+ */
+export type MonitoringAgentInfo = {
+    /**
+     * Agent Uuid
+     */
+    agent_uuid: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Ip Version
+     */
+    ip_version: '4' | '6' | '4+6';
+    /**
+     * Continent
+     */
+    continent: string;
+    /**
+     * Country
+     */
+    country: string;
+    /**
+     * City
+     */
+    city: string;
+    /**
+     * Carrier
+     */
+    carrier: string;
+    /**
+     * Status
+     */
+    status: 'online' | 'offline' | 'disabled';
+    /**
+     * Last Heartbeat At
+     */
+    last_heartbeat_at?: string | null;
+    /**
+     * Applied Config Version
+     */
+    applied_config_version: number;
+};
+
+/**
+ * MonitoringAgentListEnvelope
+ */
+export type MonitoringAgentListEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    /**
+     * Data
+     */
+    data: Array<MonitoringAgentPublic>;
+};
+
+/**
+ * MonitoringAgentPublic
+ */
+export type MonitoringAgentPublic = {
+    /**
+     * Agent Uuid
+     */
+    agent_uuid: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Ip Version
+     */
+    ip_version: '4' | '6' | '4+6';
+    /**
+     * Continent
+     */
+    continent: string;
+    /**
+     * Country
+     */
+    country: string;
+    /**
+     * City
+     */
+    city: string;
+    /**
+     * Carrier
+     */
+    carrier: string;
+    /**
+     * Status
+     */
+    status: 'online' | 'offline' | 'disabled';
+    /**
+     * Last Heartbeat At
+     */
+    last_heartbeat_at?: string | null;
+};
+
+/**
+ * MonitoringAnycastNode
+ */
+export type MonitoringAnycastNode = {
     /**
      * Task Count
      */
     task_count: number;
     /**
-     * Agent Version
+     * Tasks
      */
-    agent_version?: string | null;
-    /**
-     * Access Key
-     */
-    access_key: string;
+    tasks: Array<MonitoringTreeTask>;
 };
 
 /**
- * LatestReleaseResponse
+ * MonitoringCityNode
  */
-export type LatestReleaseResponse = {
+export type MonitoringCityNode = {
     /**
-     * Version
+     * City
      */
-    version: string;
+    city: string;
     /**
-     * Sha256
+     * Task Count
      */
-    sha256: string;
+    task_count: number;
     /**
-     * Download Url
+     * Tasks
      */
-    download_url: string;
-    /**
-     * Release Notes
-     */
-    release_notes: string | null;
+    tasks: Array<MonitoringTreeTask>;
 };
 
 /**
- * LoginRequest
+ * MonitoringContinentNode
  */
-export type LoginRequest = {
+export type MonitoringContinentNode = {
     /**
-     * Username
+     * Continent
      */
-    username: string;
+    continent: string;
     /**
-     * Password
+     * Task Count
      */
-    password: string;
+    task_count: number;
+    /**
+     * Countries
+     */
+    countries: Array<MonitoringCountryNode>;
 };
 
 /**
- * LogoutRequest
+ * MonitoringCountryNode
  */
-export type LogoutRequest = {
+export type MonitoringCountryNode = {
     /**
-     * Refresh Token
+     * Country
      */
-    refresh_token?: string | null;
+    country: string;
+    /**
+     * Task Count
+     */
+    task_count: number;
+    /**
+     * Cities
+     */
+    cities: Array<MonitoringCityNode>;
 };
 
 /**
- * MetricTypeEnum
+ * MonitoringIperf3ResultListData
  */
-export type MetricTypeEnum = 'latency' | 'jitter' | 'packet_loss';
-
-/**
- * MonitoringDataPoint
- */
-export type MonitoringDataPoint = {
-    /**
-     * Timestamp
-     */
-    timestamp: number;
-    /**
-     * Avg Rtt
-     */
-    avg_rtt: number;
-    /**
-     * Max Rtt
-     */
-    max_rtt: number;
-    /**
-     * Min Rtt
-     */
-    min_rtt: number;
-    /**
-     * Median Rtt
-     */
-    median_rtt: number;
-    /**
-     * P95 Rtt
-     */
-    p95_rtt: number;
-    /**
-     * P99 Rtt
-     */
-    p99_rtt: number;
-    /**
-     * Packet Loss Pct
-     */
-    packet_loss_pct: number;
-};
-
-/**
- * MonitoringResponse
- */
-export type MonitoringResponse = {
+export type MonitoringIperf3ResultListData = {
     /**
      * Task Uuid
      */
     task_uuid: string;
     /**
-     * Agent Uuid
+     * Start
      */
-    agent_uuid: string | null;
+    start: string;
     /**
-     * Granularity
+     * End
      */
-    granularity: string;
+    end: string;
     /**
-     * Data
+     * Items
      */
-    data: Array<MonitoringDataPoint>;
+    items: Array<MonitoringIperf3ResultSummary>;
 };
 
 /**
- * MtrHopDetail
+ * MonitoringIperf3ResultListEnvelope
  */
-export type MtrHopDetail = {
+export type MonitoringIperf3ResultListEnvelope = {
     /**
-     * Hop
+     * Code
      */
-    hop: number;
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: MonitoringIperf3ResultListData;
+};
+
+/**
+ * MonitoringIperf3ResultSummary
+ */
+export type MonitoringIperf3ResultSummary = {
+    /**
+     * Result Uuid
+     */
+    result_uuid: string;
+    /**
+     * Execution Uuid
+     */
+    execution_uuid: string;
+    /**
+     * Task Uuid
+     */
+    task_uuid: string;
+    /**
+     * Latest Sample At
+     */
+    latest_sample_at: string;
+    /**
+     * Started At
+     */
+    started_at?: string | null;
+    /**
+     * Finished At
+     */
+    finished_at?: string | null;
+    /**
+     * Duration Ms
+     */
+    duration_ms?: number | null;
+    /**
+     * Resolved Ip
+     */
+    resolved_ip?: string | null;
+    /**
+     * Latest Run Status
+     */
+    latest_run_status: string;
+    /**
+     * Mode
+     */
+    mode: string;
+    /**
+     * Parallel
+     */
+    parallel: number;
+    /**
+     * Port
+     */
+    port: number;
+    /**
+     * Duration Sec
+     */
+    duration_sec: number;
+    /**
+     * Upload Bits Per Second
+     */
+    upload_bits_per_second?: number | null;
+    /**
+     * Upload Bytes
+     */
+    upload_bytes?: number | null;
+    /**
+     * Upload Retransmits
+     */
+    upload_retransmits?: number | null;
+    /**
+     * Download Bits Per Second
+     */
+    download_bits_per_second?: number | null;
+    /**
+     * Download Bytes
+     */
+    download_bytes?: number | null;
+    /**
+     * Download Retransmits
+     */
+    download_retransmits?: number | null;
+    /**
+     * Upload Intervals
+     */
+    upload_intervals?: Array<{
+        [key: string]: unknown;
+    }>;
+    /**
+     * Download Intervals
+     */
+    download_intervals?: Array<{
+        [key: string]: unknown;
+    }>;
+    /**
+     * Upload End
+     */
+    upload_end?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Download End
+     */
+    download_end?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Bits Per Second
+     */
+    bits_per_second?: number | null;
+    /**
+     * Bytes
+     */
+    bytes?: number | null;
+    /**
+     * Retransmits
+     */
+    retransmits?: number | null;
+};
+
+/**
+ * MonitoringLatestResult
+ */
+export type MonitoringLatestResult = {
+    /**
+     * Exists
+     */
+    exists: boolean;
+    /**
+     * Source
+     */
+    source: 'victoriametrics' | 'database' | 'none';
+    /**
+     * Window Sec
+     */
+    window_sec?: number | null;
+    /**
+     * Latest Sample At
+     */
+    latest_sample_at?: string | null;
+    /**
+     * Latest Run Status
+     */
+    latest_run_status?: string | null;
+    /**
+     * Latency Avg Ms
+     */
+    latency_avg_ms?: number | null;
+    /**
+     * Latency Min Ms
+     */
+    latency_min_ms?: number | null;
+    /**
+     * Latency Max Ms
+     */
+    latency_max_ms?: number | null;
+    /**
+     * Latency Stddev Ms
+     */
+    latency_stddev_ms?: number | null;
+    /**
+     * Packets Sent
+     */
+    packets_sent?: number | null;
+    /**
+     * Packets Received
+     */
+    packets_received?: number | null;
+    /**
+     * Packet Loss Pct
+     */
+    packet_loss_pct?: number | null;
+    /**
+     * Connect Latency Avg Ms
+     */
+    connect_latency_avg_ms?: number | null;
+    /**
+     * Connect Latency Min Ms
+     */
+    connect_latency_min_ms?: number | null;
+    /**
+     * Connect Latency Max Ms
+     */
+    connect_latency_max_ms?: number | null;
+    /**
+     * Connect Latency Stddev Ms
+     */
+    connect_latency_stddev_ms?: number | null;
+    /**
+     * Connect Attempts
+     */
+    connect_attempts?: number | null;
+    /**
+     * Connect Successes
+     */
+    connect_successes?: number | null;
+    /**
+     * Connect Failures
+     */
+    connect_failures?: number | null;
+    /**
+     * Connect Failure Pct
+     */
+    connect_failure_pct?: number | null;
+    /**
+     * Trigger Type
+     */
+    trigger_type?: string | null;
+    /**
+     * Retry Seq
+     */
+    retry_seq?: number | null;
+    /**
+     * Resolved Ip
+     */
+    resolved_ip?: string | null;
+    /**
+     * Final Hop Hostname
+     */
+    final_hop_hostname?: string | null;
+    /**
+     * Final Hop Asn
+     */
+    final_hop_asn?: string | null;
+    /**
+     * Hop Count
+     */
+    hop_count?: number | null;
+};
+
+/**
+ * MonitoringMetricPoint
+ */
+export type MonitoringMetricPoint = {
+    /**
+     * Timestamp
+     */
+    timestamp: string;
+    /**
+     * Value
+     */
+    value: number;
+};
+
+/**
+ * MonitoringMetricSeries
+ */
+export type MonitoringMetricSeries = {
+    /**
+     * Metric
+     */
+    metric: string;
+    /**
+     * Unit
+     */
+    unit: string;
+    /**
+     * Points
+     */
+    points: Array<MonitoringMetricPoint>;
+};
+
+/**
+ * MonitoringMtrAddress
+ */
+export type MonitoringMtrAddress = {
     /**
      * Ip
      */
-    ip: string;
+    ip?: string | null;
     /**
      * Hostname
      */
     hostname?: string | null;
     /**
-     * Avg Rtt
+     * Asn
      */
-    avg_rtt: number;
+    asn?: string | null;
     /**
-     * Min Rtt
+     * Mpls
      */
-    min_rtt: number;
-    /**
-     * Max Rtt
-     */
-    max_rtt: number;
+    mpls: Array<MonitoringMtrMplsLabel>;
     /**
      * Packet Loss Pct
      */
     packet_loss_pct: number;
     /**
-     * Sent
+     * Avg Ms
      */
-    sent?: number | null;
+    avg_ms?: number | null;
     /**
-     * Received
+     * Best Ms
      */
-    received?: number | null;
+    best_ms?: number | null;
     /**
-     * Asn
+     * Worst Ms
      */
-    asn?: number | null;
-    /**
-     * Ptr
-     */
-    ptr?: string | null;
+    worst_ms?: number | null;
 };
 
 /**
- * MtrResultDetail
+ * MonitoringMtrHop
  */
-export type MtrResultDetail = {
+export type MonitoringMtrHop = {
+    /**
+     * Hop
+     */
+    hop: number;
+    /**
+     * Addresses
+     */
+    addresses: Array<MonitoringMtrAddress>;
+};
+
+/**
+ * MonitoringMtrMplsLabel
+ */
+export type MonitoringMtrMplsLabel = {
+    /**
+     * Label
+     */
+    label: number;
+    /**
+     * Exp
+     */
+    exp: number;
+    /**
+     * Bos
+     */
+    bos: number;
+    /**
+     * Ttl
+     */
+    ttl: number;
+};
+
+/**
+ * MonitoringMtrResultDetail
+ */
+export type MonitoringMtrResultDetail = {
     /**
      * Result Uuid
      */
     result_uuid: string;
     /**
+     * Execution Uuid
+     */
+    execution_uuid: string;
+    /**
      * Task Uuid
      */
     task_uuid: string;
+    /**
+     * Trigger Type
+     */
+    trigger_type: string;
+    /**
+     * Retry Seq
+     */
+    retry_seq: number;
+    /**
+     * Latest Sample At
+     */
+    latest_sample_at: string;
+    /**
+     * Started At
+     */
+    started_at?: string | null;
+    /**
+     * Finished At
+     */
+    finished_at?: string | null;
+    /**
+     * Duration Ms
+     */
+    duration_ms?: number | null;
+    /**
+     * Resolved Ip
+     */
+    resolved_ip?: string | null;
+    /**
+     * Hop Count
+     */
+    hop_count: number;
+    /**
+     * Latest Run Status
+     */
+    latest_run_status: string;
+    /**
+     * Message Id
+     */
+    message_id: string;
+    /**
+     * Task Revision
+     */
+    task_revision: number;
+    /**
+     * Config Version
+     */
+    config_version: number;
+    /**
+     * Target Uuid
+     */
+    target_uuid: string;
     /**
      * Agent Uuid
      */
     agent_uuid: string;
     /**
-     * Timestamp
+     * Ip Family
      */
-    timestamp: string;
+    ip_family: '4' | '6';
     /**
-     * Target Reached
+     * Probe Config Hash
      */
-    target_reached: boolean;
+    probe_config_hash: string;
     /**
-     * Total Hops
+     * Emitted At
      */
-    total_hops: number;
+    emitted_at: string;
+    /**
+     * Target
+     */
+    target: {
+        [key: string]: unknown;
+    };
+    /**
+     * Probe Config
+     */
+    probe_config: {
+        [key: string]: unknown;
+    };
+    /**
+     * Run Status
+     */
+    run_status: string;
+    /**
+     * As Path
+     */
+    as_path: Array<string>;
+    /**
+     * Execution
+     */
+    execution: {
+        [key: string]: unknown;
+    };
     /**
      * Hops
      */
-    hops: Array<MtrHopDetail>;
-};
-
-/**
- * MtrResultListResponse
- */
-export type MtrResultListResponse = {
-    /**
-     * Task Uuid
-     */
-    task_uuid: string;
-    /**
-     * Agent Uuid
-     */
-    agent_uuid: string | null;
-    /**
-     * Total
-     */
-    total: number;
-    /**
-     * Skip
-     */
-    skip: number;
-    /**
-     * Limit
-     */
-    limit: number;
-    /**
-     * Results
-     */
-    results: Array<MtrResultSummary>;
-};
-
-/**
- * MtrResultSummary
- */
-export type MtrResultSummary = {
-    /**
-     * Result Uuid
-     */
-    result_uuid: string;
-    /**
-     * Task Uuid
-     */
-    task_uuid: string;
-    /**
-     * Agent Uuid
-     */
-    agent_uuid: string;
-    /**
-     * Timestamp
-     */
-    timestamp: string;
-    /**
-     * Target Reached
-     */
-    target_reached: boolean;
-    /**
-     * Total Hops
-     */
-    total_hops: number;
-};
-
-/**
- * OperatorEnum
- */
-export type OperatorEnum = 'gt' | 'lt' | 'gte' | 'lte';
-
-/**
- * PaginatedResponse[AlertEventResponse]
- */
-export type PaginatedResponseAlertEventResponse = {
-    /**
-     * Items
-     */
-    items: Array<AlertEventResponse>;
-    /**
-     * Total
-     */
-    total: number;
-    /**
-     * Skip
-     */
-    skip: number;
-    /**
-     * Limit
-     */
-    limit: number;
-};
-
-/**
- * PaginatedResponse[AlertRuleResponse]
- */
-export type PaginatedResponseAlertRuleResponse = {
-    /**
-     * Items
-     */
-    items: Array<AlertRuleResponse>;
-    /**
-     * Total
-     */
-    total: number;
-    /**
-     * Skip
-     */
-    skip: number;
-    /**
-     * Limit
-     */
-    limit: number;
-};
-
-/**
- * PaginatedResponse[GroupResponse]
- */
-export type PaginatedResponseGroupResponse = {
-    /**
-     * Items
-     */
-    items: Array<GroupResponse>;
-    /**
-     * Total
-     */
-    total: number;
-    /**
-     * Skip
-     */
-    skip: number;
-    /**
-     * Limit
-     */
-    limit: number;
-};
-
-/**
- * PaginatedResponse[SettingResponse]
- */
-export type PaginatedResponseSettingResponse = {
-    /**
-     * Items
-     */
-    items: Array<SettingResponse>;
-    /**
-     * Total
-     */
-    total: number;
-    /**
-     * Skip
-     */
-    skip: number;
-    /**
-     * Limit
-     */
-    limit: number;
-};
-
-/**
- * PaginatedResponse[TaskResponse]
- */
-export type PaginatedResponseTaskResponse = {
-    /**
-     * Items
-     */
-    items: Array<TaskResponse>;
-    /**
-     * Total
-     */
-    total: number;
-    /**
-     * Skip
-     */
-    skip: number;
-    /**
-     * Limit
-     */
-    limit: number;
-};
-
-/**
- * PaginatedResponse[UserResponse]
- */
-export type PaginatedResponseUserResponse = {
-    /**
-     * Items
-     */
-    items: Array<UserResponse>;
-    /**
-     * Total
-     */
-    total: number;
-    /**
-     * Skip
-     */
-    skip: number;
-    /**
-     * Limit
-     */
-    limit: number;
-};
-
-/**
- * PaginatedResponse[WebhookDeliveryResponse]
- */
-export type PaginatedResponseWebhookDeliveryResponse = {
-    /**
-     * Items
-     */
-    items: Array<WebhookDeliveryResponse>;
-    /**
-     * Total
-     */
-    total: number;
-    /**
-     * Skip
-     */
-    skip: number;
-    /**
-     * Limit
-     */
-    limit: number;
-};
-
-/**
- * PaginatedResponse[WebhookResponse]
- */
-export type PaginatedResponseWebhookResponse = {
-    /**
-     * Items
-     */
-    items: Array<WebhookResponse>;
-    /**
-     * Total
-     */
-    total: number;
-    /**
-     * Skip
-     */
-    skip: number;
-    /**
-     * Limit
-     */
-    limit: number;
-};
-
-/**
- * PlatformEnum
- */
-export type PlatformEnum = 'x86_64-linux-musl' | 'aarch64-linux-musl' | 'x86_64-macos' | 'aarch64-macos' | 'x86_64-windows' | 'aarch64-windows';
-
-/**
- * ProtocolEnum
- */
-export type ProtocolEnum = 'icmp' | 'tcp' | 'mtr' | 'iperf3';
-
-/**
- * RefreshRequest
- */
-export type RefreshRequest = {
-    /**
-     * Refresh Token
-     */
-    refresh_token: string;
-};
-
-/**
- * ReleaseListResponse
- */
-export type ReleaseListResponse = {
-    /**
-     * Releases
-     */
-    releases: Array<ReleaseResponse>;
-};
-
-/**
- * ReleaseResponse
- */
-export type ReleaseResponse = {
-    /**
-     * Release Uuid
-     */
-    release_uuid: string;
-    /**
-     * Version
-     */
-    version: string;
-    /**
-     * Platform
-     */
-    platform: string;
-    /**
-     * Filename
-     */
-    filename: string;
-    /**
-     * File Size
-     */
-    file_size: number;
-    /**
-     * Sha256
-     */
-    sha256: string;
-    /**
-     * Release Notes
-     */
-    release_notes: string | null;
-    /**
-     * Is Latest
-     */
-    is_latest: boolean;
+    hops: Array<MonitoringMtrHop>;
     /**
      * Created At
      */
@@ -890,43 +2664,462 @@ export type ReleaseResponse = {
 };
 
 /**
- * SettingBulkUpdate
+ * MonitoringMtrResultDetailEnvelope
  */
-export type SettingBulkUpdate = {
+export type MonitoringMtrResultDetailEnvelope = {
     /**
-     * Settings
+     * Code
      */
-    settings: Array<SettingUpdateItem>;
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: MonitoringMtrResultDetail;
 };
 
 /**
- * SettingResponse
+ * MonitoringMtrResultListData
  */
-export type SettingResponse = {
+export type MonitoringMtrResultListData = {
     /**
-     * Key
+     * Task Uuid
      */
-    key: string;
+    task_uuid: string;
     /**
-     * Value
+     * Start
      */
-    value: string;
+    start: string;
     /**
-     * Value Type
+     * End
      */
-    value_type: string;
+    end: string;
     /**
-     * Is Secret
+     * Items
      */
-    is_secret: boolean;
+    items: Array<MonitoringMtrResultSummary>;
+};
+
+/**
+ * MonitoringMtrResultListEnvelope
+ */
+export type MonitoringMtrResultListEnvelope = {
     /**
-     * Is Bootstrap
+     * Code
      */
-    is_bootstrap: boolean;
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: MonitoringMtrResultListData;
+};
+
+/**
+ * MonitoringMtrResultSummary
+ */
+export type MonitoringMtrResultSummary = {
+    /**
+     * Result Uuid
+     */
+    result_uuid: string;
+    /**
+     * Execution Uuid
+     */
+    execution_uuid: string;
+    /**
+     * Task Uuid
+     */
+    task_uuid: string;
+    /**
+     * Trigger Type
+     */
+    trigger_type: string;
+    /**
+     * Retry Seq
+     */
+    retry_seq: number;
+    /**
+     * Latest Sample At
+     */
+    latest_sample_at: string;
+    /**
+     * Started At
+     */
+    started_at?: string | null;
+    /**
+     * Finished At
+     */
+    finished_at?: string | null;
+    /**
+     * Duration Ms
+     */
+    duration_ms?: number | null;
+    /**
+     * Resolved Ip
+     */
+    resolved_ip?: string | null;
+    /**
+     * Hop Count
+     */
+    hop_count: number;
+    /**
+     * Latest Run Status
+     */
+    latest_run_status: string;
+};
+
+/**
+ * MonitoringPagination
+ */
+export type MonitoringPagination = {
+    /**
+     * Page
+     */
+    page: number;
+    /**
+     * Page Size
+     */
+    page_size: number;
+    /**
+     * Total
+     */
+    total: number;
+    /**
+     * Total Pages
+     */
+    total_pages: number;
+};
+
+/**
+ * MonitoringTargetAnycastNode
+ */
+export type MonitoringTargetAnycastNode = {
+    /**
+     * Target Count
+     */
+    target_count: number;
+    /**
+     * Targets
+     */
+    targets: Array<MonitoringTreeTarget>;
+};
+
+/**
+ * MonitoringTargetCityNode
+ */
+export type MonitoringTargetCityNode = {
+    /**
+     * City
+     */
+    city: string;
+    /**
+     * Target Count
+     */
+    target_count: number;
+    /**
+     * Targets
+     */
+    targets: Array<MonitoringTreeTarget>;
+};
+
+/**
+ * MonitoringTargetContinentNode
+ */
+export type MonitoringTargetContinentNode = {
+    /**
+     * Continent
+     */
+    continent: string;
+    /**
+     * Target Count
+     */
+    target_count: number;
+    /**
+     * Countries
+     */
+    countries: Array<MonitoringTargetCountryNode>;
+};
+
+/**
+ * MonitoringTargetCountryNode
+ */
+export type MonitoringTargetCountryNode = {
+    /**
+     * Country
+     */
+    country: string;
+    /**
+     * Target Count
+     */
+    target_count: number;
+    /**
+     * Cities
+     */
+    cities: Array<MonitoringTargetCityNode>;
+};
+
+/**
+ * MonitoringTargetEnvelope
+ */
+export type MonitoringTargetEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: MonitoringTargetInfo;
+};
+
+/**
+ * MonitoringTargetGeoTreeData
+ */
+export type MonitoringTargetGeoTreeData = {
+    /**
+     * Total Target Count
+     */
+    total_target_count: number;
+    /**
+     * Anycast Target Count
+     */
+    anycast_target_count: number;
+    /**
+     * Tree
+     */
+    tree: Array<MonitoringTargetContinentNode>;
+    anycast: MonitoringTargetAnycastNode;
+};
+
+/**
+ * MonitoringTargetGeoTreeEnvelope
+ */
+export type MonitoringTargetGeoTreeEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: MonitoringTargetGeoTreeData;
+};
+
+/**
+ * MonitoringTargetInfo
+ */
+export type MonitoringTargetInfo = {
+    /**
+     * Target Uuid
+     */
+    target_uuid: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Target
+     */
+    target: string;
+    /**
+     * Target Type
+     */
+    target_type: 'ip' | 'domain';
+    /**
+     * Ip Version
+     */
+    ip_version: '4' | '6' | '4+6';
+    /**
+     * Is Anycast
+     */
+    is_anycast: boolean;
+    /**
+     * Continent
+     */
+    continent?: string | null;
+    /**
+     * Country
+     */
+    country?: string | null;
+    /**
+     * City
+     */
+    city?: string | null;
+    /**
+     * Zip Code
+     */
+    zip_code?: string | null;
+    /**
+     * Carrier
+     */
+    carrier: string;
+    /**
+     * Comment
+     */
+    comment?: string | null;
+    /**
+     * Tags
+     */
+    tags?: Array<string> | null;
+    /**
+     * Supported Protocols
+     */
+    supported_protocols?: Array<'icmp' | 'tcp' | 'mtr' | 'iperf3'> | null;
+    /**
+     * Is Enabled
+     */
+    is_enabled?: boolean | null;
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+};
+
+/**
+ * MonitoringTaskDetailEnvelope
+ */
+export type MonitoringTaskDetailEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: MonitoringTaskItem;
+};
+
+/**
+ * MonitoringTaskGeoTreeData
+ */
+export type MonitoringTaskGeoTreeData = {
+    /**
+     * Total Task Count
+     */
+    total_task_count: number;
+    /**
+     * Anycast Task Count
+     */
+    anycast_task_count: number;
+    /**
+     * Tree
+     */
+    tree: Array<MonitoringContinentNode>;
+    anycast: MonitoringAnycastNode;
+};
+
+/**
+ * MonitoringTaskGeoTreeEnvelope
+ */
+export type MonitoringTaskGeoTreeEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: MonitoringTaskGeoTreeData;
+};
+
+/**
+ * MonitoringTaskItem
+ */
+export type MonitoringTaskItem = {
+    /**
+     * Task Uuid
+     */
+    task_uuid: string;
+    /**
+     * Name
+     */
+    name: string;
     /**
      * Description
      */
-    description: string | null;
+    description?: string | null;
+    /**
+     * Task Type
+     */
+    task_type: 'icmp' | 'tcp' | 'mtr' | 'iperf3';
+    /**
+     * Ip Family
+     */
+    ip_family: '4' | '6';
+    /**
+     * Interval Sec
+     */
+    interval_sec: number;
+    /**
+     * Timeout Ms
+     */
+    timeout_ms: number;
+    /**
+     * Packet Count
+     */
+    packet_count: number;
+    /**
+     * Is Enabled
+     */
+    is_enabled: boolean;
+    /**
+     * Task Revision
+     */
+    task_revision: number;
+    /**
+     * Config Version
+     */
+    config_version: number;
+    /**
+     * Probe Config Hash
+     */
+    probe_config_hash: string;
+    /**
+     * Probe Config
+     */
+    probe_config: {
+        [key: string]: unknown;
+    };
+    target: MonitoringTargetInfo;
+    agent: MonitoringAgentInfo;
+    latest_result: MonitoringLatestResult;
+    /**
+     * Created At
+     */
+    created_at: string;
     /**
      * Updated At
      */
@@ -934,27 +3127,792 @@ export type SettingResponse = {
 };
 
 /**
- * SettingUpdate
+ * MonitoringTaskListData
  */
-export type SettingUpdate = {
+export type MonitoringTaskListData = {
     /**
-     * Value
+     * Items
      */
-    value: string;
+    items: Array<MonitoringTaskItem>;
+    pagination: MonitoringPagination;
 };
 
 /**
- * SettingUpdateItem
+ * MonitoringTaskListEnvelope
  */
-export type SettingUpdateItem = {
+export type MonitoringTaskListEnvelope = {
     /**
-     * Key
+     * Code
      */
-    key: string;
+    code: string;
     /**
-     * Value
+     * Message
      */
-    value: string;
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: MonitoringTaskListData;
+};
+
+/**
+ * MonitoringTaskMetricsData
+ */
+export type MonitoringTaskMetricsData = {
+    /**
+     * Task Uuid
+     */
+    task_uuid: string;
+    /**
+     * Task Type
+     */
+    task_type: 'icmp' | 'tcp' | 'mtr' | 'iperf3';
+    /**
+     * Start
+     */
+    start: string;
+    /**
+     * End
+     */
+    end: string;
+    /**
+     * Step Sec
+     */
+    step_sec: number;
+    /**
+     * Series
+     */
+    series: Array<MonitoringMetricSeries>;
+};
+
+/**
+ * MonitoringTaskMetricsEnvelope
+ */
+export type MonitoringTaskMetricsEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: MonitoringTaskMetricsData;
+};
+
+/**
+ * MonitoringTreeTarget
+ */
+export type MonitoringTreeTarget = {
+    /**
+     * Target Uuid
+     */
+    target_uuid: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Target
+     */
+    target: string;
+    /**
+     * Target Type
+     */
+    target_type: 'ip' | 'domain';
+    /**
+     * Ip Version
+     */
+    ip_version: '4' | '6' | '4+6';
+    /**
+     * Is Anycast
+     */
+    is_anycast?: boolean | null;
+    /**
+     * Carrier
+     */
+    carrier: string;
+};
+
+/**
+ * MonitoringTreeTask
+ */
+export type MonitoringTreeTask = {
+    /**
+     * Task Uuid
+     */
+    task_uuid: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Task Type
+     */
+    task_type: 'icmp' | 'tcp' | 'mtr' | 'iperf3';
+    /**
+     * Target Uuid
+     */
+    target_uuid: string;
+    /**
+     * Target Name
+     */
+    target_name: string;
+    /**
+     * Is Anycast
+     */
+    is_anycast?: boolean | null;
+};
+
+/**
+ * QuickAssociateRequest
+ */
+export type QuickAssociateRequest = {
+    /**
+     * Target Uuid
+     *
+     * 要关联的 Target UUID。
+     */
+    target_uuid: string;
+    /**
+     * Agent Uuid
+     *
+     * 要关联的 Agent UUID。
+     */
+    agent_uuid: string;
+};
+
+/**
+ * ResourceTagListData
+ */
+export type ResourceTagListData = {
+    /**
+     * Items
+     */
+    items: Array<ResourceTagResponse>;
+};
+
+/**
+ * ResourceTagListEnvelope
+ */
+export type ResourceTagListEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: ResourceTagListData;
+};
+
+/**
+ * ResourceTagResponse
+ */
+export type ResourceTagResponse = {
+    /**
+     * Tag
+     */
+    tag: string;
+    /**
+     * Resource Type
+     */
+    resource_type: 'agent' | 'target';
+    /**
+     * Resource Count
+     */
+    resource_count: number;
+};
+
+/**
+ * ResultIngestionEvent
+ */
+export type ResultIngestionEvent = {
+    /**
+     * Event Uuid
+     */
+    event_uuid: string;
+    /**
+     * Message Id
+     */
+    message_id?: string | null;
+    /**
+     * Result Uuid
+     */
+    result_uuid?: string | null;
+    /**
+     * Execution Uuid
+     */
+    execution_uuid?: string | null;
+    /**
+     * Message Type
+     */
+    message_type?: string | null;
+    /**
+     * Agent Uuid
+     */
+    agent_uuid?: string | null;
+    /**
+     * Task Uuid
+     */
+    task_uuid?: string | null;
+    /**
+     * Subject
+     */
+    subject?: string | null;
+    /**
+     * Status
+     */
+    status: string;
+    /**
+     * Reason
+     */
+    reason?: string | null;
+    /**
+     * Error Message
+     */
+    error_message?: string | null;
+    /**
+     * Received At
+     */
+    received_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+};
+
+/**
+ * ResultIngestionEventEnvelope
+ */
+export type ResultIngestionEventEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: ResultIngestionEvent;
+};
+
+/**
+ * ResultIngestionEventListData
+ */
+export type ResultIngestionEventListData = {
+    /**
+     * Items
+     */
+    items: Array<ResultIngestionEvent>;
+    pagination: MonitoringPagination;
+};
+
+/**
+ * ResultIngestionEventListEnvelope
+ */
+export type ResultIngestionEventListEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: ResultIngestionEventListData;
+};
+
+/**
+ * ResyncEnvelope
+ */
+export type ResyncEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: ResyncResponse;
+};
+
+/**
+ * ResyncResponse
+ */
+export type ResyncResponse = {
+    /**
+     * Agent Uuid
+     */
+    agent_uuid: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Ip Version
+     */
+    ip_version: '4' | '6' | '4+6';
+    /**
+     * Continent
+     */
+    continent: string;
+    /**
+     * Country
+     */
+    country: string;
+    /**
+     * City
+     */
+    city: string;
+    /**
+     * Zip Code
+     */
+    zip_code: string;
+    /**
+     * Carrier
+     */
+    carrier: string;
+    /**
+     * Comment
+     */
+    comment?: string | null;
+    /**
+     * Tags
+     */
+    tags: Array<string>;
+    /**
+     * Is Enabled
+     */
+    is_enabled: boolean;
+    /**
+     * Is Deleted
+     */
+    is_deleted: boolean;
+    /**
+     * Status
+     */
+    status: 'online' | 'offline' | 'disabled';
+    /**
+     * Last Heartbeat At
+     */
+    last_heartbeat_at?: string | null;
+    /**
+     * Last Reported Ip
+     */
+    last_reported_ip?: string | null;
+    /**
+     * Hostname
+     */
+    hostname?: string | null;
+    /**
+     * Version
+     */
+    version?: string | null;
+    /**
+     * Os
+     */
+    os?: string | null;
+    /**
+     * Arch
+     */
+    arch?: string | null;
+    /**
+     * Runtime Id
+     */
+    runtime_id?: string | null;
+    /**
+     * Expected Config Version
+     */
+    expected_config_version: number;
+    /**
+     * Applied Config Version
+     */
+    applied_config_version: number;
+    /**
+     * Scheduler Stats
+     */
+    scheduler_stats?: {
+        [key: string]: unknown;
+    } | null;
+    /**
+     * Last Snapshot Sent At
+     */
+    last_snapshot_sent_at?: string | null;
+    /**
+     * Last Snapshot Ack At
+     */
+    last_snapshot_ack_at?: string | null;
+    /**
+     * Last Snapshot Ack Status
+     */
+    last_snapshot_ack_status?: string | null;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+    /**
+     * Deleted At
+     */
+    deleted_at?: string | null;
+};
+
+/**
+ * TargetCreate
+ */
+export type TargetCreate = {
+    /**
+     * Name
+     *
+     * Target 显示名称。
+     */
+    name: string;
+    /**
+     * Target
+     *
+     * 监控目标地址，可以是 IP 地址或域名。
+     */
+    target: string;
+    /**
+     * Ip Version
+     *
+     * 目标支持的 IP 版本，可选 `4`、`6` 或 `4+6`；不传时由系统推断。
+     */
+    ip_version?: '4' | '6' | '4+6' | null;
+    /**
+     * Is Anycast
+     *
+     * 目标是否为 Anycast 地址。
+     */
+    is_anycast?: boolean;
+    /**
+     * Continent
+     *
+     * 目标所在大洲。
+     */
+    continent?: string | null;
+    /**
+     * Country
+     *
+     * 目标所在国家。
+     */
+    country?: string | null;
+    /**
+     * City
+     *
+     * 目标所在城市。
+     */
+    city?: string | null;
+    /**
+     * Zip Code
+     *
+     * 目标所在地邮编；未知时可传 `UNKNOWN`。
+     */
+    zip_code?: string | null;
+    /**
+     * Carrier
+     *
+     * 目标所属运营商、云厂商或网络提供方。
+     */
+    carrier: string;
+    /**
+     * Comment
+     *
+     * Target 备注信息。
+     */
+    comment?: string | null;
+    /**
+     * Tags
+     *
+     * Target 标签列表，用于分类和筛选。
+     */
+    tags?: Array<string>;
+    /**
+     * Supported Protocols
+     *
+     * Target 支持的监控协议。需要运行 iperf3 任务时必须包含 `iperf3`。
+     */
+    supported_protocols?: Array<'icmp' | 'tcp' | 'mtr' | 'iperf3'>;
+};
+
+/**
+ * TargetEnvelope
+ */
+export type TargetEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: TargetResponse;
+};
+
+/**
+ * TargetListData
+ */
+export type TargetListData = {
+    /**
+     * Items
+     */
+    items: Array<TargetResponse>;
+    pagination: MonitoringPagination;
+};
+
+/**
+ * TargetListEnvelope
+ */
+export type TargetListEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: TargetListData;
+};
+
+/**
+ * TargetResponse
+ */
+export type TargetResponse = {
+    /**
+     * Target Uuid
+     */
+    target_uuid: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Target
+     */
+    target: string;
+    /**
+     * Target Type
+     */
+    target_type: 'ip' | 'domain';
+    /**
+     * Ip Version
+     */
+    ip_version: '4' | '6' | '4+6';
+    /**
+     * Is Anycast
+     */
+    is_anycast: boolean;
+    /**
+     * Continent
+     */
+    continent?: string | null;
+    /**
+     * Country
+     */
+    country?: string | null;
+    /**
+     * City
+     */
+    city?: string | null;
+    /**
+     * Zip Code
+     */
+    zip_code?: string | null;
+    /**
+     * Carrier
+     */
+    carrier: string;
+    /**
+     * Comment
+     */
+    comment?: string | null;
+    /**
+     * Tags
+     */
+    tags: Array<string>;
+    /**
+     * Supported Protocols
+     */
+    supported_protocols: Array<'icmp' | 'tcp' | 'mtr' | 'iperf3'>;
+    /**
+     * Is Enabled
+     */
+    is_enabled: boolean;
+    /**
+     * Is Deleted
+     */
+    is_deleted: boolean;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+    /**
+     * Deleted At
+     */
+    deleted_at?: string | null;
+};
+
+/**
+ * TargetUpdate
+ */
+export type TargetUpdate = {
+    /**
+     * Name
+     *
+     * 新的 Target 显示名称；不传则保持不变。
+     */
+    name?: string | null;
+    /**
+     * Target
+     *
+     * 新的监控目标地址，可以是 IP 地址或域名；不传则保持不变。
+     */
+    target?: string | null;
+    /**
+     * Ip Version
+     *
+     * 新的目标 IP 版本，可选 `4`、`6` 或 `4+6`；不传则保持不变。
+     */
+    ip_version?: '4' | '6' | '4+6' | null;
+    /**
+     * Is Anycast
+     *
+     * 是否将目标标记为 Anycast；不传则保持不变。
+     */
+    is_anycast?: boolean | null;
+    /**
+     * Continent
+     *
+     * 新的目标所在大洲；不传则保持不变。
+     */
+    continent?: string | null;
+    /**
+     * Country
+     *
+     * 新的目标所在国家；不传则保持不变。
+     */
+    country?: string | null;
+    /**
+     * City
+     *
+     * 新的目标所在城市；不传则保持不变。
+     */
+    city?: string | null;
+    /**
+     * Zip Code
+     *
+     * 新的目标所在地邮编；不传则保持不变。
+     */
+    zip_code?: string | null;
+    /**
+     * Carrier
+     *
+     * 新的运营商、云厂商或网络提供方；不传则保持不变。
+     */
+    carrier?: string | null;
+    /**
+     * Comment
+     *
+     * 新的 Target 备注；不传则保持不变。
+     */
+    comment?: string | null;
+    /**
+     * Tags
+     *
+     * 新的 Target 标签列表；不传则保持不变。
+     */
+    tags?: Array<string> | null;
+    /**
+     * Supported Protocols
+     *
+     * 新的 Target 支持协议列表；不传则保持不变。需要运行 iperf3 任务时必须包含 `iperf3`。
+     */
+    supported_protocols?: Array<'icmp' | 'tcp' | 'mtr' | 'iperf3'> | null;
+};
+
+/**
+ * TaskAgentSummary
+ */
+export type TaskAgentSummary = {
+    /**
+     * Agent Uuid
+     */
+    agent_uuid: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Status
+     */
+    status: 'online' | 'offline' | 'disabled';
+    /**
+     * City
+     */
+    city: string;
+};
+
+/**
+ * TaskArrayEnvelope
+ */
+export type TaskArrayEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    /**
+     * Data
+     */
+    data: Array<TaskResponse>;
 };
 
 /**
@@ -962,46 +3920,135 @@ export type SettingUpdateItem = {
  */
 export type TaskCreate = {
     /**
-     * Task Name
+     * Name
+     *
+     * 任务显示名称；不传时由系统根据 Agent、Target 和任务类型生成。
      */
-    task_name: string;
-    protocol: ProtocolEnum;
+    name?: string | null;
     /**
-     * Target
+     * Description
+     *
+     * 任务描述。
      */
-    target: string;
+    description?: string | null;
     /**
-     * Port
+     * Target Uuid
+     *
+     * 任务关联的 Target UUID。
      */
-    port?: number | null;
+    target_uuid: string;
+    /**
+     * Agent Uuid
+     *
+     * 任务关联的 Agent UUID。
+     */
+    agent_uuid: string;
+    /**
+     * Task Type
+     *
+     * 任务类型，可选 `icmp`、`tcp`、`mtr` 或 `iperf3`。
+     */
+    task_type: 'icmp' | 'tcp' | 'mtr' | 'iperf3';
+    /**
+     * Ip Family
+     *
+     * 任务使用的 IP 协议族，可选 `4` 或 `6`。
+     */
+    ip_family: '4' | '6';
     /**
      * Interval
+     *
+     * 任务执行间隔，单位为秒。
      */
     interval?: number;
     /**
-     * Packet Count
-     */
-    packet_count?: number;
-    /**
      * Timeout
+     *
+     * 单次探测超时时间，单位为毫秒。
      */
     timeout?: number;
     /**
-     * Max Hops
+     * Packet Count
+     *
+     * 单次探测发送的包数量或连接尝试数量。
      */
-    max_hops?: number | null;
+    packet_count?: number;
     /**
-     * Loss Threshold
+     * Probe Config
+     *
+     * 任务类型相关的探测配置，例如 TCP 端口、MTR 最大跳数等。
      */
-    loss_threshold?: number | null;
+    probe_config?: {
+        [key: string]: unknown;
+    };
     /**
-     * Cooldown Secs
+     * Mtr Retry Config
+     *
+     * MTR 重试配置，仅对 MTR 任务生效。
      */
-    cooldown_secs?: number | null;
+    mtr_retry_config?: {
+        [key: string]: unknown;
+    } | null;
     /**
-     * Max Retries
+     * Schedule Jitter Ms
+     *
+     * 调度抖动上限，单位为毫秒，用于避免大量任务同时触发。
      */
-    max_retries?: number | null;
+    schedule_jitter_ms?: number;
+    /**
+     * Created By Relation
+     *
+     * 是否由快速关联流程自动创建。
+     */
+    created_by_relation?: boolean;
+};
+
+/**
+ * TaskEnvelope
+ */
+export type TaskEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: TaskResponse;
+};
+
+/**
+ * TaskListData
+ */
+export type TaskListData = {
+    /**
+     * Items
+     */
+    items: Array<TaskResponse>;
+};
+
+/**
+ * TaskListEnvelope
+ */
+export type TaskListEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: TaskListData;
 };
 
 /**
@@ -1013,57 +4060,303 @@ export type TaskResponse = {
      */
     task_uuid: string;
     /**
-     * Task Name
+     * Name
      */
-    task_name: string;
+    name: string;
     /**
-     * Protocol
+     * Description
      */
-    protocol: string;
+    description?: string | null;
     /**
-     * Target
+     * Target Uuid
      */
-    target: string;
+    target_uuid: string;
     /**
-     * Port
+     * Agent Uuid
      */
-    port: number | null;
+    agent_uuid: string;
+    target?: TaskTargetSummary | null;
+    agent?: TaskAgentSummary | null;
+    /**
+     * Task Type
+     */
+    task_type: 'icmp' | 'tcp' | 'mtr' | 'iperf3';
+    /**
+     * Ip Family
+     */
+    ip_family: '4' | '6';
     /**
      * Interval
      */
     interval: number;
     /**
-     * Packet Count
-     */
-    packet_count: number;
-    /**
      * Timeout
      */
     timeout: number;
     /**
-     * Max Hops
+     * Packet Count
      */
-    max_hops: number | null;
+    packet_count: number;
     /**
-     * Loss Threshold
+     * Probe Config
      */
-    loss_threshold: number | null;
+    probe_config: {
+        [key: string]: unknown;
+    };
     /**
-     * Cooldown Secs
+     * Probe Config Hash
      */
-    cooldown_secs: number | null;
+    probe_config_hash: string;
     /**
-     * Max Retries
+     * Task Revision
      */
-    max_retries: number | null;
+    task_revision: number;
     /**
-     * Is Active
+     * Mtr Retry Config
      */
-    is_active: boolean;
+    mtr_retry_config?: {
+        [key: string]: unknown;
+    } | null;
+    /**
+     * Schedule Jitter Ms
+     */
+    schedule_jitter_ms: number;
+    /**
+     * Is Enabled
+     */
+    is_enabled: boolean;
+    /**
+     * Is Deleted
+     */
+    is_deleted: boolean;
+    /**
+     * Created By Relation
+     */
+    created_by_relation: boolean;
     /**
      * Created At
      */
     created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+    /**
+     * Deleted At
+     */
+    deleted_at?: string | null;
+};
+
+/**
+ * TaskSnapshotAck
+ */
+export type TaskSnapshotAck = {
+    /**
+     * Config Version
+     *
+     * Agent 确认的任务配置版本号。
+     */
+    config_version: number;
+    /**
+     * Accepted
+     *
+     * Agent 是否成功接受并应用该任务快照。
+     */
+    accepted: boolean;
+    /**
+     * Applied At
+     *
+     * Agent 应用任务快照的时间。
+     */
+    applied_at?: string | null;
+    /**
+     * Task Count
+     *
+     * Agent 应用后的任务数量。
+     */
+    task_count?: number;
+    /**
+     * Error Type
+     *
+     * 应用失败时的错误类型。
+     */
+    error_type?: string | null;
+    /**
+     * Error Message
+     *
+     * 应用失败时的错误详情。
+     */
+    error_message?: string | null;
+};
+
+/**
+ * TaskSnapshotAckEnvelope
+ */
+export type TaskSnapshotAckEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: AgentResponse;
+};
+
+/**
+ * TaskSnapshotAgent
+ */
+export type TaskSnapshotAgent = {
+    /**
+     * Agent Uuid
+     */
+    agent_uuid: string;
+    /**
+     * Ip Version
+     */
+    ip_version: '4' | '6' | '4+6';
+};
+
+/**
+ * TaskSnapshotEnvelope
+ */
+export type TaskSnapshotEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: TaskSnapshotResponse;
+};
+
+/**
+ * TaskSnapshotResponse
+ */
+export type TaskSnapshotResponse = {
+    /**
+     * Config Version
+     */
+    config_version: number;
+    /**
+     * Snapshot Mode
+     */
+    snapshot_mode: 'full';
+    /**
+     * Generated At
+     */
+    generated_at: string;
+    agent: TaskSnapshotAgent;
+    /**
+     * Tasks
+     */
+    tasks: Array<TaskSnapshotTaskItem>;
+};
+
+/**
+ * TaskSnapshotTarget
+ */
+export type TaskSnapshotTarget = {
+    /**
+     * Target
+     */
+    target: string;
+    /**
+     * Target Type
+     */
+    target_type: 'ip' | 'domain';
+};
+
+/**
+ * TaskSnapshotTaskItem
+ */
+export type TaskSnapshotTaskItem = {
+    /**
+     * Task Uuid
+     */
+    task_uuid: string;
+    /**
+     * Task Revision
+     */
+    task_revision: number;
+    /**
+     * Task Type
+     */
+    task_type: 'icmp' | 'tcp' | 'mtr' | 'iperf3';
+    /**
+     * Target Uuid
+     */
+    target_uuid: string;
+    /**
+     * Ip Family
+     */
+    ip_family: '4' | '6';
+    /**
+     * Interval Sec
+     */
+    interval_sec: number;
+    /**
+     * Timeout Ms
+     */
+    timeout_ms: number;
+    /**
+     * Is Enabled
+     */
+    is_enabled: boolean;
+    target: TaskSnapshotTarget;
+    /**
+     * Probe Config
+     */
+    probe_config: {
+        [key: string]: unknown;
+    };
+    /**
+     * Probe Config Hash
+     */
+    probe_config_hash: string;
+    /**
+     * Mtr Retry Config
+     */
+    mtr_retry_config?: {
+        [key: string]: unknown;
+    } | null;
+};
+
+/**
+ * TaskTargetSummary
+ */
+export type TaskTargetSummary = {
+    /**
+     * Target Uuid
+     */
+    target_uuid: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Target
+     */
+    target: string;
+    /**
+     * Target Type
+     */
+    target_type: 'ip' | 'domain';
+    /**
+     * Is Anycast
+     */
+    is_anycast: boolean;
 };
 
 /**
@@ -1071,141 +4364,75 @@ export type TaskResponse = {
  */
 export type TaskUpdate = {
     /**
-     * Task Name
+     * Name
+     *
+     * 新的任务显示名称；不传则保持不变。
      */
-    task_name?: string | null;
+    name?: string | null;
     /**
-     * Target
+     * Description
+     *
+     * 新的任务描述；不传则保持不变。
      */
-    target?: string | null;
+    description?: string | null;
+    /**
+     * Target Uuid
+     *
+     * 新的 Target UUID；不传则保持不变。
+     */
+    target_uuid?: string | null;
+    /**
+     * Agent Uuid
+     *
+     * 新的 Agent UUID；不传则保持不变。
+     */
+    agent_uuid?: string | null;
+    /**
+     * Ip Family
+     *
+     * 新的 IP 协议族，可选 `4` 或 `6`；不传则保持不变。
+     */
+    ip_family?: '4' | '6' | null;
     /**
      * Interval
+     *
+     * 新的任务执行间隔，单位为秒；不传则保持不变。
      */
     interval?: number | null;
     /**
+     * Timeout
+     *
+     * 新的单次探测超时时间，单位为毫秒；不传则保持不变。
+     */
+    timeout?: number | null;
+    /**
      * Packet Count
+     *
+     * 新的单次探测包数量或连接尝试数量；不传则保持不变。
      */
     packet_count?: number | null;
     /**
-     * Is Active
+     * Probe Config
+     *
+     * 新的探测配置；不传则保持不变。
      */
-    is_active?: boolean | null;
+    probe_config?: {
+        [key: string]: unknown;
+    } | null;
     /**
-     * Max Hops
+     * Mtr Retry Config
+     *
+     * 新的 MTR 重试配置；不传则保持不变。
      */
-    max_hops?: number | null;
+    mtr_retry_config?: {
+        [key: string]: unknown;
+    } | null;
     /**
-     * Loss Threshold
+     * Schedule Jitter Ms
+     *
+     * 新的调度抖动上限，单位为毫秒；不传则保持不变。
      */
-    loss_threshold?: number | null;
-    /**
-     * Cooldown Secs
-     */
-    cooldown_secs?: number | null;
-    /**
-     * Max Retries
-     */
-    max_retries?: number | null;
-};
-
-/**
- * TokenResponse
- */
-export type TokenResponse = {
-    /**
-     * Access Token
-     */
-    access_token: string;
-    /**
-     * Refresh Token
-     */
-    refresh_token: string;
-    /**
-     * Token Type
-     */
-    token_type?: string;
-};
-
-/**
- * UserChangePassword
- */
-export type UserChangePassword = {
-    /**
-     * New Password
-     */
-    new_password: string;
-};
-
-/**
- * UserCreate
- */
-export type UserCreate = {
-    /**
-     * Username
-     */
-    username: string;
-    /**
-     * Email
-     */
-    email: string;
-    /**
-     * Password
-     */
-    password: string;
-    role: UserRoleEnum;
-};
-
-/**
- * UserResponse
- */
-export type UserResponse = {
-    /**
-     * User Uuid
-     */
-    user_uuid: string;
-    /**
-     * Username
-     */
-    username: string;
-    /**
-     * Email
-     */
-    email: string;
-    /**
-     * Role
-     */
-    role: string;
-    /**
-     * Is Active
-     */
-    is_active: boolean;
-    /**
-     * Created At
-     */
-    created_at: string;
-};
-
-/**
- * UserRoleEnum
- */
-export type UserRoleEnum = 'admin' | 'subscriber';
-
-/**
- * UserUpdate
- */
-export type UserUpdate = {
-    /**
-     * Username
-     */
-    username?: string | null;
-    /**
-     * Email
-     */
-    email?: string | null;
-    /**
-     * Is Active
-     */
-    is_active?: boolean | null;
+    schedule_jitter_ms?: number | null;
 };
 
 /**
@@ -1236,928 +4463,1750 @@ export type ValidationError = {
     };
 };
 
-/**
- * WebhookCreate
- */
-export type WebhookCreate = {
-    /**
-     * Name
-     */
-    name: string;
-    /**
-     * Url
-     */
-    url: string;
-    /**
-     * Body Template
-     */
-    body_template?: string | null;
-    /**
-     * Custom Headers
-     */
-    custom_headers?: {
-        [key: string]: string;
-    } | null;
-};
-
-/**
- * WebhookCreateResponse
- */
-export type WebhookCreateResponse = {
-    /**
-     * Webhook Uuid
-     */
-    webhook_uuid: string;
-    /**
-     * User Uuid
-     */
-    user_uuid: string;
-    /**
-     * Name
-     */
-    name: string;
-    /**
-     * Url
-     */
-    url: string;
-    /**
-     * Is Active
-     */
-    is_active: boolean;
-    /**
-     * Is Deleted
-     */
-    is_deleted: boolean;
-    /**
-     * Consecutive Failures
-     */
-    consecutive_failures: number;
-    /**
-     * Body Template
-     */
-    body_template?: string | null;
-    /**
-     * Custom Headers
-     */
-    custom_headers?: {
-        [key: string]: string;
-    } | null;
-    /**
-     * Created At
-     */
-    created_at: string;
-    /**
-     * Secret
-     */
-    secret: string;
-};
-
-/**
- * WebhookDeliveryDetailResponse
- */
-export type WebhookDeliveryDetailResponse = {
-    /**
-     * Delivery Uuid
-     */
-    delivery_uuid: string;
-    /**
-     * Webhook Uuid
-     */
-    webhook_uuid: string;
-    /**
-     * Event Type
-     */
-    event_type: string;
-    /**
-     * Status
-     */
-    status: string;
-    /**
-     * Attempt
-     */
-    attempt: number;
-    /**
-     * Response Status
-     */
-    response_status: number | null;
-    /**
-     * Response Time Ms
-     */
-    response_time_ms: number | null;
-    /**
-     * Created At
-     */
-    created_at: string;
-    /**
-     * Request Url
-     */
-    request_url: string;
-    /**
-     * Request Headers
-     */
-    request_headers: {
-        [key: string]: unknown;
-    };
-    /**
-     * Request Body
-     */
-    request_body: string;
-    /**
-     * Response Body
-     */
-    response_body: string | null;
-};
-
-/**
- * WebhookDeliveryResponse
- */
-export type WebhookDeliveryResponse = {
-    /**
-     * Delivery Uuid
-     */
-    delivery_uuid: string;
-    /**
-     * Webhook Uuid
-     */
-    webhook_uuid: string;
-    /**
-     * Event Type
-     */
-    event_type: string;
-    /**
-     * Status
-     */
-    status: string;
-    /**
-     * Attempt
-     */
-    attempt: number;
-    /**
-     * Response Status
-     */
-    response_status: number | null;
-    /**
-     * Response Time Ms
-     */
-    response_time_ms: number | null;
-    /**
-     * Created At
-     */
-    created_at: string;
-};
-
-/**
- * WebhookResponse
- */
-export type WebhookResponse = {
-    /**
-     * Webhook Uuid
-     */
-    webhook_uuid: string;
-    /**
-     * User Uuid
-     */
-    user_uuid: string;
-    /**
-     * Name
-     */
-    name: string;
-    /**
-     * Url
-     */
-    url: string;
-    /**
-     * Is Active
-     */
-    is_active: boolean;
-    /**
-     * Is Deleted
-     */
-    is_deleted: boolean;
-    /**
-     * Consecutive Failures
-     */
-    consecutive_failures: number;
-    /**
-     * Body Template
-     */
-    body_template?: string | null;
-    /**
-     * Custom Headers
-     */
-    custom_headers?: {
-        [key: string]: string;
-    } | null;
-    /**
-     * Created At
-     */
-    created_at: string;
-};
-
-/**
- * WebhookUpdate
- */
-export type WebhookUpdate = {
-    /**
-     * Name
-     */
-    name?: string | null;
-    /**
-     * Url
-     */
-    url?: string | null;
-    /**
-     * Is Active
-     */
-    is_active?: boolean | null;
-    /**
-     * Body Template
-     */
-    body_template?: string | null;
-    /**
-     * Custom Headers
-     */
-    custom_headers?: {
-        [key: string]: string;
-    } | null;
-};
-
-export type RegisterRouteApiV1AuthRegisterPostData = {
-    body: UserCreate;
+export type HealthHealthGetData = {
+    body?: never;
     path?: never;
     query?: never;
-    url: '/api/v1/auth/register';
+    url: '/health';
 };
 
-export type RegisterRouteApiV1AuthRegisterPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type RegisterRouteApiV1AuthRegisterPostError = RegisterRouteApiV1AuthRegisterPostErrors[keyof RegisterRouteApiV1AuthRegisterPostErrors];
-
-export type RegisterRouteApiV1AuthRegisterPostResponses = {
+export type HealthHealthGetResponses = {
     /**
      * Successful Response
      */
-    201: UserResponse;
+    200: HealthResponse;
 };
 
-export type RegisterRouteApiV1AuthRegisterPostResponse = RegisterRouteApiV1AuthRegisterPostResponses[keyof RegisterRouteApiV1AuthRegisterPostResponses];
+export type HealthHealthGetResponse = HealthHealthGetResponses[keyof HealthHealthGetResponses];
 
-export type LoginRouteApiV1AuthLoginPostData = {
-    body: LoginRequest;
+export type PostAuthLoginApiV1AuthLoginPostData = {
+    body: AdminLoginRequest;
     path?: never;
     query?: never;
     url: '/api/v1/auth/login';
 };
 
-export type LoginRouteApiV1AuthLoginPostErrors = {
+export type PostAuthLoginApiV1AuthLoginPostErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type LoginRouteApiV1AuthLoginPostError = LoginRouteApiV1AuthLoginPostErrors[keyof LoginRouteApiV1AuthLoginPostErrors];
+export type PostAuthLoginApiV1AuthLoginPostError = PostAuthLoginApiV1AuthLoginPostErrors[keyof PostAuthLoginApiV1AuthLoginPostErrors];
 
-export type LoginRouteApiV1AuthLoginPostResponses = {
+export type PostAuthLoginApiV1AuthLoginPostResponses = {
     /**
      * Successful Response
      */
-    200: TokenResponse;
+    200: AdminLoginEnvelope;
 };
 
-export type LoginRouteApiV1AuthLoginPostResponse = LoginRouteApiV1AuthLoginPostResponses[keyof LoginRouteApiV1AuthLoginPostResponses];
+export type PostAuthLoginApiV1AuthLoginPostResponse = PostAuthLoginApiV1AuthLoginPostResponses[keyof PostAuthLoginApiV1AuthLoginPostResponses];
 
-export type RefreshRouteApiV1AuthRefreshPostData = {
-    body: RefreshRequest;
+export type GetAuthMeApiV1AuthMeGetData = {
+    body?: never;
     path?: never;
     query?: never;
-    url: '/api/v1/auth/refresh';
+    url: '/api/v1/auth/me';
 };
 
-export type RefreshRouteApiV1AuthRefreshPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type RefreshRouteApiV1AuthRefreshPostError = RefreshRouteApiV1AuthRefreshPostErrors[keyof RefreshRouteApiV1AuthRefreshPostErrors];
-
-export type RefreshRouteApiV1AuthRefreshPostResponses = {
+export type GetAuthMeApiV1AuthMeGetResponses = {
     /**
      * Successful Response
      */
-    200: TokenResponse;
+    200: AdminMeEnvelope;
 };
 
-export type RefreshRouteApiV1AuthRefreshPostResponse = RefreshRouteApiV1AuthRefreshPostResponses[keyof RefreshRouteApiV1AuthRefreshPostResponses];
+export type GetAuthMeApiV1AuthMeGetResponse = GetAuthMeApiV1AuthMeGetResponses[keyof GetAuthMeApiV1AuthMeGetResponses];
 
-export type LogoutRouteApiV1AuthLogoutPostData = {
-    /**
-     * Data
-     */
-    body?: LogoutRequest | null;
+export type PostAuthLogoutApiV1AuthLogoutPostData = {
+    body?: never;
     headers?: {
         /**
          * Authorization
+         *
+         * 管理员 Bearer Token 请求头，格式为 `Bearer <access_token>`。
          */
-        authorization?: string;
+        authorization?: string | null;
     };
     path?: never;
     query?: never;
     url: '/api/v1/auth/logout';
 };
 
-export type LogoutRouteApiV1AuthLogoutPostErrors = {
+export type PostAuthLogoutApiV1AuthLogoutPostErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type LogoutRouteApiV1AuthLogoutPostError = LogoutRouteApiV1AuthLogoutPostErrors[keyof LogoutRouteApiV1AuthLogoutPostErrors];
+export type PostAuthLogoutApiV1AuthLogoutPostError = PostAuthLogoutApiV1AuthLogoutPostErrors[keyof PostAuthLogoutApiV1AuthLogoutPostErrors];
 
-export type LogoutRouteApiV1AuthLogoutPostResponses = {
+export type PostAuthLogoutApiV1AuthLogoutPostResponses = {
     /**
      * Successful Response
      */
-    204: void;
+    200: AdminLogoutEnvelope;
 };
 
-export type LogoutRouteApiV1AuthLogoutPostResponse = LogoutRouteApiV1AuthLogoutPostResponses[keyof LogoutRouteApiV1AuthLogoutPostResponses];
+export type PostAuthLogoutApiV1AuthLogoutPostResponse = PostAuthLogoutApiV1AuthLogoutPostResponses[keyof PostAuthLogoutApiV1AuthLogoutPostResponses];
 
-export type ListUsersRouteApiV1UsersGetData = {
+export type PostV1AuthRefreshApiV1AuthRefreshPostData = {
     body?: never;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/refresh';
+};
+
+export type PostV1AuthRefreshApiV1AuthRefreshPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: AdminLoginEnvelope;
+};
+
+export type PostV1AuthRefreshApiV1AuthRefreshPostResponse = PostV1AuthRefreshApiV1AuthRefreshPostResponses[keyof PostV1AuthRefreshApiV1AuthRefreshPostResponses];
+
+export type GetMetadataEnumsApiV1MetadataEnumsGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/metadata/enums';
+};
+
+export type GetMetadataEnumsApiV1MetadataEnumsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: MetadataEnumsEnvelope;
+};
+
+export type GetMetadataEnumsApiV1MetadataEnumsGetResponse = GetMetadataEnumsApiV1MetadataEnumsGetResponses[keyof GetMetadataEnumsApiV1MetadataEnumsGetResponses];
+
+export type GetMonitoringTaskGeoTreeApiV1MonitoringTaskGeoTreeGetData = {
+    body?: never;
     path?: never;
     query?: {
         /**
-         * Skip
+         * Task Type
+         *
+         * 任务类型过滤，可选值为 `icmp`、`tcp`、`mtr`、`iperf3`。
          */
-        skip?: number;
+        task_type?: string | null;
         /**
-         * Limit
+         * Is Anycast
+         *
+         * 是否只查询 Anycast Target；不传表示不过滤。
          */
-        limit?: number;
+        is_anycast?: boolean | null;
         /**
-         * Role
+         * Keyword
+         *
+         * 关键词过滤，按名称、地址或相关文本进行模糊匹配。
          */
-        role?: string | null;
+        keyword?: string | null;
     };
-    url: '/api/v1/users/';
+    url: '/api/v1/monitoring/task-geo-tree';
 };
 
-export type ListUsersRouteApiV1UsersGetErrors = {
+export type GetMonitoringTaskGeoTreeApiV1MonitoringTaskGeoTreeGetErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type ListUsersRouteApiV1UsersGetError = ListUsersRouteApiV1UsersGetErrors[keyof ListUsersRouteApiV1UsersGetErrors];
+export type GetMonitoringTaskGeoTreeApiV1MonitoringTaskGeoTreeGetError = GetMonitoringTaskGeoTreeApiV1MonitoringTaskGeoTreeGetErrors[keyof GetMonitoringTaskGeoTreeApiV1MonitoringTaskGeoTreeGetErrors];
 
-export type ListUsersRouteApiV1UsersGetResponses = {
+export type GetMonitoringTaskGeoTreeApiV1MonitoringTaskGeoTreeGetResponses = {
     /**
      * Successful Response
      */
-    200: PaginatedResponseUserResponse;
+    200: MonitoringTaskGeoTreeEnvelope;
 };
 
-export type ListUsersRouteApiV1UsersGetResponse = ListUsersRouteApiV1UsersGetResponses[keyof ListUsersRouteApiV1UsersGetResponses];
+export type GetMonitoringTaskGeoTreeApiV1MonitoringTaskGeoTreeGetResponse = GetMonitoringTaskGeoTreeApiV1MonitoringTaskGeoTreeGetResponses[keyof GetMonitoringTaskGeoTreeApiV1MonitoringTaskGeoTreeGetResponses];
 
-export type DisableUserRouteApiV1UsersUserUuidDeleteData = {
+export type GetMonitoringTargetGeoTreeApiV1MonitoringTargetGeoTreeGetData = {
     body?: never;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path: {
-        /**
-         * User Uuid
-         */
-        user_uuid: string;
-    };
-    query?: never;
-    url: '/api/v1/users/{user_uuid}';
-};
-
-export type DisableUserRouteApiV1UsersUserUuidDeleteErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type DisableUserRouteApiV1UsersUserUuidDeleteError = DisableUserRouteApiV1UsersUserUuidDeleteErrors[keyof DisableUserRouteApiV1UsersUserUuidDeleteErrors];
-
-export type DisableUserRouteApiV1UsersUserUuidDeleteResponses = {
-    /**
-     * Successful Response
-     */
-    200: UserResponse;
-};
-
-export type DisableUserRouteApiV1UsersUserUuidDeleteResponse = DisableUserRouteApiV1UsersUserUuidDeleteResponses[keyof DisableUserRouteApiV1UsersUserUuidDeleteResponses];
-
-export type GetUserRouteApiV1UsersUserUuidGetData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path: {
-        /**
-         * User Uuid
-         */
-        user_uuid: string;
-    };
-    query?: never;
-    url: '/api/v1/users/{user_uuid}';
-};
-
-export type GetUserRouteApiV1UsersUserUuidGetErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type GetUserRouteApiV1UsersUserUuidGetError = GetUserRouteApiV1UsersUserUuidGetErrors[keyof GetUserRouteApiV1UsersUserUuidGetErrors];
-
-export type GetUserRouteApiV1UsersUserUuidGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: UserResponse;
-};
-
-export type GetUserRouteApiV1UsersUserUuidGetResponse = GetUserRouteApiV1UsersUserUuidGetResponses[keyof GetUserRouteApiV1UsersUserUuidGetResponses];
-
-export type UpdateUserRouteApiV1UsersUserUuidPatchData = {
-    body: UserUpdate;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path: {
-        /**
-         * User Uuid
-         */
-        user_uuid: string;
-    };
-    query?: never;
-    url: '/api/v1/users/{user_uuid}';
-};
-
-export type UpdateUserRouteApiV1UsersUserUuidPatchErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type UpdateUserRouteApiV1UsersUserUuidPatchError = UpdateUserRouteApiV1UsersUserUuidPatchErrors[keyof UpdateUserRouteApiV1UsersUserUuidPatchErrors];
-
-export type UpdateUserRouteApiV1UsersUserUuidPatchResponses = {
-    /**
-     * Successful Response
-     */
-    200: UserResponse;
-};
-
-export type UpdateUserRouteApiV1UsersUserUuidPatchResponse = UpdateUserRouteApiV1UsersUserUuidPatchResponses[keyof UpdateUserRouteApiV1UsersUserUuidPatchResponses];
-
-export type ChangePasswordRouteApiV1UsersUserUuidPasswordPutData = {
-    body: UserChangePassword;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path: {
-        /**
-         * User Uuid
-         */
-        user_uuid: string;
-    };
-    query?: never;
-    url: '/api/v1/users/{user_uuid}/password';
-};
-
-export type ChangePasswordRouteApiV1UsersUserUuidPasswordPutErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ChangePasswordRouteApiV1UsersUserUuidPasswordPutError = ChangePasswordRouteApiV1UsersUserUuidPasswordPutErrors[keyof ChangePasswordRouteApiV1UsersUserUuidPasswordPutErrors];
-
-export type ChangePasswordRouteApiV1UsersUserUuidPasswordPutResponses = {
-    /**
-     * Successful Response
-     */
-    200: UserResponse;
-};
-
-export type ChangePasswordRouteApiV1UsersUserUuidPasswordPutResponse = ChangePasswordRouteApiV1UsersUserUuidPasswordPutResponses[keyof ChangePasswordRouteApiV1UsersUserUuidPasswordPutResponses];
-
-export type RemoveFromGroupRouteApiV1UsersUserUuidGroupsGroupUuidDeleteData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path: {
-        /**
-         * User Uuid
-         */
-        user_uuid: string;
-        /**
-         * Group Uuid
-         */
-        group_uuid: string;
-    };
-    query?: never;
-    url: '/api/v1/users/{user_uuid}/groups/{group_uuid}';
-};
-
-export type RemoveFromGroupRouteApiV1UsersUserUuidGroupsGroupUuidDeleteErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type RemoveFromGroupRouteApiV1UsersUserUuidGroupsGroupUuidDeleteError = RemoveFromGroupRouteApiV1UsersUserUuidGroupsGroupUuidDeleteErrors[keyof RemoveFromGroupRouteApiV1UsersUserUuidGroupsGroupUuidDeleteErrors];
-
-export type RemoveFromGroupRouteApiV1UsersUserUuidGroupsGroupUuidDeleteResponses = {
-    /**
-     * Successful Response
-     */
-    200: unknown;
-};
-
-export type AddToGroupRouteApiV1UsersUserUuidGroupsGroupUuidPostData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path: {
-        /**
-         * User Uuid
-         */
-        user_uuid: string;
-        /**
-         * Group Uuid
-         */
-        group_uuid: string;
-    };
-    query?: never;
-    url: '/api/v1/users/{user_uuid}/groups/{group_uuid}';
-};
-
-export type AddToGroupRouteApiV1UsersUserUuidGroupsGroupUuidPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type AddToGroupRouteApiV1UsersUserUuidGroupsGroupUuidPostError = AddToGroupRouteApiV1UsersUserUuidGroupsGroupUuidPostErrors[keyof AddToGroupRouteApiV1UsersUserUuidGroupsGroupUuidPostErrors];
-
-export type AddToGroupRouteApiV1UsersUserUuidGroupsGroupUuidPostResponses = {
-    /**
-     * Successful Response
-     */
-    201: unknown;
-};
-
-export type ListGroupsRouteApiV1UsersGroupsGetData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
     path?: never;
     query?: {
         /**
-         * Skip
+         * Is Anycast
+         *
+         * 是否只查询 Anycast Target；不传表示不过滤。
          */
-        skip?: number;
+        is_anycast?: boolean | null;
         /**
-         * Limit
+         * Keyword
+         *
+         * 关键词过滤，按名称、地址或相关文本进行模糊匹配。
          */
-        limit?: number;
+        keyword?: string | null;
     };
-    url: '/api/v1/users/groups/';
+    url: '/api/v1/monitoring/target-geo-tree';
 };
 
-export type ListGroupsRouteApiV1UsersGroupsGetErrors = {
+export type GetMonitoringTargetGeoTreeApiV1MonitoringTargetGeoTreeGetErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type ListGroupsRouteApiV1UsersGroupsGetError = ListGroupsRouteApiV1UsersGroupsGetErrors[keyof ListGroupsRouteApiV1UsersGroupsGetErrors];
+export type GetMonitoringTargetGeoTreeApiV1MonitoringTargetGeoTreeGetError = GetMonitoringTargetGeoTreeApiV1MonitoringTargetGeoTreeGetErrors[keyof GetMonitoringTargetGeoTreeApiV1MonitoringTargetGeoTreeGetErrors];
 
-export type ListGroupsRouteApiV1UsersGroupsGetResponses = {
+export type GetMonitoringTargetGeoTreeApiV1MonitoringTargetGeoTreeGetResponses = {
     /**
      * Successful Response
      */
-    200: PaginatedResponseGroupResponse;
+    200: MonitoringTargetGeoTreeEnvelope;
 };
 
-export type ListGroupsRouteApiV1UsersGroupsGetResponse = ListGroupsRouteApiV1UsersGroupsGetResponses[keyof ListGroupsRouteApiV1UsersGroupsGetResponses];
+export type GetMonitoringTargetGeoTreeApiV1MonitoringTargetGeoTreeGetResponse = GetMonitoringTargetGeoTreeApiV1MonitoringTargetGeoTreeGetResponses[keyof GetMonitoringTargetGeoTreeApiV1MonitoringTargetGeoTreeGetResponses];
 
-export type CreateGroupRouteApiV1UsersGroupsPostData = {
-    body: GroupCreate;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path?: never;
-    query?: never;
-    url: '/api/v1/users/groups/';
-};
-
-export type CreateGroupRouteApiV1UsersGroupsPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type CreateGroupRouteApiV1UsersGroupsPostError = CreateGroupRouteApiV1UsersGroupsPostErrors[keyof CreateGroupRouteApiV1UsersGroupsPostErrors];
-
-export type CreateGroupRouteApiV1UsersGroupsPostResponses = {
-    /**
-     * Successful Response
-     */
-    201: GroupResponse;
-};
-
-export type CreateGroupRouteApiV1UsersGroupsPostResponse = CreateGroupRouteApiV1UsersGroupsPostResponses[keyof CreateGroupRouteApiV1UsersGroupsPostResponses];
-
-export type DeleteGroupRouteApiV1UsersGroupsGroupUuidDeleteData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path: {
-        /**
-         * Group Uuid
-         */
-        group_uuid: string;
-    };
-    query?: never;
-    url: '/api/v1/users/groups/{group_uuid}';
-};
-
-export type DeleteGroupRouteApiV1UsersGroupsGroupUuidDeleteErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type DeleteGroupRouteApiV1UsersGroupsGroupUuidDeleteError = DeleteGroupRouteApiV1UsersGroupsGroupUuidDeleteErrors[keyof DeleteGroupRouteApiV1UsersGroupsGroupUuidDeleteErrors];
-
-export type DeleteGroupRouteApiV1UsersGroupsGroupUuidDeleteResponses = {
-    /**
-     * Successful Response
-     */
-    204: void;
-};
-
-export type DeleteGroupRouteApiV1UsersGroupsGroupUuidDeleteResponse = DeleteGroupRouteApiV1UsersGroupsGroupUuidDeleteResponses[keyof DeleteGroupRouteApiV1UsersGroupsGroupUuidDeleteResponses];
-
-export type GetGroupRouteApiV1UsersGroupsGroupUuidGetData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path: {
-        /**
-         * Group Uuid
-         */
-        group_uuid: string;
-    };
-    query?: never;
-    url: '/api/v1/users/groups/{group_uuid}';
-};
-
-export type GetGroupRouteApiV1UsersGroupsGroupUuidGetErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type GetGroupRouteApiV1UsersGroupsGroupUuidGetError = GetGroupRouteApiV1UsersGroupsGroupUuidGetErrors[keyof GetGroupRouteApiV1UsersGroupsGroupUuidGetErrors];
-
-export type GetGroupRouteApiV1UsersGroupsGroupUuidGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: GroupResponse;
-};
-
-export type GetGroupRouteApiV1UsersGroupsGroupUuidGetResponse = GetGroupRouteApiV1UsersGroupsGroupUuidGetResponses[keyof GetGroupRouteApiV1UsersGroupsGroupUuidGetResponses];
-
-export type UpdateGroupRouteApiV1UsersGroupsGroupUuidPatchData = {
-    body: GroupUpdate;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path: {
-        /**
-         * Group Uuid
-         */
-        group_uuid: string;
-    };
-    query?: never;
-    url: '/api/v1/users/groups/{group_uuid}';
-};
-
-export type UpdateGroupRouteApiV1UsersGroupsGroupUuidPatchErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type UpdateGroupRouteApiV1UsersGroupsGroupUuidPatchError = UpdateGroupRouteApiV1UsersGroupsGroupUuidPatchErrors[keyof UpdateGroupRouteApiV1UsersGroupsGroupUuidPatchErrors];
-
-export type UpdateGroupRouteApiV1UsersGroupsGroupUuidPatchResponses = {
-    /**
-     * Successful Response
-     */
-    200: GroupResponse;
-};
-
-export type UpdateGroupRouteApiV1UsersGroupsGroupUuidPatchResponse = UpdateGroupRouteApiV1UsersGroupsGroupUuidPatchResponses[keyof UpdateGroupRouteApiV1UsersGroupsGroupUuidPatchResponses];
-
-export type ListDownloadsApiV1AgentsDownloadGetData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/v1/agents/download/';
-};
-
-export type ListDownloadsApiV1AgentsDownloadGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: unknown;
-};
-
-export type DownloadAgentApiV1AgentsDownloadFilenameGetData = {
+export type GetMonitoringTargetApiV1MonitoringTargetsTargetUuidGetData = {
     body?: never;
     path: {
         /**
-         * Filename
+         * Target Uuid
+         *
+         * Target 的唯一标识 UUID。
          */
-        filename: string;
+        target_uuid: string;
     };
     query?: never;
-    url: '/api/v1/agents/download/{filename}';
+    url: '/api/v1/monitoring/targets/{target_uuid}';
 };
 
-export type DownloadAgentApiV1AgentsDownloadFilenameGetErrors = {
+export type GetMonitoringTargetApiV1MonitoringTargetsTargetUuidGetErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type DownloadAgentApiV1AgentsDownloadFilenameGetError = DownloadAgentApiV1AgentsDownloadFilenameGetErrors[keyof DownloadAgentApiV1AgentsDownloadFilenameGetErrors];
+export type GetMonitoringTargetApiV1MonitoringTargetsTargetUuidGetError = GetMonitoringTargetApiV1MonitoringTargetsTargetUuidGetErrors[keyof GetMonitoringTargetApiV1MonitoringTargetsTargetUuidGetErrors];
 
-export type DownloadAgentApiV1AgentsDownloadFilenameGetResponses = {
+export type GetMonitoringTargetApiV1MonitoringTargetsTargetUuidGetResponses = {
     /**
      * Successful Response
      */
-    200: unknown;
+    200: MonitoringTargetEnvelope;
 };
 
-export type ListAgentsApiV1AgentsGetData = {
+export type GetMonitoringTargetApiV1MonitoringTargetsTargetUuidGetResponse = GetMonitoringTargetApiV1MonitoringTargetsTargetUuidGetResponses[keyof GetMonitoringTargetApiV1MonitoringTargetsTargetUuidGetResponses];
+
+export type GetMonitoringTasksApiV1MonitoringTasksGetData = {
     body?: never;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
     path?: never;
     query?: {
         /**
-         * Skip
+         * Continent
+         *
+         * 按 Target 或 Agent 所在大洲过滤。
          */
-        skip?: number;
+        continent?: string | null;
+        /**
+         * Country
+         *
+         * 按 Target 或 Agent 所在国家过滤。
+         */
+        country?: string | null;
+        /**
+         * City
+         *
+         * 按 Target 或 Agent 所在城市过滤。
+         */
+        city?: string | null;
+        /**
+         * Task Type
+         *
+         * 任务类型过滤，可选值为 `icmp`、`tcp`、`mtr`、`iperf3`。
+         */
+        task_type?: string | null;
+        /**
+         * Is Anycast
+         *
+         * 是否只查询 Anycast Target；不传表示不过滤。
+         */
+        is_anycast?: boolean | null;
+        /**
+         * Ip Family
+         *
+         * IP 协议族过滤，可选值为 `4` 或 `6`。
+         */
+        ip_family?: string | null;
+        /**
+         * Target Uuid
+         *
+         * 按 Target UUID 过滤。
+         */
+        target_uuid?: string | null;
+        /**
+         * Agent Uuid
+         *
+         * 按 Agent UUID 过滤。
+         */
+        agent_uuid?: string | null;
+        /**
+         * Keyword
+         *
+         * 关键词过滤，按名称、地址或相关文本进行模糊匹配。
+         */
+        keyword?: string | null;
+        /**
+         * Is Enabled
+         *
+         * 启用状态过滤；不传表示同时返回启用和停用的数据。
+         */
+        is_enabled?: boolean | null;
+        /**
+         * Page
+         *
+         * 页码，从 1 开始。
+         */
+        page?: number;
+        /**
+         * Page Size
+         *
+         * 每页返回数量，范围为 1 到 100。
+         */
+        page_size?: number;
+        /**
+         * Sort By
+         *
+         * 排序字段，可选 `name`、`created_at`、`updated_at`、`latest_latency_ms`、`latest_loss_pct`、`latest_connect_failure_pct`。
+         */
+        sort_by?: string;
+        /**
+         * Sort Order
+         *
+         * 排序方向，可选值为 `asc` 或 `desc`。
+         */
+        sort_order?: string;
+        /**
+         * Latest Window Sec
+         *
+         * 查询最新监控结果时使用的时间窗口，单位为秒。
+         */
+        latest_window_sec?: number;
+    };
+    url: '/api/v1/monitoring/tasks';
+};
+
+export type GetMonitoringTasksApiV1MonitoringTasksGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetMonitoringTasksApiV1MonitoringTasksGetError = GetMonitoringTasksApiV1MonitoringTasksGetErrors[keyof GetMonitoringTasksApiV1MonitoringTasksGetErrors];
+
+export type GetMonitoringTasksApiV1MonitoringTasksGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: MonitoringTaskListEnvelope;
+};
+
+export type GetMonitoringTasksApiV1MonitoringTasksGetResponse = GetMonitoringTasksApiV1MonitoringTasksGetResponses[keyof GetMonitoringTasksApiV1MonitoringTasksGetResponses];
+
+export type GetMonitoringTaskApiV1MonitoringTasksTaskUuidGetData = {
+    body?: never;
+    path: {
+        /**
+         * Task Uuid
+         *
+         * 监控任务的唯一标识 UUID。
+         */
+        task_uuid: string;
+    };
+    query?: {
+        /**
+         * Latest Window Sec
+         *
+         * 查询最新监控结果时使用的时间窗口，单位为秒。
+         */
+        latest_window_sec?: number;
+    };
+    url: '/api/v1/monitoring/tasks/{task_uuid}';
+};
+
+export type GetMonitoringTaskApiV1MonitoringTasksTaskUuidGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetMonitoringTaskApiV1MonitoringTasksTaskUuidGetError = GetMonitoringTaskApiV1MonitoringTasksTaskUuidGetErrors[keyof GetMonitoringTaskApiV1MonitoringTasksTaskUuidGetErrors];
+
+export type GetMonitoringTaskApiV1MonitoringTasksTaskUuidGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: MonitoringTaskDetailEnvelope;
+};
+
+export type GetMonitoringTaskApiV1MonitoringTasksTaskUuidGetResponse = GetMonitoringTaskApiV1MonitoringTasksTaskUuidGetResponses[keyof GetMonitoringTaskApiV1MonitoringTasksTaskUuidGetResponses];
+
+export type GetMonitoringTaskMetricsRouteApiV1MonitoringTasksTaskUuidMetricsGetData = {
+    body?: never;
+    path: {
+        /**
+         * Task Uuid
+         *
+         * 监控任务的唯一标识 UUID。
+         */
+        task_uuid: string;
+    };
+    query: {
+        /**
+         * Start
+         *
+         * 查询开始时间，必须使用 UTC ISO 8601 格式并以 `Z` 结尾，例如 `2026-05-19T19:30:00Z`。
+         */
+        start: string;
+        /**
+         * End
+         *
+         * 查询结束时间，必须使用 UTC ISO 8601 格式并以 `Z` 结尾，例如 `2026-05-19T20:00:00Z`；`end` 必须晚于 `start`。
+         */
+        end: string;
+        /**
+         * Step Sec
+         *
+         * 查询步长，单位为秒。该参数控制 VictoriaMetrics range query 的采样间隔。
+         *
+         * - 由于监控任务最小执行粒度为 1 分钟，step_sec 最小值为 60。
+         * - 值越大返回点越少，适合更长时间范围的图表查询。
+         * - 允许范围为 60 到 86400 秒。
+         */
+        step_sec?: number;
+        /**
+         * Metrics
+         *
+         * 可选的指标名列表，使用英文逗号分隔。
+         *
+         * 不传时，ICMP 默认返回 `latency_avg_ms,packet_loss_pct`；TCP 默认返回 `connect_latency_avg_ms,connect_failure_pct`。
+         *
+         * ### ICMP 指标含义
+         *
+         * - `latency_avg_ms` 表示 step 窗口内收到的 ICMP 包平均延迟。
+         * - `latency_min_ms` 表示最小延迟。
+         * - `latency_max_ms` 表示最大延迟。
+         * - `latency_stddev_ms` 表示延迟标准差。
+         * - `latency_jitter_ms` 表示 step 窗口内 ICMP 相邻成功报文的接收间隔与发送间隔差值的平均值。
+         * - `packet_loss_pct` 表示丢包率。
+         * - `packets_sent` 表示发送包数。
+         * - `packets_received` 表示收到包数。
+         *
+         * ### TCP 指标含义
+         *
+         * - `connect_latency_avg_ms` 表示 step 窗口内成功连接的平均耗时。
+         * - `connect_latency_min_ms` 表示最小连接耗时。
+         * - `connect_latency_max_ms` 表示最大连接耗时。
+         * - `connect_latency_stddev_ms` 表示连接耗时标准差。
+         * - `connect_jitter_ms` 表示 step 窗口内 TCP 相邻成功连接的完成间隔与发起间隔差值的平均值。
+         * - `connect_failure_pct` 表示连接失败率。
+         * - `connect_attempts` 表示连接尝试次数。
+         * - `connect_successes` 表示连接成功次数。
+         * - `connect_failures` 表示连接失败次数。
+         *
+         * MTR 和 iperf3 不通过该接口暴露图表指标。MTR 请使用结果详情接口查看 hop/path 数据；iperf3 请使用 iperf3-results 接口查看吞吐结果。
+         */
+        metrics?: string | null;
+    };
+    url: '/api/v1/monitoring/tasks/{task_uuid}/metrics';
+};
+
+export type GetMonitoringTaskMetricsRouteApiV1MonitoringTasksTaskUuidMetricsGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetMonitoringTaskMetricsRouteApiV1MonitoringTasksTaskUuidMetricsGetError = GetMonitoringTaskMetricsRouteApiV1MonitoringTasksTaskUuidMetricsGetErrors[keyof GetMonitoringTaskMetricsRouteApiV1MonitoringTasksTaskUuidMetricsGetErrors];
+
+export type GetMonitoringTaskMetricsRouteApiV1MonitoringTasksTaskUuidMetricsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: MonitoringTaskMetricsEnvelope;
+};
+
+export type GetMonitoringTaskMetricsRouteApiV1MonitoringTasksTaskUuidMetricsGetResponse = GetMonitoringTaskMetricsRouteApiV1MonitoringTasksTaskUuidMetricsGetResponses[keyof GetMonitoringTaskMetricsRouteApiV1MonitoringTasksTaskUuidMetricsGetResponses];
+
+export type GetMonitoringTaskMtrResultsApiV1MonitoringTasksTaskUuidMtrResultsGetData = {
+    body?: never;
+    path: {
+        /**
+         * Task Uuid
+         *
+         * 监控任务的唯一标识 UUID。
+         */
+        task_uuid: string;
+    };
+    query: {
+        /**
+         * Start
+         *
+         * 查询开始时间，必须使用 UTC ISO 8601 且以 `Z` 结尾，格式与 metrics 接口一致。
+         *
+         * 示例：`2026-05-15T12:00:00.000Z`。
+         */
+        start: string;
+        /**
+         * End
+         *
+         * 查询结束时间，必须使用 UTC ISO 8601 且以 `Z` 结尾，格式与 metrics 接口一致，并且必须晚于 start。
+         *
+         * 示例：`2026-05-15T13:00:00.000Z`。
+         */
+        end: string;
+    };
+    url: '/api/v1/monitoring/tasks/{task_uuid}/mtr-results';
+};
+
+export type GetMonitoringTaskMtrResultsApiV1MonitoringTasksTaskUuidMtrResultsGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetMonitoringTaskMtrResultsApiV1MonitoringTasksTaskUuidMtrResultsGetError = GetMonitoringTaskMtrResultsApiV1MonitoringTasksTaskUuidMtrResultsGetErrors[keyof GetMonitoringTaskMtrResultsApiV1MonitoringTasksTaskUuidMtrResultsGetErrors];
+
+export type GetMonitoringTaskMtrResultsApiV1MonitoringTasksTaskUuidMtrResultsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: MonitoringMtrResultListEnvelope;
+};
+
+export type GetMonitoringTaskMtrResultsApiV1MonitoringTasksTaskUuidMtrResultsGetResponse = GetMonitoringTaskMtrResultsApiV1MonitoringTasksTaskUuidMtrResultsGetResponses[keyof GetMonitoringTaskMtrResultsApiV1MonitoringTasksTaskUuidMtrResultsGetResponses];
+
+export type GetMonitoringTaskIperf3ResultsApiV1MonitoringTasksTaskUuidIperf3ResultsGetData = {
+    body?: never;
+    path: {
+        /**
+         * Task Uuid
+         *
+         * 监控任务的唯一标识 UUID。
+         */
+        task_uuid: string;
+    };
+    query: {
+        /**
+         * Start
+         *
+         * 查询开始时间，必须使用 UTC ISO 8601 且以 `Z` 结尾，格式与 metrics 接口一致。
+         *
+         * 示例：`2026-05-15T12:00:00.000Z`。
+         */
+        start: string;
+        /**
+         * End
+         *
+         * 查询结束时间，必须使用 UTC ISO 8601 且以 `Z` 结尾，格式与 metrics 接口一致，并且必须晚于 start。
+         *
+         * 示例：`2026-05-15T13:00:00.000Z`。
+         */
+        end: string;
+    };
+    url: '/api/v1/monitoring/tasks/{task_uuid}/iperf3-results';
+};
+
+export type GetMonitoringTaskIperf3ResultsApiV1MonitoringTasksTaskUuidIperf3ResultsGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetMonitoringTaskIperf3ResultsApiV1MonitoringTasksTaskUuidIperf3ResultsGetError = GetMonitoringTaskIperf3ResultsApiV1MonitoringTasksTaskUuidIperf3ResultsGetErrors[keyof GetMonitoringTaskIperf3ResultsApiV1MonitoringTasksTaskUuidIperf3ResultsGetErrors];
+
+export type GetMonitoringTaskIperf3ResultsApiV1MonitoringTasksTaskUuidIperf3ResultsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: MonitoringIperf3ResultListEnvelope;
+};
+
+export type GetMonitoringTaskIperf3ResultsApiV1MonitoringTasksTaskUuidIperf3ResultsGetResponse = GetMonitoringTaskIperf3ResultsApiV1MonitoringTasksTaskUuidIperf3ResultsGetResponses[keyof GetMonitoringTaskIperf3ResultsApiV1MonitoringTasksTaskUuidIperf3ResultsGetResponses];
+
+export type GetMonitoringMtrResultApiV1MonitoringMtrResultsResultUuidGetData = {
+    body?: never;
+    path: {
+        /**
+         * Result Uuid
+         *
+         * MTR 结果的唯一标识 UUID。
+         */
+        result_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/monitoring/mtr-results/{result_uuid}';
+};
+
+export type GetMonitoringMtrResultApiV1MonitoringMtrResultsResultUuidGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetMonitoringMtrResultApiV1MonitoringMtrResultsResultUuidGetError = GetMonitoringMtrResultApiV1MonitoringMtrResultsResultUuidGetErrors[keyof GetMonitoringMtrResultApiV1MonitoringMtrResultsResultUuidGetErrors];
+
+export type GetMonitoringMtrResultApiV1MonitoringMtrResultsResultUuidGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: MonitoringMtrResultDetailEnvelope;
+};
+
+export type GetMonitoringMtrResultApiV1MonitoringMtrResultsResultUuidGetResponse = GetMonitoringMtrResultApiV1MonitoringMtrResultsResultUuidGetResponses[keyof GetMonitoringMtrResultApiV1MonitoringMtrResultsResultUuidGetResponses];
+
+export type GetTagsApiV1TagsGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Resource Type
+         *
+         * 标签所属资源类型，可选 `agent` 或 `target`；不传时查询全部。
+         */
+        resource_type?: string | null;
+        /**
+         * Keyword
+         *
+         * 按标签文本进行模糊检索。
+         */
+        keyword?: string | null;
         /**
          * Limit
+         *
+         * 最多返回的标签数量，范围 1-200。
          */
         limit?: number;
-        /**
-         * Tags
-         */
-        tags?: Array<string> | null;
     };
-    url: '/api/v1/agents/';
+    url: '/api/v1/tags';
 };
 
-export type ListAgentsApiV1AgentsGetErrors = {
+export type GetTagsApiV1TagsGetErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type ListAgentsApiV1AgentsGetError = ListAgentsApiV1AgentsGetErrors[keyof ListAgentsApiV1AgentsGetErrors];
+export type GetTagsApiV1TagsGetError = GetTagsApiV1TagsGetErrors[keyof GetTagsApiV1TagsGetErrors];
 
-export type ListAgentsApiV1AgentsGetResponses = {
+export type GetTagsApiV1TagsGetResponses = {
     /**
      * Successful Response
      */
-    200: unknown;
+    200: ResourceTagListEnvelope;
 };
 
-export type CreateAgentApiV1AgentsPostData = {
-    body: AgentCreate;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
+export type GetTagsApiV1TagsGetResponse = GetTagsApiV1TagsGetResponses[keyof GetTagsApiV1TagsGetResponses];
+
+export type GetSystemSettingsApiV1SettingsGetData = {
+    body?: never;
     path?: never;
     query?: never;
-    url: '/api/v1/agents/';
+    url: '/api/v1/settings';
 };
 
-export type CreateAgentApiV1AgentsPostErrors = {
+export type GetSystemSettingsApiV1SettingsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: AppSettingsEnvelope;
+};
+
+export type GetSystemSettingsApiV1SettingsGetResponse = GetSystemSettingsApiV1SettingsGetResponses[keyof GetSystemSettingsApiV1SettingsGetResponses];
+
+export type PatchSystemSettingsApiV1SettingsPatchData = {
+    body: AppSettingsUpdate;
+    path?: never;
+    query?: never;
+    url: '/api/v1/settings';
+};
+
+export type PatchSystemSettingsApiV1SettingsPatchErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type CreateAgentApiV1AgentsPostError = CreateAgentApiV1AgentsPostErrors[keyof CreateAgentApiV1AgentsPostErrors];
+export type PatchSystemSettingsApiV1SettingsPatchError = PatchSystemSettingsApiV1SettingsPatchErrors[keyof PatchSystemSettingsApiV1SettingsPatchErrors];
 
-export type CreateAgentApiV1AgentsPostResponses = {
+export type PatchSystemSettingsApiV1SettingsPatchResponses = {
     /**
      * Successful Response
      */
-    201: unknown;
+    200: AppSettingsEnvelope;
 };
 
-export type DisableAgentApiV1AgentsAgentUuidDeleteData = {
+export type PatchSystemSettingsApiV1SettingsPatchResponse = PatchSystemSettingsApiV1SettingsPatchResponses[keyof PatchSystemSettingsApiV1SettingsPatchResponses];
+
+export type GetAgentArtifactsApiV1ArtifactsAgentsGetData = {
     body?: never;
-    headers?: {
+    path?: never;
+    query?: {
         /**
-         * Authorization
+         * Version
+         *
+         * 按 Agent 可执行文件版本过滤，例如 `1.2.3`。
          */
-        authorization?: string;
+        version?: string | null;
+        /**
+         * Os
+         *
+         * 按适用操作系统过滤，例如 `linux`。
+         */
+        os?: string | null;
+        /**
+         * Arch
+         *
+         * 按适用 CPU 架构过滤，例如 `x86_64` 或 `aarch64`。
+         */
+        arch?: string | null;
+        /**
+         * Is Active
+         *
+         * 是否只查询启用状态的 Artifact；不传表示不过滤。
+         */
+        is_active?: boolean | null;
     };
+    url: '/api/v1/artifacts/agents';
+};
+
+export type GetAgentArtifactsApiV1ArtifactsAgentsGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetAgentArtifactsApiV1ArtifactsAgentsGetError = GetAgentArtifactsApiV1ArtifactsAgentsGetErrors[keyof GetAgentArtifactsApiV1ArtifactsAgentsGetErrors];
+
+export type GetAgentArtifactsApiV1ArtifactsAgentsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: AgentArtifactListEnvelope;
+};
+
+export type GetAgentArtifactsApiV1ArtifactsAgentsGetResponse = GetAgentArtifactsApiV1ArtifactsAgentsGetResponses[keyof GetAgentArtifactsApiV1ArtifactsAgentsGetResponses];
+
+export type PostAgentArtifactApiV1ArtifactsAgentsPostData = {
+    body: BodyPostAgentArtifactApiV1ArtifactsAgentsPost;
+    path?: never;
+    query?: never;
+    url: '/api/v1/artifacts/agents';
+};
+
+export type PostAgentArtifactApiV1ArtifactsAgentsPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PostAgentArtifactApiV1ArtifactsAgentsPostError = PostAgentArtifactApiV1ArtifactsAgentsPostErrors[keyof PostAgentArtifactApiV1ArtifactsAgentsPostErrors];
+
+export type PostAgentArtifactApiV1ArtifactsAgentsPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: AgentArtifactEnvelope;
+};
+
+export type PostAgentArtifactApiV1ArtifactsAgentsPostResponse = PostAgentArtifactApiV1ArtifactsAgentsPostResponses[keyof PostAgentArtifactApiV1ArtifactsAgentsPostResponses];
+
+export type RemoveAgentArtifactApiV1ArtifactsAgentsArtifactUuidDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Artifact Uuid
+         *
+         * Agent Artifact 的唯一标识 UUID。
+         */
+        artifact_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/artifacts/agents/{artifact_uuid}';
+};
+
+export type RemoveAgentArtifactApiV1ArtifactsAgentsArtifactUuidDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RemoveAgentArtifactApiV1ArtifactsAgentsArtifactUuidDeleteError = RemoveAgentArtifactApiV1ArtifactsAgentsArtifactUuidDeleteErrors[keyof RemoveAgentArtifactApiV1ArtifactsAgentsArtifactUuidDeleteErrors];
+
+export type RemoveAgentArtifactApiV1ArtifactsAgentsArtifactUuidDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    200: AgentArtifactEnvelope;
+};
+
+export type RemoveAgentArtifactApiV1ArtifactsAgentsArtifactUuidDeleteResponse = RemoveAgentArtifactApiV1ArtifactsAgentsArtifactUuidDeleteResponses[keyof RemoveAgentArtifactApiV1ArtifactsAgentsArtifactUuidDeleteResponses];
+
+export type GetAgentArtifactApiV1ArtifactsAgentsArtifactUuidGetData = {
+    body?: never;
+    path: {
+        /**
+         * Artifact Uuid
+         *
+         * Agent Artifact 的唯一标识 UUID。
+         */
+        artifact_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/artifacts/agents/{artifact_uuid}';
+};
+
+export type GetAgentArtifactApiV1ArtifactsAgentsArtifactUuidGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetAgentArtifactApiV1ArtifactsAgentsArtifactUuidGetError = GetAgentArtifactApiV1ArtifactsAgentsArtifactUuidGetErrors[keyof GetAgentArtifactApiV1ArtifactsAgentsArtifactUuidGetErrors];
+
+export type GetAgentArtifactApiV1ArtifactsAgentsArtifactUuidGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: AgentArtifactEnvelope;
+};
+
+export type GetAgentArtifactApiV1ArtifactsAgentsArtifactUuidGetResponse = GetAgentArtifactApiV1ArtifactsAgentsArtifactUuidGetResponses[keyof GetAgentArtifactApiV1ArtifactsAgentsArtifactUuidGetResponses];
+
+export type PatchAgentArtifactApiV1ArtifactsAgentsArtifactUuidPatchData = {
+    body: AgentArtifactUpdate;
+    path: {
+        /**
+         * Artifact Uuid
+         *
+         * Agent Artifact 的唯一标识 UUID。
+         */
+        artifact_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/artifacts/agents/{artifact_uuid}';
+};
+
+export type PatchAgentArtifactApiV1ArtifactsAgentsArtifactUuidPatchErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PatchAgentArtifactApiV1ArtifactsAgentsArtifactUuidPatchError = PatchAgentArtifactApiV1ArtifactsAgentsArtifactUuidPatchErrors[keyof PatchAgentArtifactApiV1ArtifactsAgentsArtifactUuidPatchErrors];
+
+export type PatchAgentArtifactApiV1ArtifactsAgentsArtifactUuidPatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: AgentArtifactEnvelope;
+};
+
+export type PatchAgentArtifactApiV1ArtifactsAgentsArtifactUuidPatchResponse = PatchAgentArtifactApiV1ArtifactsAgentsArtifactUuidPatchResponses[keyof PatchAgentArtifactApiV1ArtifactsAgentsArtifactUuidPatchResponses];
+
+export type DownloadAgentArtifactApiV1ArtifactsAgentsArtifactUuidDownloadGetData = {
+    body?: never;
+    path: {
+        /**
+         * Artifact Uuid
+         *
+         * Agent Artifact 的唯一标识 UUID。
+         */
+        artifact_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/artifacts/agents/{artifact_uuid}/download';
+};
+
+export type DownloadAgentArtifactApiV1ArtifactsAgentsArtifactUuidDownloadGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DownloadAgentArtifactApiV1ArtifactsAgentsArtifactUuidDownloadGetError = DownloadAgentArtifactApiV1ArtifactsAgentsArtifactUuidDownloadGetErrors[keyof DownloadAgentArtifactApiV1ArtifactsAgentsArtifactUuidDownloadGetErrors];
+
+export type GetGeoContinentsApiV1GeoContinentsGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Keyword
+         *
+         * 按大洲英文名称、中文名称或代码模糊检索。
+         */
+        keyword?: string | null;
+        /**
+         * Include Deleted
+         *
+         * 是否包含已删除的大洲；默认只返回未删除数据。
+         */
+        include_deleted?: boolean;
+        /**
+         * Limit
+         *
+         * 最多返回的大洲数量，范围 1-500。
+         */
+        limit?: number;
+    };
+    url: '/api/v1/geo/continents';
+};
+
+export type GetGeoContinentsApiV1GeoContinentsGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetGeoContinentsApiV1GeoContinentsGetError = GetGeoContinentsApiV1GeoContinentsGetErrors[keyof GetGeoContinentsApiV1GeoContinentsGetErrors];
+
+export type GetGeoContinentsApiV1GeoContinentsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: GeoContinentListEnvelope;
+};
+
+export type GetGeoContinentsApiV1GeoContinentsGetResponse = GetGeoContinentsApiV1GeoContinentsGetResponses[keyof GetGeoContinentsApiV1GeoContinentsGetResponses];
+
+export type PostGeoContinentApiV1GeoContinentsPostData = {
+    body: GeoContinentCreate;
+    path?: never;
+    query?: never;
+    url: '/api/v1/geo/continents';
+};
+
+export type PostGeoContinentApiV1GeoContinentsPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PostGeoContinentApiV1GeoContinentsPostError = PostGeoContinentApiV1GeoContinentsPostErrors[keyof PostGeoContinentApiV1GeoContinentsPostErrors];
+
+export type PostGeoContinentApiV1GeoContinentsPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: GeoContinentEnvelope;
+};
+
+export type PostGeoContinentApiV1GeoContinentsPostResponse = PostGeoContinentApiV1GeoContinentsPostResponses[keyof PostGeoContinentApiV1GeoContinentsPostResponses];
+
+export type GetGeoTreeApiV1GeoTreeGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Keyword
+         *
+         * 按大洲、国家、城市的英文名称、中文名称或代码模糊检索；匹配下级时会保留父级路径。
+         */
+        keyword?: string | null;
+        /**
+         * Include Deleted
+         *
+         * 是否包含已删除的 GEO 记录；默认只返回未删除数据。
+         */
+        include_deleted?: boolean;
+    };
+    url: '/api/v1/geo/tree';
+};
+
+export type GetGeoTreeApiV1GeoTreeGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetGeoTreeApiV1GeoTreeGetError = GetGeoTreeApiV1GeoTreeGetErrors[keyof GetGeoTreeApiV1GeoTreeGetErrors];
+
+export type GetGeoTreeApiV1GeoTreeGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: GeoTreeEnvelope;
+};
+
+export type GetGeoTreeApiV1GeoTreeGetResponse = GetGeoTreeApiV1GeoTreeGetResponses[keyof GetGeoTreeApiV1GeoTreeGetResponses];
+
+export type DeleteGeoContinentEndpointApiV1GeoContinentsContinentUuidDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Continent Uuid
+         *
+         * GEO 大洲记录的唯一标识 UUID。
+         */
+        continent_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/geo/continents/{continent_uuid}';
+};
+
+export type DeleteGeoContinentEndpointApiV1GeoContinentsContinentUuidDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteGeoContinentEndpointApiV1GeoContinentsContinentUuidDeleteError = DeleteGeoContinentEndpointApiV1GeoContinentsContinentUuidDeleteErrors[keyof DeleteGeoContinentEndpointApiV1GeoContinentsContinentUuidDeleteErrors];
+
+export type DeleteGeoContinentEndpointApiV1GeoContinentsContinentUuidDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    200: GeoContinentEnvelope;
+};
+
+export type DeleteGeoContinentEndpointApiV1GeoContinentsContinentUuidDeleteResponse = DeleteGeoContinentEndpointApiV1GeoContinentsContinentUuidDeleteResponses[keyof DeleteGeoContinentEndpointApiV1GeoContinentsContinentUuidDeleteResponses];
+
+export type PatchGeoContinentApiV1GeoContinentsContinentUuidPatchData = {
+    body: GeoContinentUpdate;
+    path: {
+        /**
+         * Continent Uuid
+         *
+         * GEO 大洲记录的唯一标识 UUID。
+         */
+        continent_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/geo/continents/{continent_uuid}';
+};
+
+export type PatchGeoContinentApiV1GeoContinentsContinentUuidPatchErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PatchGeoContinentApiV1GeoContinentsContinentUuidPatchError = PatchGeoContinentApiV1GeoContinentsContinentUuidPatchErrors[keyof PatchGeoContinentApiV1GeoContinentsContinentUuidPatchErrors];
+
+export type PatchGeoContinentApiV1GeoContinentsContinentUuidPatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: GeoContinentEnvelope;
+};
+
+export type PatchGeoContinentApiV1GeoContinentsContinentUuidPatchResponse = PatchGeoContinentApiV1GeoContinentsContinentUuidPatchResponses[keyof PatchGeoContinentApiV1GeoContinentsContinentUuidPatchResponses];
+
+export type GetGeoCountriesApiV1GeoCountriesGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Continent Uuid
+         *
+         * 所属大洲 UUID；传入后只返回该大洲下的国家。
+         */
+        continent_uuid?: string | null;
+        /**
+         * Keyword
+         *
+         * 按国家英文名称、中文名称或代码模糊检索。
+         */
+        keyword?: string | null;
+        /**
+         * Include Deleted
+         *
+         * 是否包含已删除的国家；默认只返回未删除数据。
+         */
+        include_deleted?: boolean;
+        /**
+         * Limit
+         *
+         * 最多返回的国家数量，范围 1-500。
+         */
+        limit?: number;
+    };
+    url: '/api/v1/geo/countries';
+};
+
+export type GetGeoCountriesApiV1GeoCountriesGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetGeoCountriesApiV1GeoCountriesGetError = GetGeoCountriesApiV1GeoCountriesGetErrors[keyof GetGeoCountriesApiV1GeoCountriesGetErrors];
+
+export type GetGeoCountriesApiV1GeoCountriesGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: GeoCountryListEnvelope;
+};
+
+export type GetGeoCountriesApiV1GeoCountriesGetResponse = GetGeoCountriesApiV1GeoCountriesGetResponses[keyof GetGeoCountriesApiV1GeoCountriesGetResponses];
+
+export type PostGeoCountryApiV1GeoCountriesPostData = {
+    body: GeoCountryCreate;
+    path?: never;
+    query?: never;
+    url: '/api/v1/geo/countries';
+};
+
+export type PostGeoCountryApiV1GeoCountriesPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PostGeoCountryApiV1GeoCountriesPostError = PostGeoCountryApiV1GeoCountriesPostErrors[keyof PostGeoCountryApiV1GeoCountriesPostErrors];
+
+export type PostGeoCountryApiV1GeoCountriesPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: GeoCountryEnvelope;
+};
+
+export type PostGeoCountryApiV1GeoCountriesPostResponse = PostGeoCountryApiV1GeoCountriesPostResponses[keyof PostGeoCountryApiV1GeoCountriesPostResponses];
+
+export type DeleteGeoCountryEndpointApiV1GeoCountriesCountryUuidDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Country Uuid
+         *
+         * GEO 国家记录的唯一标识 UUID。
+         */
+        country_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/geo/countries/{country_uuid}';
+};
+
+export type DeleteGeoCountryEndpointApiV1GeoCountriesCountryUuidDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteGeoCountryEndpointApiV1GeoCountriesCountryUuidDeleteError = DeleteGeoCountryEndpointApiV1GeoCountriesCountryUuidDeleteErrors[keyof DeleteGeoCountryEndpointApiV1GeoCountriesCountryUuidDeleteErrors];
+
+export type DeleteGeoCountryEndpointApiV1GeoCountriesCountryUuidDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    200: GeoCountryEnvelope;
+};
+
+export type DeleteGeoCountryEndpointApiV1GeoCountriesCountryUuidDeleteResponse = DeleteGeoCountryEndpointApiV1GeoCountriesCountryUuidDeleteResponses[keyof DeleteGeoCountryEndpointApiV1GeoCountriesCountryUuidDeleteResponses];
+
+export type PatchGeoCountryApiV1GeoCountriesCountryUuidPatchData = {
+    body: GeoCountryUpdate;
+    path: {
+        /**
+         * Country Uuid
+         *
+         * GEO 国家记录的唯一标识 UUID。
+         */
+        country_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/geo/countries/{country_uuid}';
+};
+
+export type PatchGeoCountryApiV1GeoCountriesCountryUuidPatchErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PatchGeoCountryApiV1GeoCountriesCountryUuidPatchError = PatchGeoCountryApiV1GeoCountriesCountryUuidPatchErrors[keyof PatchGeoCountryApiV1GeoCountriesCountryUuidPatchErrors];
+
+export type PatchGeoCountryApiV1GeoCountriesCountryUuidPatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: GeoCountryEnvelope;
+};
+
+export type PatchGeoCountryApiV1GeoCountriesCountryUuidPatchResponse = PatchGeoCountryApiV1GeoCountriesCountryUuidPatchResponses[keyof PatchGeoCountryApiV1GeoCountriesCountryUuidPatchResponses];
+
+export type GetGeoCitiesApiV1GeoCitiesGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Country Uuid
+         *
+         * 所属国家 UUID；传入后只返回该国家下的城市。
+         */
+        country_uuid?: string | null;
+        /**
+         * Keyword
+         *
+         * 按城市英文名称、中文名称或代码模糊检索。
+         */
+        keyword?: string | null;
+        /**
+         * Include Deleted
+         *
+         * 是否包含已删除的城市；默认只返回未删除数据。
+         */
+        include_deleted?: boolean;
+        /**
+         * Limit
+         *
+         * 最多返回的城市数量，范围 1-500。
+         */
+        limit?: number;
+    };
+    url: '/api/v1/geo/cities';
+};
+
+export type GetGeoCitiesApiV1GeoCitiesGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetGeoCitiesApiV1GeoCitiesGetError = GetGeoCitiesApiV1GeoCitiesGetErrors[keyof GetGeoCitiesApiV1GeoCitiesGetErrors];
+
+export type GetGeoCitiesApiV1GeoCitiesGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: GeoCityListEnvelope;
+};
+
+export type GetGeoCitiesApiV1GeoCitiesGetResponse = GetGeoCitiesApiV1GeoCitiesGetResponses[keyof GetGeoCitiesApiV1GeoCitiesGetResponses];
+
+export type PostGeoCityApiV1GeoCitiesPostData = {
+    body: GeoCityCreate;
+    path?: never;
+    query?: never;
+    url: '/api/v1/geo/cities';
+};
+
+export type PostGeoCityApiV1GeoCitiesPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PostGeoCityApiV1GeoCitiesPostError = PostGeoCityApiV1GeoCitiesPostErrors[keyof PostGeoCityApiV1GeoCitiesPostErrors];
+
+export type PostGeoCityApiV1GeoCitiesPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: GeoCityEnvelope;
+};
+
+export type PostGeoCityApiV1GeoCitiesPostResponse = PostGeoCityApiV1GeoCitiesPostResponses[keyof PostGeoCityApiV1GeoCitiesPostResponses];
+
+export type DeleteGeoCityEndpointApiV1GeoCitiesCityUuidDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * City Uuid
+         *
+         * GEO 城市记录的唯一标识 UUID。
+         */
+        city_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/geo/cities/{city_uuid}';
+};
+
+export type DeleteGeoCityEndpointApiV1GeoCitiesCityUuidDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteGeoCityEndpointApiV1GeoCitiesCityUuidDeleteError = DeleteGeoCityEndpointApiV1GeoCitiesCityUuidDeleteErrors[keyof DeleteGeoCityEndpointApiV1GeoCitiesCityUuidDeleteErrors];
+
+export type DeleteGeoCityEndpointApiV1GeoCitiesCityUuidDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    200: GeoCityEnvelope;
+};
+
+export type DeleteGeoCityEndpointApiV1GeoCitiesCityUuidDeleteResponse = DeleteGeoCityEndpointApiV1GeoCitiesCityUuidDeleteResponses[keyof DeleteGeoCityEndpointApiV1GeoCitiesCityUuidDeleteResponses];
+
+export type PatchGeoCityApiV1GeoCitiesCityUuidPatchData = {
+    body: GeoCityUpdate;
+    path: {
+        /**
+         * City Uuid
+         *
+         * GEO 城市记录的唯一标识 UUID。
+         */
+        city_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/geo/cities/{city_uuid}';
+};
+
+export type PatchGeoCityApiV1GeoCitiesCityUuidPatchErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PatchGeoCityApiV1GeoCitiesCityUuidPatchError = PatchGeoCityApiV1GeoCitiesCityUuidPatchErrors[keyof PatchGeoCityApiV1GeoCitiesCityUuidPatchErrors];
+
+export type PatchGeoCityApiV1GeoCitiesCityUuidPatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: GeoCityEnvelope;
+};
+
+export type PatchGeoCityApiV1GeoCitiesCityUuidPatchResponse = PatchGeoCityApiV1GeoCitiesCityUuidPatchResponses[keyof PatchGeoCityApiV1GeoCitiesCityUuidPatchResponses];
+
+export type GetMonitoringAgentsApiV1MonitoringAgentsGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/monitoring/agents';
+};
+
+export type GetMonitoringAgentsApiV1MonitoringAgentsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: MonitoringAgentListEnvelope;
+};
+
+export type GetMonitoringAgentsApiV1MonitoringAgentsGetResponse = GetMonitoringAgentsApiV1MonitoringAgentsGetResponses[keyof GetMonitoringAgentsApiV1MonitoringAgentsGetResponses];
+
+export type GetMonitoringAgentApiV1MonitoringAgentsAgentUuidGetData = {
+    body?: never;
     path: {
         /**
          * Agent Uuid
+         *
+         * Agent 的唯一标识 UUID。
+         */
+        agent_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/monitoring/agents/{agent_uuid}';
+};
+
+export type GetMonitoringAgentApiV1MonitoringAgentsAgentUuidGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetMonitoringAgentApiV1MonitoringAgentsAgentUuidGetError = GetMonitoringAgentApiV1MonitoringAgentsAgentUuidGetErrors[keyof GetMonitoringAgentApiV1MonitoringAgentsAgentUuidGetErrors];
+
+export type GetMonitoringAgentApiV1MonitoringAgentsAgentUuidGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: MonitoringAgentEnvelope;
+};
+
+export type GetMonitoringAgentApiV1MonitoringAgentsAgentUuidGetResponse = GetMonitoringAgentApiV1MonitoringAgentsAgentUuidGetResponses[keyof GetMonitoringAgentApiV1MonitoringAgentsAgentUuidGetResponses];
+
+export type GetTargetsApiV1TargetsGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page
+         *
+         * 页码，从 1 开始。
+         */
+        page?: number;
+        /**
+         * Page Size
+         *
+         * 每页返回数量，范围为 1 到 100。
+         */
+        page_size?: number;
+        /**
+         * Keyword
+         *
+         * 关键词过滤，按名称、地址或相关文本进行模糊匹配。
+         */
+        keyword?: string | null;
+        /**
+         * Target Type
+         *
+         * Target 类型过滤，可选值为 `ip` 或 `domain`。
+         */
+        target_type?: string | null;
+        /**
+         * Is Anycast
+         *
+         * 是否只查询 Anycast Target；不传表示不过滤。
+         */
+        is_anycast?: boolean | null;
+        /**
+         * Is Enabled
+         *
+         * 启用状态过滤；不传表示同时返回启用和停用的数据。
+         */
+        is_enabled?: boolean | null;
+        /**
+         * Sort By
+         *
+         * 排序字段，可选 `name`、`target`、`target_type`、`is_anycast`、`created_at`、`updated_at`。
+         */
+        sort_by?: string;
+        /**
+         * Sort Order
+         *
+         * 排序方向，可选值为 `asc` 或 `desc`。
+         */
+        sort_order?: string;
+    };
+    url: '/api/v1/targets';
+};
+
+export type GetTargetsApiV1TargetsGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetTargetsApiV1TargetsGetError = GetTargetsApiV1TargetsGetErrors[keyof GetTargetsApiV1TargetsGetErrors];
+
+export type GetTargetsApiV1TargetsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: TargetListEnvelope;
+};
+
+export type GetTargetsApiV1TargetsGetResponse = GetTargetsApiV1TargetsGetResponses[keyof GetTargetsApiV1TargetsGetResponses];
+
+export type PostTargetApiV1TargetsPostData = {
+    body: TargetCreate;
+    path?: never;
+    query?: never;
+    url: '/api/v1/targets';
+};
+
+export type PostTargetApiV1TargetsPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PostTargetApiV1TargetsPostError = PostTargetApiV1TargetsPostErrors[keyof PostTargetApiV1TargetsPostErrors];
+
+export type PostTargetApiV1TargetsPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: TargetEnvelope;
+};
+
+export type PostTargetApiV1TargetsPostResponse = PostTargetApiV1TargetsPostResponses[keyof PostTargetApiV1TargetsPostResponses];
+
+export type DeleteTargetApiV1TargetsTargetUuidDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Target Uuid
+         *
+         * Target 的唯一标识 UUID。
+         */
+        target_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/targets/{target_uuid}';
+};
+
+export type DeleteTargetApiV1TargetsTargetUuidDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteTargetApiV1TargetsTargetUuidDeleteError = DeleteTargetApiV1TargetsTargetUuidDeleteErrors[keyof DeleteTargetApiV1TargetsTargetUuidDeleteErrors];
+
+export type DeleteTargetApiV1TargetsTargetUuidDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    200: TargetEnvelope;
+};
+
+export type DeleteTargetApiV1TargetsTargetUuidDeleteResponse = DeleteTargetApiV1TargetsTargetUuidDeleteResponses[keyof DeleteTargetApiV1TargetsTargetUuidDeleteResponses];
+
+export type GetTargetApiV1TargetsTargetUuidGetData = {
+    body?: never;
+    path: {
+        /**
+         * Target Uuid
+         *
+         * Target 的唯一标识 UUID。
+         */
+        target_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/targets/{target_uuid}';
+};
+
+export type GetTargetApiV1TargetsTargetUuidGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetTargetApiV1TargetsTargetUuidGetError = GetTargetApiV1TargetsTargetUuidGetErrors[keyof GetTargetApiV1TargetsTargetUuidGetErrors];
+
+export type GetTargetApiV1TargetsTargetUuidGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: TargetEnvelope;
+};
+
+export type GetTargetApiV1TargetsTargetUuidGetResponse = GetTargetApiV1TargetsTargetUuidGetResponses[keyof GetTargetApiV1TargetsTargetUuidGetResponses];
+
+export type PatchTargetApiV1TargetsTargetUuidPatchData = {
+    body: TargetUpdate;
+    path: {
+        /**
+         * Target Uuid
+         *
+         * Target 的唯一标识 UUID。
+         */
+        target_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/targets/{target_uuid}';
+};
+
+export type PatchTargetApiV1TargetsTargetUuidPatchErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PatchTargetApiV1TargetsTargetUuidPatchError = PatchTargetApiV1TargetsTargetUuidPatchErrors[keyof PatchTargetApiV1TargetsTargetUuidPatchErrors];
+
+export type PatchTargetApiV1TargetsTargetUuidPatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: TargetEnvelope;
+};
+
+export type PatchTargetApiV1TargetsTargetUuidPatchResponse = PatchTargetApiV1TargetsTargetUuidPatchResponses[keyof PatchTargetApiV1TargetsTargetUuidPatchResponses];
+
+export type EnableTargetApiV1TargetsTargetUuidEnablePostData = {
+    body?: never;
+    path: {
+        /**
+         * Target Uuid
+         *
+         * Target 的唯一标识 UUID。
+         */
+        target_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/targets/{target_uuid}/enable';
+};
+
+export type EnableTargetApiV1TargetsTargetUuidEnablePostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type EnableTargetApiV1TargetsTargetUuidEnablePostError = EnableTargetApiV1TargetsTargetUuidEnablePostErrors[keyof EnableTargetApiV1TargetsTargetUuidEnablePostErrors];
+
+export type EnableTargetApiV1TargetsTargetUuidEnablePostResponses = {
+    /**
+     * Successful Response
+     */
+    200: TargetEnvelope;
+};
+
+export type EnableTargetApiV1TargetsTargetUuidEnablePostResponse = EnableTargetApiV1TargetsTargetUuidEnablePostResponses[keyof EnableTargetApiV1TargetsTargetUuidEnablePostResponses];
+
+export type DisableTargetApiV1TargetsTargetUuidDisablePostData = {
+    body?: never;
+    path: {
+        /**
+         * Target Uuid
+         *
+         * Target 的唯一标识 UUID。
+         */
+        target_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/targets/{target_uuid}/disable';
+};
+
+export type DisableTargetApiV1TargetsTargetUuidDisablePostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DisableTargetApiV1TargetsTargetUuidDisablePostError = DisableTargetApiV1TargetsTargetUuidDisablePostErrors[keyof DisableTargetApiV1TargetsTargetUuidDisablePostErrors];
+
+export type DisableTargetApiV1TargetsTargetUuidDisablePostResponses = {
+    /**
+     * Successful Response
+     */
+    200: TargetEnvelope;
+};
+
+export type DisableTargetApiV1TargetsTargetUuidDisablePostResponse = DisableTargetApiV1TargetsTargetUuidDisablePostResponses[keyof DisableTargetApiV1TargetsTargetUuidDisablePostResponses];
+
+export type GetAgentsApiV1AgentsGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page
+         *
+         * 页码，从 1 开始。
+         */
+        page?: number;
+        /**
+         * Page Size
+         *
+         * 每页返回数量，范围为 1 到 100。
+         */
+        page_size?: number;
+        /**
+         * Keyword
+         *
+         * 关键词过滤，按名称、地址或相关文本进行模糊匹配。
+         */
+        keyword?: string | null;
+        /**
+         * Status
+         *
+         * Agent 状态过滤，可选值为 `online`、`offline`、`disabled`。
+         */
+        status?: string | null;
+        /**
+         * Is Enabled
+         *
+         * 启用状态过滤；不传表示同时返回启用和停用的数据。
+         */
+        is_enabled?: boolean | null;
+        /**
+         * Sort By
+         *
+         * 排序字段，可选 `name`、`status`、`last_heartbeat_at`、`created_at`、`updated_at`。
+         */
+        sort_by?: string;
+        /**
+         * Sort Order
+         *
+         * 排序方向，可选值为 `asc` 或 `desc`。
+         */
+        sort_order?: string;
+    };
+    url: '/api/v1/agents';
+};
+
+export type GetAgentsApiV1AgentsGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetAgentsApiV1AgentsGetError = GetAgentsApiV1AgentsGetErrors[keyof GetAgentsApiV1AgentsGetErrors];
+
+export type GetAgentsApiV1AgentsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: AgentListEnvelope;
+};
+
+export type GetAgentsApiV1AgentsGetResponse = GetAgentsApiV1AgentsGetResponses[keyof GetAgentsApiV1AgentsGetResponses];
+
+export type PostAgentApiV1AgentsPostData = {
+    body: AgentCreate;
+    path?: never;
+    query?: never;
+    url: '/api/v1/agents';
+};
+
+export type PostAgentApiV1AgentsPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PostAgentApiV1AgentsPostError = PostAgentApiV1AgentsPostErrors[keyof PostAgentApiV1AgentsPostErrors];
+
+export type PostAgentApiV1AgentsPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: AgentCreateEnvelope;
+};
+
+export type PostAgentApiV1AgentsPostResponse = PostAgentApiV1AgentsPostResponses[keyof PostAgentApiV1AgentsPostResponses];
+
+export type DeleteAgentApiV1AgentsAgentUuidDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Agent Uuid
+         *
+         * Agent 的唯一标识 UUID。
          */
         agent_uuid: string;
     };
@@ -2165,33 +6214,31 @@ export type DisableAgentApiV1AgentsAgentUuidDeleteData = {
     url: '/api/v1/agents/{agent_uuid}';
 };
 
-export type DisableAgentApiV1AgentsAgentUuidDeleteErrors = {
+export type DeleteAgentApiV1AgentsAgentUuidDeleteErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type DisableAgentApiV1AgentsAgentUuidDeleteError = DisableAgentApiV1AgentsAgentUuidDeleteErrors[keyof DisableAgentApiV1AgentsAgentUuidDeleteErrors];
+export type DeleteAgentApiV1AgentsAgentUuidDeleteError = DeleteAgentApiV1AgentsAgentUuidDeleteErrors[keyof DeleteAgentApiV1AgentsAgentUuidDeleteErrors];
 
-export type DisableAgentApiV1AgentsAgentUuidDeleteResponses = {
+export type DeleteAgentApiV1AgentsAgentUuidDeleteResponses = {
     /**
      * Successful Response
      */
-    200: unknown;
+    200: AgentEnvelope;
 };
+
+export type DeleteAgentApiV1AgentsAgentUuidDeleteResponse = DeleteAgentApiV1AgentsAgentUuidDeleteResponses[keyof DeleteAgentApiV1AgentsAgentUuidDeleteResponses];
 
 export type GetAgentApiV1AgentsAgentUuidGetData = {
     body?: never;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
     path: {
         /**
          * Agent Uuid
+         *
+         * Agent 的唯一标识 UUID。
          */
         agent_uuid: string;
     };
@@ -2212,20 +6259,18 @@ export type GetAgentApiV1AgentsAgentUuidGetResponses = {
     /**
      * Successful Response
      */
-    200: unknown;
+    200: AgentEnvelope;
 };
 
-export type UpdateAgentApiV1AgentsAgentUuidPatchData = {
+export type GetAgentApiV1AgentsAgentUuidGetResponse = GetAgentApiV1AgentsAgentUuidGetResponses[keyof GetAgentApiV1AgentsAgentUuidGetResponses];
+
+export type PatchAgentApiV1AgentsAgentUuidPatchData = {
     body: AgentUpdate;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
     path: {
         /**
          * Agent Uuid
+         *
+         * Agent 的唯一标识 UUID。
          */
         agent_uuid: string;
     };
@@ -2233,86 +6278,191 @@ export type UpdateAgentApiV1AgentsAgentUuidPatchData = {
     url: '/api/v1/agents/{agent_uuid}';
 };
 
-export type UpdateAgentApiV1AgentsAgentUuidPatchErrors = {
+export type PatchAgentApiV1AgentsAgentUuidPatchErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type UpdateAgentApiV1AgentsAgentUuidPatchError = UpdateAgentApiV1AgentsAgentUuidPatchErrors[keyof UpdateAgentApiV1AgentsAgentUuidPatchErrors];
+export type PatchAgentApiV1AgentsAgentUuidPatchError = PatchAgentApiV1AgentsAgentUuidPatchErrors[keyof PatchAgentApiV1AgentsAgentUuidPatchErrors];
 
-export type UpdateAgentApiV1AgentsAgentUuidPatchResponses = {
+export type PatchAgentApiV1AgentsAgentUuidPatchResponses = {
     /**
      * Successful Response
      */
-    200: unknown;
+    200: AgentEnvelope;
 };
 
-export type RegisterAgentApiV1AgentsRegisterPostData = {
-    body: AgentRegisterRequest;
-    path?: never;
-    query?: never;
-    url: '/api/v1/agents/register';
-};
+export type PatchAgentApiV1AgentsAgentUuidPatchResponse = PatchAgentApiV1AgentsAgentUuidPatchResponses[keyof PatchAgentApiV1AgentsAgentUuidPatchResponses];
 
-export type RegisterAgentApiV1AgentsRegisterPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type RegisterAgentApiV1AgentsRegisterPostError = RegisterAgentApiV1AgentsRegisterPostErrors[keyof RegisterAgentApiV1AgentsRegisterPostErrors];
-
-export type RegisterAgentApiV1AgentsRegisterPostResponses = {
-    /**
-     * Successful Response
-     */
-    200: AgentRegisterResponse;
-};
-
-export type RegisterAgentApiV1AgentsRegisterPostResponse = RegisterAgentApiV1AgentsRegisterPostResponses[keyof RegisterAgentApiV1AgentsRegisterPostResponses];
-
-export type GetAgentTasksApiV1AgentsAgentUuidTasksGetData = {
+export type EnableAgentApiV1AgentsAgentUuidEnablePostData = {
     body?: never;
-    headers: {
-        /**
-         * X-Access-Key
-         */
-        'X-Access-Key': string;
-    };
     path: {
         /**
          * Agent Uuid
+         *
+         * Agent 的唯一标识 UUID。
          */
         agent_uuid: string;
     };
     query?: never;
-    url: '/api/v1/agents/{agent_uuid}/tasks';
+    url: '/api/v1/agents/{agent_uuid}/enable';
 };
 
-export type GetAgentTasksApiV1AgentsAgentUuidTasksGetErrors = {
+export type EnableAgentApiV1AgentsAgentUuidEnablePostErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type GetAgentTasksApiV1AgentsAgentUuidTasksGetError = GetAgentTasksApiV1AgentsAgentUuidTasksGetErrors[keyof GetAgentTasksApiV1AgentsAgentUuidTasksGetErrors];
+export type EnableAgentApiV1AgentsAgentUuidEnablePostError = EnableAgentApiV1AgentsAgentUuidEnablePostErrors[keyof EnableAgentApiV1AgentsAgentUuidEnablePostErrors];
 
-export type GetAgentTasksApiV1AgentsAgentUuidTasksGetResponses = {
+export type EnableAgentApiV1AgentsAgentUuidEnablePostResponses = {
     /**
      * Successful Response
      */
-    200: unknown;
+    200: AgentEnvelope;
 };
 
-export type RecordHeartbeatApiV1AgentsAgentUuidHeartbeatPostData = {
-    body: HeartbeatRequest;
+export type EnableAgentApiV1AgentsAgentUuidEnablePostResponse = EnableAgentApiV1AgentsAgentUuidEnablePostResponses[keyof EnableAgentApiV1AgentsAgentUuidEnablePostResponses];
+
+export type DisableAgentApiV1AgentsAgentUuidDisablePostData = {
+    body?: never;
     path: {
         /**
          * Agent Uuid
+         *
+         * Agent 的唯一标识 UUID。
+         */
+        agent_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/agents/{agent_uuid}/disable';
+};
+
+export type DisableAgentApiV1AgentsAgentUuidDisablePostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DisableAgentApiV1AgentsAgentUuidDisablePostError = DisableAgentApiV1AgentsAgentUuidDisablePostErrors[keyof DisableAgentApiV1AgentsAgentUuidDisablePostErrors];
+
+export type DisableAgentApiV1AgentsAgentUuidDisablePostResponses = {
+    /**
+     * Successful Response
+     */
+    200: AgentEnvelope;
+};
+
+export type DisableAgentApiV1AgentsAgentUuidDisablePostResponse = DisableAgentApiV1AgentsAgentUuidDisablePostResponses[keyof DisableAgentApiV1AgentsAgentUuidDisablePostResponses];
+
+export type ResyncAgentApiV1AgentsAgentUuidResyncPostData = {
+    body?: never;
+    path: {
+        /**
+         * Agent Uuid
+         *
+         * Agent 的唯一标识 UUID。
+         */
+        agent_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/agents/{agent_uuid}/resync';
+};
+
+export type ResyncAgentApiV1AgentsAgentUuidResyncPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ResyncAgentApiV1AgentsAgentUuidResyncPostError = ResyncAgentApiV1AgentsAgentUuidResyncPostErrors[keyof ResyncAgentApiV1AgentsAgentUuidResyncPostErrors];
+
+export type ResyncAgentApiV1AgentsAgentUuidResyncPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: ResyncEnvelope;
+};
+
+export type ResyncAgentApiV1AgentsAgentUuidResyncPostResponse = ResyncAgentApiV1AgentsAgentUuidResyncPostResponses[keyof ResyncAgentApiV1AgentsAgentUuidResyncPostResponses];
+
+export type RotateAgentAuthTokenApiV1AgentsAgentUuidRotateTokenPostData = {
+    body?: never;
+    path: {
+        /**
+         * Agent Uuid
+         *
+         * Agent 的唯一标识 UUID。
+         */
+        agent_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/agents/{agent_uuid}/rotate-token';
+};
+
+export type RotateAgentAuthTokenApiV1AgentsAgentUuidRotateTokenPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RotateAgentAuthTokenApiV1AgentsAgentUuidRotateTokenPostError = RotateAgentAuthTokenApiV1AgentsAgentUuidRotateTokenPostErrors[keyof RotateAgentAuthTokenApiV1AgentsAgentUuidRotateTokenPostErrors];
+
+export type RotateAgentAuthTokenApiV1AgentsAgentUuidRotateTokenPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: AgentTokenRotateEnvelope;
+};
+
+export type RotateAgentAuthTokenApiV1AgentsAgentUuidRotateTokenPostResponse = RotateAgentAuthTokenApiV1AgentsAgentUuidRotateTokenPostResponses[keyof RotateAgentAuthTokenApiV1AgentsAgentUuidRotateTokenPostResponses];
+
+export type RequestAgentResyncApiV1AgentsAgentUuidResyncRequestPostData = {
+    body?: never;
+    path: {
+        /**
+         * Agent Uuid
+         *
+         * Agent 的唯一标识 UUID。
+         */
+        agent_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/agents/{agent_uuid}/resync-request';
+};
+
+export type RequestAgentResyncApiV1AgentsAgentUuidResyncRequestPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RequestAgentResyncApiV1AgentsAgentUuidResyncRequestPostError = RequestAgentResyncApiV1AgentsAgentUuidResyncRequestPostErrors[keyof RequestAgentResyncApiV1AgentsAgentUuidResyncRequestPostErrors];
+
+export type RequestAgentResyncApiV1AgentsAgentUuidResyncRequestPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: ResyncEnvelope;
+};
+
+export type RequestAgentResyncApiV1AgentsAgentUuidResyncRequestPostResponse = RequestAgentResyncApiV1AgentsAgentUuidResyncRequestPostResponses[keyof RequestAgentResyncApiV1AgentsAgentUuidResyncRequestPostResponses];
+
+export type PostAgentHeartbeatApiV1AgentsAgentUuidHeartbeatPostData = {
+    body: AgentHeartbeat;
+    path: {
+        /**
+         * Agent Uuid
+         *
+         * Agent 的唯一标识 UUID。
          */
         agent_uuid: string;
     };
@@ -2320,1455 +6470,494 @@ export type RecordHeartbeatApiV1AgentsAgentUuidHeartbeatPostData = {
     url: '/api/v1/agents/{agent_uuid}/heartbeat';
 };
 
-export type RecordHeartbeatApiV1AgentsAgentUuidHeartbeatPostErrors = {
+export type PostAgentHeartbeatApiV1AgentsAgentUuidHeartbeatPostErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type RecordHeartbeatApiV1AgentsAgentUuidHeartbeatPostError = RecordHeartbeatApiV1AgentsAgentUuidHeartbeatPostErrors[keyof RecordHeartbeatApiV1AgentsAgentUuidHeartbeatPostErrors];
+export type PostAgentHeartbeatApiV1AgentsAgentUuidHeartbeatPostError = PostAgentHeartbeatApiV1AgentsAgentUuidHeartbeatPostErrors[keyof PostAgentHeartbeatApiV1AgentsAgentUuidHeartbeatPostErrors];
 
-export type RecordHeartbeatApiV1AgentsAgentUuidHeartbeatPostResponses = {
+export type PostAgentHeartbeatApiV1AgentsAgentUuidHeartbeatPostResponses = {
     /**
      * Successful Response
      */
-    200: unknown;
+    200: AgentHeartbeatEnvelope;
 };
 
-export type UploadReleaseApiV1AgentsReleasesUploadPostData = {
-    body: BodyUploadReleaseApiV1AgentsReleasesUploadPost;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path?: never;
-    query?: never;
-    url: '/api/v1/agents/releases/upload';
-};
+export type PostAgentHeartbeatApiV1AgentsAgentUuidHeartbeatPostResponse = PostAgentHeartbeatApiV1AgentsAgentUuidHeartbeatPostResponses[keyof PostAgentHeartbeatApiV1AgentsAgentUuidHeartbeatPostResponses];
 
-export type UploadReleaseApiV1AgentsReleasesUploadPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type UploadReleaseApiV1AgentsReleasesUploadPostError = UploadReleaseApiV1AgentsReleasesUploadPostErrors[keyof UploadReleaseApiV1AgentsReleasesUploadPostErrors];
-
-export type UploadReleaseApiV1AgentsReleasesUploadPostResponses = {
-    /**
-     * Successful Response
-     */
-    201: ReleaseResponse;
-};
-
-export type UploadReleaseApiV1AgentsReleasesUploadPostResponse = UploadReleaseApiV1AgentsReleasesUploadPostResponses[keyof UploadReleaseApiV1AgentsReleasesUploadPostResponses];
-
-export type ListReleasesApiV1AgentsReleasesGetData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path?: never;
-    query?: {
-        /**
-         * Platform
-         */
-        platform?: string | null;
-    };
-    url: '/api/v1/agents/releases/';
-};
-
-export type ListReleasesApiV1AgentsReleasesGetErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ListReleasesApiV1AgentsReleasesGetError = ListReleasesApiV1AgentsReleasesGetErrors[keyof ListReleasesApiV1AgentsReleasesGetErrors];
-
-export type ListReleasesApiV1AgentsReleasesGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: ReleaseListResponse;
-};
-
-export type ListReleasesApiV1AgentsReleasesGetResponse = ListReleasesApiV1AgentsReleasesGetResponses[keyof ListReleasesApiV1AgentsReleasesGetResponses];
-
-export type GetLatestReleaseApiV1AgentsReleasesLatestPlatformGetData = {
-    body?: never;
+export type PostTaskSnapshotAckApiV1AgentsAgentUuidTaskSnapshotAckPostData = {
+    body: TaskSnapshotAck;
     path: {
-        /**
-         * Platform
-         */
-        platform: string;
-    };
-    query?: never;
-    url: '/api/v1/agents/releases/latest/{platform}';
-};
-
-export type GetLatestReleaseApiV1AgentsReleasesLatestPlatformGetErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type GetLatestReleaseApiV1AgentsReleasesLatestPlatformGetError = GetLatestReleaseApiV1AgentsReleasesLatestPlatformGetErrors[keyof GetLatestReleaseApiV1AgentsReleasesLatestPlatformGetErrors];
-
-export type GetLatestReleaseApiV1AgentsReleasesLatestPlatformGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: LatestReleaseResponse;
-};
-
-export type GetLatestReleaseApiV1AgentsReleasesLatestPlatformGetResponse = GetLatestReleaseApiV1AgentsReleasesLatestPlatformGetResponses[keyof GetLatestReleaseApiV1AgentsReleasesLatestPlatformGetResponses];
-
-export type DeleteReleaseApiV1AgentsReleasesReleaseUuidDeleteData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path: {
-        /**
-         * Release Uuid
-         */
-        release_uuid: string;
-    };
-    query?: never;
-    url: '/api/v1/agents/releases/{release_uuid}';
-};
-
-export type DeleteReleaseApiV1AgentsReleasesReleaseUuidDeleteErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type DeleteReleaseApiV1AgentsReleasesReleaseUuidDeleteError = DeleteReleaseApiV1AgentsReleasesReleaseUuidDeleteErrors[keyof DeleteReleaseApiV1AgentsReleasesReleaseUuidDeleteErrors];
-
-export type DeleteReleaseApiV1AgentsReleasesReleaseUuidDeleteResponses = {
-    /**
-     * Successful Response
-     */
-    200: unknown;
-};
-
-export type GetReleaseApiV1AgentsReleasesReleaseUuidGetData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path: {
-        /**
-         * Release Uuid
-         */
-        release_uuid: string;
-    };
-    query?: never;
-    url: '/api/v1/agents/releases/{release_uuid}';
-};
-
-export type GetReleaseApiV1AgentsReleasesReleaseUuidGetErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type GetReleaseApiV1AgentsReleasesReleaseUuidGetError = GetReleaseApiV1AgentsReleasesReleaseUuidGetErrors[keyof GetReleaseApiV1AgentsReleasesReleaseUuidGetErrors];
-
-export type GetReleaseApiV1AgentsReleasesReleaseUuidGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: ReleaseResponse;
-};
-
-export type GetReleaseApiV1AgentsReleasesReleaseUuidGetResponse = GetReleaseApiV1AgentsReleasesReleaseUuidGetResponses[keyof GetReleaseApiV1AgentsReleasesReleaseUuidGetResponses];
-
-export type PushUpdateApiV1AgentsReleasesReleaseUuidPushPostData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path: {
-        /**
-         * Release Uuid
-         */
-        release_uuid: string;
-    };
-    query?: never;
-    url: '/api/v1/agents/releases/{release_uuid}/push';
-};
-
-export type PushUpdateApiV1AgentsReleasesReleaseUuidPushPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type PushUpdateApiV1AgentsReleasesReleaseUuidPushPostError = PushUpdateApiV1AgentsReleasesReleaseUuidPushPostErrors[keyof PushUpdateApiV1AgentsReleasesReleaseUuidPushPostErrors];
-
-export type PushUpdateApiV1AgentsReleasesReleaseUuidPushPostResponses = {
-    /**
-     * Successful Response
-     */
-    200: unknown;
-};
-
-export type ListTasksEndpointApiV1TasksGetData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * Skip
-         */
-        skip?: number;
-        /**
-         * Limit
-         */
-        limit?: number;
-        /**
-         * Is Active
-         */
-        is_active?: boolean | null;
-    };
-    url: '/api/v1/tasks/';
-};
-
-export type ListTasksEndpointApiV1TasksGetErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ListTasksEndpointApiV1TasksGetError = ListTasksEndpointApiV1TasksGetErrors[keyof ListTasksEndpointApiV1TasksGetErrors];
-
-export type ListTasksEndpointApiV1TasksGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: PaginatedResponseTaskResponse;
-};
-
-export type ListTasksEndpointApiV1TasksGetResponse = ListTasksEndpointApiV1TasksGetResponses[keyof ListTasksEndpointApiV1TasksGetResponses];
-
-export type CreateTaskEndpointApiV1TasksPostData = {
-    body: TaskCreate;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path?: never;
-    query?: never;
-    url: '/api/v1/tasks/';
-};
-
-export type CreateTaskEndpointApiV1TasksPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type CreateTaskEndpointApiV1TasksPostError = CreateTaskEndpointApiV1TasksPostErrors[keyof CreateTaskEndpointApiV1TasksPostErrors];
-
-export type CreateTaskEndpointApiV1TasksPostResponses = {
-    /**
-     * Successful Response
-     */
-    201: TaskResponse;
-};
-
-export type CreateTaskEndpointApiV1TasksPostResponse = CreateTaskEndpointApiV1TasksPostResponses[keyof CreateTaskEndpointApiV1TasksPostResponses];
-
-export type DeleteTaskEndpointApiV1TasksTaskUuidDeleteData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path: {
-        /**
-         * Task Uuid
-         */
-        task_uuid: string;
-    };
-    query?: never;
-    url: '/api/v1/tasks/{task_uuid}';
-};
-
-export type DeleteTaskEndpointApiV1TasksTaskUuidDeleteErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type DeleteTaskEndpointApiV1TasksTaskUuidDeleteError = DeleteTaskEndpointApiV1TasksTaskUuidDeleteErrors[keyof DeleteTaskEndpointApiV1TasksTaskUuidDeleteErrors];
-
-export type DeleteTaskEndpointApiV1TasksTaskUuidDeleteResponses = {
-    /**
-     * Successful Response
-     */
-    200: TaskResponse;
-};
-
-export type DeleteTaskEndpointApiV1TasksTaskUuidDeleteResponse = DeleteTaskEndpointApiV1TasksTaskUuidDeleteResponses[keyof DeleteTaskEndpointApiV1TasksTaskUuidDeleteResponses];
-
-export type GetTaskEndpointApiV1TasksTaskUuidGetData = {
-    body?: never;
-    path: {
-        /**
-         * Task Uuid
-         */
-        task_uuid: string;
-    };
-    query?: never;
-    url: '/api/v1/tasks/{task_uuid}';
-};
-
-export type GetTaskEndpointApiV1TasksTaskUuidGetErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type GetTaskEndpointApiV1TasksTaskUuidGetError = GetTaskEndpointApiV1TasksTaskUuidGetErrors[keyof GetTaskEndpointApiV1TasksTaskUuidGetErrors];
-
-export type GetTaskEndpointApiV1TasksTaskUuidGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: TaskResponse;
-};
-
-export type GetTaskEndpointApiV1TasksTaskUuidGetResponse = GetTaskEndpointApiV1TasksTaskUuidGetResponses[keyof GetTaskEndpointApiV1TasksTaskUuidGetResponses];
-
-export type UpdateTaskEndpointApiV1TasksTaskUuidPatchData = {
-    body: TaskUpdate;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path: {
-        /**
-         * Task Uuid
-         */
-        task_uuid: string;
-    };
-    query?: never;
-    url: '/api/v1/tasks/{task_uuid}';
-};
-
-export type UpdateTaskEndpointApiV1TasksTaskUuidPatchErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type UpdateTaskEndpointApiV1TasksTaskUuidPatchError = UpdateTaskEndpointApiV1TasksTaskUuidPatchErrors[keyof UpdateTaskEndpointApiV1TasksTaskUuidPatchErrors];
-
-export type UpdateTaskEndpointApiV1TasksTaskUuidPatchResponses = {
-    /**
-     * Successful Response
-     */
-    200: TaskResponse;
-};
-
-export type UpdateTaskEndpointApiV1TasksTaskUuidPatchResponse = UpdateTaskEndpointApiV1TasksTaskUuidPatchResponses[keyof UpdateTaskEndpointApiV1TasksTaskUuidPatchResponses];
-
-export type AssignTaskEndpointApiV1TasksTaskUuidAssignPostData = {
-    body: AgentTaskAssign;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path: {
-        /**
-         * Task Uuid
-         */
-        task_uuid: string;
-    };
-    query?: never;
-    url: '/api/v1/tasks/{task_uuid}/assign';
-};
-
-export type AssignTaskEndpointApiV1TasksTaskUuidAssignPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type AssignTaskEndpointApiV1TasksTaskUuidAssignPostError = AssignTaskEndpointApiV1TasksTaskUuidAssignPostErrors[keyof AssignTaskEndpointApiV1TasksTaskUuidAssignPostErrors];
-
-export type AssignTaskEndpointApiV1TasksTaskUuidAssignPostResponses = {
-    /**
-     * Response Assign Task Endpoint Api V1 Tasks  Task Uuid  Assign Post
-     *
-     * Successful Response
-     */
-    200: Array<AgentResponse>;
-};
-
-export type AssignTaskEndpointApiV1TasksTaskUuidAssignPostResponse = AssignTaskEndpointApiV1TasksTaskUuidAssignPostResponses[keyof AssignTaskEndpointApiV1TasksTaskUuidAssignPostResponses];
-
-export type GetTaskAgentsEndpointApiV1TasksTaskUuidAgentsGetData = {
-    body?: never;
-    path: {
-        /**
-         * Task Uuid
-         */
-        task_uuid: string;
-    };
-    query?: never;
-    url: '/api/v1/tasks/{task_uuid}/agents';
-};
-
-export type GetTaskAgentsEndpointApiV1TasksTaskUuidAgentsGetErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type GetTaskAgentsEndpointApiV1TasksTaskUuidAgentsGetError = GetTaskAgentsEndpointApiV1TasksTaskUuidAgentsGetErrors[keyof GetTaskAgentsEndpointApiV1TasksTaskUuidAgentsGetErrors];
-
-export type GetTaskAgentsEndpointApiV1TasksTaskUuidAgentsGetResponses = {
-    /**
-     * Response Get Task Agents Endpoint Api V1 Tasks  Task Uuid  Agents Get
-     *
-     * Successful Response
-     */
-    200: Array<AgentResponse>;
-};
-
-export type GetTaskAgentsEndpointApiV1TasksTaskUuidAgentsGetResponse = GetTaskAgentsEndpointApiV1TasksTaskUuidAgentsGetResponses[keyof GetTaskAgentsEndpointApiV1TasksTaskUuidAgentsGetResponses];
-
-export type UnassignTaskEndpointApiV1TasksTaskUuidAgentsAgentUuidDeleteData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path: {
-        /**
-         * Task Uuid
-         */
-        task_uuid: string;
         /**
          * Agent Uuid
+         *
+         * Agent 的唯一标识 UUID。
          */
         agent_uuid: string;
     };
     query?: never;
-    url: '/api/v1/tasks/{task_uuid}/agents/{agent_uuid}';
+    url: '/api/v1/agents/{agent_uuid}/task-snapshot-ack';
 };
 
-export type UnassignTaskEndpointApiV1TasksTaskUuidAgentsAgentUuidDeleteErrors = {
+export type PostTaskSnapshotAckApiV1AgentsAgentUuidTaskSnapshotAckPostErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type UnassignTaskEndpointApiV1TasksTaskUuidAgentsAgentUuidDeleteError = UnassignTaskEndpointApiV1TasksTaskUuidAgentsAgentUuidDeleteErrors[keyof UnassignTaskEndpointApiV1TasksTaskUuidAgentsAgentUuidDeleteErrors];
+export type PostTaskSnapshotAckApiV1AgentsAgentUuidTaskSnapshotAckPostError = PostTaskSnapshotAckApiV1AgentsAgentUuidTaskSnapshotAckPostErrors[keyof PostTaskSnapshotAckApiV1AgentsAgentUuidTaskSnapshotAckPostErrors];
 
-export type UnassignTaskEndpointApiV1TasksTaskUuidAgentsAgentUuidDeleteResponses = {
+export type PostTaskSnapshotAckApiV1AgentsAgentUuidTaskSnapshotAckPostResponses = {
     /**
      * Successful Response
      */
-    204: void;
+    200: TaskSnapshotAckEnvelope;
 };
 
-export type UnassignTaskEndpointApiV1TasksTaskUuidAgentsAgentUuidDeleteResponse = UnassignTaskEndpointApiV1TasksTaskUuidAgentsAgentUuidDeleteResponses[keyof UnassignTaskEndpointApiV1TasksTaskUuidAgentsAgentUuidDeleteResponses];
+export type PostTaskSnapshotAckApiV1AgentsAgentUuidTaskSnapshotAckPostResponse = PostTaskSnapshotAckApiV1AgentsAgentUuidTaskSnapshotAckPostResponses[keyof PostTaskSnapshotAckApiV1AgentsAgentUuidTaskSnapshotAckPostResponses];
 
-export type MonitoringQueryApiV1MonitoringQueryGetData = {
+export type GetTasksApiV1TasksGetData = {
     body?: never;
     path?: never;
-    query: {
+    query?: {
         /**
-         * Task Uuid
+         * Keyword
+         *
+         * 关键词过滤，按名称、地址或相关文本进行模糊匹配。
          */
-        task_uuid: string;
+        keyword?: string | null;
+        /**
+         * Task Type
+         *
+         * 任务类型过滤，可选值为 `icmp`、`tcp`、`mtr`、`iperf3`。
+         */
+        task_type?: string | null;
+        /**
+         * Ip Family
+         *
+         * IP 协议族过滤，可选值为 `4` 或 `6`。
+         */
+        ip_family?: string | null;
         /**
          * Agent Uuid
+         *
+         * 按 Agent UUID 过滤。
          */
         agent_uuid?: string | null;
         /**
-         * Start
+         * Target Uuid
+         *
+         * 按 Target UUID 过滤。
          */
-        start: number;
+        target_uuid?: string | null;
         /**
-         * End
+         * Is Enabled
+         *
+         * 启用状态过滤；不传表示同时返回启用和停用的数据。
          */
-        end: number;
-        granularity: GranularityEnum;
+        is_enabled?: boolean | null;
+        /**
+         * Sort By
+         *
+         * 排序字段，可选 `name`、`task_type`、`is_enabled`、`created_at`、`updated_at`。
+         */
+        sort_by?: string;
+        /**
+         * Sort Order
+         *
+         * 排序方向，可选值为 `asc` 或 `desc`。
+         */
+        sort_order?: string;
     };
-    url: '/api/v1/monitoring/query';
+    url: '/api/v1/tasks';
 };
 
-export type MonitoringQueryApiV1MonitoringQueryGetErrors = {
+export type GetTasksApiV1TasksGetErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type MonitoringQueryApiV1MonitoringQueryGetError = MonitoringQueryApiV1MonitoringQueryGetErrors[keyof MonitoringQueryApiV1MonitoringQueryGetErrors];
+export type GetTasksApiV1TasksGetError = GetTasksApiV1TasksGetErrors[keyof GetTasksApiV1TasksGetErrors];
 
-export type MonitoringQueryApiV1MonitoringQueryGetResponses = {
+export type GetTasksApiV1TasksGetResponses = {
     /**
      * Successful Response
      */
-    200: MonitoringResponse;
+    200: TaskListEnvelope;
 };
 
-export type MonitoringQueryApiV1MonitoringQueryGetResponse = MonitoringQueryApiV1MonitoringQueryGetResponses[keyof MonitoringQueryApiV1MonitoringQueryGetResponses];
+export type GetTasksApiV1TasksGetResponse = GetTasksApiV1TasksGetResponses[keyof GetTasksApiV1TasksGetResponses];
 
-export type DashboardStatsApiV1DashboardStatsGetData = {
-    body?: never;
+export type PostTaskApiV1TasksPostData = {
+    body: TaskCreate;
     path?: never;
     query?: never;
-    url: '/api/v1/dashboard/stats';
+    url: '/api/v1/tasks';
 };
 
-export type DashboardStatsApiV1DashboardStatsGetResponses = {
-    /**
-     * Response Dashboard Stats Api V1 Dashboard Stats Get
-     *
-     * Successful Response
-     */
-    200: {
-        [key: string]: unknown;
-    };
-};
-
-export type DashboardStatsApiV1DashboardStatsGetResponse = DashboardStatsApiV1DashboardStatsGetResponses[keyof DashboardStatsApiV1DashboardStatsGetResponses];
-
-export type MtrListResultsApiV1MonitoringMtrGetData = {
-    body?: never;
-    path?: never;
-    query: {
-        /**
-         * Task Uuid
-         */
-        task_uuid: string;
-        /**
-         * Agent Uuid
-         */
-        agent_uuid?: string | null;
-        /**
-         * Start
-         */
-        start: number;
-        /**
-         * End
-         */
-        end: number;
-        /**
-         * Skip
-         */
-        skip?: number;
-        /**
-         * Limit
-         */
-        limit?: number;
-    };
-    url: '/api/v1/monitoring/mtr';
-};
-
-export type MtrListResultsApiV1MonitoringMtrGetErrors = {
+export type PostTaskApiV1TasksPostErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type MtrListResultsApiV1MonitoringMtrGetError = MtrListResultsApiV1MonitoringMtrGetErrors[keyof MtrListResultsApiV1MonitoringMtrGetErrors];
+export type PostTaskApiV1TasksPostError = PostTaskApiV1TasksPostErrors[keyof PostTaskApiV1TasksPostErrors];
 
-export type MtrListResultsApiV1MonitoringMtrGetResponses = {
+export type PostTaskApiV1TasksPostResponses = {
     /**
      * Successful Response
      */
-    200: MtrResultListResponse;
+    201: TaskEnvelope;
 };
 
-export type MtrListResultsApiV1MonitoringMtrGetResponse = MtrListResultsApiV1MonitoringMtrGetResponses[keyof MtrListResultsApiV1MonitoringMtrGetResponses];
+export type PostTaskApiV1TasksPostResponse = PostTaskApiV1TasksPostResponses[keyof PostTaskApiV1TasksPostResponses];
 
-export type MtrGetResultApiV1MonitoringMtrResultUuidGetData = {
+export type DeleteTaskApiV1TasksTaskUuidDeleteData = {
     body?: never;
     path: {
+        /**
+         * Task Uuid
+         *
+         * 监控任务的唯一标识 UUID。
+         */
+        task_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/tasks/{task_uuid}';
+};
+
+export type DeleteTaskApiV1TasksTaskUuidDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteTaskApiV1TasksTaskUuidDeleteError = DeleteTaskApiV1TasksTaskUuidDeleteErrors[keyof DeleteTaskApiV1TasksTaskUuidDeleteErrors];
+
+export type DeleteTaskApiV1TasksTaskUuidDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    200: TaskEnvelope;
+};
+
+export type DeleteTaskApiV1TasksTaskUuidDeleteResponse = DeleteTaskApiV1TasksTaskUuidDeleteResponses[keyof DeleteTaskApiV1TasksTaskUuidDeleteResponses];
+
+export type GetTaskApiV1TasksTaskUuidGetData = {
+    body?: never;
+    path: {
+        /**
+         * Task Uuid
+         *
+         * 监控任务的唯一标识 UUID。
+         */
+        task_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/tasks/{task_uuid}';
+};
+
+export type GetTaskApiV1TasksTaskUuidGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetTaskApiV1TasksTaskUuidGetError = GetTaskApiV1TasksTaskUuidGetErrors[keyof GetTaskApiV1TasksTaskUuidGetErrors];
+
+export type GetTaskApiV1TasksTaskUuidGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: TaskEnvelope;
+};
+
+export type GetTaskApiV1TasksTaskUuidGetResponse = GetTaskApiV1TasksTaskUuidGetResponses[keyof GetTaskApiV1TasksTaskUuidGetResponses];
+
+export type PatchTaskApiV1TasksTaskUuidPatchData = {
+    body: TaskUpdate;
+    path: {
+        /**
+         * Task Uuid
+         *
+         * 监控任务的唯一标识 UUID。
+         */
+        task_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/tasks/{task_uuid}';
+};
+
+export type PatchTaskApiV1TasksTaskUuidPatchErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PatchTaskApiV1TasksTaskUuidPatchError = PatchTaskApiV1TasksTaskUuidPatchErrors[keyof PatchTaskApiV1TasksTaskUuidPatchErrors];
+
+export type PatchTaskApiV1TasksTaskUuidPatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: TaskEnvelope;
+};
+
+export type PatchTaskApiV1TasksTaskUuidPatchResponse = PatchTaskApiV1TasksTaskUuidPatchResponses[keyof PatchTaskApiV1TasksTaskUuidPatchResponses];
+
+export type EnableTaskApiV1TasksTaskUuidEnablePostData = {
+    body?: never;
+    path: {
+        /**
+         * Task Uuid
+         *
+         * 监控任务的唯一标识 UUID。
+         */
+        task_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/tasks/{task_uuid}/enable';
+};
+
+export type EnableTaskApiV1TasksTaskUuidEnablePostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type EnableTaskApiV1TasksTaskUuidEnablePostError = EnableTaskApiV1TasksTaskUuidEnablePostErrors[keyof EnableTaskApiV1TasksTaskUuidEnablePostErrors];
+
+export type EnableTaskApiV1TasksTaskUuidEnablePostResponses = {
+    /**
+     * Successful Response
+     */
+    200: TaskEnvelope;
+};
+
+export type EnableTaskApiV1TasksTaskUuidEnablePostResponse = EnableTaskApiV1TasksTaskUuidEnablePostResponses[keyof EnableTaskApiV1TasksTaskUuidEnablePostResponses];
+
+export type DisableTaskApiV1TasksTaskUuidDisablePostData = {
+    body?: never;
+    path: {
+        /**
+         * Task Uuid
+         *
+         * 监控任务的唯一标识 UUID。
+         */
+        task_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/tasks/{task_uuid}/disable';
+};
+
+export type DisableTaskApiV1TasksTaskUuidDisablePostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DisableTaskApiV1TasksTaskUuidDisablePostError = DisableTaskApiV1TasksTaskUuidDisablePostErrors[keyof DisableTaskApiV1TasksTaskUuidDisablePostErrors];
+
+export type DisableTaskApiV1TasksTaskUuidDisablePostResponses = {
+    /**
+     * Successful Response
+     */
+    200: TaskEnvelope;
+};
+
+export type DisableTaskApiV1TasksTaskUuidDisablePostResponse = DisableTaskApiV1TasksTaskUuidDisablePostResponses[keyof DisableTaskApiV1TasksTaskUuidDisablePostResponses];
+
+export type PostQuickAssociateApiV1RelationsQuickAssociatePostData = {
+    body: QuickAssociateRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/relations/quick-associate';
+};
+
+export type PostQuickAssociateApiV1RelationsQuickAssociatePostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PostQuickAssociateApiV1RelationsQuickAssociatePostError = PostQuickAssociateApiV1RelationsQuickAssociatePostErrors[keyof PostQuickAssociateApiV1RelationsQuickAssociatePostErrors];
+
+export type PostQuickAssociateApiV1RelationsQuickAssociatePostResponses = {
+    /**
+     * Successful Response
+     */
+    201: TaskArrayEnvelope;
+};
+
+export type PostQuickAssociateApiV1RelationsQuickAssociatePostResponse = PostQuickAssociateApiV1RelationsQuickAssociatePostResponses[keyof PostQuickAssociateApiV1RelationsQuickAssociatePostResponses];
+
+export type GetResultIngestionEventsApiV1ResultsIngestionEventsGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Message Id
+         *
+         * 按结果消息 message_id 过滤。
+         */
+        message_id?: string | null;
         /**
          * Result Uuid
+         *
+         * 按结果 UUID 过滤。
          */
-        result_uuid: string;
-    };
-    query?: never;
-    url: '/api/v1/monitoring/mtr/{result_uuid}';
-};
-
-export type MtrGetResultApiV1MonitoringMtrResultUuidGetErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type MtrGetResultApiV1MonitoringMtrResultUuidGetError = MtrGetResultApiV1MonitoringMtrResultUuidGetErrors[keyof MtrGetResultApiV1MonitoringMtrResultUuidGetErrors];
-
-export type MtrGetResultApiV1MonitoringMtrResultUuidGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: MtrResultDetail;
-};
-
-export type MtrGetResultApiV1MonitoringMtrResultUuidGetResponse = MtrGetResultApiV1MonitoringMtrResultUuidGetResponses[keyof MtrGetResultApiV1MonitoringMtrResultUuidGetResponses];
-
-export type ListRulesEndpointApiV1AlertsRulesGetData = {
-    body?: never;
-    headers?: {
+        result_uuid?: string | null;
         /**
-         * Authorization
+         * Execution Uuid
+         *
+         * 按执行 UUID 过滤。
          */
-        authorization?: string;
-    };
-    path?: never;
-    query?: {
-        /**
-         * Skip
-         */
-        skip?: number;
-        /**
-         * Limit
-         */
-        limit?: number;
-    };
-    url: '/api/v1/alerts/rules/';
-};
-
-export type ListRulesEndpointApiV1AlertsRulesGetErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ListRulesEndpointApiV1AlertsRulesGetError = ListRulesEndpointApiV1AlertsRulesGetErrors[keyof ListRulesEndpointApiV1AlertsRulesGetErrors];
-
-export type ListRulesEndpointApiV1AlertsRulesGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: PaginatedResponseAlertRuleResponse;
-};
-
-export type ListRulesEndpointApiV1AlertsRulesGetResponse = ListRulesEndpointApiV1AlertsRulesGetResponses[keyof ListRulesEndpointApiV1AlertsRulesGetResponses];
-
-export type CreateRuleEndpointApiV1AlertsRulesPostData = {
-    body: AlertRuleCreate;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path?: never;
-    query?: never;
-    url: '/api/v1/alerts/rules/';
-};
-
-export type CreateRuleEndpointApiV1AlertsRulesPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type CreateRuleEndpointApiV1AlertsRulesPostError = CreateRuleEndpointApiV1AlertsRulesPostErrors[keyof CreateRuleEndpointApiV1AlertsRulesPostErrors];
-
-export type CreateRuleEndpointApiV1AlertsRulesPostResponses = {
-    /**
-     * Successful Response
-     */
-    201: AlertRuleResponse;
-};
-
-export type CreateRuleEndpointApiV1AlertsRulesPostResponse = CreateRuleEndpointApiV1AlertsRulesPostResponses[keyof CreateRuleEndpointApiV1AlertsRulesPostResponses];
-
-export type DeleteRuleEndpointApiV1AlertsRulesRuleUuidDeleteData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path: {
-        /**
-         * Rule Uuid
-         */
-        rule_uuid: string;
-    };
-    query?: never;
-    url: '/api/v1/alerts/rules/{rule_uuid}';
-};
-
-export type DeleteRuleEndpointApiV1AlertsRulesRuleUuidDeleteErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type DeleteRuleEndpointApiV1AlertsRulesRuleUuidDeleteError = DeleteRuleEndpointApiV1AlertsRulesRuleUuidDeleteErrors[keyof DeleteRuleEndpointApiV1AlertsRulesRuleUuidDeleteErrors];
-
-export type DeleteRuleEndpointApiV1AlertsRulesRuleUuidDeleteResponses = {
-    /**
-     * Successful Response
-     */
-    204: void;
-};
-
-export type DeleteRuleEndpointApiV1AlertsRulesRuleUuidDeleteResponse = DeleteRuleEndpointApiV1AlertsRulesRuleUuidDeleteResponses[keyof DeleteRuleEndpointApiV1AlertsRulesRuleUuidDeleteResponses];
-
-export type GetRuleEndpointApiV1AlertsRulesRuleUuidGetData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path: {
-        /**
-         * Rule Uuid
-         */
-        rule_uuid: string;
-    };
-    query?: never;
-    url: '/api/v1/alerts/rules/{rule_uuid}';
-};
-
-export type GetRuleEndpointApiV1AlertsRulesRuleUuidGetErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type GetRuleEndpointApiV1AlertsRulesRuleUuidGetError = GetRuleEndpointApiV1AlertsRulesRuleUuidGetErrors[keyof GetRuleEndpointApiV1AlertsRulesRuleUuidGetErrors];
-
-export type GetRuleEndpointApiV1AlertsRulesRuleUuidGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: AlertRuleResponse;
-};
-
-export type GetRuleEndpointApiV1AlertsRulesRuleUuidGetResponse = GetRuleEndpointApiV1AlertsRulesRuleUuidGetResponses[keyof GetRuleEndpointApiV1AlertsRulesRuleUuidGetResponses];
-
-export type UpdateRuleEndpointApiV1AlertsRulesRuleUuidPatchData = {
-    body: AlertRuleUpdate;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path: {
-        /**
-         * Rule Uuid
-         */
-        rule_uuid: string;
-    };
-    query?: never;
-    url: '/api/v1/alerts/rules/{rule_uuid}';
-};
-
-export type UpdateRuleEndpointApiV1AlertsRulesRuleUuidPatchErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type UpdateRuleEndpointApiV1AlertsRulesRuleUuidPatchError = UpdateRuleEndpointApiV1AlertsRulesRuleUuidPatchErrors[keyof UpdateRuleEndpointApiV1AlertsRulesRuleUuidPatchErrors];
-
-export type UpdateRuleEndpointApiV1AlertsRulesRuleUuidPatchResponses = {
-    /**
-     * Successful Response
-     */
-    200: AlertRuleResponse;
-};
-
-export type UpdateRuleEndpointApiV1AlertsRulesRuleUuidPatchResponse = UpdateRuleEndpointApiV1AlertsRulesRuleUuidPatchResponses[keyof UpdateRuleEndpointApiV1AlertsRulesRuleUuidPatchResponses];
-
-export type ListEventsEndpointApiV1AlertsEventsGetData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path?: never;
-    query?: {
-        /**
-         * Rule Uuid
-         */
-        rule_uuid?: string | null;
-        /**
-         * Task Uuid
-         */
-        task_uuid?: string | null;
+        execution_uuid?: string | null;
         /**
          * Status
+         *
+         * 按入库状态过滤，例如 `processed`、`duplicate`、`failed`。
          */
         status?: string | null;
         /**
-         * Skip
+         * Page
+         *
+         * 页码，从 1 开始。
          */
-        skip?: number;
+        page?: number;
         /**
-         * Limit
+         * Page Size
+         *
+         * 每页返回数量，范围为 1 到 200。
          */
-        limit?: number;
+        page_size?: number;
     };
-    url: '/api/v1/alerts/events/';
+    url: '/api/v1/results/ingestion-events';
 };
 
-export type ListEventsEndpointApiV1AlertsEventsGetErrors = {
+export type GetResultIngestionEventsApiV1ResultsIngestionEventsGetErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type ListEventsEndpointApiV1AlertsEventsGetError = ListEventsEndpointApiV1AlertsEventsGetErrors[keyof ListEventsEndpointApiV1AlertsEventsGetErrors];
+export type GetResultIngestionEventsApiV1ResultsIngestionEventsGetError = GetResultIngestionEventsApiV1ResultsIngestionEventsGetErrors[keyof GetResultIngestionEventsApiV1ResultsIngestionEventsGetErrors];
 
-export type ListEventsEndpointApiV1AlertsEventsGetResponses = {
+export type GetResultIngestionEventsApiV1ResultsIngestionEventsGetResponses = {
     /**
      * Successful Response
      */
-    200: PaginatedResponseAlertEventResponse;
+    200: ResultIngestionEventListEnvelope;
 };
 
-export type ListEventsEndpointApiV1AlertsEventsGetResponse = ListEventsEndpointApiV1AlertsEventsGetResponses[keyof ListEventsEndpointApiV1AlertsEventsGetResponses];
+export type GetResultIngestionEventsApiV1ResultsIngestionEventsGetResponse = GetResultIngestionEventsApiV1ResultsIngestionEventsGetResponses[keyof GetResultIngestionEventsApiV1ResultsIngestionEventsGetResponses];
 
-export type GetEventEndpointApiV1AlertsEventsEventUuidGetData = {
+export type GetResultIngestionEventApiV1ResultsIngestionEventsMessageIdGetData = {
     body?: never;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
     path: {
         /**
-         * Event Uuid
+         * Message Id
+         *
+         * 结果消息的 message_id，用于查询最近一次入库事件。
          */
-        event_uuid: string;
+        message_id: string;
     };
     query?: never;
-    url: '/api/v1/alerts/events/{event_uuid}';
+    url: '/api/v1/results/ingestion-events/{message_id}';
 };
 
-export type GetEventEndpointApiV1AlertsEventsEventUuidGetErrors = {
+export type GetResultIngestionEventApiV1ResultsIngestionEventsMessageIdGetErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type GetEventEndpointApiV1AlertsEventsEventUuidGetError = GetEventEndpointApiV1AlertsEventsEventUuidGetErrors[keyof GetEventEndpointApiV1AlertsEventsEventUuidGetErrors];
+export type GetResultIngestionEventApiV1ResultsIngestionEventsMessageIdGetError = GetResultIngestionEventApiV1ResultsIngestionEventsMessageIdGetErrors[keyof GetResultIngestionEventApiV1ResultsIngestionEventsMessageIdGetErrors];
 
-export type GetEventEndpointApiV1AlertsEventsEventUuidGetResponses = {
+export type GetResultIngestionEventApiV1ResultsIngestionEventsMessageIdGetResponses = {
     /**
      * Successful Response
      */
-    200: AlertEventResponse;
+    200: ResultIngestionEventEnvelope;
 };
 
-export type GetEventEndpointApiV1AlertsEventsEventUuidGetResponse = GetEventEndpointApiV1AlertsEventsEventUuidGetResponses[keyof GetEventEndpointApiV1AlertsEventsEventUuidGetResponses];
+export type GetResultIngestionEventApiV1ResultsIngestionEventsMessageIdGetResponse = GetResultIngestionEventApiV1ResultsIngestionEventsMessageIdGetResponses[keyof GetResultIngestionEventApiV1ResultsIngestionEventsMessageIdGetResponses];
 
-export type ListWebhooksEndpointApiV1WebhooksGetData = {
+export type GetAgentWorkApiV1AgentsAgentUuidWorkGetData = {
     body?: never;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path?: never;
-    query?: {
-        /**
-         * Skip
-         */
-        skip?: number;
-        /**
-         * Limit
-         */
-        limit?: number;
-    };
-    url: '/api/v1/webhooks/';
-};
-
-export type ListWebhooksEndpointApiV1WebhooksGetErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ListWebhooksEndpointApiV1WebhooksGetError = ListWebhooksEndpointApiV1WebhooksGetErrors[keyof ListWebhooksEndpointApiV1WebhooksGetErrors];
-
-export type ListWebhooksEndpointApiV1WebhooksGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: PaginatedResponseWebhookResponse;
-};
-
-export type ListWebhooksEndpointApiV1WebhooksGetResponse = ListWebhooksEndpointApiV1WebhooksGetResponses[keyof ListWebhooksEndpointApiV1WebhooksGetResponses];
-
-export type CreateWebhookEndpointApiV1WebhooksPostData = {
-    body: WebhookCreate;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path?: never;
-    query?: never;
-    url: '/api/v1/webhooks/';
-};
-
-export type CreateWebhookEndpointApiV1WebhooksPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type CreateWebhookEndpointApiV1WebhooksPostError = CreateWebhookEndpointApiV1WebhooksPostErrors[keyof CreateWebhookEndpointApiV1WebhooksPostErrors];
-
-export type CreateWebhookEndpointApiV1WebhooksPostResponses = {
-    /**
-     * Successful Response
-     */
-    201: WebhookCreateResponse;
-};
-
-export type CreateWebhookEndpointApiV1WebhooksPostResponse = CreateWebhookEndpointApiV1WebhooksPostResponses[keyof CreateWebhookEndpointApiV1WebhooksPostResponses];
-
-export type DeleteWebhookEndpointApiV1WebhooksWebhookUuidDeleteData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
     path: {
         /**
-         * Webhook Uuid
+         * Agent Uuid
+         *
+         * Agent 的唯一标识 UUID。
          */
-        webhook_uuid: string;
+        agent_uuid: string;
     };
     query?: never;
-    url: '/api/v1/webhooks/{webhook_uuid}';
+    url: '/api/v1/agents/{agent_uuid}/work';
 };
 
-export type DeleteWebhookEndpointApiV1WebhooksWebhookUuidDeleteErrors = {
+export type GetAgentWorkApiV1AgentsAgentUuidWorkGetErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type DeleteWebhookEndpointApiV1WebhooksWebhookUuidDeleteError = DeleteWebhookEndpointApiV1WebhooksWebhookUuidDeleteErrors[keyof DeleteWebhookEndpointApiV1WebhooksWebhookUuidDeleteErrors];
+export type GetAgentWorkApiV1AgentsAgentUuidWorkGetError = GetAgentWorkApiV1AgentsAgentUuidWorkGetErrors[keyof GetAgentWorkApiV1AgentsAgentUuidWorkGetErrors];
 
-export type DeleteWebhookEndpointApiV1WebhooksWebhookUuidDeleteResponses = {
+export type GetAgentWorkApiV1AgentsAgentUuidWorkGetResponses = {
     /**
      * Successful Response
      */
-    204: void;
+    200: TaskSnapshotEnvelope;
 };
 
-export type DeleteWebhookEndpointApiV1WebhooksWebhookUuidDeleteResponse = DeleteWebhookEndpointApiV1WebhooksWebhookUuidDeleteResponses[keyof DeleteWebhookEndpointApiV1WebhooksWebhookUuidDeleteResponses];
+export type GetAgentWorkApiV1AgentsAgentUuidWorkGetResponse = GetAgentWorkApiV1AgentsAgentUuidWorkGetResponses[keyof GetAgentWorkApiV1AgentsAgentUuidWorkGetResponses];
 
-export type GetWebhookEndpointApiV1WebhooksWebhookUuidGetData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
+export type PostAgentIperf3ExecutionClaimApiV1AgentsAgentUuidIperf3ExecutionClaimsPostData = {
+    body: Iperf3ExecutionClaimRequest;
     path: {
         /**
-         * Webhook Uuid
+         * Agent Uuid
+         *
+         * Agent 的唯一标识 UUID。
          */
-        webhook_uuid: string;
+        agent_uuid: string;
     };
     query?: never;
-    url: '/api/v1/webhooks/{webhook_uuid}';
+    url: '/api/v1/agents/{agent_uuid}/iperf3-execution-claims';
 };
 
-export type GetWebhookEndpointApiV1WebhooksWebhookUuidGetErrors = {
+export type PostAgentIperf3ExecutionClaimApiV1AgentsAgentUuidIperf3ExecutionClaimsPostErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type GetWebhookEndpointApiV1WebhooksWebhookUuidGetError = GetWebhookEndpointApiV1WebhooksWebhookUuidGetErrors[keyof GetWebhookEndpointApiV1WebhooksWebhookUuidGetErrors];
+export type PostAgentIperf3ExecutionClaimApiV1AgentsAgentUuidIperf3ExecutionClaimsPostError = PostAgentIperf3ExecutionClaimApiV1AgentsAgentUuidIperf3ExecutionClaimsPostErrors[keyof PostAgentIperf3ExecutionClaimApiV1AgentsAgentUuidIperf3ExecutionClaimsPostErrors];
 
-export type GetWebhookEndpointApiV1WebhooksWebhookUuidGetResponses = {
+export type PostAgentIperf3ExecutionClaimApiV1AgentsAgentUuidIperf3ExecutionClaimsPostResponses = {
     /**
      * Successful Response
      */
-    200: WebhookResponse;
+    200: Iperf3ExecutionClaimEnvelope;
 };
 
-export type GetWebhookEndpointApiV1WebhooksWebhookUuidGetResponse = GetWebhookEndpointApiV1WebhooksWebhookUuidGetResponses[keyof GetWebhookEndpointApiV1WebhooksWebhookUuidGetResponses];
-
-export type UpdateWebhookEndpointApiV1WebhooksWebhookUuidPatchData = {
-    body: WebhookUpdate;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path: {
-        /**
-         * Webhook Uuid
-         */
-        webhook_uuid: string;
-    };
-    query?: never;
-    url: '/api/v1/webhooks/{webhook_uuid}';
-};
-
-export type UpdateWebhookEndpointApiV1WebhooksWebhookUuidPatchErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type UpdateWebhookEndpointApiV1WebhooksWebhookUuidPatchError = UpdateWebhookEndpointApiV1WebhooksWebhookUuidPatchErrors[keyof UpdateWebhookEndpointApiV1WebhooksWebhookUuidPatchErrors];
-
-export type UpdateWebhookEndpointApiV1WebhooksWebhookUuidPatchResponses = {
-    /**
-     * Successful Response
-     */
-    200: WebhookResponse;
-};
-
-export type UpdateWebhookEndpointApiV1WebhooksWebhookUuidPatchResponse = UpdateWebhookEndpointApiV1WebhooksWebhookUuidPatchResponses[keyof UpdateWebhookEndpointApiV1WebhooksWebhookUuidPatchResponses];
-
-export type TestWebhookEndpointApiV1WebhooksWebhookUuidTestPostData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path: {
-        /**
-         * Webhook Uuid
-         */
-        webhook_uuid: string;
-    };
-    query?: never;
-    url: '/api/v1/webhooks/{webhook_uuid}/test';
-};
-
-export type TestWebhookEndpointApiV1WebhooksWebhookUuidTestPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type TestWebhookEndpointApiV1WebhooksWebhookUuidTestPostError = TestWebhookEndpointApiV1WebhooksWebhookUuidTestPostErrors[keyof TestWebhookEndpointApiV1WebhooksWebhookUuidTestPostErrors];
-
-export type TestWebhookEndpointApiV1WebhooksWebhookUuidTestPostResponses = {
-    /**
-     * Successful Response
-     */
-    200: WebhookDeliveryDetailResponse;
-};
-
-export type TestWebhookEndpointApiV1WebhooksWebhookUuidTestPostResponse = TestWebhookEndpointApiV1WebhooksWebhookUuidTestPostResponses[keyof TestWebhookEndpointApiV1WebhooksWebhookUuidTestPostResponses];
-
-export type RotateSecretEndpointApiV1WebhooksWebhookUuidRotateSecretPostData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path: {
-        /**
-         * Webhook Uuid
-         */
-        webhook_uuid: string;
-    };
-    query?: never;
-    url: '/api/v1/webhooks/{webhook_uuid}/rotate-secret';
-};
-
-export type RotateSecretEndpointApiV1WebhooksWebhookUuidRotateSecretPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type RotateSecretEndpointApiV1WebhooksWebhookUuidRotateSecretPostError = RotateSecretEndpointApiV1WebhooksWebhookUuidRotateSecretPostErrors[keyof RotateSecretEndpointApiV1WebhooksWebhookUuidRotateSecretPostErrors];
-
-export type RotateSecretEndpointApiV1WebhooksWebhookUuidRotateSecretPostResponses = {
-    /**
-     * Successful Response
-     */
-    200: WebhookCreateResponse;
-};
-
-export type RotateSecretEndpointApiV1WebhooksWebhookUuidRotateSecretPostResponse = RotateSecretEndpointApiV1WebhooksWebhookUuidRotateSecretPostResponses[keyof RotateSecretEndpointApiV1WebhooksWebhookUuidRotateSecretPostResponses];
-
-export type ListDeliveriesEndpointApiV1WebhooksWebhookUuidDeliveriesGetData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path: {
-        /**
-         * Webhook Uuid
-         */
-        webhook_uuid: string;
-    };
-    query?: {
-        /**
-         * Skip
-         */
-        skip?: number;
-        /**
-         * Limit
-         */
-        limit?: number;
-    };
-    url: '/api/v1/webhooks/{webhook_uuid}/deliveries';
-};
-
-export type ListDeliveriesEndpointApiV1WebhooksWebhookUuidDeliveriesGetErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ListDeliveriesEndpointApiV1WebhooksWebhookUuidDeliveriesGetError = ListDeliveriesEndpointApiV1WebhooksWebhookUuidDeliveriesGetErrors[keyof ListDeliveriesEndpointApiV1WebhooksWebhookUuidDeliveriesGetErrors];
-
-export type ListDeliveriesEndpointApiV1WebhooksWebhookUuidDeliveriesGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: PaginatedResponseWebhookDeliveryResponse;
-};
-
-export type ListDeliveriesEndpointApiV1WebhooksWebhookUuidDeliveriesGetResponse = ListDeliveriesEndpointApiV1WebhooksWebhookUuidDeliveriesGetResponses[keyof ListDeliveriesEndpointApiV1WebhooksWebhookUuidDeliveriesGetResponses];
-
-export type RetryDeliveryEndpointApiV1WebhooksWebhookUuidDeliveriesDeliveryUuidRetryPostData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path: {
-        /**
-         * Webhook Uuid
-         */
-        webhook_uuid: string;
-        /**
-         * Delivery Uuid
-         */
-        delivery_uuid: string;
-    };
-    query?: never;
-    url: '/api/v1/webhooks/{webhook_uuid}/deliveries/{delivery_uuid}/retry';
-};
-
-export type RetryDeliveryEndpointApiV1WebhooksWebhookUuidDeliveriesDeliveryUuidRetryPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type RetryDeliveryEndpointApiV1WebhooksWebhookUuidDeliveriesDeliveryUuidRetryPostError = RetryDeliveryEndpointApiV1WebhooksWebhookUuidDeliveriesDeliveryUuidRetryPostErrors[keyof RetryDeliveryEndpointApiV1WebhooksWebhookUuidDeliveriesDeliveryUuidRetryPostErrors];
-
-export type RetryDeliveryEndpointApiV1WebhooksWebhookUuidDeliveriesDeliveryUuidRetryPostResponses = {
-    /**
-     * Successful Response
-     */
-    200: WebhookDeliveryDetailResponse;
-};
-
-export type RetryDeliveryEndpointApiV1WebhooksWebhookUuidDeliveriesDeliveryUuidRetryPostResponse = RetryDeliveryEndpointApiV1WebhooksWebhookUuidDeliveriesDeliveryUuidRetryPostResponses[keyof RetryDeliveryEndpointApiV1WebhooksWebhookUuidDeliveriesDeliveryUuidRetryPostResponses];
-
-export type ListSettingsEndpointApiV1SettingsGetData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path?: never;
-    query?: {
-        /**
-         * Skip
-         */
-        skip?: number;
-        /**
-         * Limit
-         */
-        limit?: number;
-    };
-    url: '/api/v1/settings/';
-};
-
-export type ListSettingsEndpointApiV1SettingsGetErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ListSettingsEndpointApiV1SettingsGetError = ListSettingsEndpointApiV1SettingsGetErrors[keyof ListSettingsEndpointApiV1SettingsGetErrors];
-
-export type ListSettingsEndpointApiV1SettingsGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: PaginatedResponseSettingResponse;
-};
-
-export type ListSettingsEndpointApiV1SettingsGetResponse = ListSettingsEndpointApiV1SettingsGetResponses[keyof ListSettingsEndpointApiV1SettingsGetResponses];
-
-export type BulkUpdateSettingsEndpointApiV1SettingsBulkPatchData = {
-    body: SettingBulkUpdate;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path?: never;
-    query?: never;
-    url: '/api/v1/settings/bulk';
-};
-
-export type BulkUpdateSettingsEndpointApiV1SettingsBulkPatchErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type BulkUpdateSettingsEndpointApiV1SettingsBulkPatchError = BulkUpdateSettingsEndpointApiV1SettingsBulkPatchErrors[keyof BulkUpdateSettingsEndpointApiV1SettingsBulkPatchErrors];
-
-export type BulkUpdateSettingsEndpointApiV1SettingsBulkPatchResponses = {
-    /**
-     * Response Bulk Update Settings Endpoint Api V1 Settings Bulk Patch
-     *
-     * Successful Response
-     */
-    200: Array<SettingResponse>;
-};
-
-export type BulkUpdateSettingsEndpointApiV1SettingsBulkPatchResponse = BulkUpdateSettingsEndpointApiV1SettingsBulkPatchResponses[keyof BulkUpdateSettingsEndpointApiV1SettingsBulkPatchResponses];
-
-export type GetSettingEndpointApiV1SettingsKeyGetData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path: {
-        /**
-         * Key
-         */
-        key: string;
-    };
-    query?: never;
-    url: '/api/v1/settings/{key}';
-};
-
-export type GetSettingEndpointApiV1SettingsKeyGetErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type GetSettingEndpointApiV1SettingsKeyGetError = GetSettingEndpointApiV1SettingsKeyGetErrors[keyof GetSettingEndpointApiV1SettingsKeyGetErrors];
-
-export type GetSettingEndpointApiV1SettingsKeyGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: SettingResponse;
-};
-
-export type GetSettingEndpointApiV1SettingsKeyGetResponse = GetSettingEndpointApiV1SettingsKeyGetResponses[keyof GetSettingEndpointApiV1SettingsKeyGetResponses];
-
-export type UpdateSettingEndpointApiV1SettingsKeyPatchData = {
-    body: SettingUpdate;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path: {
-        /**
-         * Key
-         */
-        key: string;
-    };
-    query?: never;
-    url: '/api/v1/settings/{key}';
-};
-
-export type UpdateSettingEndpointApiV1SettingsKeyPatchErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type UpdateSettingEndpointApiV1SettingsKeyPatchError = UpdateSettingEndpointApiV1SettingsKeyPatchErrors[keyof UpdateSettingEndpointApiV1SettingsKeyPatchErrors];
-
-export type UpdateSettingEndpointApiV1SettingsKeyPatchResponses = {
-    /**
-     * Successful Response
-     */
-    200: SettingResponse;
-};
-
-export type UpdateSettingEndpointApiV1SettingsKeyPatchResponse = UpdateSettingEndpointApiV1SettingsKeyPatchResponses[keyof UpdateSettingEndpointApiV1SettingsKeyPatchResponses];
-
-export type ListAuditLogsApiV1AuditLogsGetData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization
-         */
-        authorization?: string;
-    };
-    path?: never;
-    query?: {
-        /**
-         * Actor Uuid
-         */
-        actor_uuid?: string | null;
-        /**
-         * Resource Type
-         */
-        resource_type?: string | null;
-        /**
-         * Action
-         */
-        action?: string | null;
-        /**
-         * Skip
-         */
-        skip?: number;
-        /**
-         * Limit
-         */
-        limit?: number;
-    };
-    url: '/api/v1/audit/logs';
-};
-
-export type ListAuditLogsApiV1AuditLogsGetErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ListAuditLogsApiV1AuditLogsGetError = ListAuditLogsApiV1AuditLogsGetErrors[keyof ListAuditLogsApiV1AuditLogsGetErrors];
-
-export type ListAuditLogsApiV1AuditLogsGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: unknown;
-};
-
-export type HealthApiV1HealthGetData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/v1/health';
-};
-
-export type HealthApiV1HealthGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: unknown;
-};
+export type PostAgentIperf3ExecutionClaimApiV1AgentsAgentUuidIperf3ExecutionClaimsPostResponse = PostAgentIperf3ExecutionClaimApiV1AgentsAgentUuidIperf3ExecutionClaimsPostResponses[keyof PostAgentIperf3ExecutionClaimApiV1AgentsAgentUuidIperf3ExecutionClaimsPostResponses];

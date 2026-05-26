@@ -2,7 +2,7 @@
 
 import { type Client, formDataBodySerializer, type Options as Options2, type TDataShape } from './client';
 import { client } from './client.gen';
-import type { AddToGroupRouteApiV1UsersUserUuidGroupsGroupUuidPostData, AddToGroupRouteApiV1UsersUserUuidGroupsGroupUuidPostErrors, AddToGroupRouteApiV1UsersUserUuidGroupsGroupUuidPostResponses, AssignTaskEndpointApiV1TasksTaskUuidAssignPostData, AssignTaskEndpointApiV1TasksTaskUuidAssignPostErrors, AssignTaskEndpointApiV1TasksTaskUuidAssignPostResponses, BulkUpdateSettingsEndpointApiV1SettingsBulkPatchData, BulkUpdateSettingsEndpointApiV1SettingsBulkPatchErrors, BulkUpdateSettingsEndpointApiV1SettingsBulkPatchResponses, ChangePasswordRouteApiV1UsersUserUuidPasswordPutData, ChangePasswordRouteApiV1UsersUserUuidPasswordPutErrors, ChangePasswordRouteApiV1UsersUserUuidPasswordPutResponses, CreateAgentApiV1AgentsPostData, CreateAgentApiV1AgentsPostErrors, CreateAgentApiV1AgentsPostResponses, CreateGroupRouteApiV1UsersGroupsPostData, CreateGroupRouteApiV1UsersGroupsPostErrors, CreateGroupRouteApiV1UsersGroupsPostResponses, CreateRuleEndpointApiV1AlertsRulesPostData, CreateRuleEndpointApiV1AlertsRulesPostErrors, CreateRuleEndpointApiV1AlertsRulesPostResponses, CreateTaskEndpointApiV1TasksPostData, CreateTaskEndpointApiV1TasksPostErrors, CreateTaskEndpointApiV1TasksPostResponses, CreateWebhookEndpointApiV1WebhooksPostData, CreateWebhookEndpointApiV1WebhooksPostErrors, CreateWebhookEndpointApiV1WebhooksPostResponses, DashboardStatsApiV1DashboardStatsGetData, DashboardStatsApiV1DashboardStatsGetResponses, DeleteGroupRouteApiV1UsersGroupsGroupUuidDeleteData, DeleteGroupRouteApiV1UsersGroupsGroupUuidDeleteErrors, DeleteGroupRouteApiV1UsersGroupsGroupUuidDeleteResponses, DeleteReleaseApiV1AgentsReleasesReleaseUuidDeleteData, DeleteReleaseApiV1AgentsReleasesReleaseUuidDeleteErrors, DeleteReleaseApiV1AgentsReleasesReleaseUuidDeleteResponses, DeleteRuleEndpointApiV1AlertsRulesRuleUuidDeleteData, DeleteRuleEndpointApiV1AlertsRulesRuleUuidDeleteErrors, DeleteRuleEndpointApiV1AlertsRulesRuleUuidDeleteResponses, DeleteTaskEndpointApiV1TasksTaskUuidDeleteData, DeleteTaskEndpointApiV1TasksTaskUuidDeleteErrors, DeleteTaskEndpointApiV1TasksTaskUuidDeleteResponses, DeleteWebhookEndpointApiV1WebhooksWebhookUuidDeleteData, DeleteWebhookEndpointApiV1WebhooksWebhookUuidDeleteErrors, DeleteWebhookEndpointApiV1WebhooksWebhookUuidDeleteResponses, DisableAgentApiV1AgentsAgentUuidDeleteData, DisableAgentApiV1AgentsAgentUuidDeleteErrors, DisableAgentApiV1AgentsAgentUuidDeleteResponses, DisableUserRouteApiV1UsersUserUuidDeleteData, DisableUserRouteApiV1UsersUserUuidDeleteErrors, DisableUserRouteApiV1UsersUserUuidDeleteResponses, DownloadAgentApiV1AgentsDownloadFilenameGetData, DownloadAgentApiV1AgentsDownloadFilenameGetErrors, DownloadAgentApiV1AgentsDownloadFilenameGetResponses, GetAgentApiV1AgentsAgentUuidGetData, GetAgentApiV1AgentsAgentUuidGetErrors, GetAgentApiV1AgentsAgentUuidGetResponses, GetAgentTasksApiV1AgentsAgentUuidTasksGetData, GetAgentTasksApiV1AgentsAgentUuidTasksGetErrors, GetAgentTasksApiV1AgentsAgentUuidTasksGetResponses, GetEventEndpointApiV1AlertsEventsEventUuidGetData, GetEventEndpointApiV1AlertsEventsEventUuidGetErrors, GetEventEndpointApiV1AlertsEventsEventUuidGetResponses, GetGroupRouteApiV1UsersGroupsGroupUuidGetData, GetGroupRouteApiV1UsersGroupsGroupUuidGetErrors, GetGroupRouteApiV1UsersGroupsGroupUuidGetResponses, GetLatestReleaseApiV1AgentsReleasesLatestPlatformGetData, GetLatestReleaseApiV1AgentsReleasesLatestPlatformGetErrors, GetLatestReleaseApiV1AgentsReleasesLatestPlatformGetResponses, GetReleaseApiV1AgentsReleasesReleaseUuidGetData, GetReleaseApiV1AgentsReleasesReleaseUuidGetErrors, GetReleaseApiV1AgentsReleasesReleaseUuidGetResponses, GetRuleEndpointApiV1AlertsRulesRuleUuidGetData, GetRuleEndpointApiV1AlertsRulesRuleUuidGetErrors, GetRuleEndpointApiV1AlertsRulesRuleUuidGetResponses, GetSettingEndpointApiV1SettingsKeyGetData, GetSettingEndpointApiV1SettingsKeyGetErrors, GetSettingEndpointApiV1SettingsKeyGetResponses, GetTaskAgentsEndpointApiV1TasksTaskUuidAgentsGetData, GetTaskAgentsEndpointApiV1TasksTaskUuidAgentsGetErrors, GetTaskAgentsEndpointApiV1TasksTaskUuidAgentsGetResponses, GetTaskEndpointApiV1TasksTaskUuidGetData, GetTaskEndpointApiV1TasksTaskUuidGetErrors, GetTaskEndpointApiV1TasksTaskUuidGetResponses, GetUserRouteApiV1UsersUserUuidGetData, GetUserRouteApiV1UsersUserUuidGetErrors, GetUserRouteApiV1UsersUserUuidGetResponses, GetWebhookEndpointApiV1WebhooksWebhookUuidGetData, GetWebhookEndpointApiV1WebhooksWebhookUuidGetErrors, GetWebhookEndpointApiV1WebhooksWebhookUuidGetResponses, HealthApiV1HealthGetData, HealthApiV1HealthGetResponses, ListAgentsApiV1AgentsGetData, ListAgentsApiV1AgentsGetErrors, ListAgentsApiV1AgentsGetResponses, ListAuditLogsApiV1AuditLogsGetData, ListAuditLogsApiV1AuditLogsGetErrors, ListAuditLogsApiV1AuditLogsGetResponses, ListDeliveriesEndpointApiV1WebhooksWebhookUuidDeliveriesGetData, ListDeliveriesEndpointApiV1WebhooksWebhookUuidDeliveriesGetErrors, ListDeliveriesEndpointApiV1WebhooksWebhookUuidDeliveriesGetResponses, ListDownloadsApiV1AgentsDownloadGetData, ListDownloadsApiV1AgentsDownloadGetResponses, ListEventsEndpointApiV1AlertsEventsGetData, ListEventsEndpointApiV1AlertsEventsGetErrors, ListEventsEndpointApiV1AlertsEventsGetResponses, ListGroupsRouteApiV1UsersGroupsGetData, ListGroupsRouteApiV1UsersGroupsGetErrors, ListGroupsRouteApiV1UsersGroupsGetResponses, ListReleasesApiV1AgentsReleasesGetData, ListReleasesApiV1AgentsReleasesGetErrors, ListReleasesApiV1AgentsReleasesGetResponses, ListRulesEndpointApiV1AlertsRulesGetData, ListRulesEndpointApiV1AlertsRulesGetErrors, ListRulesEndpointApiV1AlertsRulesGetResponses, ListSettingsEndpointApiV1SettingsGetData, ListSettingsEndpointApiV1SettingsGetErrors, ListSettingsEndpointApiV1SettingsGetResponses, ListTasksEndpointApiV1TasksGetData, ListTasksEndpointApiV1TasksGetErrors, ListTasksEndpointApiV1TasksGetResponses, ListUsersRouteApiV1UsersGetData, ListUsersRouteApiV1UsersGetErrors, ListUsersRouteApiV1UsersGetResponses, ListWebhooksEndpointApiV1WebhooksGetData, ListWebhooksEndpointApiV1WebhooksGetErrors, ListWebhooksEndpointApiV1WebhooksGetResponses, LoginRouteApiV1AuthLoginPostData, LoginRouteApiV1AuthLoginPostErrors, LoginRouteApiV1AuthLoginPostResponses, LogoutRouteApiV1AuthLogoutPostData, LogoutRouteApiV1AuthLogoutPostErrors, LogoutRouteApiV1AuthLogoutPostResponses, MonitoringQueryApiV1MonitoringQueryGetData, MonitoringQueryApiV1MonitoringQueryGetErrors, MonitoringQueryApiV1MonitoringQueryGetResponses, MtrGetResultApiV1MonitoringMtrResultUuidGetData, MtrGetResultApiV1MonitoringMtrResultUuidGetErrors, MtrGetResultApiV1MonitoringMtrResultUuidGetResponses, MtrListResultsApiV1MonitoringMtrGetData, MtrListResultsApiV1MonitoringMtrGetErrors, MtrListResultsApiV1MonitoringMtrGetResponses, PushUpdateApiV1AgentsReleasesReleaseUuidPushPostData, PushUpdateApiV1AgentsReleasesReleaseUuidPushPostErrors, PushUpdateApiV1AgentsReleasesReleaseUuidPushPostResponses, RecordHeartbeatApiV1AgentsAgentUuidHeartbeatPostData, RecordHeartbeatApiV1AgentsAgentUuidHeartbeatPostErrors, RecordHeartbeatApiV1AgentsAgentUuidHeartbeatPostResponses, RefreshRouteApiV1AuthRefreshPostData, RefreshRouteApiV1AuthRefreshPostErrors, RefreshRouteApiV1AuthRefreshPostResponses, RegisterAgentApiV1AgentsRegisterPostData, RegisterAgentApiV1AgentsRegisterPostErrors, RegisterAgentApiV1AgentsRegisterPostResponses, RegisterRouteApiV1AuthRegisterPostData, RegisterRouteApiV1AuthRegisterPostErrors, RegisterRouteApiV1AuthRegisterPostResponses, RemoveFromGroupRouteApiV1UsersUserUuidGroupsGroupUuidDeleteData, RemoveFromGroupRouteApiV1UsersUserUuidGroupsGroupUuidDeleteErrors, RemoveFromGroupRouteApiV1UsersUserUuidGroupsGroupUuidDeleteResponses, RetryDeliveryEndpointApiV1WebhooksWebhookUuidDeliveriesDeliveryUuidRetryPostData, RetryDeliveryEndpointApiV1WebhooksWebhookUuidDeliveriesDeliveryUuidRetryPostErrors, RetryDeliveryEndpointApiV1WebhooksWebhookUuidDeliveriesDeliveryUuidRetryPostResponses, RotateSecretEndpointApiV1WebhooksWebhookUuidRotateSecretPostData, RotateSecretEndpointApiV1WebhooksWebhookUuidRotateSecretPostErrors, RotateSecretEndpointApiV1WebhooksWebhookUuidRotateSecretPostResponses, TestWebhookEndpointApiV1WebhooksWebhookUuidTestPostData, TestWebhookEndpointApiV1WebhooksWebhookUuidTestPostErrors, TestWebhookEndpointApiV1WebhooksWebhookUuidTestPostResponses, UnassignTaskEndpointApiV1TasksTaskUuidAgentsAgentUuidDeleteData, UnassignTaskEndpointApiV1TasksTaskUuidAgentsAgentUuidDeleteErrors, UnassignTaskEndpointApiV1TasksTaskUuidAgentsAgentUuidDeleteResponses, UpdateAgentApiV1AgentsAgentUuidPatchData, UpdateAgentApiV1AgentsAgentUuidPatchErrors, UpdateAgentApiV1AgentsAgentUuidPatchResponses, UpdateGroupRouteApiV1UsersGroupsGroupUuidPatchData, UpdateGroupRouteApiV1UsersGroupsGroupUuidPatchErrors, UpdateGroupRouteApiV1UsersGroupsGroupUuidPatchResponses, UpdateRuleEndpointApiV1AlertsRulesRuleUuidPatchData, UpdateRuleEndpointApiV1AlertsRulesRuleUuidPatchErrors, UpdateRuleEndpointApiV1AlertsRulesRuleUuidPatchResponses, UpdateSettingEndpointApiV1SettingsKeyPatchData, UpdateSettingEndpointApiV1SettingsKeyPatchErrors, UpdateSettingEndpointApiV1SettingsKeyPatchResponses, UpdateTaskEndpointApiV1TasksTaskUuidPatchData, UpdateTaskEndpointApiV1TasksTaskUuidPatchErrors, UpdateTaskEndpointApiV1TasksTaskUuidPatchResponses, UpdateUserRouteApiV1UsersUserUuidPatchData, UpdateUserRouteApiV1UsersUserUuidPatchErrors, UpdateUserRouteApiV1UsersUserUuidPatchResponses, UpdateWebhookEndpointApiV1WebhooksWebhookUuidPatchData, UpdateWebhookEndpointApiV1WebhooksWebhookUuidPatchErrors, UpdateWebhookEndpointApiV1WebhooksWebhookUuidPatchResponses, UploadReleaseApiV1AgentsReleasesUploadPostData, UploadReleaseApiV1AgentsReleasesUploadPostErrors, UploadReleaseApiV1AgentsReleasesUploadPostResponses } from './types.gen';
+import type { DeleteAgentApiV1AgentsAgentUuidDeleteData, DeleteAgentApiV1AgentsAgentUuidDeleteErrors, DeleteAgentApiV1AgentsAgentUuidDeleteResponses, DeleteGeoCityEndpointApiV1GeoCitiesCityUuidDeleteData, DeleteGeoCityEndpointApiV1GeoCitiesCityUuidDeleteErrors, DeleteGeoCityEndpointApiV1GeoCitiesCityUuidDeleteResponses, DeleteGeoContinentEndpointApiV1GeoContinentsContinentUuidDeleteData, DeleteGeoContinentEndpointApiV1GeoContinentsContinentUuidDeleteErrors, DeleteGeoContinentEndpointApiV1GeoContinentsContinentUuidDeleteResponses, DeleteGeoCountryEndpointApiV1GeoCountriesCountryUuidDeleteData, DeleteGeoCountryEndpointApiV1GeoCountriesCountryUuidDeleteErrors, DeleteGeoCountryEndpointApiV1GeoCountriesCountryUuidDeleteResponses, DeleteTargetApiV1TargetsTargetUuidDeleteData, DeleteTargetApiV1TargetsTargetUuidDeleteErrors, DeleteTargetApiV1TargetsTargetUuidDeleteResponses, DeleteTaskApiV1TasksTaskUuidDeleteData, DeleteTaskApiV1TasksTaskUuidDeleteErrors, DeleteTaskApiV1TasksTaskUuidDeleteResponses, DisableAgentApiV1AgentsAgentUuidDisablePostData, DisableAgentApiV1AgentsAgentUuidDisablePostErrors, DisableAgentApiV1AgentsAgentUuidDisablePostResponses, DisableTargetApiV1TargetsTargetUuidDisablePostData, DisableTargetApiV1TargetsTargetUuidDisablePostErrors, DisableTargetApiV1TargetsTargetUuidDisablePostResponses, DisableTaskApiV1TasksTaskUuidDisablePostData, DisableTaskApiV1TasksTaskUuidDisablePostErrors, DisableTaskApiV1TasksTaskUuidDisablePostResponses, DownloadAgentArtifactApiV1ArtifactsAgentsArtifactUuidDownloadGetData, DownloadAgentArtifactApiV1ArtifactsAgentsArtifactUuidDownloadGetErrors, EnableAgentApiV1AgentsAgentUuidEnablePostData, EnableAgentApiV1AgentsAgentUuidEnablePostErrors, EnableAgentApiV1AgentsAgentUuidEnablePostResponses, EnableTargetApiV1TargetsTargetUuidEnablePostData, EnableTargetApiV1TargetsTargetUuidEnablePostErrors, EnableTargetApiV1TargetsTargetUuidEnablePostResponses, EnableTaskApiV1TasksTaskUuidEnablePostData, EnableTaskApiV1TasksTaskUuidEnablePostErrors, EnableTaskApiV1TasksTaskUuidEnablePostResponses, GetAgentApiV1AgentsAgentUuidGetData, GetAgentApiV1AgentsAgentUuidGetErrors, GetAgentApiV1AgentsAgentUuidGetResponses, GetAgentArtifactApiV1ArtifactsAgentsArtifactUuidGetData, GetAgentArtifactApiV1ArtifactsAgentsArtifactUuidGetErrors, GetAgentArtifactApiV1ArtifactsAgentsArtifactUuidGetResponses, GetAgentArtifactsApiV1ArtifactsAgentsGetData, GetAgentArtifactsApiV1ArtifactsAgentsGetErrors, GetAgentArtifactsApiV1ArtifactsAgentsGetResponses, GetAgentsApiV1AgentsGetData, GetAgentsApiV1AgentsGetErrors, GetAgentsApiV1AgentsGetResponses, GetAgentWorkApiV1AgentsAgentUuidWorkGetData, GetAgentWorkApiV1AgentsAgentUuidWorkGetErrors, GetAgentWorkApiV1AgentsAgentUuidWorkGetResponses, GetAuthMeApiV1AuthMeGetData, GetAuthMeApiV1AuthMeGetResponses, GetGeoCitiesApiV1GeoCitiesGetData, GetGeoCitiesApiV1GeoCitiesGetErrors, GetGeoCitiesApiV1GeoCitiesGetResponses, GetGeoContinentsApiV1GeoContinentsGetData, GetGeoContinentsApiV1GeoContinentsGetErrors, GetGeoContinentsApiV1GeoContinentsGetResponses, GetGeoCountriesApiV1GeoCountriesGetData, GetGeoCountriesApiV1GeoCountriesGetErrors, GetGeoCountriesApiV1GeoCountriesGetResponses, GetGeoTreeApiV1GeoTreeGetData, GetGeoTreeApiV1GeoTreeGetErrors, GetGeoTreeApiV1GeoTreeGetResponses, GetMetadataEnumsApiV1MetadataEnumsGetData, GetMetadataEnumsApiV1MetadataEnumsGetResponses, GetMonitoringAgentApiV1MonitoringAgentsAgentUuidGetData, GetMonitoringAgentApiV1MonitoringAgentsAgentUuidGetErrors, GetMonitoringAgentApiV1MonitoringAgentsAgentUuidGetResponses, GetMonitoringAgentsApiV1MonitoringAgentsGetData, GetMonitoringAgentsApiV1MonitoringAgentsGetResponses, GetMonitoringMtrResultApiV1MonitoringMtrResultsResultUuidGetData, GetMonitoringMtrResultApiV1MonitoringMtrResultsResultUuidGetErrors, GetMonitoringMtrResultApiV1MonitoringMtrResultsResultUuidGetResponses, GetMonitoringTargetApiV1MonitoringTargetsTargetUuidGetData, GetMonitoringTargetApiV1MonitoringTargetsTargetUuidGetErrors, GetMonitoringTargetApiV1MonitoringTargetsTargetUuidGetResponses, GetMonitoringTargetGeoTreeApiV1MonitoringTargetGeoTreeGetData, GetMonitoringTargetGeoTreeApiV1MonitoringTargetGeoTreeGetErrors, GetMonitoringTargetGeoTreeApiV1MonitoringTargetGeoTreeGetResponses, GetMonitoringTaskApiV1MonitoringTasksTaskUuidGetData, GetMonitoringTaskApiV1MonitoringTasksTaskUuidGetErrors, GetMonitoringTaskApiV1MonitoringTasksTaskUuidGetResponses, GetMonitoringTaskGeoTreeApiV1MonitoringTaskGeoTreeGetData, GetMonitoringTaskGeoTreeApiV1MonitoringTaskGeoTreeGetErrors, GetMonitoringTaskGeoTreeApiV1MonitoringTaskGeoTreeGetResponses, GetMonitoringTaskIperf3ResultsApiV1MonitoringTasksTaskUuidIperf3ResultsGetData, GetMonitoringTaskIperf3ResultsApiV1MonitoringTasksTaskUuidIperf3ResultsGetErrors, GetMonitoringTaskIperf3ResultsApiV1MonitoringTasksTaskUuidIperf3ResultsGetResponses, GetMonitoringTaskMetricsRouteApiV1MonitoringTasksTaskUuidMetricsGetData, GetMonitoringTaskMetricsRouteApiV1MonitoringTasksTaskUuidMetricsGetErrors, GetMonitoringTaskMetricsRouteApiV1MonitoringTasksTaskUuidMetricsGetResponses, GetMonitoringTaskMtrResultsApiV1MonitoringTasksTaskUuidMtrResultsGetData, GetMonitoringTaskMtrResultsApiV1MonitoringTasksTaskUuidMtrResultsGetErrors, GetMonitoringTaskMtrResultsApiV1MonitoringTasksTaskUuidMtrResultsGetResponses, GetMonitoringTasksApiV1MonitoringTasksGetData, GetMonitoringTasksApiV1MonitoringTasksGetErrors, GetMonitoringTasksApiV1MonitoringTasksGetResponses, GetResultIngestionEventApiV1ResultsIngestionEventsMessageIdGetData, GetResultIngestionEventApiV1ResultsIngestionEventsMessageIdGetErrors, GetResultIngestionEventApiV1ResultsIngestionEventsMessageIdGetResponses, GetResultIngestionEventsApiV1ResultsIngestionEventsGetData, GetResultIngestionEventsApiV1ResultsIngestionEventsGetErrors, GetResultIngestionEventsApiV1ResultsIngestionEventsGetResponses, GetSystemSettingsApiV1SettingsGetData, GetSystemSettingsApiV1SettingsGetResponses, GetTagsApiV1TagsGetData, GetTagsApiV1TagsGetErrors, GetTagsApiV1TagsGetResponses, GetTargetApiV1TargetsTargetUuidGetData, GetTargetApiV1TargetsTargetUuidGetErrors, GetTargetApiV1TargetsTargetUuidGetResponses, GetTargetsApiV1TargetsGetData, GetTargetsApiV1TargetsGetErrors, GetTargetsApiV1TargetsGetResponses, GetTaskApiV1TasksTaskUuidGetData, GetTaskApiV1TasksTaskUuidGetErrors, GetTaskApiV1TasksTaskUuidGetResponses, GetTasksApiV1TasksGetData, GetTasksApiV1TasksGetErrors, GetTasksApiV1TasksGetResponses, HealthHealthGetData, HealthHealthGetResponses, PatchAgentApiV1AgentsAgentUuidPatchData, PatchAgentApiV1AgentsAgentUuidPatchErrors, PatchAgentApiV1AgentsAgentUuidPatchResponses, PatchAgentArtifactApiV1ArtifactsAgentsArtifactUuidPatchData, PatchAgentArtifactApiV1ArtifactsAgentsArtifactUuidPatchErrors, PatchAgentArtifactApiV1ArtifactsAgentsArtifactUuidPatchResponses, PatchGeoCityApiV1GeoCitiesCityUuidPatchData, PatchGeoCityApiV1GeoCitiesCityUuidPatchErrors, PatchGeoCityApiV1GeoCitiesCityUuidPatchResponses, PatchGeoContinentApiV1GeoContinentsContinentUuidPatchData, PatchGeoContinentApiV1GeoContinentsContinentUuidPatchErrors, PatchGeoContinentApiV1GeoContinentsContinentUuidPatchResponses, PatchGeoCountryApiV1GeoCountriesCountryUuidPatchData, PatchGeoCountryApiV1GeoCountriesCountryUuidPatchErrors, PatchGeoCountryApiV1GeoCountriesCountryUuidPatchResponses, PatchSystemSettingsApiV1SettingsPatchData, PatchSystemSettingsApiV1SettingsPatchErrors, PatchSystemSettingsApiV1SettingsPatchResponses, PatchTargetApiV1TargetsTargetUuidPatchData, PatchTargetApiV1TargetsTargetUuidPatchErrors, PatchTargetApiV1TargetsTargetUuidPatchResponses, PatchTaskApiV1TasksTaskUuidPatchData, PatchTaskApiV1TasksTaskUuidPatchErrors, PatchTaskApiV1TasksTaskUuidPatchResponses, PostAgentApiV1AgentsPostData, PostAgentApiV1AgentsPostErrors, PostAgentApiV1AgentsPostResponses, PostAgentArtifactApiV1ArtifactsAgentsPostData, PostAgentArtifactApiV1ArtifactsAgentsPostErrors, PostAgentArtifactApiV1ArtifactsAgentsPostResponses, PostAgentHeartbeatApiV1AgentsAgentUuidHeartbeatPostData, PostAgentHeartbeatApiV1AgentsAgentUuidHeartbeatPostErrors, PostAgentHeartbeatApiV1AgentsAgentUuidHeartbeatPostResponses, PostAgentIperf3ExecutionClaimApiV1AgentsAgentUuidIperf3ExecutionClaimsPostData, PostAgentIperf3ExecutionClaimApiV1AgentsAgentUuidIperf3ExecutionClaimsPostErrors, PostAgentIperf3ExecutionClaimApiV1AgentsAgentUuidIperf3ExecutionClaimsPostResponses, PostAuthLoginApiV1AuthLoginPostData, PostAuthLoginApiV1AuthLoginPostErrors, PostAuthLoginApiV1AuthLoginPostResponses, PostAuthLogoutApiV1AuthLogoutPostData, PostAuthLogoutApiV1AuthLogoutPostErrors, PostAuthLogoutApiV1AuthLogoutPostResponses, PostGeoCityApiV1GeoCitiesPostData, PostGeoCityApiV1GeoCitiesPostErrors, PostGeoCityApiV1GeoCitiesPostResponses, PostGeoContinentApiV1GeoContinentsPostData, PostGeoContinentApiV1GeoContinentsPostErrors, PostGeoContinentApiV1GeoContinentsPostResponses, PostGeoCountryApiV1GeoCountriesPostData, PostGeoCountryApiV1GeoCountriesPostErrors, PostGeoCountryApiV1GeoCountriesPostResponses, PostQuickAssociateApiV1RelationsQuickAssociatePostData, PostQuickAssociateApiV1RelationsQuickAssociatePostErrors, PostQuickAssociateApiV1RelationsQuickAssociatePostResponses, PostTargetApiV1TargetsPostData, PostTargetApiV1TargetsPostErrors, PostTargetApiV1TargetsPostResponses, PostTaskApiV1TasksPostData, PostTaskApiV1TasksPostErrors, PostTaskApiV1TasksPostResponses, PostTaskSnapshotAckApiV1AgentsAgentUuidTaskSnapshotAckPostData, PostTaskSnapshotAckApiV1AgentsAgentUuidTaskSnapshotAckPostErrors, PostTaskSnapshotAckApiV1AgentsAgentUuidTaskSnapshotAckPostResponses, PostV1AuthRefreshApiV1AuthRefreshPostData, PostV1AuthRefreshApiV1AuthRefreshPostResponses, RemoveAgentArtifactApiV1ArtifactsAgentsArtifactUuidDeleteData, RemoveAgentArtifactApiV1ArtifactsAgentsArtifactUuidDeleteErrors, RemoveAgentArtifactApiV1ArtifactsAgentsArtifactUuidDeleteResponses, RequestAgentResyncApiV1AgentsAgentUuidResyncRequestPostData, RequestAgentResyncApiV1AgentsAgentUuidResyncRequestPostErrors, RequestAgentResyncApiV1AgentsAgentUuidResyncRequestPostResponses, ResyncAgentApiV1AgentsAgentUuidResyncPostData, ResyncAgentApiV1AgentsAgentUuidResyncPostErrors, ResyncAgentApiV1AgentsAgentUuidResyncPostResponses, RotateAgentAuthTokenApiV1AgentsAgentUuidRotateTokenPostData, RotateAgentAuthTokenApiV1AgentsAgentUuidRotateTokenPostErrors, RotateAgentAuthTokenApiV1AgentsAgentUuidRotateTokenPostResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -19,21 +19,14 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
 };
 
 /**
- * Register Route
+ * 检查后端服务是否存活并返回基础健康状态
  */
-export const registerRouteApiV1AuthRegisterPost = <ThrowOnError extends boolean = false>(options: Options<RegisterRouteApiV1AuthRegisterPostData, ThrowOnError>) => (options.client ?? client).post<RegisterRouteApiV1AuthRegisterPostResponses, RegisterRouteApiV1AuthRegisterPostErrors, ThrowOnError>({
-    url: '/api/v1/auth/register',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
+export const healthHealthGet = <ThrowOnError extends boolean = false>(options?: Options<HealthHealthGetData, ThrowOnError>) => (options?.client ?? client).get<HealthHealthGetResponses, unknown, ThrowOnError>({ url: '/health', ...options });
 
 /**
- * Login Route
+ * 管理员登录并创建新的后台访问会话，校验用户名和密码后返回 Bearer 访问令牌
  */
-export const loginRouteApiV1AuthLoginPost = <ThrowOnError extends boolean = false>(options: Options<LoginRouteApiV1AuthLoginPostData, ThrowOnError>) => (options.client ?? client).post<LoginRouteApiV1AuthLoginPostResponses, LoginRouteApiV1AuthLoginPostErrors, ThrowOnError>({
+export const postAuthLoginApiV1AuthLoginPost = <ThrowOnError extends boolean = false>(options: Options<PostAuthLoginApiV1AuthLoginPostData, ThrowOnError>) => (options.client ?? client).post<PostAuthLoginApiV1AuthLoginPostResponses, PostAuthLoginApiV1AuthLoginPostErrors, ThrowOnError>({
     url: '/api/v1/auth/login',
     ...options,
     headers: {
@@ -43,147 +36,110 @@ export const loginRouteApiV1AuthLoginPost = <ThrowOnError extends boolean = fals
 });
 
 /**
- * Refresh Route
+ * 获取当前管理员会话信息，用于确认访问令牌是否有效并返回当前登录用户名
  */
-export const refreshRouteApiV1AuthRefreshPost = <ThrowOnError extends boolean = false>(options: Options<RefreshRouteApiV1AuthRefreshPostData, ThrowOnError>) => (options.client ?? client).post<RefreshRouteApiV1AuthRefreshPostResponses, RefreshRouteApiV1AuthRefreshPostErrors, ThrowOnError>({
-    url: '/api/v1/auth/refresh',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
+export const getAuthMeApiV1AuthMeGet = <ThrowOnError extends boolean = false>(options?: Options<GetAuthMeApiV1AuthMeGetData, ThrowOnError>) => (options?.client ?? client).get<GetAuthMeApiV1AuthMeGetResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/auth/me',
+    ...options
 });
 
 /**
- * Logout Route
- *
- * Revoke the current access token (and optionally the refresh token).
- *
- * Requires a valid access token in the Authorization header.
+ * 管理员退出登录并吊销当前访问令牌，使该后台会话立即失效
  */
-export const logoutRouteApiV1AuthLogoutPost = <ThrowOnError extends boolean = false>(options?: Options<LogoutRouteApiV1AuthLogoutPostData, ThrowOnError>) => (options?.client ?? client).post<LogoutRouteApiV1AuthLogoutPostResponses, LogoutRouteApiV1AuthLogoutPostErrors, ThrowOnError>({
+export const postAuthLogoutApiV1AuthLogoutPost = <ThrowOnError extends boolean = false>(options?: Options<PostAuthLogoutApiV1AuthLogoutPostData, ThrowOnError>) => (options?.client ?? client).post<PostAuthLogoutApiV1AuthLogoutPostResponses, PostAuthLogoutApiV1AuthLogoutPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/auth/logout',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options?.headers
-    }
+    ...options
 });
 
 /**
- * List Users Route
+ * 刷新管理员后台会话，吊销旧令牌并签发新的 Bearer 访问令牌
  */
-export const listUsersRouteApiV1UsersGet = <ThrowOnError extends boolean = false>(options?: Options<ListUsersRouteApiV1UsersGetData, ThrowOnError>) => (options?.client ?? client).get<ListUsersRouteApiV1UsersGetResponses, ListUsersRouteApiV1UsersGetErrors, ThrowOnError>({ url: '/api/v1/users/', ...options });
-
-/**
- * Disable User Route
- */
-export const disableUserRouteApiV1UsersUserUuidDelete = <ThrowOnError extends boolean = false>(options: Options<DisableUserRouteApiV1UsersUserUuidDeleteData, ThrowOnError>) => (options.client ?? client).delete<DisableUserRouteApiV1UsersUserUuidDeleteResponses, DisableUserRouteApiV1UsersUserUuidDeleteErrors, ThrowOnError>({ url: '/api/v1/users/{user_uuid}', ...options });
-
-/**
- * Get User Route
- */
-export const getUserRouteApiV1UsersUserUuidGet = <ThrowOnError extends boolean = false>(options: Options<GetUserRouteApiV1UsersUserUuidGetData, ThrowOnError>) => (options.client ?? client).get<GetUserRouteApiV1UsersUserUuidGetResponses, GetUserRouteApiV1UsersUserUuidGetErrors, ThrowOnError>({ url: '/api/v1/users/{user_uuid}', ...options });
-
-/**
- * Update User Route
- */
-export const updateUserRouteApiV1UsersUserUuidPatch = <ThrowOnError extends boolean = false>(options: Options<UpdateUserRouteApiV1UsersUserUuidPatchData, ThrowOnError>) => (options.client ?? client).patch<UpdateUserRouteApiV1UsersUserUuidPatchResponses, UpdateUserRouteApiV1UsersUserUuidPatchErrors, ThrowOnError>({
-    url: '/api/v1/users/{user_uuid}',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
+export const postV1AuthRefreshApiV1AuthRefreshPost = <ThrowOnError extends boolean = false>(options?: Options<PostV1AuthRefreshApiV1AuthRefreshPostData, ThrowOnError>) => (options?.client ?? client).post<PostV1AuthRefreshApiV1AuthRefreshPostResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/auth/refresh',
+    ...options
 });
 
 /**
- * Change Password Route
- *
- * Change a user's password. Admin only.
+ * 获取后台管理表单所需的枚举值，包括任务类型、IP 协议族、Target 类型、Agent 状态和排序字段
  */
-export const changePasswordRouteApiV1UsersUserUuidPasswordPut = <ThrowOnError extends boolean = false>(options: Options<ChangePasswordRouteApiV1UsersUserUuidPasswordPutData, ThrowOnError>) => (options.client ?? client).put<ChangePasswordRouteApiV1UsersUserUuidPasswordPutResponses, ChangePasswordRouteApiV1UsersUserUuidPasswordPutErrors, ThrowOnError>({
-    url: '/api/v1/users/{user_uuid}/password',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
+export const getMetadataEnumsApiV1MetadataEnumsGet = <ThrowOnError extends boolean = false>(options?: Options<GetMetadataEnumsApiV1MetadataEnumsGetData, ThrowOnError>) => (options?.client ?? client).get<GetMetadataEnumsApiV1MetadataEnumsGetResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/metadata/enums',
+    ...options
 });
 
 /**
- * Remove From Group Route
+ * 按地理位置聚合监控任务，返回可用于前端级联筛选和区域导航的任务地理树
  */
-export const removeFromGroupRouteApiV1UsersUserUuidGroupsGroupUuidDelete = <ThrowOnError extends boolean = false>(options: Options<RemoveFromGroupRouteApiV1UsersUserUuidGroupsGroupUuidDeleteData, ThrowOnError>) => (options.client ?? client).delete<RemoveFromGroupRouteApiV1UsersUserUuidGroupsGroupUuidDeleteResponses, RemoveFromGroupRouteApiV1UsersUserUuidGroupsGroupUuidDeleteErrors, ThrowOnError>({ url: '/api/v1/users/{user_uuid}/groups/{group_uuid}', ...options });
+export const getMonitoringTaskGeoTreeApiV1MonitoringTaskGeoTreeGet = <ThrowOnError extends boolean = false>(options?: Options<GetMonitoringTaskGeoTreeApiV1MonitoringTaskGeoTreeGetData, ThrowOnError>) => (options?.client ?? client).get<GetMonitoringTaskGeoTreeApiV1MonitoringTaskGeoTreeGetResponses, GetMonitoringTaskGeoTreeApiV1MonitoringTaskGeoTreeGetErrors, ThrowOnError>({ url: '/api/v1/monitoring/task-geo-tree', ...options });
 
 /**
- * Add To Group Route
+ * 按地理位置聚合监控目标 Target，返回可用于前端级联筛选和区域导航的目标地理树
  */
-export const addToGroupRouteApiV1UsersUserUuidGroupsGroupUuidPost = <ThrowOnError extends boolean = false>(options: Options<AddToGroupRouteApiV1UsersUserUuidGroupsGroupUuidPostData, ThrowOnError>) => (options.client ?? client).post<AddToGroupRouteApiV1UsersUserUuidGroupsGroupUuidPostResponses, AddToGroupRouteApiV1UsersUserUuidGroupsGroupUuidPostErrors, ThrowOnError>({ url: '/api/v1/users/{user_uuid}/groups/{group_uuid}', ...options });
+export const getMonitoringTargetGeoTreeApiV1MonitoringTargetGeoTreeGet = <ThrowOnError extends boolean = false>(options?: Options<GetMonitoringTargetGeoTreeApiV1MonitoringTargetGeoTreeGetData, ThrowOnError>) => (options?.client ?? client).get<GetMonitoringTargetGeoTreeApiV1MonitoringTargetGeoTreeGetResponses, GetMonitoringTargetGeoTreeApiV1MonitoringTargetGeoTreeGetErrors, ThrowOnError>({ url: '/api/v1/monitoring/target-geo-tree', ...options });
 
 /**
- * List Groups Route
+ * 查询指定监控目标 Target 的公开展示信息，返回目标地址、类型、地理位置、Anycast 标记、支持协议和启用状态
  */
-export const listGroupsRouteApiV1UsersGroupsGet = <ThrowOnError extends boolean = false>(options?: Options<ListGroupsRouteApiV1UsersGroupsGetData, ThrowOnError>) => (options?.client ?? client).get<ListGroupsRouteApiV1UsersGroupsGetResponses, ListGroupsRouteApiV1UsersGroupsGetErrors, ThrowOnError>({ url: '/api/v1/users/groups/', ...options });
+export const getMonitoringTargetApiV1MonitoringTargetsTargetUuidGet = <ThrowOnError extends boolean = false>(options: Options<GetMonitoringTargetApiV1MonitoringTargetsTargetUuidGetData, ThrowOnError>) => (options.client ?? client).get<GetMonitoringTargetApiV1MonitoringTargetsTargetUuidGetResponses, GetMonitoringTargetApiV1MonitoringTargetsTargetUuidGetErrors, ThrowOnError>({ url: '/api/v1/monitoring/targets/{target_uuid}', ...options });
 
 /**
- * Create Group Route
+ * 分页查询监控任务视图，支持按地理位置、任务类型、Target、Agent、关键字、启用状态和最新指标排序
  */
-export const createGroupRouteApiV1UsersGroupsPost = <ThrowOnError extends boolean = false>(options: Options<CreateGroupRouteApiV1UsersGroupsPostData, ThrowOnError>) => (options.client ?? client).post<CreateGroupRouteApiV1UsersGroupsPostResponses, CreateGroupRouteApiV1UsersGroupsPostErrors, ThrowOnError>({
-    url: '/api/v1/users/groups/',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
+export const getMonitoringTasksApiV1MonitoringTasksGet = <ThrowOnError extends boolean = false>(options?: Options<GetMonitoringTasksApiV1MonitoringTasksGetData, ThrowOnError>) => (options?.client ?? client).get<GetMonitoringTasksApiV1MonitoringTasksGetResponses, GetMonitoringTasksApiV1MonitoringTasksGetErrors, ThrowOnError>({ url: '/api/v1/monitoring/tasks', ...options });
+
+/**
+ * 查询单个监控任务的完整监控视图详情，包括任务、Target、Agent 关联信息以及最新监控摘要
+ */
+export const getMonitoringTaskApiV1MonitoringTasksTaskUuidGet = <ThrowOnError extends boolean = false>(options: Options<GetMonitoringTaskApiV1MonitoringTasksTaskUuidGetData, ThrowOnError>) => (options.client ?? client).get<GetMonitoringTaskApiV1MonitoringTasksTaskUuidGetResponses, GetMonitoringTaskApiV1MonitoringTasksTaskUuidGetErrors, ThrowOnError>({ url: '/api/v1/monitoring/tasks/{task_uuid}', ...options });
+
+/**
+ * 查询单个 ICMP 或 TCP 监控任务在指定时间范围内的时序指标数据，用于绘制 SmokePing 和趋势图表
+ */
+export const getMonitoringTaskMetricsRouteApiV1MonitoringTasksTaskUuidMetricsGet = <ThrowOnError extends boolean = false>(options: Options<GetMonitoringTaskMetricsRouteApiV1MonitoringTasksTaskUuidMetricsGetData, ThrowOnError>) => (options.client ?? client).get<GetMonitoringTaskMetricsRouteApiV1MonitoringTasksTaskUuidMetricsGetResponses, GetMonitoringTaskMetricsRouteApiV1MonitoringTasksTaskUuidMetricsGetErrors, ThrowOnError>({ url: '/api/v1/monitoring/tasks/{task_uuid}/metrics', ...options });
+
+/**
+ * 按时间范围查询指定监控任务的 MTR 路由追踪结果列表，用于选择某次 MTR 执行并查看路径详情
+ */
+export const getMonitoringTaskMtrResultsApiV1MonitoringTasksTaskUuidMtrResultsGet = <ThrowOnError extends boolean = false>(options: Options<GetMonitoringTaskMtrResultsApiV1MonitoringTasksTaskUuidMtrResultsGetData, ThrowOnError>) => (options.client ?? client).get<GetMonitoringTaskMtrResultsApiV1MonitoringTasksTaskUuidMtrResultsGetResponses, GetMonitoringTaskMtrResultsApiV1MonitoringTasksTaskUuidMtrResultsGetErrors, ThrowOnError>({ url: '/api/v1/monitoring/tasks/{task_uuid}/mtr-results', ...options });
+
+/**
+ * 按时间范围查询指定 iperf3 监控任务的 PostgreSQL 历史执行结果列表，用于查看吞吐、传输字节数、重传次数和执行状态
+ */
+export const getMonitoringTaskIperf3ResultsApiV1MonitoringTasksTaskUuidIperf3ResultsGet = <ThrowOnError extends boolean = false>(options: Options<GetMonitoringTaskIperf3ResultsApiV1MonitoringTasksTaskUuidIperf3ResultsGetData, ThrowOnError>) => (options.client ?? client).get<GetMonitoringTaskIperf3ResultsApiV1MonitoringTasksTaskUuidIperf3ResultsGetResponses, GetMonitoringTaskIperf3ResultsApiV1MonitoringTasksTaskUuidIperf3ResultsGetErrors, ThrowOnError>({ url: '/api/v1/monitoring/tasks/{task_uuid}/iperf3-results', ...options });
+
+/**
+ * 查询单条 MTR 路由追踪结果详情，包括每一跳的地址、延迟、丢包和 ASN 富化信息
+ */
+export const getMonitoringMtrResultApiV1MonitoringMtrResultsResultUuidGet = <ThrowOnError extends boolean = false>(options: Options<GetMonitoringMtrResultApiV1MonitoringMtrResultsResultUuidGetData, ThrowOnError>) => (options.client ?? client).get<GetMonitoringMtrResultApiV1MonitoringMtrResultsResultUuidGetResponses, GetMonitoringMtrResultApiV1MonitoringMtrResultsResultUuidGetErrors, ThrowOnError>({ url: '/api/v1/monitoring/mtr-results/{result_uuid}', ...options });
+
+/**
+ * 查询 Agent 和 Target 已使用的标签目录，供前端标签输入框检索和自动补全
+ */
+export const getTagsApiV1TagsGet = <ThrowOnError extends boolean = false>(options?: Options<GetTagsApiV1TagsGetData, ThrowOnError>) => (options?.client ?? client).get<GetTagsApiV1TagsGetResponses, GetTagsApiV1TagsGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/tags',
+    ...options
 });
 
 /**
- * Delete Group Route
+ * 查询系统运行配置，当前包含 Agent Artifact 使用的 Cloudflare R2 对象存储配置；敏感密钥只返回是否已配置
  */
-export const deleteGroupRouteApiV1UsersGroupsGroupUuidDelete = <ThrowOnError extends boolean = false>(options: Options<DeleteGroupRouteApiV1UsersGroupsGroupUuidDeleteData, ThrowOnError>) => (options.client ?? client).delete<DeleteGroupRouteApiV1UsersGroupsGroupUuidDeleteResponses, DeleteGroupRouteApiV1UsersGroupsGroupUuidDeleteErrors, ThrowOnError>({ url: '/api/v1/users/groups/{group_uuid}', ...options });
-
-/**
- * Get Group Route
- */
-export const getGroupRouteApiV1UsersGroupsGroupUuidGet = <ThrowOnError extends boolean = false>(options: Options<GetGroupRouteApiV1UsersGroupsGroupUuidGetData, ThrowOnError>) => (options.client ?? client).get<GetGroupRouteApiV1UsersGroupsGroupUuidGetResponses, GetGroupRouteApiV1UsersGroupsGroupUuidGetErrors, ThrowOnError>({ url: '/api/v1/users/groups/{group_uuid}', ...options });
-
-/**
- * Update Group Route
- */
-export const updateGroupRouteApiV1UsersGroupsGroupUuidPatch = <ThrowOnError extends boolean = false>(options: Options<UpdateGroupRouteApiV1UsersGroupsGroupUuidPatchData, ThrowOnError>) => (options.client ?? client).patch<UpdateGroupRouteApiV1UsersGroupsGroupUuidPatchResponses, UpdateGroupRouteApiV1UsersGroupsGroupUuidPatchErrors, ThrowOnError>({
-    url: '/api/v1/users/groups/{group_uuid}',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
+export const getSystemSettingsApiV1SettingsGet = <ThrowOnError extends boolean = false>(options?: Options<GetSystemSettingsApiV1SettingsGetData, ThrowOnError>) => (options?.client ?? client).get<GetSystemSettingsApiV1SettingsGetResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/settings',
+    ...options
 });
 
 /**
- * List Downloads
- *
- * List available agent binaries for download. No auth required.
+ * 更新系统运行配置，当前用于通过 API 填入 Agent Artifact 的 Cloudflare R2 参数；不传 secret 时保留原密钥
  */
-export const listDownloadsApiV1AgentsDownloadGet = <ThrowOnError extends boolean = false>(options?: Options<ListDownloadsApiV1AgentsDownloadGetData, ThrowOnError>) => (options?.client ?? client).get<ListDownloadsApiV1AgentsDownloadGetResponses, unknown, ThrowOnError>({ url: '/api/v1/agents/download/', ...options });
-
-/**
- * Download Agent
- *
- * Download an agent binary by filename. No auth required.
- */
-export const downloadAgentApiV1AgentsDownloadFilenameGet = <ThrowOnError extends boolean = false>(options: Options<DownloadAgentApiV1AgentsDownloadFilenameGetData, ThrowOnError>) => (options.client ?? client).get<DownloadAgentApiV1AgentsDownloadFilenameGetResponses, DownloadAgentApiV1AgentsDownloadFilenameGetErrors, ThrowOnError>({ url: '/api/v1/agents/download/{filename}', ...options });
-
-/**
- * List Agents
- */
-export const listAgentsApiV1AgentsGet = <ThrowOnError extends boolean = false>(options?: Options<ListAgentsApiV1AgentsGetData, ThrowOnError>) => (options?.client ?? client).get<ListAgentsApiV1AgentsGetResponses, ListAgentsApiV1AgentsGetErrors, ThrowOnError>({ url: '/api/v1/agents/', ...options });
-
-/**
- * Create Agent
- */
-export const createAgentApiV1AgentsPost = <ThrowOnError extends boolean = false>(options: Options<CreateAgentApiV1AgentsPostData, ThrowOnError>) => (options.client ?? client).post<CreateAgentApiV1AgentsPostResponses, CreateAgentApiV1AgentsPostErrors, ThrowOnError>({
-    url: '/api/v1/agents/',
+export const patchSystemSettingsApiV1SettingsPatch = <ThrowOnError extends boolean = false>(options: Options<PatchSystemSettingsApiV1SettingsPatchData, ThrowOnError>) => (options.client ?? client).patch<PatchSystemSettingsApiV1SettingsPatchResponses, PatchSystemSettingsApiV1SettingsPatchErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/settings',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -192,19 +148,335 @@ export const createAgentApiV1AgentsPost = <ThrowOnError extends boolean = false>
 });
 
 /**
- * Disable Agent
+ * 查询 Agent 可执行文件 Artifact 列表，支持按版本、操作系统、CPU 架构和启用状态过滤
  */
-export const disableAgentApiV1AgentsAgentUuidDelete = <ThrowOnError extends boolean = false>(options: Options<DisableAgentApiV1AgentsAgentUuidDeleteData, ThrowOnError>) => (options.client ?? client).delete<DisableAgentApiV1AgentsAgentUuidDeleteResponses, DisableAgentApiV1AgentsAgentUuidDeleteErrors, ThrowOnError>({ url: '/api/v1/agents/{agent_uuid}', ...options });
+export const getAgentArtifactsApiV1ArtifactsAgentsGet = <ThrowOnError extends boolean = false>(options?: Options<GetAgentArtifactsApiV1ArtifactsAgentsGetData, ThrowOnError>) => (options?.client ?? client).get<GetAgentArtifactsApiV1ArtifactsAgentsGetResponses, GetAgentArtifactsApiV1ArtifactsAgentsGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/artifacts/agents',
+    ...options
+});
 
 /**
- * Get Agent
+ * 上传 Agent 可执行文件 Artifact 到 Cloudflare R2，并在 PostgreSQL 中保存版本、平台、哈希和对象存储位置等元数据
  */
-export const getAgentApiV1AgentsAgentUuidGet = <ThrowOnError extends boolean = false>(options: Options<GetAgentApiV1AgentsAgentUuidGetData, ThrowOnError>) => (options.client ?? client).get<GetAgentApiV1AgentsAgentUuidGetResponses, GetAgentApiV1AgentsAgentUuidGetErrors, ThrowOnError>({ url: '/api/v1/agents/{agent_uuid}', ...options });
+export const postAgentArtifactApiV1ArtifactsAgentsPost = <ThrowOnError extends boolean = false>(options: Options<PostAgentArtifactApiV1ArtifactsAgentsPostData, ThrowOnError>) => (options.client ?? client).post<PostAgentArtifactApiV1ArtifactsAgentsPostResponses, PostAgentArtifactApiV1ArtifactsAgentsPostErrors, ThrowOnError>({
+    ...formDataBodySerializer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/artifacts/agents',
+    ...options,
+    headers: {
+        'Content-Type': null,
+        ...options.headers
+    }
+});
 
 /**
- * Update Agent
+ * 软删除指定 Agent Artifact，并尝试同步删除 Cloudflare R2 中的对象，避免后续列表和下载继续暴露该版本
  */
-export const updateAgentApiV1AgentsAgentUuidPatch = <ThrowOnError extends boolean = false>(options: Options<UpdateAgentApiV1AgentsAgentUuidPatchData, ThrowOnError>) => (options.client ?? client).patch<UpdateAgentApiV1AgentsAgentUuidPatchResponses, UpdateAgentApiV1AgentsAgentUuidPatchErrors, ThrowOnError>({
+export const removeAgentArtifactApiV1ArtifactsAgentsArtifactUuidDelete = <ThrowOnError extends boolean = false>(options: Options<RemoveAgentArtifactApiV1ArtifactsAgentsArtifactUuidDeleteData, ThrowOnError>) => (options.client ?? client).delete<RemoveAgentArtifactApiV1ArtifactsAgentsArtifactUuidDeleteResponses, RemoveAgentArtifactApiV1ArtifactsAgentsArtifactUuidDeleteErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/artifacts/agents/{artifact_uuid}',
+    ...options
+});
+
+/**
+ * 查询单个 Agent Artifact 元数据，返回版本、平台、文件大小、SHA-256 和 Cloudflare R2 对象位置
+ */
+export const getAgentArtifactApiV1ArtifactsAgentsArtifactUuidGet = <ThrowOnError extends boolean = false>(options: Options<GetAgentArtifactApiV1ArtifactsAgentsArtifactUuidGetData, ThrowOnError>) => (options.client ?? client).get<GetAgentArtifactApiV1ArtifactsAgentsArtifactUuidGetResponses, GetAgentArtifactApiV1ArtifactsAgentsArtifactUuidGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/artifacts/agents/{artifact_uuid}',
+    ...options
+});
+
+/**
+ * 更新 Agent Artifact 元数据，例如版本号、适用平台、启用状态或备注；不会修改 R2 中的文件本体
+ */
+export const patchAgentArtifactApiV1ArtifactsAgentsArtifactUuidPatch = <ThrowOnError extends boolean = false>(options: Options<PatchAgentArtifactApiV1ArtifactsAgentsArtifactUuidPatchData, ThrowOnError>) => (options.client ?? client).patch<PatchAgentArtifactApiV1ArtifactsAgentsArtifactUuidPatchResponses, PatchAgentArtifactApiV1ArtifactsAgentsArtifactUuidPatchErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/artifacts/agents/{artifact_uuid}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 生成并跳转到 Agent Artifact 的 Cloudflare R2 下载地址，用于下载安装指定版本的 Agent 可执行文件
+ */
+export const downloadAgentArtifactApiV1ArtifactsAgentsArtifactUuidDownloadGet = <ThrowOnError extends boolean = false>(options: Options<DownloadAgentArtifactApiV1ArtifactsAgentsArtifactUuidDownloadGetData, ThrowOnError>) => (options.client ?? client).get<unknown, DownloadAgentArtifactApiV1ArtifactsAgentsArtifactUuidDownloadGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/artifacts/agents/{artifact_uuid}/download',
+    ...options
+});
+
+/**
+ * 查询 GEO 大洲目录，支持按英文名称、中文名称或代码模糊检索，供 Target 和 Agent 表单自动补全
+ */
+export const getGeoContinentsApiV1GeoContinentsGet = <ThrowOnError extends boolean = false>(options?: Options<GetGeoContinentsApiV1GeoContinentsGetData, ThrowOnError>) => (options?.client ?? client).get<GetGeoContinentsApiV1GeoContinentsGetResponses, GetGeoContinentsApiV1GeoContinentsGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/geo/continents',
+    ...options
+});
+
+/**
+ * 创建 GEO 大洲记录，用于维护 Target 和 Agent 可选择的地理位置上级分类
+ */
+export const postGeoContinentApiV1GeoContinentsPost = <ThrowOnError extends boolean = false>(options: Options<PostGeoContinentApiV1GeoContinentsPostData, ThrowOnError>) => (options.client ?? client).post<PostGeoContinentApiV1GeoContinentsPostResponses, PostGeoContinentApiV1GeoContinentsPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/geo/continents',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 查询完整 GEO 树形目录，按大洲、国家、城市三层返回数据，用于后台树形增删改查和位置选择
+ */
+export const getGeoTreeApiV1GeoTreeGet = <ThrowOnError extends boolean = false>(options?: Options<GetGeoTreeApiV1GeoTreeGetData, ThrowOnError>) => (options?.client ?? client).get<GetGeoTreeApiV1GeoTreeGetResponses, GetGeoTreeApiV1GeoTreeGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/geo/tree',
+    ...options
+});
+
+/**
+ * 软删除 GEO 大洲记录；不会级联删除已有 Target、Agent 字符串位置，只影响后续检索选择
+ */
+export const deleteGeoContinentEndpointApiV1GeoContinentsContinentUuidDelete = <ThrowOnError extends boolean = false>(options: Options<DeleteGeoContinentEndpointApiV1GeoContinentsContinentUuidDeleteData, ThrowOnError>) => (options.client ?? client).delete<DeleteGeoContinentEndpointApiV1GeoContinentsContinentUuidDeleteResponses, DeleteGeoContinentEndpointApiV1GeoContinentsContinentUuidDeleteErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/geo/continents/{continent_uuid}',
+    ...options
+});
+
+/**
+ * 更新 GEO 大洲记录的名称、代码或删除状态，修改后可立即用于前端地理位置检索
+ */
+export const patchGeoContinentApiV1GeoContinentsContinentUuidPatch = <ThrowOnError extends boolean = false>(options: Options<PatchGeoContinentApiV1GeoContinentsContinentUuidPatchData, ThrowOnError>) => (options.client ?? client).patch<PatchGeoContinentApiV1GeoContinentsContinentUuidPatchResponses, PatchGeoContinentApiV1GeoContinentsContinentUuidPatchErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/geo/continents/{continent_uuid}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 查询 GEO 国家目录，可按所属大洲过滤，并支持按英文名称、中文名称或代码模糊检索
+ */
+export const getGeoCountriesApiV1GeoCountriesGet = <ThrowOnError extends boolean = false>(options?: Options<GetGeoCountriesApiV1GeoCountriesGetData, ThrowOnError>) => (options?.client ?? client).get<GetGeoCountriesApiV1GeoCountriesGetResponses, GetGeoCountriesApiV1GeoCountriesGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/geo/countries',
+    ...options
+});
+
+/**
+ * 创建 GEO 国家记录，必须关联一个已存在且未删除的大洲
+ */
+export const postGeoCountryApiV1GeoCountriesPost = <ThrowOnError extends boolean = false>(options: Options<PostGeoCountryApiV1GeoCountriesPostData, ThrowOnError>) => (options.client ?? client).post<PostGeoCountryApiV1GeoCountriesPostResponses, PostGeoCountryApiV1GeoCountriesPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/geo/countries',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 软删除 GEO 国家记录；不会级联删除已有 Target、Agent 字符串位置，只影响后续检索选择
+ */
+export const deleteGeoCountryEndpointApiV1GeoCountriesCountryUuidDelete = <ThrowOnError extends boolean = false>(options: Options<DeleteGeoCountryEndpointApiV1GeoCountriesCountryUuidDeleteData, ThrowOnError>) => (options.client ?? client).delete<DeleteGeoCountryEndpointApiV1GeoCountriesCountryUuidDeleteResponses, DeleteGeoCountryEndpointApiV1GeoCountriesCountryUuidDeleteErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/geo/countries/{country_uuid}',
+    ...options
+});
+
+/**
+ * 更新 GEO 国家记录，可修改所属大洲、名称、代码、中文名称或删除状态
+ */
+export const patchGeoCountryApiV1GeoCountriesCountryUuidPatch = <ThrowOnError extends boolean = false>(options: Options<PatchGeoCountryApiV1GeoCountriesCountryUuidPatchData, ThrowOnError>) => (options.client ?? client).patch<PatchGeoCountryApiV1GeoCountriesCountryUuidPatchResponses, PatchGeoCountryApiV1GeoCountriesCountryUuidPatchErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/geo/countries/{country_uuid}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 查询 GEO 城市目录，可按所属国家过滤，并支持按英文名称、中文名称或代码模糊检索
+ */
+export const getGeoCitiesApiV1GeoCitiesGet = <ThrowOnError extends boolean = false>(options?: Options<GetGeoCitiesApiV1GeoCitiesGetData, ThrowOnError>) => (options?.client ?? client).get<GetGeoCitiesApiV1GeoCitiesGetResponses, GetGeoCitiesApiV1GeoCitiesGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/geo/cities',
+    ...options
+});
+
+/**
+ * 创建 GEO 城市记录，必须关联一个已存在且未删除的国家
+ */
+export const postGeoCityApiV1GeoCitiesPost = <ThrowOnError extends boolean = false>(options: Options<PostGeoCityApiV1GeoCitiesPostData, ThrowOnError>) => (options.client ?? client).post<PostGeoCityApiV1GeoCitiesPostResponses, PostGeoCityApiV1GeoCitiesPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/geo/cities',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 软删除 GEO 城市记录；不会级联删除已有 Target、Agent 字符串位置，只影响后续检索选择
+ */
+export const deleteGeoCityEndpointApiV1GeoCitiesCityUuidDelete = <ThrowOnError extends boolean = false>(options: Options<DeleteGeoCityEndpointApiV1GeoCitiesCityUuidDeleteData, ThrowOnError>) => (options.client ?? client).delete<DeleteGeoCityEndpointApiV1GeoCitiesCityUuidDeleteResponses, DeleteGeoCityEndpointApiV1GeoCitiesCityUuidDeleteErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/geo/cities/{city_uuid}',
+    ...options
+});
+
+/**
+ * 更新 GEO 城市记录，可修改所属国家、名称、代码、中文名称、首都标记、排序权重或删除状态
+ */
+export const patchGeoCityApiV1GeoCitiesCityUuidPatch = <ThrowOnError extends boolean = false>(options: Options<PatchGeoCityApiV1GeoCitiesCityUuidPatchData, ThrowOnError>) => (options.client ?? client).patch<PatchGeoCityApiV1GeoCitiesCityUuidPatchResponses, PatchGeoCityApiV1GeoCitiesCityUuidPatchErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/geo/cities/{city_uuid}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 查询可用于监控页面展示的 Agent 列表，返回探针基础信息、状态和地理位置
+ */
+export const getMonitoringAgentsApiV1MonitoringAgentsGet = <ThrowOnError extends boolean = false>(options?: Options<GetMonitoringAgentsApiV1MonitoringAgentsGetData, ThrowOnError>) => (options?.client ?? client).get<GetMonitoringAgentsApiV1MonitoringAgentsGetResponses, unknown, ThrowOnError>({ url: '/api/v1/monitoring/agents', ...options });
+
+/**
+ * 查询单个监控 Agent 的展示详情，用于监控页面查看探针状态和关联信息
+ */
+export const getMonitoringAgentApiV1MonitoringAgentsAgentUuidGet = <ThrowOnError extends boolean = false>(options: Options<GetMonitoringAgentApiV1MonitoringAgentsAgentUuidGetData, ThrowOnError>) => (options.client ?? client).get<GetMonitoringAgentApiV1MonitoringAgentsAgentUuidGetResponses, GetMonitoringAgentApiV1MonitoringAgentsAgentUuidGetErrors, ThrowOnError>({ url: '/api/v1/monitoring/agents/{agent_uuid}', ...options });
+
+/**
+ * 分页查询 Target 管理列表，支持按关键字、目标类型、Anycast 标记、启用状态和排序字段过滤
+ */
+export const getTargetsApiV1TargetsGet = <ThrowOnError extends boolean = false>(options?: Options<GetTargetsApiV1TargetsGetData, ThrowOnError>) => (options?.client ?? client).get<GetTargetsApiV1TargetsGetResponses, GetTargetsApiV1TargetsGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/targets',
+    ...options
+});
+
+/**
+ * 创建新的监控目标 Target，保存目标地址、类型、IP 协议族、地理位置和 Anycast 等管理信息
+ */
+export const postTargetApiV1TargetsPost = <ThrowOnError extends boolean = false>(options: Options<PostTargetApiV1TargetsPostData, ThrowOnError>) => (options.client ?? client).post<PostTargetApiV1TargetsPostResponses, PostTargetApiV1TargetsPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/targets',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 软删除指定 Target，并重新发布受影响 Agent 的任务快照以移除相关监控配置
+ */
+export const deleteTargetApiV1TargetsTargetUuidDelete = <ThrowOnError extends boolean = false>(options: Options<DeleteTargetApiV1TargetsTargetUuidDeleteData, ThrowOnError>) => (options.client ?? client).delete<DeleteTargetApiV1TargetsTargetUuidDeleteResponses, DeleteTargetApiV1TargetsTargetUuidDeleteErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/targets/{target_uuid}',
+    ...options
+});
+
+/**
+ * 查询单个 Target 的管理详情，返回目标地址、类型、地理位置、启用状态和审计时间字段
+ */
+export const getTargetApiV1TargetsTargetUuidGet = <ThrowOnError extends boolean = false>(options: Options<GetTargetApiV1TargetsTargetUuidGetData, ThrowOnError>) => (options.client ?? client).get<GetTargetApiV1TargetsTargetUuidGetResponses, GetTargetApiV1TargetsTargetUuidGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/targets/{target_uuid}',
+    ...options
+});
+
+/**
+ * 更新 Target 管理信息，并向受影响的 Agent 重新发布任务快照以同步最新配置
+ */
+export const patchTargetApiV1TargetsTargetUuidPatch = <ThrowOnError extends boolean = false>(options: Options<PatchTargetApiV1TargetsTargetUuidPatchData, ThrowOnError>) => (options.client ?? client).patch<PatchTargetApiV1TargetsTargetUuidPatchResponses, PatchTargetApiV1TargetsTargetUuidPatchErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/targets/{target_uuid}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 启用指定 Target，并重新发布受影响 Agent 的任务快照使相关监控任务恢复下发
+ */
+export const enableTargetApiV1TargetsTargetUuidEnablePost = <ThrowOnError extends boolean = false>(options: Options<EnableTargetApiV1TargetsTargetUuidEnablePostData, ThrowOnError>) => (options.client ?? client).post<EnableTargetApiV1TargetsTargetUuidEnablePostResponses, EnableTargetApiV1TargetsTargetUuidEnablePostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/targets/{target_uuid}/enable',
+    ...options
+});
+
+/**
+ * 停用指定 Target，并重新发布受影响 Agent 的任务快照使相关监控任务停止下发
+ */
+export const disableTargetApiV1TargetsTargetUuidDisablePost = <ThrowOnError extends boolean = false>(options: Options<DisableTargetApiV1TargetsTargetUuidDisablePostData, ThrowOnError>) => (options.client ?? client).post<DisableTargetApiV1TargetsTargetUuidDisablePostResponses, DisableTargetApiV1TargetsTargetUuidDisablePostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/targets/{target_uuid}/disable',
+    ...options
+});
+
+/**
+ * 分页查询 Agent 管理列表，支持按关键字、在线状态、启用状态和排序字段过滤
+ */
+export const getAgentsApiV1AgentsGet = <ThrowOnError extends boolean = false>(options?: Options<GetAgentsApiV1AgentsGetData, ThrowOnError>) => (options?.client ?? client).get<GetAgentsApiV1AgentsGetResponses, GetAgentsApiV1AgentsGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/agents',
+    ...options
+});
+
+/**
+ * 创建新的监控 Agent，登记探针身份、地理位置和运行属性，并返回仅本次可见的认证令牌
+ */
+export const postAgentApiV1AgentsPost = <ThrowOnError extends boolean = false>(options: Options<PostAgentApiV1AgentsPostData, ThrowOnError>) => (options.client ?? client).post<PostAgentApiV1AgentsPostResponses, PostAgentApiV1AgentsPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/agents',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 软删除指定 Agent，并发布最新任务快照以清理该探针的监控任务配置
+ */
+export const deleteAgentApiV1AgentsAgentUuidDelete = <ThrowOnError extends boolean = false>(options: Options<DeleteAgentApiV1AgentsAgentUuidDeleteData, ThrowOnError>) => (options.client ?? client).delete<DeleteAgentApiV1AgentsAgentUuidDeleteResponses, DeleteAgentApiV1AgentsAgentUuidDeleteErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/agents/{agent_uuid}',
+    ...options
+});
+
+/**
+ * 查询单个 Agent 的管理详情，返回探针状态、地理位置、版本、配置同步版本和心跳信息
+ */
+export const getAgentApiV1AgentsAgentUuidGet = <ThrowOnError extends boolean = false>(options: Options<GetAgentApiV1AgentsAgentUuidGetData, ThrowOnError>) => (options.client ?? client).get<GetAgentApiV1AgentsAgentUuidGetResponses, GetAgentApiV1AgentsAgentUuidGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/agents/{agent_uuid}',
+    ...options
+});
+
+/**
+ * 更新 Agent 管理信息，并重新发布该 Agent 的任务快照以同步最新配置
+ */
+export const patchAgentApiV1AgentsAgentUuidPatch = <ThrowOnError extends boolean = false>(options: Options<PatchAgentApiV1AgentsAgentUuidPatchData, ThrowOnError>) => (options.client ?? client).patch<PatchAgentApiV1AgentsAgentUuidPatchResponses, PatchAgentApiV1AgentsAgentUuidPatchErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/agents/{agent_uuid}',
     ...options,
     headers: {
@@ -214,31 +486,55 @@ export const updateAgentApiV1AgentsAgentUuidPatch = <ThrowOnError extends boolea
 });
 
 /**
- * Register Agent
+ * 启用指定 Agent，并重新发布任务快照使该探针可以继续接收和执行监控任务
  */
-export const registerAgentApiV1AgentsRegisterPost = <ThrowOnError extends boolean = false>(options: Options<RegisterAgentApiV1AgentsRegisterPostData, ThrowOnError>) => (options.client ?? client).post<RegisterAgentApiV1AgentsRegisterPostResponses, RegisterAgentApiV1AgentsRegisterPostErrors, ThrowOnError>({
-    url: '/api/v1/agents/register',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
+export const enableAgentApiV1AgentsAgentUuidEnablePost = <ThrowOnError extends boolean = false>(options: Options<EnableAgentApiV1AgentsAgentUuidEnablePostData, ThrowOnError>) => (options.client ?? client).post<EnableAgentApiV1AgentsAgentUuidEnablePostResponses, EnableAgentApiV1AgentsAgentUuidEnablePostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/agents/{agent_uuid}/enable',
+    ...options
 });
 
 /**
- * Get Agent Tasks
- *
- * Return full task list assigned to this agent. Requires access_key header.
- *
- * Agent calls this after register + NATS subscribe to get initial tasks,
- * and can re-call periodically as a fallback if NATS messages are missed.
+ * 停用指定 Agent，并重新发布任务快照使该探针停止接收和执行监控任务
  */
-export const getAgentTasksApiV1AgentsAgentUuidTasksGet = <ThrowOnError extends boolean = false>(options: Options<GetAgentTasksApiV1AgentsAgentUuidTasksGetData, ThrowOnError>) => (options.client ?? client).get<GetAgentTasksApiV1AgentsAgentUuidTasksGetResponses, GetAgentTasksApiV1AgentsAgentUuidTasksGetErrors, ThrowOnError>({ url: '/api/v1/agents/{agent_uuid}/tasks', ...options });
+export const disableAgentApiV1AgentsAgentUuidDisablePost = <ThrowOnError extends boolean = false>(options: Options<DisableAgentApiV1AgentsAgentUuidDisablePostData, ThrowOnError>) => (options.client ?? client).post<DisableAgentApiV1AgentsAgentUuidDisablePostResponses, DisableAgentApiV1AgentsAgentUuidDisablePostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/agents/{agent_uuid}/disable',
+    ...options
+});
 
 /**
- * Record Heartbeat
+ * 管理员手动重新发布指定 Agent 的完整任务快照，用于修复配置不同步或强制重新下发任务
  */
-export const recordHeartbeatApiV1AgentsAgentUuidHeartbeatPost = <ThrowOnError extends boolean = false>(options: Options<RecordHeartbeatApiV1AgentsAgentUuidHeartbeatPostData, ThrowOnError>) => (options.client ?? client).post<RecordHeartbeatApiV1AgentsAgentUuidHeartbeatPostResponses, RecordHeartbeatApiV1AgentsAgentUuidHeartbeatPostErrors, ThrowOnError>({
+export const resyncAgentApiV1AgentsAgentUuidResyncPost = <ThrowOnError extends boolean = false>(options: Options<ResyncAgentApiV1AgentsAgentUuidResyncPostData, ThrowOnError>) => (options.client ?? client).post<ResyncAgentApiV1AgentsAgentUuidResyncPostResponses, ResyncAgentApiV1AgentsAgentUuidResyncPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/agents/{agent_uuid}/resync',
+    ...options
+});
+
+/**
+ * 轮换指定 Agent 的认证令牌，生成新令牌并让旧令牌失效，用于凭据泄露或安全维护场景
+ */
+export const rotateAgentAuthTokenApiV1AgentsAgentUuidRotateTokenPost = <ThrowOnError extends boolean = false>(options: Options<RotateAgentAuthTokenApiV1AgentsAgentUuidRotateTokenPostData, ThrowOnError>) => (options.client ?? client).post<RotateAgentAuthTokenApiV1AgentsAgentUuidRotateTokenPostResponses, RotateAgentAuthTokenApiV1AgentsAgentUuidRotateTokenPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/agents/{agent_uuid}/rotate-token',
+    ...options
+});
+
+/**
+ * Agent 主动请求重新同步任务快照，服务端重新发布该探针当前应执行的完整任务配置
+ */
+export const requestAgentResyncApiV1AgentsAgentUuidResyncRequestPost = <ThrowOnError extends boolean = false>(options: Options<RequestAgentResyncApiV1AgentsAgentUuidResyncRequestPostData, ThrowOnError>) => (options.client ?? client).post<RequestAgentResyncApiV1AgentsAgentUuidResyncRequestPostResponses, RequestAgentResyncApiV1AgentsAgentUuidResyncRequestPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/agents/{agent_uuid}/resync-request',
+    ...options
+});
+
+/**
+ * Agent 上报心跳、版本、运行状态和可观测信息，用于维护探针在线状态和最后活跃时间
+ */
+export const postAgentHeartbeatApiV1AgentsAgentUuidHeartbeatPost = <ThrowOnError extends boolean = false>(options: Options<PostAgentHeartbeatApiV1AgentsAgentUuidHeartbeatPostData, ThrowOnError>) => (options.client ?? client).post<PostAgentHeartbeatApiV1AgentsAgentUuidHeartbeatPostResponses, PostAgentHeartbeatApiV1AgentsAgentUuidHeartbeatPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/agents/{agent_uuid}/heartbeat',
     ...options,
     headers: {
@@ -248,59 +544,11 @@ export const recordHeartbeatApiV1AgentsAgentUuidHeartbeatPost = <ThrowOnError ex
 });
 
 /**
- * Upload Release
+ * Agent 确认已应用任务快照版本，服务端记录已生效配置版本和同步时间
  */
-export const uploadReleaseApiV1AgentsReleasesUploadPost = <ThrowOnError extends boolean = false>(options: Options<UploadReleaseApiV1AgentsReleasesUploadPostData, ThrowOnError>) => (options.client ?? client).post<UploadReleaseApiV1AgentsReleasesUploadPostResponses, UploadReleaseApiV1AgentsReleasesUploadPostErrors, ThrowOnError>({
-    ...formDataBodySerializer,
-    url: '/api/v1/agents/releases/upload',
-    ...options,
-    headers: {
-        'Content-Type': null,
-        ...options.headers
-    }
-});
-
-/**
- * List Releases
- */
-export const listReleasesApiV1AgentsReleasesGet = <ThrowOnError extends boolean = false>(options?: Options<ListReleasesApiV1AgentsReleasesGetData, ThrowOnError>) => (options?.client ?? client).get<ListReleasesApiV1AgentsReleasesGetResponses, ListReleasesApiV1AgentsReleasesGetErrors, ThrowOnError>({ url: '/api/v1/agents/releases/', ...options });
-
-/**
- * Get Latest Release
- */
-export const getLatestReleaseApiV1AgentsReleasesLatestPlatformGet = <ThrowOnError extends boolean = false>(options: Options<GetLatestReleaseApiV1AgentsReleasesLatestPlatformGetData, ThrowOnError>) => (options.client ?? client).get<GetLatestReleaseApiV1AgentsReleasesLatestPlatformGetResponses, GetLatestReleaseApiV1AgentsReleasesLatestPlatformGetErrors, ThrowOnError>({ url: '/api/v1/agents/releases/latest/{platform}', ...options });
-
-/**
- * Delete Release
- */
-export const deleteReleaseApiV1AgentsReleasesReleaseUuidDelete = <ThrowOnError extends boolean = false>(options: Options<DeleteReleaseApiV1AgentsReleasesReleaseUuidDeleteData, ThrowOnError>) => (options.client ?? client).delete<DeleteReleaseApiV1AgentsReleasesReleaseUuidDeleteResponses, DeleteReleaseApiV1AgentsReleasesReleaseUuidDeleteErrors, ThrowOnError>({ url: '/api/v1/agents/releases/{release_uuid}', ...options });
-
-/**
- * Get Release
- */
-export const getReleaseApiV1AgentsReleasesReleaseUuidGet = <ThrowOnError extends boolean = false>(options: Options<GetReleaseApiV1AgentsReleasesReleaseUuidGetData, ThrowOnError>) => (options.client ?? client).get<GetReleaseApiV1AgentsReleasesReleaseUuidGetResponses, GetReleaseApiV1AgentsReleasesReleaseUuidGetErrors, ThrowOnError>({ url: '/api/v1/agents/releases/{release_uuid}', ...options });
-
-/**
- * Push Update
- *
- * Push update notification to all matching-platform agents.
- */
-export const pushUpdateApiV1AgentsReleasesReleaseUuidPushPost = <ThrowOnError extends boolean = false>(options: Options<PushUpdateApiV1AgentsReleasesReleaseUuidPushPostData, ThrowOnError>) => (options.client ?? client).post<PushUpdateApiV1AgentsReleasesReleaseUuidPushPostResponses, PushUpdateApiV1AgentsReleasesReleaseUuidPushPostErrors, ThrowOnError>({ url: '/api/v1/agents/releases/{release_uuid}/push', ...options });
-
-/**
- * List Tasks Endpoint
- *
- * List tasks. No auth required.
- */
-export const listTasksEndpointApiV1TasksGet = <ThrowOnError extends boolean = false>(options?: Options<ListTasksEndpointApiV1TasksGetData, ThrowOnError>) => (options?.client ?? client).get<ListTasksEndpointApiV1TasksGetResponses, ListTasksEndpointApiV1TasksGetErrors, ThrowOnError>({ url: '/api/v1/tasks/', ...options });
-
-/**
- * Create Task Endpoint
- *
- * Create a new probe task. Admin only.
- */
-export const createTaskEndpointApiV1TasksPost = <ThrowOnError extends boolean = false>(options: Options<CreateTaskEndpointApiV1TasksPostData, ThrowOnError>) => (options.client ?? client).post<CreateTaskEndpointApiV1TasksPostResponses, CreateTaskEndpointApiV1TasksPostErrors, ThrowOnError>({
-    url: '/api/v1/tasks/',
+export const postTaskSnapshotAckApiV1AgentsAgentUuidTaskSnapshotAckPost = <ThrowOnError extends boolean = false>(options: Options<PostTaskSnapshotAckApiV1AgentsAgentUuidTaskSnapshotAckPostData, ThrowOnError>) => (options.client ?? client).post<PostTaskSnapshotAckApiV1AgentsAgentUuidTaskSnapshotAckPostResponses, PostTaskSnapshotAckApiV1AgentsAgentUuidTaskSnapshotAckPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/agents/{agent_uuid}/task-snapshot-ack',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -309,25 +557,50 @@ export const createTaskEndpointApiV1TasksPost = <ThrowOnError extends boolean = 
 });
 
 /**
- * Delete Task Endpoint
- *
- * Deactivate a task (soft delete). Admin only.
+ * 查询任务管理列表，支持按关键字、任务类型、IP 协议族、Agent、Target、启用状态和排序字段过滤
  */
-export const deleteTaskEndpointApiV1TasksTaskUuidDelete = <ThrowOnError extends boolean = false>(options: Options<DeleteTaskEndpointApiV1TasksTaskUuidDeleteData, ThrowOnError>) => (options.client ?? client).delete<DeleteTaskEndpointApiV1TasksTaskUuidDeleteResponses, DeleteTaskEndpointApiV1TasksTaskUuidDeleteErrors, ThrowOnError>({ url: '/api/v1/tasks/{task_uuid}', ...options });
+export const getTasksApiV1TasksGet = <ThrowOnError extends boolean = false>(options?: Options<GetTasksApiV1TasksGetData, ThrowOnError>) => (options?.client ?? client).get<GetTasksApiV1TasksGetResponses, GetTasksApiV1TasksGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/tasks',
+    ...options
+});
 
 /**
- * Get Task Endpoint
- *
- * Get a single task by UUID. No auth required.
+ * 创建新的监控任务，将一个 Target 与一个 Agent 关联并下发对应的 ICMP、TCP 或 MTR 探测配置
  */
-export const getTaskEndpointApiV1TasksTaskUuidGet = <ThrowOnError extends boolean = false>(options: Options<GetTaskEndpointApiV1TasksTaskUuidGetData, ThrowOnError>) => (options.client ?? client).get<GetTaskEndpointApiV1TasksTaskUuidGetResponses, GetTaskEndpointApiV1TasksTaskUuidGetErrors, ThrowOnError>({ url: '/api/v1/tasks/{task_uuid}', ...options });
+export const postTaskApiV1TasksPost = <ThrowOnError extends boolean = false>(options: Options<PostTaskApiV1TasksPostData, ThrowOnError>) => (options.client ?? client).post<PostTaskApiV1TasksPostResponses, PostTaskApiV1TasksPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/tasks',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
- * Update Task Endpoint
- *
- * Update a task. Admin only.
+ * 软删除指定监控任务，并重新发布 Agent 任务快照以从探针配置中移除该任务
  */
-export const updateTaskEndpointApiV1TasksTaskUuidPatch = <ThrowOnError extends boolean = false>(options: Options<UpdateTaskEndpointApiV1TasksTaskUuidPatchData, ThrowOnError>) => (options.client ?? client).patch<UpdateTaskEndpointApiV1TasksTaskUuidPatchResponses, UpdateTaskEndpointApiV1TasksTaskUuidPatchErrors, ThrowOnError>({
+export const deleteTaskApiV1TasksTaskUuidDelete = <ThrowOnError extends boolean = false>(options: Options<DeleteTaskApiV1TasksTaskUuidDeleteData, ThrowOnError>) => (options.client ?? client).delete<DeleteTaskApiV1TasksTaskUuidDeleteResponses, DeleteTaskApiV1TasksTaskUuidDeleteErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/tasks/{task_uuid}',
+    ...options
+});
+
+/**
+ * 查询单个监控任务的管理详情，返回任务配置以及对应 Target 和 Agent 的关联信息
+ */
+export const getTaskApiV1TasksTaskUuidGet = <ThrowOnError extends boolean = false>(options: Options<GetTaskApiV1TasksTaskUuidGetData, ThrowOnError>) => (options.client ?? client).get<GetTaskApiV1TasksTaskUuidGetResponses, GetTaskApiV1TasksTaskUuidGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/tasks/{task_uuid}',
+    ...options
+});
+
+/**
+ * 更新监控任务配置，并重新发布对应 Agent 的任务快照以同步最新探测参数
+ */
+export const patchTaskApiV1TasksTaskUuidPatch = <ThrowOnError extends boolean = false>(options: Options<PatchTaskApiV1TasksTaskUuidPatchData, ThrowOnError>) => (options.client ?? client).patch<PatchTaskApiV1TasksTaskUuidPatchResponses, PatchTaskApiV1TasksTaskUuidPatchErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/tasks/{task_uuid}',
     ...options,
     headers: {
@@ -337,12 +610,29 @@ export const updateTaskEndpointApiV1TasksTaskUuidPatch = <ThrowOnError extends b
 });
 
 /**
- * Assign Task Endpoint
- *
- * Assign a task to agents by their UUIDs. Admin only.
+ * 启用指定监控任务，并重新发布 Agent 任务快照使该任务恢复执行
  */
-export const assignTaskEndpointApiV1TasksTaskUuidAssignPost = <ThrowOnError extends boolean = false>(options: Options<AssignTaskEndpointApiV1TasksTaskUuidAssignPostData, ThrowOnError>) => (options.client ?? client).post<AssignTaskEndpointApiV1TasksTaskUuidAssignPostResponses, AssignTaskEndpointApiV1TasksTaskUuidAssignPostErrors, ThrowOnError>({
-    url: '/api/v1/tasks/{task_uuid}/assign',
+export const enableTaskApiV1TasksTaskUuidEnablePost = <ThrowOnError extends boolean = false>(options: Options<EnableTaskApiV1TasksTaskUuidEnablePostData, ThrowOnError>) => (options.client ?? client).post<EnableTaskApiV1TasksTaskUuidEnablePostResponses, EnableTaskApiV1TasksTaskUuidEnablePostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/tasks/{task_uuid}/enable',
+    ...options
+});
+
+/**
+ * 停用指定监控任务，并重新发布 Agent 任务快照使该任务停止执行但保留配置
+ */
+export const disableTaskApiV1TasksTaskUuidDisablePost = <ThrowOnError extends boolean = false>(options: Options<DisableTaskApiV1TasksTaskUuidDisablePostData, ThrowOnError>) => (options.client ?? client).post<DisableTaskApiV1TasksTaskUuidDisablePostResponses, DisableTaskApiV1TasksTaskUuidDisablePostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/tasks/{task_uuid}/disable',
+    ...options
+});
+
+/**
+ * 快速关联一个 Target 和一个 Agent，批量创建所需监控任务并立即发布任务快照
+ */
+export const postQuickAssociateApiV1RelationsQuickAssociatePost = <ThrowOnError extends boolean = false>(options: Options<PostQuickAssociateApiV1RelationsQuickAssociatePostData, ThrowOnError>) => (options.client ?? client).post<PostQuickAssociateApiV1RelationsQuickAssociatePostResponses, PostQuickAssociateApiV1RelationsQuickAssociatePostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/relations/quick-associate',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -351,219 +641,43 @@ export const assignTaskEndpointApiV1TasksTaskUuidAssignPost = <ThrowOnError exte
 });
 
 /**
- * Get Task Agents Endpoint
+ * 分页查询结果入库事件，支持按消息 ID、结果 UUID、执行 UUID 和处理状态追踪 worker 消费情况
+ */
+export const getResultIngestionEventsApiV1ResultsIngestionEventsGet = <ThrowOnError extends boolean = false>(options?: Options<GetResultIngestionEventsApiV1ResultsIngestionEventsGetData, ThrowOnError>) => (options?.client ?? client).get<GetResultIngestionEventsApiV1ResultsIngestionEventsGetResponses, GetResultIngestionEventsApiV1ResultsIngestionEventsGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/results/ingestion-events',
+    ...options
+});
+
+/**
+ * 按消息 ID 查询最近一次结果入库事件，用于排查某条 NATS 结果消息的处理状态和错误信息
+ */
+export const getResultIngestionEventApiV1ResultsIngestionEventsMessageIdGet = <ThrowOnError extends boolean = false>(options: Options<GetResultIngestionEventApiV1ResultsIngestionEventsMessageIdGetData, ThrowOnError>) => (options.client ?? client).get<GetResultIngestionEventApiV1ResultsIngestionEventsMessageIdGetResponses, GetResultIngestionEventApiV1ResultsIngestionEventsMessageIdGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/results/ingestion-events/{message_id}',
+    ...options
+});
+
+/**
+ * Agent 拉取当前完整任务快照，用于本地调度器同步服务端期望的全部监控任务配置
  *
- * Get agents assigned to a task. No auth required.
+ * Return the Agent's current full task.snapshot payload. This is configuration synchronization for Agent-local scheduling, not a TaskRun dispatch API.
  */
-export const getTaskAgentsEndpointApiV1TasksTaskUuidAgentsGet = <ThrowOnError extends boolean = false>(options: Options<GetTaskAgentsEndpointApiV1TasksTaskUuidAgentsGetData, ThrowOnError>) => (options.client ?? client).get<GetTaskAgentsEndpointApiV1TasksTaskUuidAgentsGetResponses, GetTaskAgentsEndpointApiV1TasksTaskUuidAgentsGetErrors, ThrowOnError>({ url: '/api/v1/tasks/{task_uuid}/agents', ...options });
+export const getAgentWorkApiV1AgentsAgentUuidWorkGet = <ThrowOnError extends boolean = false>(options: Options<GetAgentWorkApiV1AgentsAgentUuidWorkGetData, ThrowOnError>) => (options.client ?? client).get<GetAgentWorkApiV1AgentsAgentUuidWorkGetResponses, GetAgentWorkApiV1AgentsAgentUuidWorkGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/agents/{agent_uuid}/work',
+    ...options
+});
 
 /**
- * Unassign Task Endpoint
- *
- * Unassign an agent from a task. Admin only.
+ * Agent 执行 iperf3 任务前申请后端授权，确保同一 Target 在最近五分钟窗口内只有一个 Agent 执行 iperf3
  */
-export const unassignTaskEndpointApiV1TasksTaskUuidAgentsAgentUuidDelete = <ThrowOnError extends boolean = false>(options: Options<UnassignTaskEndpointApiV1TasksTaskUuidAgentsAgentUuidDeleteData, ThrowOnError>) => (options.client ?? client).delete<UnassignTaskEndpointApiV1TasksTaskUuidAgentsAgentUuidDeleteResponses, UnassignTaskEndpointApiV1TasksTaskUuidAgentsAgentUuidDeleteErrors, ThrowOnError>({ url: '/api/v1/tasks/{task_uuid}/agents/{agent_uuid}', ...options });
-
-/**
- * Monitoring Query
- */
-export const monitoringQueryApiV1MonitoringQueryGet = <ThrowOnError extends boolean = false>(options: Options<MonitoringQueryApiV1MonitoringQueryGetData, ThrowOnError>) => (options.client ?? client).get<MonitoringQueryApiV1MonitoringQueryGetResponses, MonitoringQueryApiV1MonitoringQueryGetErrors, ThrowOnError>({ url: '/api/v1/monitoring/query', ...options });
-
-/**
- * Dashboard Stats
- */
-export const dashboardStatsApiV1DashboardStatsGet = <ThrowOnError extends boolean = false>(options?: Options<DashboardStatsApiV1DashboardStatsGetData, ThrowOnError>) => (options?.client ?? client).get<DashboardStatsApiV1DashboardStatsGetResponses, unknown, ThrowOnError>({ url: '/api/v1/dashboard/stats', ...options });
-
-/**
- * Mtr List Results
- */
-export const mtrListResultsApiV1MonitoringMtrGet = <ThrowOnError extends boolean = false>(options: Options<MtrListResultsApiV1MonitoringMtrGetData, ThrowOnError>) => (options.client ?? client).get<MtrListResultsApiV1MonitoringMtrGetResponses, MtrListResultsApiV1MonitoringMtrGetErrors, ThrowOnError>({ url: '/api/v1/monitoring/mtr', ...options });
-
-/**
- * Mtr Get Result
- */
-export const mtrGetResultApiV1MonitoringMtrResultUuidGet = <ThrowOnError extends boolean = false>(options: Options<MtrGetResultApiV1MonitoringMtrResultUuidGetData, ThrowOnError>) => (options.client ?? client).get<MtrGetResultApiV1MonitoringMtrResultUuidGetResponses, MtrGetResultApiV1MonitoringMtrResultUuidGetErrors, ThrowOnError>({ url: '/api/v1/monitoring/mtr/{result_uuid}', ...options });
-
-/**
- * List Rules Endpoint
- *
- * List alert rules. Admin sees all; subscriber sees own only.
- */
-export const listRulesEndpointApiV1AlertsRulesGet = <ThrowOnError extends boolean = false>(options?: Options<ListRulesEndpointApiV1AlertsRulesGetData, ThrowOnError>) => (options?.client ?? client).get<ListRulesEndpointApiV1AlertsRulesGetResponses, ListRulesEndpointApiV1AlertsRulesGetErrors, ThrowOnError>({ url: '/api/v1/alerts/rules/', ...options });
-
-/**
- * Create Rule Endpoint
- *
- * Create a new alert rule. Subscriber or admin.
- */
-export const createRuleEndpointApiV1AlertsRulesPost = <ThrowOnError extends boolean = false>(options: Options<CreateRuleEndpointApiV1AlertsRulesPostData, ThrowOnError>) => (options.client ?? client).post<CreateRuleEndpointApiV1AlertsRulesPostResponses, CreateRuleEndpointApiV1AlertsRulesPostErrors, ThrowOnError>({
-    url: '/api/v1/alerts/rules/',
+export const postAgentIperf3ExecutionClaimApiV1AgentsAgentUuidIperf3ExecutionClaimsPost = <ThrowOnError extends boolean = false>(options: Options<PostAgentIperf3ExecutionClaimApiV1AgentsAgentUuidIperf3ExecutionClaimsPostData, ThrowOnError>) => (options.client ?? client).post<PostAgentIperf3ExecutionClaimApiV1AgentsAgentUuidIperf3ExecutionClaimsPostResponses, PostAgentIperf3ExecutionClaimApiV1AgentsAgentUuidIperf3ExecutionClaimsPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/agents/{agent_uuid}/iperf3-execution-claims',
     ...options,
     headers: {
         'Content-Type': 'application/json',
         ...options.headers
     }
 });
-
-/**
- * Delete Rule Endpoint
- *
- * Deactivate an alert rule (soft delete). Own only (or admin).
- */
-export const deleteRuleEndpointApiV1AlertsRulesRuleUuidDelete = <ThrowOnError extends boolean = false>(options: Options<DeleteRuleEndpointApiV1AlertsRulesRuleUuidDeleteData, ThrowOnError>) => (options.client ?? client).delete<DeleteRuleEndpointApiV1AlertsRulesRuleUuidDeleteResponses, DeleteRuleEndpointApiV1AlertsRulesRuleUuidDeleteErrors, ThrowOnError>({ url: '/api/v1/alerts/rules/{rule_uuid}', ...options });
-
-/**
- * Get Rule Endpoint
- *
- * Get a single alert rule by UUID.
- */
-export const getRuleEndpointApiV1AlertsRulesRuleUuidGet = <ThrowOnError extends boolean = false>(options: Options<GetRuleEndpointApiV1AlertsRulesRuleUuidGetData, ThrowOnError>) => (options.client ?? client).get<GetRuleEndpointApiV1AlertsRulesRuleUuidGetResponses, GetRuleEndpointApiV1AlertsRulesRuleUuidGetErrors, ThrowOnError>({ url: '/api/v1/alerts/rules/{rule_uuid}', ...options });
-
-/**
- * Update Rule Endpoint
- *
- * Update an alert rule. Own only (or admin).
- */
-export const updateRuleEndpointApiV1AlertsRulesRuleUuidPatch = <ThrowOnError extends boolean = false>(options: Options<UpdateRuleEndpointApiV1AlertsRulesRuleUuidPatchData, ThrowOnError>) => (options.client ?? client).patch<UpdateRuleEndpointApiV1AlertsRulesRuleUuidPatchResponses, UpdateRuleEndpointApiV1AlertsRulesRuleUuidPatchErrors, ThrowOnError>({
-    url: '/api/v1/alerts/rules/{rule_uuid}',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
- * List Events Endpoint
- *
- * List alert events. Admin sees all; subscriber sees events for own rules only.
- */
-export const listEventsEndpointApiV1AlertsEventsGet = <ThrowOnError extends boolean = false>(options?: Options<ListEventsEndpointApiV1AlertsEventsGetData, ThrowOnError>) => (options?.client ?? client).get<ListEventsEndpointApiV1AlertsEventsGetResponses, ListEventsEndpointApiV1AlertsEventsGetErrors, ThrowOnError>({ url: '/api/v1/alerts/events/', ...options });
-
-/**
- * Get Event Endpoint
- *
- * Get a single alert event by UUID.
- */
-export const getEventEndpointApiV1AlertsEventsEventUuidGet = <ThrowOnError extends boolean = false>(options: Options<GetEventEndpointApiV1AlertsEventsEventUuidGetData, ThrowOnError>) => (options.client ?? client).get<GetEventEndpointApiV1AlertsEventsEventUuidGetResponses, GetEventEndpointApiV1AlertsEventsEventUuidGetErrors, ThrowOnError>({ url: '/api/v1/alerts/events/{event_uuid}', ...options });
-
-/**
- * List Webhooks Endpoint
- *
- * List webhooks. Admin sees all; subscriber sees own only.
- */
-export const listWebhooksEndpointApiV1WebhooksGet = <ThrowOnError extends boolean = false>(options?: Options<ListWebhooksEndpointApiV1WebhooksGetData, ThrowOnError>) => (options?.client ?? client).get<ListWebhooksEndpointApiV1WebhooksGetResponses, ListWebhooksEndpointApiV1WebhooksGetErrors, ThrowOnError>({ url: '/api/v1/webhooks/', ...options });
-
-/**
- * Create Webhook Endpoint
- *
- * Create a new webhook. Secret is returned only once.
- */
-export const createWebhookEndpointApiV1WebhooksPost = <ThrowOnError extends boolean = false>(options: Options<CreateWebhookEndpointApiV1WebhooksPostData, ThrowOnError>) => (options.client ?? client).post<CreateWebhookEndpointApiV1WebhooksPostResponses, CreateWebhookEndpointApiV1WebhooksPostErrors, ThrowOnError>({
-    url: '/api/v1/webhooks/',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
- * Delete Webhook Endpoint
- *
- * Deactivate a webhook (soft delete). Own only (or admin).
- */
-export const deleteWebhookEndpointApiV1WebhooksWebhookUuidDelete = <ThrowOnError extends boolean = false>(options: Options<DeleteWebhookEndpointApiV1WebhooksWebhookUuidDeleteData, ThrowOnError>) => (options.client ?? client).delete<DeleteWebhookEndpointApiV1WebhooksWebhookUuidDeleteResponses, DeleteWebhookEndpointApiV1WebhooksWebhookUuidDeleteErrors, ThrowOnError>({ url: '/api/v1/webhooks/{webhook_uuid}', ...options });
-
-/**
- * Get Webhook Endpoint
- *
- * Get a single webhook by UUID. Own only (or admin).
- */
-export const getWebhookEndpointApiV1WebhooksWebhookUuidGet = <ThrowOnError extends boolean = false>(options: Options<GetWebhookEndpointApiV1WebhooksWebhookUuidGetData, ThrowOnError>) => (options.client ?? client).get<GetWebhookEndpointApiV1WebhooksWebhookUuidGetResponses, GetWebhookEndpointApiV1WebhooksWebhookUuidGetErrors, ThrowOnError>({ url: '/api/v1/webhooks/{webhook_uuid}', ...options });
-
-/**
- * Update Webhook Endpoint
- *
- * Update a webhook. Own only (or admin).
- */
-export const updateWebhookEndpointApiV1WebhooksWebhookUuidPatch = <ThrowOnError extends boolean = false>(options: Options<UpdateWebhookEndpointApiV1WebhooksWebhookUuidPatchData, ThrowOnError>) => (options.client ?? client).patch<UpdateWebhookEndpointApiV1WebhooksWebhookUuidPatchResponses, UpdateWebhookEndpointApiV1WebhooksWebhookUuidPatchErrors, ThrowOnError>({
-    url: '/api/v1/webhooks/{webhook_uuid}',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
- * Test Webhook Endpoint
- *
- * Send a test ping event to the webhook and return the delivery result.
- */
-export const testWebhookEndpointApiV1WebhooksWebhookUuidTestPost = <ThrowOnError extends boolean = false>(options: Options<TestWebhookEndpointApiV1WebhooksWebhookUuidTestPostData, ThrowOnError>) => (options.client ?? client).post<TestWebhookEndpointApiV1WebhooksWebhookUuidTestPostResponses, TestWebhookEndpointApiV1WebhooksWebhookUuidTestPostErrors, ThrowOnError>({ url: '/api/v1/webhooks/{webhook_uuid}/test', ...options });
-
-/**
- * Rotate Secret Endpoint
- *
- * Generate a new HMAC secret for the webhook. Old secret is invalidated.
- */
-export const rotateSecretEndpointApiV1WebhooksWebhookUuidRotateSecretPost = <ThrowOnError extends boolean = false>(options: Options<RotateSecretEndpointApiV1WebhooksWebhookUuidRotateSecretPostData, ThrowOnError>) => (options.client ?? client).post<RotateSecretEndpointApiV1WebhooksWebhookUuidRotateSecretPostResponses, RotateSecretEndpointApiV1WebhooksWebhookUuidRotateSecretPostErrors, ThrowOnError>({ url: '/api/v1/webhooks/{webhook_uuid}/rotate-secret', ...options });
-
-/**
- * List Deliveries Endpoint
- *
- * List recent delivery attempts for a webhook (newest first).
- */
-export const listDeliveriesEndpointApiV1WebhooksWebhookUuidDeliveriesGet = <ThrowOnError extends boolean = false>(options: Options<ListDeliveriesEndpointApiV1WebhooksWebhookUuidDeliveriesGetData, ThrowOnError>) => (options.client ?? client).get<ListDeliveriesEndpointApiV1WebhooksWebhookUuidDeliveriesGetResponses, ListDeliveriesEndpointApiV1WebhooksWebhookUuidDeliveriesGetErrors, ThrowOnError>({ url: '/api/v1/webhooks/{webhook_uuid}/deliveries', ...options });
-
-/**
- * Retry Delivery Endpoint
- *
- * Manually retry a failed delivery.
- */
-export const retryDeliveryEndpointApiV1WebhooksWebhookUuidDeliveriesDeliveryUuidRetryPost = <ThrowOnError extends boolean = false>(options: Options<RetryDeliveryEndpointApiV1WebhooksWebhookUuidDeliveriesDeliveryUuidRetryPostData, ThrowOnError>) => (options.client ?? client).post<RetryDeliveryEndpointApiV1WebhooksWebhookUuidDeliveriesDeliveryUuidRetryPostResponses, RetryDeliveryEndpointApiV1WebhooksWebhookUuidDeliveriesDeliveryUuidRetryPostErrors, ThrowOnError>({ url: '/api/v1/webhooks/{webhook_uuid}/deliveries/{delivery_uuid}/retry', ...options });
-
-/**
- * List Settings Endpoint
- */
-export const listSettingsEndpointApiV1SettingsGet = <ThrowOnError extends boolean = false>(options?: Options<ListSettingsEndpointApiV1SettingsGetData, ThrowOnError>) => (options?.client ?? client).get<ListSettingsEndpointApiV1SettingsGetResponses, ListSettingsEndpointApiV1SettingsGetErrors, ThrowOnError>({ url: '/api/v1/settings/', ...options });
-
-/**
- * Bulk Update Settings Endpoint
- */
-export const bulkUpdateSettingsEndpointApiV1SettingsBulkPatch = <ThrowOnError extends boolean = false>(options: Options<BulkUpdateSettingsEndpointApiV1SettingsBulkPatchData, ThrowOnError>) => (options.client ?? client).patch<BulkUpdateSettingsEndpointApiV1SettingsBulkPatchResponses, BulkUpdateSettingsEndpointApiV1SettingsBulkPatchErrors, ThrowOnError>({
-    url: '/api/v1/settings/bulk',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
- * Get Setting Endpoint
- */
-export const getSettingEndpointApiV1SettingsKeyGet = <ThrowOnError extends boolean = false>(options: Options<GetSettingEndpointApiV1SettingsKeyGetData, ThrowOnError>) => (options.client ?? client).get<GetSettingEndpointApiV1SettingsKeyGetResponses, GetSettingEndpointApiV1SettingsKeyGetErrors, ThrowOnError>({ url: '/api/v1/settings/{key}', ...options });
-
-/**
- * Update Setting Endpoint
- */
-export const updateSettingEndpointApiV1SettingsKeyPatch = <ThrowOnError extends boolean = false>(options: Options<UpdateSettingEndpointApiV1SettingsKeyPatchData, ThrowOnError>) => (options.client ?? client).patch<UpdateSettingEndpointApiV1SettingsKeyPatchResponses, UpdateSettingEndpointApiV1SettingsKeyPatchErrors, ThrowOnError>({
-    url: '/api/v1/settings/{key}',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
- * List Audit Logs
- */
-export const listAuditLogsApiV1AuditLogsGet = <ThrowOnError extends boolean = false>(options?: Options<ListAuditLogsApiV1AuditLogsGetData, ThrowOnError>) => (options?.client ?? client).get<ListAuditLogsApiV1AuditLogsGetResponses, ListAuditLogsApiV1AuditLogsGetErrors, ThrowOnError>({ url: '/api/v1/audit/logs', ...options });
-
-/**
- * Health
- */
-export const healthApiV1HealthGet = <ThrowOnError extends boolean = false>(options?: Options<HealthApiV1HealthGetData, ThrowOnError>) => (options?.client ?? client).get<HealthApiV1HealthGetResponses, unknown, ThrowOnError>({ url: '/api/v1/health', ...options });

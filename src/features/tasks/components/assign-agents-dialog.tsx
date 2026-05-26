@@ -8,7 +8,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CheckableList } from '@/components/ui/checkable-list'
-import type { AgentResponse } from '@/api/generated/types.gen'
+import type { AdminAgent } from '@/api/hooks/admin-api'
 
 interface AssignAgentsDialogProps {
   taskUuid: string | null
@@ -23,8 +23,8 @@ export function AssignAgentsDialog({ taskUuid, onClose }: AssignAgentsDialogProp
   const unassignAgent = useUnassignAgent()
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set())
 
-  const taskAgents = (taskAgentsData ?? []) as AgentResponse[]
-  const allAgents = ((allAgentsData as { items?: AgentResponse[] })?.items ?? []) as AgentResponse[]
+  const taskAgents = (taskAgentsData ?? []) as AdminAgent[]
+  const allAgents = ((allAgentsData as { items?: AdminAgent[] })?.items ?? []) as AdminAgent[]
   const assignedUuids = new Set(taskAgents.map((a) => a.agent_uuid))
 
   const handleToggle = (agentUuid: string) => {

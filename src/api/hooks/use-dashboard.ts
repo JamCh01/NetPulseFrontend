@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { dashboardKeys } from './keys'
-import { dashboardStatsApiV1DashboardStatsGet } from '@/api/generated/sdk.gen'
 import { reportMissingApi } from '@/lib/api-compat'
+import { adminRequest } from './admin-api'
+import type { DashboardStats } from '@/api/types'
 
 let dashboardStatsUnsupported = false
 
@@ -21,8 +22,9 @@ export function useDashboardStats() {
       if (dashboardStatsUnsupported) {
         return { __unsupported: true } as const
       }
-      const { data, error } = await dashboardStatsApiV1DashboardStatsGet()
-      if (error) {
+      try {
+        return await adminRequest<DashboardStats>('/api/v1/dashboard/stats')
+      } catch (error) {
         if (isNotFoundError(error)) {
           dashboardStatsUnsupported = true
           reportMissingApi('/api/v1/dashboard/stats')
@@ -30,7 +32,6 @@ export function useDashboardStats() {
         }
         throw error
       }
-      return data
     },
     staleTime: 5 * 60 * 1000,
     retry: (failureCount, error) => {

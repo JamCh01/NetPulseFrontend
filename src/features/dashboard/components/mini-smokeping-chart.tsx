@@ -1,7 +1,7 @@
 import { memo, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
-import type { MonitoringDataPoint } from '@/api/generated/types.gen'
+import type { MonitoringDataPoint } from '@/features/monitoring/lib/monitoring-data-point'
 import { LazyECharts } from '@/components/charts/lazy-echarts'
 import { useChartTheme } from '@/features/monitoring/lib/chart-theme'
 import { transformToChartData } from '@/features/monitoring/lib/transform-chart-data'
