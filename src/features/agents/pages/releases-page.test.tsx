@@ -38,7 +38,7 @@ describe('ReleasesPage agent artifacts', () => {
         expect(url.searchParams.get('os')).toBe('linux')
         return HttpResponse.json({
           data: {
-            items: [artifact],
+            items: [{ ...artifact, arch: 'amd64' }],
           },
         })
       }),
@@ -51,11 +51,11 @@ describe('ReleasesPage agent artifacts', () => {
     renderWithProviders(<ReleasesPage />)
 
     await user.click(screen.getByRole('combobox', { name: 'OS' }))
-    await user.click(await screen.findByRole('option', { name: 'linux' }))
+    await user.click(await screen.findByRole('option', { name: 'Linux' }))
 
     expect(await screen.findByText('Agent Artifacts')).toBeInTheDocument()
     expect(await screen.findByText('1.2.3')).toBeInTheDocument()
-    expect(screen.getByText('linux / x86_64')).toBeInTheDocument()
+    expect(screen.getByText('Linux / x86_64 (AMD64)')).toBeInTheDocument()
     expect(screen.getByText('cloudflare_r2')).toBeInTheDocument()
     expect(screen.queryByText('push update')).not.toBeInTheDocument()
 
@@ -64,5 +64,28 @@ describe('ReleasesPage agent artifacts', () => {
     await user.click(within(dialog).getByRole('button', { name: '删除' }))
 
     expect(deletePath).toBe('artifact-1')
+  })
+
+  it('uses standardized OS and de-duplicated architecture labels in artifact controls', async () => {
+    const user = userEvent.setup()
+    server.use(
+      http.get('*/api/v1/artifacts/agents', () => HttpResponse.json({ data: { items: [] } })),
+    )
+
+    renderWithProviders(<ReleasesPage />)
+
+    expect(await screen.findByText('Agent Artifacts')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('combobox', { name: 'OS' }))
+    expect(await screen.findByRole('option', { name: 'Linux' })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'macOS' })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'Windows' })).toBeInTheDocument()
+    await user.keyboard('{Escape}')
+
+    await user.click(screen.getByRole('combobox', { name: 'Arch' }))
+    expect(await screen.findByRole('option', { name: 'x86_64 (AMD64)' })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'aarch64 (ARM64)' })).toBeInTheDocument()
+    expect(screen.queryByRole('option', { name: 'amd64' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('option', { name: 'arm64' })).not.toBeInTheDocument()
   })
 })

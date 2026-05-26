@@ -9,10 +9,10 @@ NetPulse Frontend -- a React SPA for network monitoring. Backend is a Python Fas
 ## Quick Reference
 
 ```bash
-npm run dev          # Start dev server (localhost:5173, proxies /api to :8000)
-npm run build        # tsc -b && vite build
-npm run test         # vitest run
-npm run generate:api # Regenerate API client from OpenAPI
+bun run dev          # Start dev server (localhost:5173, proxies /api to :8000)
+bun run build        # tsc -b && vite build
+bun run test         # vitest run
+bun run generate:api # Regenerate API client from OpenAPI
 ```
 
 ## Architecture
@@ -36,7 +36,7 @@ npm run generate:api # Regenerate API client from OpenAPI
 
 ### API Types
 - Auto-generated types in `src/api/generated/types.gen.ts` -- some fields are manually added (e.g., `user_uuid`, `is_deleted`, `platform`, `AlertRuleUpdate`, `UserChangePassword`)
-- After regenerating with `npm run generate:api`, re-apply manual additions
+- After regenerating with `bun run generate:api`, re-apply manual additions
 - Custom shared types go in `src/api/types.ts` (e.g., `DashboardStats`)
 - Agent endpoints return `unknown` from OpenAPI -- pages cast with `as`
 
@@ -167,12 +167,12 @@ npm run generate:api # Regenerate API client from OpenAPI
 ## Deployment
 
 ### Build & Artifacts
-- `npm run build` outputs to `dist/` (static SPA, no SSR)
+- `bun run build` outputs to `dist/` (static SPA, no SSR)
 - `VITE_API_BASE_URL` is baked in at build time -- **must be empty** when SDK paths include `/api/v1` (setting `/api/v1` causes double-prefix `/api/v1/api/v1/...`)
 - All `VITE_*` env vars are embedded in the JS bundle at build time, not read at runtime
 
 ### Docker
-- `Dockerfile` -- two-stage build: `node:22-alpine` (build) + `nginx:alpine` (serve)
+- `Dockerfile` -- two-stage build: `oven/bun:1.3.12-alpine` (build) + `nginx:alpine` (serve)
 - `nginx.conf` -- SPA fallback + `/api/` reverse proxy to `http://backend:8000` + gzip + asset caching
 - `.dockerignore` -- excludes node_modules, dist, .env, test artifacts
 - Build arg: `docker build --build-arg VITE_API_BASE_URL=... -t netpulse-frontend .`

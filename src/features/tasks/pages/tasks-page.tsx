@@ -32,7 +32,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { ToggleSwitch } from '@/components/ui/toggle-switch'
 import { buildTaskPayload, formatDateTime, protocolOptionsForTarget } from '@/features/admin/utils'
-import { PROTOCOL_COLORS, protocolLabel } from '@/lib/constants'
+import { PROTOCOL_COLORS, ipFamilyLabel, protocolLabel } from '@/lib/constants'
 
 type Iperf3Mode = 'single_thread' | 'multi_thread'
 type MtrProbeProtocol = 'icmp_echo' | 'tcp' | 'udp'
@@ -375,12 +375,6 @@ function ProtocolFields({
 
 function iperf3ModeLabel(mode: Iperf3Mode): string {
   return mode === 'multi_thread' ? '8 线程' : '单线程'
-}
-
-function ipFamilyLabel(value: IpFamily | null): string {
-  if (value === '6') return 'IPv6'
-  if (value === '4') return 'IPv4'
-  return '选择 IP 协议族'
 }
 
 function targetOptionLabel(target: TargetOptionSummary | null | undefined, fallback?: string | null): string {

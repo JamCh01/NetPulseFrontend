@@ -11,6 +11,13 @@ import { formatDateTime } from '@/features/admin/utils'
 
 const PAGE_SIZE = 50
 
+function eventStatusLabel(status: string | null) {
+  if (status === 'processed') return 'processed'
+  if (status === 'duplicate') return 'duplicate'
+  if (status === 'failed') return 'failed'
+  return '全部状态'
+}
+
 function statusVariant(status: string) {
   if (status === 'processed') return 'success'
   if (status === 'failed') return 'destructive'
@@ -53,7 +60,11 @@ export default function ResultIngestionEventsPage() {
             setStatus(value ?? 'all')
             setPage(1)
           }}>
-            <SelectTrigger className="w-full md:w-44"><SelectValue /></SelectTrigger>
+            <SelectTrigger aria-label="事件状态" className="w-full md:w-44">
+              <SelectValue>
+                {(value: string | null) => eventStatusLabel(value)}
+              </SelectValue>
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">全部状态</SelectItem>
               <SelectItem value="processed">processed</SelectItem>

@@ -31,9 +31,16 @@ import { Textarea } from '@/components/ui/textarea'
 import { GeoInput } from '@/features/admin/geo-input'
 import { TagInput } from '@/features/admin/tag-input'
 import { csvToList, formatDateTime, joinLocation } from '@/features/admin/utils'
-import { AGENT_STATUS_COLORS } from '@/lib/constants'
+import { AGENT_STATUS_COLORS, ipVersionLabel } from '@/lib/constants'
 
 const PAGE_SIZE = 100
+
+function agentStatusLabel(value: AgentStatus | 'all' | null) {
+  if (value === 'online') return 'Online'
+  if (value === 'offline') return 'Offline'
+  if (value === 'disabled') return 'Disabled'
+  return '全部状态'
+}
 
 export default function AgentsPage() {
   const navigate = useNavigate()
@@ -189,7 +196,11 @@ export default function AgentsPage() {
             setStatus(value as AgentStatus | 'all')
             setPage(1)
           }}>
-            <SelectTrigger className="w-full md:w-40"><SelectValue /></SelectTrigger>
+            <SelectTrigger aria-label="状态" className="w-full md:w-40">
+              <SelectValue>
+                {(value: AgentStatus | 'all' | null) => agentStatusLabel(value)}
+              </SelectValue>
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">全部状态</SelectItem>
               <SelectItem value="online">Online</SelectItem>
@@ -298,7 +309,11 @@ export default function AgentsPage() {
               <div>
                 <Label className="mb-1.5 text-xs text-text-secondary">IP 支持</Label>
                 <Select value={form.ip_version} onValueChange={(value) => setForm({ ...form, ip_version: value as IpVersion })}>
-                  <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                  <SelectTrigger aria-label="IP 支持" className="w-full">
+                    <SelectValue>
+                      {(value: IpVersion | null) => ipVersionLabel(value)}
+                    </SelectValue>
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="4">IPv4</SelectItem>
                     <SelectItem value="6">IPv6</SelectItem>

@@ -6,6 +6,7 @@ NetPulse is a network monitoring platform (SmokePing-style). This is the React f
 
 - **React 19** + **TypeScript 5.9**
 - **Vite 8** (build & dev server)
+- **Bun 1.3** (package manager & script runner)
 - **React Router 7** (client-side routing)
 - **TanStack Query 5** (server state management)
 - **Zustand 5** (client state: auth, theme)
@@ -44,25 +45,25 @@ NetPulse is a network monitoring platform (SmokePing-style). This is the React f
 
 ```bash
 # Install dependencies
-npm install
+bun install
 
 # Copy environment config
 cp .env.example .env
 
 # Start dev server (proxies /api to localhost:8000)
-npm run dev
+bun run dev
 ```
 
 ## Scripts
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start Vite dev server with HMR |
-| `npm run build` | Type-check + production build |
-| `npm run preview` | Preview production build locally |
-| `npm run lint` | Run ESLint |
-| `npm run test` | Run tests once |
-| `npm run generate:api` | Regenerate API client from OpenAPI spec |
+| `bun run dev` | Start Vite dev server with HMR |
+| `bun run build` | Type-check + production build |
+| `bun run preview` | Preview production build locally |
+| `bun run lint` | Run ESLint |
+| `bun run test` | Run tests once |
+| `bun run generate:api` | Regenerate API client from OpenAPI spec |
 
 ## Project Structure
 
@@ -118,7 +119,7 @@ src/
 
 ### Manual Deployment (Nginx)
 
-The project is built using `npm run build` and produces static files in `dist/`.
+The project is built using `bun run build` and produces static files in `dist/`.
 
 **API Reverse Proxy:**
 The frontend calls `/api/v1/...` endpoints. If `VITE_API_BASE_URL` is empty, proxy API requests from the frontend origin to the backend:

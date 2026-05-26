@@ -23,6 +23,19 @@ export function protocolLabel(protocol: string): string {
   return PROTOCOL_LABELS[normalized as MonitoringProtocolName] ?? normalized.toUpperCase()
 }
 
+export function ipVersionLabel(value: string | null | undefined, placeholder = '选择 IP 版本'): string {
+  if (value === '4') return 'IPv4'
+  if (value === '6') return 'IPv6'
+  if (value === '4+6') return 'IPv4 + IPv6'
+  return value || placeholder
+}
+
+export function ipFamilyLabel(value: string | null | undefined, placeholder = '选择 IP 协议族'): string {
+  if (value === '4') return 'IPv4'
+  if (value === '6') return 'IPv6'
+  return value || placeholder
+}
+
 export const PROTOCOL_ICON_COLORS: Record<string, string> = {
   icmp: 'text-cyan-600 dark:text-cyan-400',
   tcp: 'text-purple-600 dark:text-purple-400',

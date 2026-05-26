@@ -382,6 +382,16 @@ function GeoEditDialog({ dialog, onClose }: { dialog: GeoDialogState; onClose: (
     else updateCity.mutate({ uuid: dialog.item.city_uuid, data: payload }, options)
   }
 
+  const continentLabel = (continentUuid: string | null) => {
+    if (!continentUuid) return '选择大洲'
+    return (continentsQuery.data?.items ?? []).find((continent: GeoContinent) => continent.continent_uuid === continentUuid)?.name ?? continentUuid
+  }
+
+  const countryLabel = (countryUuid: string | null) => {
+    if (!countryUuid) return '选择国家'
+    return (countriesQuery.data?.items ?? []).find((country: GeoCountry) => country.country_uuid === countryUuid)?.name ?? countryUuid
+  }
+
   return (
     <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
       <DialogContent className="sm:max-w-lg">
@@ -394,7 +404,11 @@ function GeoEditDialog({ dialog, onClose }: { dialog: GeoDialogState; onClose: (
             <div>
               <Label className="mb-1.5 text-xs text-text-secondary">所属大洲</Label>
               <Select value={form.continent_uuid || undefined} onValueChange={(value) => setForm({ ...form, continent_uuid: value ?? '' })}>
-                <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                <SelectTrigger aria-label="所属大洲" className="w-full">
+                  <SelectValue>
+                    {(value: string | null) => continentLabel(value)}
+                  </SelectValue>
+                </SelectTrigger>
                 <SelectContent>
                   {(continentsQuery.data?.items ?? []).map((continent: GeoContinent) => (
                     <SelectItem key={continent.continent_uuid} value={continent.continent_uuid}>{continent.name}</SelectItem>
@@ -407,7 +421,11 @@ function GeoEditDialog({ dialog, onClose }: { dialog: GeoDialogState; onClose: (
             <div>
               <Label className="mb-1.5 text-xs text-text-secondary">所属国家</Label>
               <Select value={form.country_uuid || undefined} onValueChange={(value) => setForm({ ...form, country_uuid: value ?? '' })}>
-                <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                <SelectTrigger aria-label="所属国家" className="w-full">
+                  <SelectValue>
+                    {(value: string | null) => countryLabel(value)}
+                  </SelectValue>
+                </SelectTrigger>
                 <SelectContent>
                   {(countriesQuery.data?.items ?? []).map((country: GeoCountry) => (
                     <SelectItem key={country.country_uuid} value={country.country_uuid}>{country.name}</SelectItem>

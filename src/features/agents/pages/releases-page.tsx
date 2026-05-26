@@ -28,8 +28,22 @@ import { Textarea } from '@/components/ui/textarea'
 import { ToggleSwitch } from '@/components/ui/toggle-switch'
 import { formatDateTime } from '@/lib/format'
 
-const OS_OPTIONS = ['linux', 'darwin', 'windows']
-const ARCH_OPTIONS = ['x86_64', 'aarch64', 'arm64', 'amd64']
+const OS_OPTIONS = [
+  { value: 'linux', label: 'Linux' },
+  { value: 'darwin', label: 'macOS' },
+  { value: 'windows', label: 'Windows' },
+] as const
+
+const ARCH_OPTIONS = [
+  { value: 'x86_64', label: 'x86_64 (AMD64)' },
+  { value: 'aarch64', label: 'aarch64 (ARM64)' },
+] as const
+
+const ARCH_ALIASES: Record<string, string> = {
+  amd64: 'x86_64',
+  x64: 'x86_64',
+  arm64: 'aarch64',
+}
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
@@ -41,8 +55,25 @@ function shortSha(sha: string): string {
   return `${sha.slice(0, 12)}...${sha.slice(-6)}`
 }
 
+function normalizeArch(arch: string | null | undefined): string {
+  const normalized = arch?.trim().toLowerCase()
+  if (!normalized) return 'x86_64'
+  return ARCH_ALIASES[normalized] ?? normalized
+}
+
+function osLabel(os: string | null | undefined, placeholder = '选择 OS'): string {
+  if (!os) return placeholder
+  return OS_OPTIONS.find((option) => option.value === os.toLowerCase())?.label ?? os
+}
+
+function archLabel(arch: string | null | undefined, placeholder = '选择 Arch'): string {
+  if (!arch) return placeholder
+  const canonical = normalizeArch(arch)
+  return ARCH_OPTIONS.find((option) => option.value === canonical)?.label ?? arch
+}
+
 function artifactPlatform(artifact: AgentArtifactResponse): string {
-  return `${artifact.os} / ${artifact.arch}`
+  return `${osLabel(artifact.os)} / ${archLabel(artifact.arch)}`
 }
 
 export default function ReleasesPage() {
@@ -115,7 +146,7 @@ export default function ReleasesPage() {
         body: {
           version: editing.version,
           os: editing.os,
-          arch: editing.arch,
+          arch: normalizeArch(editing.arch),
           is_active: editing.is_active,
           comment: editing.comment ?? null,
         },
@@ -168,11 +199,11 @@ export default function ReleasesPage() {
             <Label htmlFor="artifact-os-filter" className="mb-1.5 text-xs text-text-muted">OS</Label>
             <Select value={osFilter || '__all__'} onValueChange={(value) => setOsFilter(value === '__all__' ? '' : (value ?? ''))}>
               <SelectTrigger id="artifact-os-filter" aria-label="OS" className="w-full bg-background/95">
-                <SelectValue>{(value: string | null) => value === '__all__' || !value ? '全部 OS' : value}</SelectValue>
+                <SelectValue>{(value: string | null) => value === '__all__' || !value ? '全部 OS' : osLabel(value)}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="__all__">全部 OS</SelectItem>
-                {OS_OPTIONS.map((os) => <SelectItem key={os} value={os}>{os}</SelectItem>)}
+                {OS_OPTIONS.map((os) => <SelectItem key={os.value} value={os.value}>{os.label}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
@@ -180,11 +211,11 @@ export default function ReleasesPage() {
             <Label htmlFor="artifact-arch-filter" className="mb-1.5 text-xs text-text-muted">Arch</Label>
             <Select value={archFilter || '__all__'} onValueChange={(value) => setArchFilter(value === '__all__' ? '' : (value ?? ''))}>
               <SelectTrigger id="artifact-arch-filter" aria-label="Arch" className="w-full bg-background/95">
-                <SelectValue>{(value: string | null) => value === '__all__' || !value ? '全部 Arch' : value}</SelectValue>
+                <SelectValue>{(value: string | null) => value === '__all__' || !value ? '全部 Arch' : archLabel(value)}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="__all__">全部 Arch</SelectItem>
-                {ARCH_OPTIONS.map((arch) => <SelectItem key={arch} value={arch}>{arch}</SelectItem>)}
+                {ARCH_OPTIONS.map((arch) => <SelectItem key={arch.value} value={arch.value}>{arch.label}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
@@ -315,18 +346,18 @@ export default function ReleasesPage() {
                 <Label htmlFor="artifact-upload-os" className="mb-1.5 text-xs text-text-muted">OS</Label>
                 <Select value={uploadOs} onValueChange={(value) => setUploadOs(value ?? 'linux')}>
                   <SelectTrigger id="artifact-upload-os" aria-label="上传 OS" className="w-full bg-background/95">
-                    <SelectValue>{(value: string | null) => value ?? 'linux'}</SelectValue>
+                    <SelectValue>{(value: string | null) => osLabel(value, 'Linux')}</SelectValue>
                   </SelectTrigger>
-                  <SelectContent>{OS_OPTIONS.map((os) => <SelectItem key={os} value={os}>{os}</SelectItem>)}</SelectContent>
+                  <SelectContent>{OS_OPTIONS.map((os) => <SelectItem key={os.value} value={os.value}>{os.label}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div>
                 <Label htmlFor="artifact-upload-arch" className="mb-1.5 text-xs text-text-muted">Arch</Label>
                 <Select value={uploadArch} onValueChange={(value) => setUploadArch(value ?? 'x86_64')}>
                   <SelectTrigger id="artifact-upload-arch" aria-label="上传 Arch" className="w-full bg-background/95">
-                    <SelectValue>{(value: string | null) => value ?? 'x86_64'}</SelectValue>
+                    <SelectValue>{(value: string | null) => archLabel(value, 'x86_64 (AMD64)')}</SelectValue>
                   </SelectTrigger>
-                  <SelectContent>{ARCH_OPTIONS.map((arch) => <SelectItem key={arch} value={arch}>{arch}</SelectItem>)}</SelectContent>
+                  <SelectContent>{ARCH_OPTIONS.map((arch) => <SelectItem key={arch.value} value={arch.value}>{arch.label}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
             </div>
@@ -366,11 +397,21 @@ export default function ReleasesPage() {
                 </div>
                 <div>
                   <Label htmlFor="artifact-edit-os" className="mb-1.5 text-xs text-text-muted">OS</Label>
-                  <Input id="artifact-edit-os" value={editing.os} onChange={(event) => setEditing({ ...editing, os: event.target.value })} required />
+                  <Select value={editing.os} onValueChange={(value) => setEditing({ ...editing, os: value ?? 'linux' })}>
+                    <SelectTrigger id="artifact-edit-os" aria-label="编辑 OS" className="w-full bg-background/95">
+                      <SelectValue>{(value: string | null) => osLabel(value)}</SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>{OS_OPTIONS.map((os) => <SelectItem key={os.value} value={os.value}>{os.label}</SelectItem>)}</SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label htmlFor="artifact-edit-arch" className="mb-1.5 text-xs text-text-muted">Arch</Label>
-                  <Input id="artifact-edit-arch" value={editing.arch} onChange={(event) => setEditing({ ...editing, arch: event.target.value })} required />
+                  <Select value={normalizeArch(editing.arch)} onValueChange={(value) => setEditing({ ...editing, arch: value ?? 'x86_64' })}>
+                    <SelectTrigger id="artifact-edit-arch" aria-label="编辑 Arch" className="w-full bg-background/95">
+                      <SelectValue>{(value: string | null) => archLabel(value)}</SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>{ARCH_OPTIONS.map((arch) => <SelectItem key={arch.value} value={arch.value}>{arch.label}</SelectItem>)}</SelectContent>
+                  </Select>
                 </div>
               </div>
               <div className="flex items-center justify-between rounded-lg border border-border/70 p-3">

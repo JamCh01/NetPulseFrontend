@@ -34,7 +34,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { GeoInput } from '@/features/admin/geo-input'
 import { TagInput } from '@/features/admin/tag-input'
 import { csvToList, formatDateTime, joinLocation } from '@/features/admin/utils'
-import { MONITORING_PROTOCOLS, PROTOCOL_COLORS, protocolLabel } from '@/lib/constants'
+import { MONITORING_PROTOCOLS, PROTOCOL_COLORS, ipVersionLabel, protocolLabel } from '@/lib/constants'
 
 const PAGE_SIZE = 100
 const PROTOCOLS: TargetProtocol[] = [...MONITORING_PROTOCOLS]
@@ -313,7 +313,11 @@ export default function TargetsPage() {
               <div>
                 <Label className="mb-1.5 text-xs text-text-secondary">IP 版本</Label>
                 <Select value={form.ip_version} onValueChange={(value) => setForm({ ...form, ip_version: value as IpVersion })}>
-                  <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                  <SelectTrigger aria-label="IP 版本" className="w-full">
+                    <SelectValue>
+                      {(value: IpVersion | null) => ipVersionLabel(value)}
+                    </SelectValue>
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="4">IPv4</SelectItem>
                     <SelectItem value="6">IPv6</SelectItem>
