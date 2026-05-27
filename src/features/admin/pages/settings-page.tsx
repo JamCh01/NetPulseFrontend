@@ -216,7 +216,9 @@ function SettingsForm({ settings }: { settings: AppSettingsResponse }) {
 
   const saveDisabled = updateSettings.isPending
   const secretStatus = useMemo(() => {
-    return settings.artifact_r2_secret_access_key_configured ? 'Secret Access Key 已配置' : 'Secret Access Key 未配置'
+    return settings.artifact_r2_secret_access_key_configured
+      ? { label: 'Secret Access Key 已配置', className: 'font-medium text-emerald-400' }
+      : { label: 'Secret Access Key 未配置', className: 'font-medium text-red-400' }
   }, [settings])
 
   const updateField = (key: keyof SettingsFormState, value: string | number | boolean) => {
@@ -248,7 +250,7 @@ function SettingsForm({ settings }: { settings: AppSettingsResponse }) {
                     <Label htmlFor={`setting-${field.key}`} className="text-sm text-text-primary">{field.label}</Label>
                     <p className="mt-1 text-xs leading-relaxed text-text-muted">{field.description}</p>
                     {field.type === 'secret' && (
-                      <p className="mt-1 text-xs text-emerald-300">{secretStatus}</p>
+                      <p className={`mt-1 text-xs ${secretStatus.className}`}>{secretStatus.label}</p>
                     )}
                   </div>
                   <Input

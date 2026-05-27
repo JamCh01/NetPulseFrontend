@@ -48,7 +48,7 @@ describe('SettingsPage', () => {
     renderWithProviders(<SettingsPage />)
 
     expect(await screen.findByText('系统设置')).toBeInTheDocument()
-    expect(await screen.findByText('Secret Access Key 已配置')).toBeInTheDocument()
+    expect(await screen.findByText('Secret Access Key 已配置')).toHaveClass('font-medium', 'text-emerald-400')
     expect(screen.queryByDisplayValue('secret-key')).not.toBeInTheDocument()
 
     const workerSection = screen.getByRole('region', { name: 'Result Worker' })
@@ -62,5 +62,20 @@ describe('SettingsPage', () => {
       worker_processing_concurrency: 48,
     })
     expect(patchedBody).not.toHaveProperty('artifact_r2_secret_access_key')
+  })
+
+  it('marks missing Secret Access Key as red', async () => {
+    server.use(
+      http.get('*/api/v1/settings', () => HttpResponse.json({
+        data: {
+          ...settingsResponse,
+          artifact_r2_secret_access_key_configured: false,
+        },
+      })),
+    )
+
+    renderWithProviders(<SettingsPage />)
+
+    expect(await screen.findByText('Secret Access Key 未配置')).toHaveClass('font-medium', 'text-red-400')
   })
 })
