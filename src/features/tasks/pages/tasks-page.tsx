@@ -68,6 +68,7 @@ interface TaskFormState {
   mtr_max_retry_count: string
   iperf3_mode: Iperf3Mode
   iperf3_duration: string
+  iperf3_execution_time: string
 }
 
 function initialTaskForm(): TaskFormState {
@@ -92,6 +93,7 @@ function initialTaskForm(): TaskFormState {
     mtr_max_retry_count: '3',
     iperf3_mode: 'single_thread',
     iperf3_duration: '10',
+    iperf3_execution_time: '00:00',
   }
 }
 
@@ -108,6 +110,7 @@ function formWithProtocolDefaults(current: TaskFormState, taskType: TaskType): T
       packet_count: '1',
       port: '5201',
       iperf3_duration: current.iperf3_duration || '10',
+      iperf3_execution_time: current.iperf3_execution_time || '00:00',
     }
   }
   if (taskType === 'mtr') {
@@ -229,6 +232,9 @@ function ProtocolFields({
         </FieldRow>
         <FieldRow label="iperf3 执行时长" description="单次上传和下载动作各自运行的秒数，后端五分钟 claim 窗口覆盖两段动作。" htmlFor={`${prefix}-iperf3-duration`}>
           <Input id={`${prefix}-iperf3-duration`} aria-label="iperf3 执行时长" type="number" min="1" placeholder="执行秒数" value={value.iperf3_duration} onChange={(event) => setValue({ iperf3_duration: event.target.value })} />
+        </FieldRow>
+        <FieldRow label="iperf3 UTC 执行时间" description="按 UTC 时间每天执行 iperf3 任务，格式为 HH:MM；Agent 本地执行时间会随所在时区换算。" htmlFor={`${prefix}-iperf3-execution-time`}>
+          <Input id={`${prefix}-iperf3-execution-time`} aria-label="iperf3 UTC 执行时间" type="time" step="60" value={value.iperf3_execution_time} onChange={(event) => setValue({ iperf3_execution_time: event.target.value })} />
         </FieldRow>
       </>
     )
@@ -398,6 +404,12 @@ function optionalNumber(value: string): number | undefined {
   return Number(value)
 }
 
+function timeInputValue(value: string): string {
+  const parts = value.trim().split(':')
+  if (parts.length < 2) return '00:00'
+  return `${parts[0].padStart(2, '0')}:${parts[1].padStart(2, '0')}`
+}
+
 export default function TasksPage() {
   const [keyword, setKeyword] = useState('')
   const [taskType, setTaskType] = useState<TaskType | 'all'>('all')
@@ -475,6 +487,7 @@ export default function TasksPage() {
       mtrMaxRetryCount: Number(form.mtr_max_retry_count),
       iperf3Mode: form.iperf3_mode,
       iperf3Duration: form.iperf3_duration ? Number(form.iperf3_duration) : undefined,
+      iperf3ExecutionTime: form.iperf3_execution_time || '00:00',
     })
     createTask.mutate(payload, {
       onSuccess: () => {
@@ -490,6 +503,7 @@ export default function TasksPage() {
     const probeConfig = task.probe_config ?? {}
     const mode = probeConfig.mode === 'multi_thread' ? 'multi_thread' : 'single_thread'
     const durationSec = typeof probeConfig.duration_sec === 'number' ? probeConfig.duration_sec : 10
+    const executionTime = typeof probeConfig.execution_time === 'string' ? probeConfig.execution_time : '00:00:00'
     const port = typeof probeConfig.port === 'number' ? String(probeConfig.port) : ''
     const retryConfig = task.mtr_retry_config ?? {}
     const mtrProtocol = probeConfig.probe_protocol === 'tcp' || probeConfig.probe_protocol === 'udp'
@@ -515,6 +529,7 @@ export default function TasksPage() {
       mtr_max_retry_count: typeof retryConfig.max_retry_count === 'number' ? String(retryConfig.max_retry_count) : '3',
       iperf3_mode: mode,
       iperf3_duration: String(durationSec),
+      iperf3_execution_time: timeInputValue(executionTime),
       task_type: task.task_type,
     })
     setEditTask(task)
@@ -544,6 +559,7 @@ export default function TasksPage() {
       mtrMaxRetryCount: Number(editForm.mtr_max_retry_count),
       iperf3Mode: editForm.iperf3_mode,
       iperf3Duration: editForm.iperf3_duration ? Number(editForm.iperf3_duration) : undefined,
+      iperf3ExecutionTime: editForm.iperf3_execution_time || '00:00',
     })
     updateTask.mutate({
       uuid: editTask.task_uuid,

@@ -51,6 +51,7 @@ export function buildTaskPayload(input: {
   mtrMaxRetryCount?: number
   iperf3Mode?: 'single_thread' | 'multi_thread'
   iperf3Duration?: number
+  iperf3ExecutionTime?: string
 }): TaskCreatePayload {
   const base: TaskCreatePayload = {
     name: input.name || null,
@@ -95,6 +96,7 @@ export function buildTaskPayload(input: {
       port: input.port ?? 5201,
       duration_sec: input.iperf3Duration ?? 10,
       parallel: mode === 'multi_thread' ? 8 : 1,
+      execution_time: input.iperf3ExecutionTime ?? '00:00',
     }
   } else {
     base.probe_config = {

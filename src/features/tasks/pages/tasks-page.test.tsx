@@ -66,6 +66,7 @@ const iperf3Task = {
     port: 5201,
     duration_sec: 10,
     parallel: 8,
+    execution_time: '03:05:00',
   },
   mtr_retry_config: null,
   schedule_jitter_ms: 0,
@@ -133,6 +134,7 @@ describe('TasksPage', () => {
     expect(within(dialog).getByLabelText('端口')).toHaveValue(5201)
     expect(within(dialog).getByLabelText('iperf3 线程模式')).toBeInTheDocument()
     expect(within(dialog).getByLabelText('iperf3 执行时长')).toBeInTheDocument()
+    expect(within(dialog).getByLabelText('iperf3 UTC 执行时间')).toHaveValue('00:00')
     expect(within(dialog).queryByLabelText('调度间隔')).not.toBeInTheDocument()
     expect(within(dialog).queryByLabelText('包数量')).not.toBeInTheDocument()
   })
@@ -161,11 +163,68 @@ describe('TasksPage', () => {
     expect(within(dialog).queryByText('multi_thread')).not.toBeInTheDocument()
     expect(within(dialog).getByText('iperf3 执行时长')).toBeInTheDocument()
     expect(within(dialog).getByText('单次上传和下载动作各自运行的秒数，后端五分钟 claim 窗口覆盖两段动作。')).toBeInTheDocument()
+    expect(within(dialog).getByText('iperf3 UTC 执行时间')).toBeInTheDocument()
+    expect(within(dialog).getByText('按 UTC 时间每天执行 iperf3 任务，格式为 HH:MM；Agent 本地执行时间会随所在时区换算。')).toBeInTheDocument()
 
     const config = within(dialog).getByLabelText('任务配置')
     expect(config).toHaveClass('overflow-y-auto')
     expect(within(config).getByLabelText('端口')).toHaveValue(5201)
     expect(within(config).getByLabelText('iperf3 执行时长')).toHaveValue(10)
+    expect(within(config).getByLabelText('iperf3 UTC 执行时间')).toHaveValue('03:05')
+  })
+
+  it('submits iperf3 execution time when creating and editing tasks', async () => {
+    const user = userEvent.setup()
+    const createRequests: unknown[] = []
+    const updateRequests: unknown[] = []
+    server.use(
+      http.get('*/api/v1/tasks', () => HttpResponse.json({ items: [iperf3Task] })),
+      http.get('*/api/v1/targets', () => HttpResponse.json({ items: [target] })),
+      http.get('*/api/v1/agents', () => HttpResponse.json({ items: [agent] })),
+      http.post('*/api/v1/tasks', async ({ request }) => {
+        createRequests.push(await request.json())
+        return HttpResponse.json({ ...iperf3Task, probe_config: { ...iperf3Task.probe_config, execution_time: '04:30:00' } }, { status: 201 })
+      }),
+      http.patch('*/api/v1/tasks/:taskUuid', async ({ request }) => {
+        updateRequests.push(await request.json())
+        return HttpResponse.json({ ...iperf3Task, probe_config: { ...iperf3Task.probe_config, execution_time: '05:45:00' } })
+      }),
+    )
+
+    renderWithProviders(<TasksPage />)
+
+    await user.click(screen.getByRole('button', { name: '新增 Task' }))
+    const createDialog = await screen.findByRole('dialog', { name: '新增 Task' })
+    await user.click(within(createDialog).getByRole('combobox', { name: 'Target' }))
+    await user.click(await screen.findByRole('option', { name: /Tokyo iperf3 Target/ }))
+    await user.click(within(createDialog).getByRole('combobox', { name: 'Agent' }))
+    await user.click(await screen.findByRole('option', { name: /Tokyo Agent/ }))
+    await user.click(within(createDialog).getByRole('combobox', { name: '协议类型' }))
+    await user.click(await screen.findByRole('option', { name: 'IPERF3' }))
+    await user.clear(within(createDialog).getByLabelText('iperf3 UTC 执行时间'))
+    await user.type(within(createDialog).getByLabelText('iperf3 UTC 执行时间'), '04:30')
+    await user.click(within(createDialog).getByRole('button', { name: '创建' }))
+
+    expect(createRequests).toHaveLength(1)
+    expect(createRequests[0]).toMatchObject({
+      task_type: 'iperf3',
+      probe_config: {
+        execution_time: '04:30',
+      },
+    })
+
+    await user.click(await screen.findByRole('button', { name: '编辑' }))
+    const editDialog = await screen.findByRole('dialog', { name: '编辑 Task' })
+    await user.clear(within(editDialog).getByLabelText('iperf3 UTC 执行时间'))
+    await user.type(within(editDialog).getByLabelText('iperf3 UTC 执行时间'), '05:45')
+    await user.click(within(editDialog).getByRole('button', { name: '保存' }))
+
+    expect(updateRequests).toHaveLength(1)
+    expect(updateRequests[0]).toMatchObject({
+      probe_config: {
+        execution_time: '05:45',
+      },
+    })
   })
 
   it('offers iperf3 in create protocol choices when the target supports it', async () => {
