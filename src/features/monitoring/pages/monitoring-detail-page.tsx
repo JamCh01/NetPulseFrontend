@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { type TFunction } from 'i18next'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { ArrowLeft, Download, Radio, Server, Signal, Waypoints } from 'lucide-react'
 import { useMonitoringData, useMultiAgentMonitoringData } from '@/api/hooks/use-monitoring'
@@ -29,11 +31,15 @@ import type { MonitoringDataPoint } from '@/features/monitoring/lib/monitoring-d
 
 type ChartStyle = 'basic' | 'smoke'
 
-const statusCopy: Record<LatestResultState, { label: string; variant: 'success' | 'warning' | 'error' | 'inactive' }> = {
-  ok: { label: '正常', variant: 'success' },
-  missing: { label: '无数据', variant: 'warning' },
-  failed: { label: '异常', variant: 'error' },
-  unknown: { label: '未知', variant: 'inactive' },
+type StatusUi = { label: string; variant: 'success' | 'warning' | 'error' | 'inactive' }
+
+function statusCopy(t: TFunction<'translation'>): Record<LatestResultState, StatusUi> {
+  return {
+    ok: { label: t('monitoring.statusOk'), variant: 'success' },
+    missing: { label: t('monitoring.statusNoData'), variant: 'warning' },
+    failed: { label: t('monitoring.statusFailed'), variant: 'error' },
+    unknown: { label: t('monitoring.statusUnknown'), variant: 'inactive' },
+  }
 }
 
 function computeStats(data: MonitoringDataPoint[]) {
@@ -69,6 +75,7 @@ function StatItem({ label, value, tone }: { label: string; value: string; tone?:
 }
 
 export default function MonitoringDetailPage() {
+  const { t, i18n } = useTranslation()
   const { taskUuid } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
@@ -158,15 +165,15 @@ export default function MonitoringDetailPage() {
   if (taskError || !task) {
     return (
       <div className="rounded-xl border border-border bg-bg-surface p-8 text-center">
-        <div className="text-sm font-medium text-text-primary">任务不存在或加载失败</div>
+        <div className="text-sm font-medium text-text-primary">{t('monitoring.taskMissing')}</div>
         <Button variant="outline" className="mt-4" onClick={() => navigate(monitoringBasePath)}>
-          返回监控目标
+          {t('monitoring.backToTargets')}
         </Button>
       </div>
     )
   }
 
-  const status = statusCopy[classifyTaskStatus(task)]
+  const status = statusCopy(t)[classifyTaskStatus(task)]
   const port = typeof task.probe_config?.port === 'number' ? `:${task.probe_config.port}` : ''
 
   return (
@@ -181,7 +188,7 @@ export default function MonitoringDetailPage() {
                 className="mb-2 inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-primary"
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
-                监控目标
+                {t('monitoring.backToTargets')}
               </button>
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="truncate text-xl font-semibold text-text-primary">{task.name}</h1>
@@ -194,7 +201,7 @@ export default function MonitoringDetailPage() {
               <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-muted">
                 <span className="font-mono text-text-secondary">{task.target.target}{port}</span>
                 <span>{task.target.name}</span>
-                <span>{formatTargetLocation(task.target)}</span>
+                <span>{formatTargetLocation(task.target, t('monitoring.locationUnknown'))}</span>
                 {task.target.carrier && <span>{task.target.carrier}</span>}
               </div>
             </div>
@@ -202,18 +209,18 @@ export default function MonitoringDetailPage() {
               {!isMtr && (
                 <Button variant="outline" onClick={handleExportCsv}>
                   <Download className="h-4 w-4" />
-                  导出 CSV
+                  {t('monitoring.exportCsv')}
                 </Button>
               )}
               <Link to={`${monitoringBasePath}/${task.task_uuid}/mtr`}>
                 <Button variant={isMtr ? 'default' : 'outline'}>
                   <Waypoints className="h-4 w-4" />
-                  MTR 证据
+                  {t('monitoring.mtrResults')}
                 </Button>
               </Link>
               {isAdmin && (
                 <Button onClick={() => navigate(`/tasks/${task.task_uuid}`)}>
-                  管理任务
+                  {t('monitoring.manageTask')}
                 </Button>
               )}
             </div>
@@ -221,10 +228,10 @@ export default function MonitoringDetailPage() {
         </div>
 
         <div className="grid gap-3 p-4 md:grid-cols-2 xl:grid-cols-4">
-          <StatItem label="Agent" value={task.agent?.name ?? '未绑定'} />
-          <StatItem label="Agent 位置" value={formatAgentLocation(task.agent)} />
-          <StatItem label="最新样本" value={formatLatestSample(task.latest_result.latest_sample_at)} />
-          <StatItem label="执行状态" value={task.latest_result.latest_run_status ?? '暂无'} tone={status.variant === 'success' ? 'text-status-success-fg' : undefined} />
+          <StatItem label="Agent" value={task.agent?.name ?? t('common.unassigned')} />
+          <StatItem label={t('monitoring.agentLocation')} value={formatAgentLocation(task.agent, t('monitoring.locationUnknown'), t('monitoring.agentNotBound'))} />
+          <StatItem label={t('common.latestSample')} value={formatLatestSample(task.latest_result.latest_sample_at, i18n.language, t('monitoring.noSample'))} />
+          <StatItem label={t('monitoring.runStatus')} value={task.latest_result.latest_run_status ?? t('monitoring.notAvailable')} tone={status.variant === 'success' ? 'text-status-success-fg' : undefined} />
         </div>
       </div>
 
@@ -233,12 +240,12 @@ export default function MonitoringDetailPage() {
           <div className="flex items-start gap-3">
             <Waypoints className="mt-0.5 h-5 w-5 text-status-info-fg" />
             <div>
-              <div className="text-sm font-medium text-status-info-fg">MTR 不使用 metrics 图表</div>
+              <div className="text-sm font-medium text-status-info-fg">{t('monitoring.mtrNoMetricsTitle')}</div>
               <p className="mt-1 text-xs text-status-info-fg/80">
-                MTR 数据以 result 和 hop 为单位存储，请进入 MTR 证据页查看 packet loss、avg、best、worst 与 ASN。
+                {t('monitoring.mtrNoMetricsDesc')}
               </p>
               <Link to={`${monitoringBasePath}/${task.task_uuid}/mtr`}>
-                <Button className="mt-3" size="sm">查看 MTR 证据</Button>
+                <Button className="mt-3" size="sm">{t('monitoring.viewMtrEvidence')}</Button>
               </Link>
             </div>
           </div>
@@ -253,7 +260,7 @@ export default function MonitoringDetailPage() {
                 variant={!selectedAgentUuid ? 'default' : 'outline'}
                 onClick={() => setSelectedAgentUuid('')}
               >
-                全部 Agent
+                {t('monitoring.allAgents')}
               </Button>
               {taskAgents.map((agent) => (
                 <Button
@@ -291,17 +298,17 @@ export default function MonitoringDetailPage() {
           )}
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-            <StatItem label="平均延迟" value={stats ? `${stats.avg.toFixed(1)}ms` : '-'} />
+            <StatItem label={t('monitoring.averageLatency')} value={stats ? `${stats.avg.toFixed(1)}ms` : '-'} />
             <StatItem label="P95" value={stats ? `${stats.p95.toFixed(1)}ms` : '-'} />
-            <StatItem label="最小/最大" value={stats ? `${stats.min.toFixed(1)} / ${stats.max.toFixed(1)}ms` : '-'} />
-            <StatItem label="丢包率" value={stats ? `${stats.loss.toFixed(1)}%` : '-'} tone={stats && stats.loss > 0 ? 'text-status-error-fg' : 'text-status-success-fg'} />
-            <StatItem label="样本点" value={stats ? String(stats.points) : '-'} />
+            <StatItem label={t('monitoring.minMax')} value={stats ? `${stats.min.toFixed(1)} / ${stats.max.toFixed(1)}ms` : '-'} />
+            <StatItem label={t('monitoring.packetLoss')} value={stats ? `${stats.loss.toFixed(1)}%` : '-'} tone={stats && stats.loss > 0 ? 'text-status-error-fg' : 'text-status-success-fg'} />
+            <StatItem label={t('monitoring.samplePoints')} value={stats ? String(stats.points) : '-'} />
           </div>
 
           <section className="rounded-xl border border-border bg-bg-surface p-4">
             <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-text-primary">
               <Server className="h-4 w-4 text-text-muted" />
-              指标来源
+              {t('monitoring.metricSource')}
             </div>
             <div className="grid gap-3 text-xs text-text-muted md:grid-cols-3">
               <div className="rounded-lg border border-border bg-bg-surface-light p-3">
@@ -311,7 +318,7 @@ export default function MonitoringDetailPage() {
                 TCP: connect_latency_avg_ms、connect_failure_pct、jitter_ms。
               </div>
               <div className="rounded-lg border border-border bg-bg-surface-light p-3">
-                数据来自 VictoriaMetrics，最小 step_sec 为 60 秒。
+                {t('monitoring.vmStepSource')}
               </div>
             </div>
           </section>

@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { type TFunction } from 'i18next'
 import { Activity, ChevronDown, Gauge, MapPin, Radio, Server, ShieldCheck, Users, Waypoints, Wifi } from 'lucide-react'
 import { useIperf3ListsForTasks } from '@/api/hooks/use-iperf3'
 import { useMtrDetail, useMtrListsForTasks } from '@/api/hooks/use-mtr'
@@ -42,11 +44,15 @@ import {
   type MonitoringTask,
 } from '@/features/monitoring/lib/monitoring-models'
 
-const statusCopy: Record<LatestResultState, { label: string; variant: 'success' | 'warning' | 'error' | 'inactive' }> = {
-  ok: { label: '正常', variant: 'success' },
-  missing: { label: '上次更新时间', variant: 'warning' },
-  failed: { label: '异常', variant: 'error' },
-  unknown: { label: '未知', variant: 'inactive' },
+type StatusUi = { label: string; variant: 'success' | 'warning' | 'error' | 'inactive' }
+
+function statusCopy(t: TFunction<'translation'>): Record<LatestResultState, StatusUi> {
+  return {
+    ok: { label: t('monitoring.statusOk'), variant: 'success' },
+    missing: { label: t('monitoring.statusLastUpdated'), variant: 'warning' },
+    failed: { label: t('monitoring.statusFailed'), variant: 'error' },
+    unknown: { label: t('monitoring.statusUnknown'), variant: 'inactive' },
+  }
 }
 
 const filterButtonClass = 'h-9 w-full min-w-0 justify-between border-border bg-bg-surface-light px-3 text-xs text-text-secondary shadow-sm hover:border-accent-border hover:bg-muted hover:text-text-primary'
@@ -95,6 +101,7 @@ function ProtocolHeader({
   selectedAgentUuids?: string[]
   onSelectedAgentUuidsChange?: (agentUuids: string[]) => void
 }) {
+  const { t, i18n } = useTranslation()
   const agents = new Set(tasks.map((task) => task.agent?.agent_uuid).filter(Boolean)).size
   const showAgentFilter = agentOptions && selectedAgentUuids && onSelectedAgentUuidsChange
 
@@ -109,7 +116,7 @@ function ProtocolHeader({
             <h2 className="text-base font-semibold text-text-primary">{protocolLabel(protocol)}</h2>
           </div>
           <div className="mt-0.5 text-xs text-text-muted">
-            {tasks.length} 个任务 · {agents} 个 Agent · 最新样本 {formatLatestSample(latestSample(tasks))}
+            {t('monitoring.taskPlural', { count: tasks.length })} · {t('monitoring.agentPlural', { count: agents })} · {t('monitoring.latestSampleWithValue', { value: formatLatestSample(latestSample(tasks), i18n.language, t('monitoring.noSample')) })}
           </div>
         </div>
       </div>
@@ -148,10 +155,15 @@ function AgentFilterDropdown({
   onSelectedAgentUuidsChange: (agentUuids: string[]) => void
   className?: string
 }) {
+  const { t } = useTranslation()
   const selected = useMemo(() => new Set(selectedAgentUuids), [selectedAgentUuids])
   const allSelected = options.length > 0 && selectedAgentUuids.length === options.length
-  const label = labelForAgentSelection(selectedAgentUuids.length, options.length)
-  const selectedLabel = options.length === 0 ? '已选择 0/0' : `已选择 ${selectedAgentUuids.length}/${options.length}`
+  const label = labelForAgentSelection(selectedAgentUuids.length, options.length, {
+    noAgent: t('common.noAgent'),
+    noneSelected: t('common.noAgentSelected'),
+    allAgents: t('common.allAgents'),
+  })
+  const selectedLabel = t('common.selectedCount', { selected: selectedAgentUuids.length, total: options.length })
 
   const handleToggleAll = (checked: boolean) => {
     onSelectedAgentUuidsChange(checked ? options.map((option) => option.agentUuid) : [])
@@ -190,12 +202,12 @@ function AgentFilterDropdown({
           onCheckedChange={handleToggleAll}
           className="cursor-pointer text-xs"
         >
-          全部 Agent
+          {t('monitoring.allAgents')}
         </DropdownMenuCheckboxItem>
         <DropdownMenuSeparator />
         {options.length === 0 ? (
           <DropdownMenuItem disabled className="text-xs text-text-muted">
-            当前协议没有 Agent
+            {t('monitoring.noAgentForProtocol')}
           </DropdownMenuItem>
         ) : (
           options.map((option) => (
@@ -233,6 +245,7 @@ function EvidenceToolbar({
   selectedAgentUuids: string[]
   onSelectedAgentUuidsChange: (agentUuids: string[]) => void
 }) {
+  const { t, i18n } = useTranslation()
   const agents = new Set(tasks.map((task) => task.agent?.agent_uuid).filter(Boolean)).size
 
   return (
@@ -248,9 +261,9 @@ function EvidenceToolbar({
                 <h2 className="text-base font-semibold text-text-primary">{title}</h2>
               </div>
               <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-muted">
-                <span>{tasks.length} 个任务</span>
-                <span>{agents} 个 Agent</span>
-                <span>最新样本 {formatLatestSample(latestSample(tasks))}</span>
+                <span>{t('monitoring.taskPlural', { count: tasks.length })}</span>
+                <span>{t('monitoring.agentPlural', { count: agents })}</span>
+                <span>{t('monitoring.latestSampleWithValue', { value: formatLatestSample(latestSample(tasks), i18n.language, t('monitoring.noSample')) })}</span>
               </div>
             </div>
           </div>
@@ -277,31 +290,34 @@ function EvidenceToolbar({
 }
 
 function MtrEvidenceToolbar(props: Omit<Parameters<typeof EvidenceToolbar>[0], 'protocol' | 'title' | 'icon'>) {
+  const { t } = useTranslation()
   return (
     <EvidenceToolbar
       {...props}
-      title="MTR 结果"
+      title={t('monitoring.mtrResults')}
       icon={<Waypoints className="h-4 w-4" />}
     />
   )
 }
 
 function Iperf3EvidenceToolbar(props: Omit<Parameters<typeof EvidenceToolbar>[0], 'protocol' | 'title' | 'icon'>) {
+  const { t } = useTranslation()
   return (
     <EvidenceToolbar
       {...props}
-      title="iperf3 结果"
+      title={t('monitoring.iperf3Results')}
       icon={<Gauge className="h-4 w-4" />}
     />
   )
 }
 
 function EmptyProtocolState({ protocol }: { protocol: string }) {
+  const { t } = useTranslation()
   return (
     <div className="p-8 text-center">
       <ShieldCheck className="mx-auto h-7 w-7 text-text-dim" />
-      <div className="mt-3 text-sm font-medium text-text-primary">当前 Target 没有 {protocol} 任务</div>
-      <div className="mt-1 text-xs text-text-muted">创建任务并产生数据后会在这里直接展示。</div>
+      <div className="mt-3 text-sm font-medium text-text-primary">{t('monitoring.emptyProtocolTitle', { protocol })}</div>
+      <div className="mt-1 text-xs text-text-muted">{t('monitoring.emptyProtocolDesc')}</div>
     </div>
   )
 }
@@ -349,8 +365,7 @@ function MetricsProtocolPanel({
       ) : filteredTasks.length === 0 ? (
         <div className="p-8 text-center">
           <Users className="mx-auto h-7 w-7 text-text-dim" />
-          <div className="mt-3 text-sm font-medium text-text-primary">未选择 Agent</div>
-          <div className="mt-1 text-xs text-text-muted">请在上方 Agent 筛选中至少选择一个 Agent。</div>
+          <NoAgentSelectedText />
         </div>
       ) : (
         <div className="p-4">
@@ -376,6 +391,7 @@ function MtrProtocolPanel({
   timeRange: MonitoringTimeRange
   onTimeRangeChange: (range: MonitoringTimeRange) => void
 }) {
+  const { t } = useTranslation()
   const agentOptions = useMemo(() => buildAgentFilterOptions(tasks), [tasks])
   const [selectedAgentUuids, setSelectedAgentUuids] = useState<string[] | null>(null)
   const availableAgentUuids = useMemo(() => new Set(agentOptions.map((option) => option.agentUuid)), [agentOptions])
@@ -410,11 +426,10 @@ function MtrProtocolPanel({
       ) : filteredTasks.length === 0 ? (
         <div className="p-8 text-center">
           <Users className="mx-auto h-7 w-7 text-text-dim" />
-          <div className="mt-3 text-sm font-medium text-text-primary">未选择 Agent</div>
-          <div className="mt-1 text-xs text-text-muted">请在上方 Agent 筛选中至少选择一个 Agent。</div>
+          <NoAgentSelectedText />
         </div>
       ) : error ? (
-        <div className="p-6 text-sm text-status-error-fg">MTR 数据加载失败：{error.message}</div>
+        <div className="p-6 text-sm text-status-error-fg">{t('monitoring.mtrDataLoadFailed', { message: error.message })}</div>
       ) : (
         <div className="p-4">
           <MtrResultViews
@@ -442,6 +457,7 @@ function Iperf3ProtocolPanel({
   timeRange: MonitoringTimeRange
   onTimeRangeChange: (range: MonitoringTimeRange) => void
 }) {
+  const { t } = useTranslation()
   const agentOptions = useMemo(() => buildAgentFilterOptions(tasks), [tasks])
   const [selectedAgentUuids, setSelectedAgentUuids] = useState<string[] | null>(null)
   const availableAgentUuids = useMemo(() => new Set(agentOptions.map((option) => option.agentUuid)), [agentOptions])
@@ -475,11 +491,10 @@ function Iperf3ProtocolPanel({
       ) : filteredTasks.length === 0 ? (
         <div className="p-8 text-center">
           <Users className="mx-auto h-7 w-7 text-text-dim" />
-          <div className="mt-3 text-sm font-medium text-text-primary">未选择 Agent</div>
-          <div className="mt-1 text-xs text-text-muted">请在上方 Agent 筛选中至少选择一个 Agent。</div>
+          <NoAgentSelectedText />
         </div>
       ) : error ? (
-        <div className="p-6 text-sm text-status-error-fg">iperf3 数据加载失败：{error.message}</div>
+        <div className="p-6 text-sm text-status-error-fg">{t('monitoring.iperf3DataLoadFailed', { message: error.message })}</div>
       ) : (
         <div className="p-4">
           <Iperf3ResultViews
@@ -497,9 +512,10 @@ function Iperf3ProtocolPanel({
 }
 
 function TargetSummary({ group }: { group: MonitoringTargetGroup }) {
-  const status = statusCopy[group.status]
+  const { t, i18n } = useTranslation()
+  const status = statusCopy(t)[group.status]
   const statusLabel = group.status === 'missing'
-    ? `上次更新 ${formatLatestSample(latestTaskUpdate(group.tasks))}`
+    ? `${t('common.lastUpdated')} ${formatLatestSample(latestTaskUpdate(group.tasks), i18n.language, t('monitoring.noSample'))}`
     : status.label
   return (
     <section className="rounded-xl border border-border bg-bg-surface">
@@ -514,7 +530,7 @@ function TargetSummary({ group }: { group: MonitoringTargetGroup }) {
             <span className="font-mono text-text-secondary">{group.target.target}</span>
             <span className="inline-flex items-center gap-1">
               <MapPin className="h-3.5 w-3.5" />
-              {formatTargetLocation(group.target)}
+              {formatTargetLocation(group.target, t('monitoring.locationUnknown'))}
             </span>
             {group.target.carrier && (
               <span className="inline-flex items-center gap-1">
@@ -526,10 +542,10 @@ function TargetSummary({ group }: { group: MonitoringTargetGroup }) {
         </div>
       </div>
       <div className="grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-4">
-        <SummaryMetric label="任务数" value={String(group.tasks.length)} />
+        <SummaryMetric label={t('monitoring.taskCount')} value={String(group.tasks.length)} />
         <SummaryMetric label="Agent" value={String(group.agents.length)} />
-        <SummaryMetric label="协议" value={group.protocols.map((item) => protocolLabel(item)).join(' / ') || '-'} />
-        <SummaryMetric label="最新样本" value={formatLatestSample(group.latest_sample_at)} />
+        <SummaryMetric label={t('monitoring.protocol')} value={group.protocols.map((item) => protocolLabel(item)).join(' / ') || '-'} />
+        <SummaryMetric label={t('common.latestSample')} value={formatLatestSample(group.latest_sample_at, i18n.language, t('monitoring.noSample'))} />
       </div>
     </section>
   )
@@ -555,6 +571,7 @@ export function TargetMonitoringPanel({
   fallbackGroup?: MonitoringTargetGroup
   basePath: '/monitoring' | '/app/monitoring'
 }) {
+  const { t } = useTranslation()
   const { data, isLoading, error, refetch } = usePublicMonitoringTasks({
     pageSize: 100,
     targetUuid,
@@ -593,10 +610,10 @@ export function TargetMonitoringPanel({
   if (error || !group) {
     return (
       <div className="rounded-xl border border-status-error-border bg-status-error-bg p-5">
-        <div className="text-sm font-medium text-status-error-fg">Target 监控数据加载失败</div>
-        <div className="mt-1 text-xs text-status-error-fg/80">无法按 Target 读取监控任务和指标。</div>
+        <div className="text-sm font-medium text-status-error-fg">{t('monitoring.targetDataLoadFailed')}</div>
+        <div className="mt-1 text-xs text-status-error-fg/80">{t('monitoring.targetDataLoadFailedDesc')}</div>
         <Button className="mt-3" size="sm" variant="outline" onClick={() => void refetch()}>
-          重试
+          {t('common.retry')}
         </Button>
       </div>
     )
@@ -610,5 +627,15 @@ export function TargetMonitoringPanel({
       <MtrProtocolPanel tasks={mtrTasks} timeRange={mtrTimeRange} onTimeRangeChange={setMtrTimeRange} />
       <Iperf3ProtocolPanel tasks={iperf3Tasks} timeRange={iperf3TimeRange} onTimeRangeChange={setIperf3TimeRange} />
     </div>
+  )
+}
+
+function NoAgentSelectedText() {
+  const { t } = useTranslation()
+  return (
+    <>
+      <div className="mt-3 text-sm font-medium text-text-primary">{t('monitoring.noAgentSelectedTitle')}</div>
+      <div className="mt-1 text-xs text-text-muted">{t('monitoring.noAgentSelectedDesc')}</div>
+    </>
   )
 }

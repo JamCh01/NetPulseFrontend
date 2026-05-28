@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { ErrorState } from '@/components/ui/error-state'
+import i18n from '@/i18n'
 
 type ErrorBoundaryProps = {
   children: ReactNode
@@ -30,10 +31,10 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         <div className="min-h-screen gradient-bg grid-pattern px-4 py-10">
           <div className="mx-auto max-w-xl">
             <ErrorState
-              title="页面发生异常"
-              description="我们已拦截这次错误，你可以重试或刷新页面继续使用。"
+              title={i18n.t('errorBoundary.title')}
+              description={i18n.t('errorBoundary.description')}
               onRetry={this.handleRetry}
-              retryLabel="重试渲染"
+              retryLabel={i18n.t('errorBoundary.retry')}
               className="min-h-[40vh]"
             />
           </div>

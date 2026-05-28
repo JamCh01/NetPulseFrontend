@@ -40,11 +40,13 @@ const PRESETS: readonly PresetConfig[] = [
   { label: '1y', grafanaLabel: 'Last 1 year', durationMs: 365 * 24 * 60 * 60 * 1000, granularity: 'daily' },
 ] as const
 
-const GRANULARITY_KEYS: Record<MonitoringGranularity, string> = {
+type GranularityTranslationKey = 'monitoring.raw' | 'monitoring.hourly' | 'monitoring.daily'
+
+const GRANULARITY_KEYS: Record<MonitoringGranularity, GranularityTranslationKey> = {
   raw: 'monitoring.raw',
   hourly: 'monitoring.hourly',
   daily: 'monitoring.daily',
-}
+} as const
 
 const STEP_OPTIONS: ReadonlyArray<{ label: string; value: number | null }> = [
   { label: 'Auto', value: null },
@@ -239,11 +241,11 @@ export function GrafanaTimeRangeSelector({
     const start = parseDateTimeTextValue(absoluteStart)
     const end = parseDateTimeTextValue(absoluteEnd)
     if (start === null || end === null) {
-      setAbsoluteError('请输入有效的开始和结束时间。')
+      setAbsoluteError(t('timeRange.invalidRange'))
       return
     }
     if (start >= end) {
-      setAbsoluteError('开始时间必须早于结束时间。')
+      setAbsoluteError(t('timeRange.startBeforeEnd'))
       return
     }
     const nextGranularity = granularityForTimeRange(start, end)
@@ -254,18 +256,18 @@ export function GrafanaTimeRangeSelector({
       : defaultStepForGranularity(nextGranularity)
     if (showStep) {
       if (!Number.isFinite(parsedStep) || parsedStep < 60) {
-        setAbsoluteError('Step 最小值为 60 秒。')
+        setAbsoluteError(t('timeRange.minStep'))
         return
       }
       if (parsedStep > 86400) {
-        setAbsoluteError('Step 最大值为 86400 秒。')
+        setAbsoluteError(t('timeRange.maxStep'))
         return
       }
     }
     setAbsoluteError(null)
     onChange(createAbsoluteTimeRange(start, end, normalizeStep(parsedStep, nextGranularity)))
     setOpen(false)
-  }, [absoluteEnd, absoluteStart, onChange, showStep, stepValue])
+  }, [absoluteEnd, absoluteStart, onChange, showStep, stepValue, t])
 
   const handleOpenChange = () => {
     setAbsoluteStart(toDateTimeTextValue(value.start))
@@ -312,7 +314,7 @@ export function GrafanaTimeRangeSelector({
           <div className="grid md:grid-cols-[16rem_minmax(0,1fr)]">
             <div className="border-b border-border md:border-b-0 md:border-r">
               <div className="border-b border-border px-3 py-2 text-[10px] font-medium uppercase text-text-dim">
-                Quick ranges
+                {t('timeRange.quickRanges')}
               </div>
               <div className="py-1">
                 {PRESETS.map((preset) => {
@@ -337,11 +339,11 @@ export function GrafanaTimeRangeSelector({
               </div>
             </div>
             <div className="px-3 py-3">
-              <div className="mb-2 text-[10px] font-medium uppercase text-text-dim">Absolute range</div>
+              <div className="mb-2 text-[10px] font-medium uppercase text-text-dim">{t('timeRange.absoluteRange')}</div>
               <div className="grid gap-3">
                 <div className="grid gap-2 sm:grid-cols-2">
                   <label className="grid gap-1 text-xs text-text-muted">
-                    <span>开始时间</span>
+                    <span>{t('timeRange.startTime')}</span>
                     <input
                       type="text"
                       inputMode="numeric"
@@ -352,7 +354,7 @@ export function GrafanaTimeRangeSelector({
                     />
                   </label>
                   <label className="grid gap-1 text-xs text-text-muted">
-                    <span>结束时间</span>
+                    <span>{t('timeRange.endTime')}</span>
                     <input
                       type="text"
                       inputMode="numeric"
@@ -381,15 +383,15 @@ export function GrafanaTimeRangeSelector({
                 )}
                 <div className="rounded-md border border-border bg-bg-surface-light px-2 py-1.5 text-[11px] leading-relaxed text-text-dim">
                   {showStep
-                    ? 'Step 是 range query 的查询分辨率，表示 start 和 end 之间每隔多久返回一个点；后端 step_sec 只接受 60 到 86400 秒，Auto 会在前端转换为具体秒数。快捷时间范围会每 1 分钟自动推进到最新窗口；绝对时间范围不会自动刷新。'
-                    : 'MTR result 按实际探测时间点查询，不使用 metrics 聚合步长。快捷时间范围会每 1 分钟自动推进到最新窗口；绝对时间范围不会自动刷新。'}
+                    ? t('timeRange.metricsStepHelp')
+                    : t('timeRange.eventStepHelp')}
                 </div>
                 {absoluteError && (
                   <div className="text-xs text-status-error-fg">{absoluteError}</div>
                 )}
                 <div className="flex justify-end">
                   <Button type="button" size="sm" onClick={handleAbsoluteApply}>
-                    应用时间范围
+                    {t('timeRange.apply')}
                   </Button>
                 </div>
               </div>

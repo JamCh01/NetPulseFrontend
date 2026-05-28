@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Search } from 'lucide-react'
 
 import {
@@ -37,6 +38,7 @@ function exactGeoMatch<T extends { name: string; name_zh?: string | null }>(item
 }
 
 export function GeoInput({ value, onChange, required = false }: GeoInputProps) {
+  const { t } = useTranslation()
   const [focused, setFocused] = useState<'continent' | 'country' | 'city' | null>(null)
   const [selectedContinentUuid, setSelectedContinentUuid] = useState('')
   const [selectedCountryUuid, setSelectedCountryUuid] = useState('')
@@ -65,8 +67,8 @@ export function GeoInput({ value, onChange, required = false }: GeoInputProps) {
   return (
     <div className="grid gap-3 md:grid-cols-3">
       <GeoSearchField
-        label="大洲"
-        placeholder="搜索或输入大洲"
+        label={t('adminInputs.continent')}
+        placeholder={t('adminInputs.continentPlaceholder')}
         value={value.continent}
         required={required}
         focused={focused === 'continent'}
@@ -88,8 +90,8 @@ export function GeoInput({ value, onChange, required = false }: GeoInputProps) {
         }}
       />
       <GeoSearchField
-        label="国家"
-        placeholder={continentUuid ? '搜索或输入国家' : '先选择大洲'}
+        label={t('adminInputs.country')}
+        placeholder={continentUuid ? t('adminInputs.countryPlaceholder') : t('adminInputs.selectContinentFirst')}
         value={value.country}
         required={required}
         disabled={!continentUuid}
@@ -110,8 +112,8 @@ export function GeoInput({ value, onChange, required = false }: GeoInputProps) {
         }}
       />
       <GeoSearchField
-        label="城市"
-        placeholder={countryUuid ? '搜索或输入城市' : '先选择国家'}
+        label={t('adminInputs.city')}
+        placeholder={countryUuid ? t('adminInputs.cityPlaceholder') : t('adminInputs.selectCountryFirst')}
         value={value.city}
         required={required}
         disabled={!countryUuid}

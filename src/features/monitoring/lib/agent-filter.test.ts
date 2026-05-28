@@ -54,9 +54,10 @@ describe('agent-filter', () => {
   })
 
   it('formats the trigger label for all, partial, and empty selections', () => {
-    expect(labelForAgentSelection(3, 3)).toBe('全部 Agent')
+    expect(labelForAgentSelection(3, 3)).toBe('All Agents')
     expect(labelForAgentSelection(2, 3)).toBe('2/3 Agent')
-    expect(labelForAgentSelection(0, 3)).toBe('未选择 Agent')
-    expect(labelForAgentSelection(0, 0)).toBe('无 Agent')
+    expect(labelForAgentSelection(0, 3)).toBe('No Agent selected')
+    expect(labelForAgentSelection(0, 0)).toBe('No Agent')
+    expect(labelForAgentSelection(3, 3, { allAgents: '全部 Agent' })).toBe('全部 Agent')
   })
 })

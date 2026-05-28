@@ -25,9 +25,17 @@ export function filterTasksBySelectedAgents(tasks: MonitoringTask[], selectedAge
   return tasks.filter((task) => task.agent?.agent_uuid && selected.has(task.agent.agent_uuid))
 }
 
-export function labelForAgentSelection(selectedCount: number, totalCount: number): string {
-  if (totalCount === 0) return '无 Agent'
-  if (selectedCount === 0) return '未选择 Agent'
-  if (selectedCount === totalCount) return '全部 Agent'
+export function labelForAgentSelection(
+  selectedCount: number,
+  totalCount: number,
+  labels: {
+    noAgent?: string
+    noneSelected?: string
+    allAgents?: string
+  } = {},
+): string {
+  if (totalCount === 0) return labels.noAgent ?? 'No Agent'
+  if (selectedCount === 0) return labels.noneSelected ?? 'No Agent selected'
+  if (selectedCount === totalCount) return labels.allAgents ?? 'All Agents'
   return `${selectedCount}/${totalCount} Agent`
 }

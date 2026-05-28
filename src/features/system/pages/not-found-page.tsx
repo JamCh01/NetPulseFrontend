@@ -1,8 +1,10 @@
 import { Link, useNavigate } from 'react-router'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Compass, Home, Undo2 } from 'lucide-react'
 
 export default function NotFoundPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
 
   return (
@@ -12,22 +14,22 @@ export default function NotFoundPage() {
           <Compass className="h-6 w-6 text-accent-foreground" />
         </div>
         <p className="text-xs uppercase tracking-[0.2em] text-text-dim">404</p>
-        <h1 className="mt-2 text-2xl font-bold text-text-primary">页面不存在</h1>
+        <h1 className="mt-2 text-2xl font-bold text-text-primary">{t('system.notFoundTitle')}</h1>
         <p className="mx-auto mt-2 max-w-md text-sm text-text-muted">
-          这个地址可能已变更，或你访问了不存在的页面。你可以返回上一页，或者跳转到核心页面继续操作。
+          {t('system.notFoundDescription')}
         </p>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
           <Button onClick={() => navigate(-1)} variant="outline">
             <Undo2 className="mr-1.5 h-4 w-4" />
-            返回上一页
+            {t('system.goBack')}
           </Button>
           <Button render={<Link to="/monitoring" />}>
             <Compass className="mr-1.5 h-4 w-4" />
-            去监控页
+            {t('system.goMonitoring')}
           </Button>
           <Button render={<Link to="/" />} variant="secondary">
             <Home className="mr-1.5 h-4 w-4" />
-            回到首页
+            {t('system.goHome')}
           </Button>
         </div>
       </div>

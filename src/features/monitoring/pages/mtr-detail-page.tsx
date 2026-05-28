@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { ArrowLeft, Clock3, MapPin, Radio, Waypoints } from 'lucide-react'
 import { useMonitoringTaskDetail } from '@/api/hooks/use-monitoring-task-detail'
@@ -25,6 +26,7 @@ import {
 } from '@/features/monitoring/lib/time-range'
 
 export default function MtrDetailPage() {
+  const { t, i18n } = useTranslation()
   const { taskUuid } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
@@ -73,9 +75,9 @@ export default function MtrDetailPage() {
   if (taskError || !task) {
     return (
       <div className="rounded-xl border border-border bg-bg-surface p-8 text-center">
-        <div className="text-sm font-medium text-text-primary">MTR 任务不存在或加载失败</div>
+        <div className="text-sm font-medium text-text-primary">{t('monitoring.mtrTaskMissing')}</div>
         <Button variant="outline" className="mt-4" onClick={() => navigate(monitoringBasePath)}>
-          返回监控目标
+          {t('monitoring.backToTargets')}
         </Button>
       </div>
     )
@@ -97,30 +99,30 @@ export default function MtrDetailPage() {
                 className="mb-2 inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-primary"
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
-                监控目标
+                {t('monitoring.backToTargets')}
               </button>
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="truncate text-xl font-semibold text-text-primary">{task.name}</h1>
                 <Badge className={`border text-xs uppercase ${PROTOCOL_COLORS.mtr}`}>MTR</Badge>
                 <Badge variant={status === 'ok' ? 'success' : status === 'failed' ? 'error' : 'warning'}>
-                  {status === 'ok' ? '正常' : status === 'failed' ? '异常' : '无数据'}
+                  {status === 'ok' ? t('monitoring.statusOk') : status === 'failed' ? t('monitoring.statusFailed') : t('monitoring.statusNoData')}
                 </Badge>
                 {task.target.is_anycast && <Badge variant="info">Anycast</Badge>}
               </div>
               <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-muted">
                 <span className="font-mono text-text-secondary">{task.target.target}</span>
-                <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{formatTargetLocation(task.target)}</span>
-                <span className="inline-flex items-center gap-1"><Radio className="h-3.5 w-3.5" />{task.agent?.name ?? '未绑定 Agent'}</span>
-                <span>{formatAgentLocation(task.agent)}</span>
+                <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{formatTargetLocation(task.target, t('monitoring.locationUnknown'))}</span>
+                <span className="inline-flex items-center gap-1"><Radio className="h-3.5 w-3.5" />{task.agent?.name ?? t('monitoring.agentUnassigned')}</span>
+                <span>{formatAgentLocation(task.agent, t('monitoring.locationUnknown'), t('monitoring.agentNotBound'))}</span>
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Link to={`${monitoringBasePath}/${task.task_uuid}`}>
-                <Button variant="outline">指标详情</Button>
+                <Button variant="outline">{t('common.details')}</Button>
               </Link>
               {isAdmin && (
                 <Button onClick={() => navigate(`/tasks/${task.task_uuid}`)}>
-                  管理任务
+                  {t('monitoring.manageTask')}
                 </Button>
               )}
             </div>
@@ -128,10 +130,10 @@ export default function MtrDetailPage() {
         </div>
 
         <div className="grid gap-3 p-4 md:grid-cols-4">
-          <Summary label="最新样本" value={formatLatestSample(task.latest_result.latest_sample_at)} icon={Clock3} />
+          <Summary label={t('common.latestSample')} value={formatLatestSample(task.latest_result.latest_sample_at, i18n.language, t('monitoring.noSample'))} icon={Clock3} />
           <Summary label="Result" value={String(mtrListData?.results.length ?? 0)} icon={Waypoints} />
-          <Summary label="到达目标" value={String(reachedCount)} icon={Waypoints} />
-          <Summary label="未到达" value={String(failedCount)} icon={Waypoints} tone={failedCount > 0 ? 'text-status-error-fg' : 'text-status-success-fg'} />
+          <Summary label={t('monitoring.reachedTarget')} value={String(reachedCount)} icon={Waypoints} />
+          <Summary label={t('monitoring.unreached')} value={String(failedCount)} icon={Waypoints} tone={failedCount > 0 ? 'text-status-error-fg' : 'text-status-success-fg'} />
         </div>
       </div>
 
@@ -149,7 +151,7 @@ export default function MtrDetailPage() {
               setSelectedResultUuid(undefined)
             }}
           >
-            全部 Agent
+            {t('monitoring.allAgents')}
           </Button>
           {taskAgents.map((agent) => (
             <Button
@@ -169,7 +171,7 @@ export default function MtrDetailPage() {
 
       {mtrListError ? (
         <div className="rounded-xl border border-status-error-border bg-status-error-bg p-4 text-sm text-status-error-fg">
-          MTR result 加载失败：{(mtrListError as Error).message}
+          {t('monitoring.mtrDataLoadFailed', { message: (mtrListError as Error).message })}
         </div>
       ) : (
         <div className="rounded-xl border border-border bg-bg-surface p-3">

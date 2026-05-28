@@ -309,18 +309,18 @@ export function groupMonitoringTasksByTarget(tasks: MonitoringTask[]): Monitorin
   })
 }
 
-export function formatTargetLocation(target: MonitoringTarget): string {
-  return [target.city, target.country, target.continent].filter(Boolean).join(', ') || '位置未知'
+export function formatTargetLocation(target: MonitoringTarget, fallback = 'Location unknown'): string {
+  return [target.city, target.country, target.continent].filter(Boolean).join(', ') || fallback
 }
 
-export function formatAgentLocation(agent: MonitoringAgent | null | undefined): string {
-  if (!agent) return 'Agent 未绑定'
-  return [agent.city, agent.country, agent.continent].filter(Boolean).join(', ') || '位置未知'
+export function formatAgentLocation(agent: MonitoringAgent | null | undefined, fallback = 'Location unknown', unbound = 'Agent not bound'): string {
+  if (!agent) return unbound
+  return [agent.city, agent.country, agent.continent].filter(Boolean).join(', ') || fallback
 }
 
-export function formatLatestSample(timestamp?: string | null): string {
-  if (!timestamp) return '暂无样本'
-  return new Intl.DateTimeFormat('zh-CN', {
+export function formatLatestSample(timestamp?: string | null, locale = 'en-US', fallback = 'No sample'): string {
+  if (!timestamp) return fallback
+  return new Intl.DateTimeFormat(locale, {
     month: '2-digit',
     day: '2-digit',
     hour: '2-digit',

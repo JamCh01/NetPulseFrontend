@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 import { Download, Pencil, Plus, Trash2, Upload } from 'lucide-react'
 
@@ -61,12 +62,12 @@ function normalizeArch(arch: string | null | undefined): string {
   return ARCH_ALIASES[normalized] ?? normalized
 }
 
-function osLabel(os: string | null | undefined, placeholder = '选择 OS'): string {
+function osLabel(os: string | null | undefined, placeholder = 'Select OS'): string {
   if (!os) return placeholder
   return OS_OPTIONS.find((option) => option.value === os.toLowerCase())?.label ?? os
 }
 
-function archLabel(arch: string | null | undefined, placeholder = '选择 Arch'): string {
+function archLabel(arch: string | null | undefined, placeholder = 'Select Arch'): string {
   if (!arch) return placeholder
   const canonical = normalizeArch(arch)
   return ARCH_OPTIONS.find((option) => option.value === canonical)?.label ?? arch
@@ -77,6 +78,7 @@ function artifactPlatform(artifact: AgentArtifactResponse): string {
 }
 
 export default function ReleasesPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [osFilter, setOsFilter] = useState('linux')
   const [archFilter, setArchFilter] = useState('')
@@ -185,11 +187,11 @@ export default function ReleasesPage() {
             Agents /
           </button>
           <h1 className="text-2xl font-semibold text-text-primary">Agent Artifacts</h1>
-          <p className="mt-1 text-sm text-text-muted">管理 Agent 可执行文件版本、平台元数据和 Cloudflare R2 下载入口。</p>
+          <p className="mt-1 text-sm text-text-muted">{t('artifacts.description')}</p>
         </div>
         <Button onClick={() => setUploadOpen(true)}>
           <Upload className="w-4 h-4" />
-          上传 Artifact
+          {t('artifacts.uploadArtifact')}
         </Button>
       </div>
 
@@ -199,10 +201,10 @@ export default function ReleasesPage() {
             <Label htmlFor="artifact-os-filter" className="mb-1.5 text-xs text-text-muted">OS</Label>
             <Select value={osFilter || '__all__'} onValueChange={(value) => setOsFilter(value === '__all__' ? '' : (value ?? ''))}>
               <SelectTrigger id="artifact-os-filter" aria-label="OS" className="w-full bg-background/95">
-                <SelectValue>{(value: string | null) => value === '__all__' || !value ? '全部 OS' : osLabel(value)}</SelectValue>
+                <SelectValue>{(value: string | null) => value === '__all__' || !value ? t('artifacts.allOs') : osLabel(value, t('artifacts.osPlaceholder'))}</SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="__all__">全部 OS</SelectItem>
+                <SelectItem value="__all__">{t('artifacts.allOs')}</SelectItem>
                 {OS_OPTIONS.map((os) => <SelectItem key={os.value} value={os.value}>{os.label}</SelectItem>)}
               </SelectContent>
             </Select>
@@ -211,10 +213,10 @@ export default function ReleasesPage() {
             <Label htmlFor="artifact-arch-filter" className="mb-1.5 text-xs text-text-muted">Arch</Label>
             <Select value={archFilter || '__all__'} onValueChange={(value) => setArchFilter(value === '__all__' ? '' : (value ?? ''))}>
               <SelectTrigger id="artifact-arch-filter" aria-label="Arch" className="w-full bg-background/95">
-                <SelectValue>{(value: string | null) => value === '__all__' || !value ? '全部 Arch' : archLabel(value)}</SelectValue>
+                <SelectValue>{(value: string | null) => value === '__all__' || !value ? t('artifacts.allArch') : archLabel(value, t('artifacts.archPlaceholder'))}</SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="__all__">全部 Arch</SelectItem>
+                <SelectItem value="__all__">{t('artifacts.allArch')}</SelectItem>
                 {ARCH_OPTIONS.map((arch) => <SelectItem key={arch.value} value={arch.value}>{arch.label}</SelectItem>)}
               </SelectContent>
             </Select>
@@ -225,20 +227,20 @@ export default function ReleasesPage() {
               id="artifact-version-filter"
               value={versionFilter}
               onChange={(event) => setVersionFilter(event.target.value)}
-              placeholder="例如 1.2.3"
+              placeholder={t('artifacts.versionPlaceholder')}
               className="bg-background/95"
             />
           </div>
           <div>
-            <Label htmlFor="artifact-active-filter" className="mb-1.5 text-xs text-text-muted">状态</Label>
+            <Label htmlFor="artifact-active-filter" className="mb-1.5 text-xs text-text-muted">{t('common.status')}</Label>
             <Select value={activeFilter} onValueChange={(value) => setActiveFilter((value as typeof activeFilter) ?? 'all')}>
-              <SelectTrigger id="artifact-active-filter" aria-label="状态" className="w-full bg-background/95">
-                <SelectValue>{(value: string | null) => value === 'active' ? '启用' : value === 'inactive' ? '停用' : '全部'}</SelectValue>
+              <SelectTrigger id="artifact-active-filter" aria-label={t('common.status')} className="w-full bg-background/95">
+                <SelectValue>{(value: string | null) => value === 'active' ? t('common.enabled') : value === 'inactive' ? t('common.stopped') : t('common.all')}</SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">全部</SelectItem>
-                <SelectItem value="active">启用</SelectItem>
-                <SelectItem value="inactive">停用</SelectItem>
+                <SelectItem value="all">{t('common.all')}</SelectItem>
+                <SelectItem value="active">{t('common.enabled')}</SelectItem>
+                <SelectItem value="inactive">{t('common.stopped')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -251,22 +253,22 @@ export default function ReleasesPage() {
             {Array.from({ length: 4 }, (_, index) => <Skeleton key={index} className="h-10 w-full" />)}
           </div>
         ) : error ? (
-          <div className="p-8 text-center text-sm text-red-400">Artifact 列表加载失败。</div>
+          <div className="p-8 text-center text-sm text-red-400">{t('artifacts.loadFailed')}</div>
         ) : artifacts.length === 0 ? (
-          <div className="p-8 text-center text-sm text-text-muted">暂无 Agent Artifact。</div>
+          <div className="p-8 text-center text-sm text-text-muted">{t('artifacts.empty')}</div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>版本</TableHead>
-                <TableHead>平台</TableHead>
-                <TableHead>文件</TableHead>
-                <TableHead>大小</TableHead>
+                <TableHead>{t('common.version')}</TableHead>
+                <TableHead>{t('common.platform')}</TableHead>
+                <TableHead>{t('common.file')}</TableHead>
+                <TableHead>{t('common.size')}</TableHead>
                 <TableHead>SHA256</TableHead>
-                <TableHead>存储</TableHead>
-                <TableHead>状态</TableHead>
-                <TableHead>创建时间</TableHead>
-                <TableHead>操作</TableHead>
+                <TableHead>{t('common.storage')}</TableHead>
+                <TableHead>{t('common.status')}</TableHead>
+                <TableHead>{t('common.createdAt')}</TableHead>
+                <TableHead>{t('common.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -296,19 +298,19 @@ export default function ReleasesPage() {
                   </TableCell>
                   <TableCell>
                     <Badge className={artifact.is_active ? 'border border-emerald-500/30 bg-emerald-500/15 text-emerald-300' : 'border border-border bg-muted text-text-muted'}>
-                      {artifact.is_active ? '启用' : '停用'}
+                      {artifact.is_active ? t('common.enabled') : t('common.stopped')}
                     </Badge>
                   </TableCell>
                   <TableCell className="font-mono text-xs text-text-secondary">{formatDateTime(artifact.created_at, 'zh')}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="icon-sm" aria-label="下载" onClick={() => handleDownload(artifact)}>
+                      <Button variant="ghost" size="icon-sm" aria-label={t('common.downloading')} onClick={() => handleDownload(artifact)}>
                         <Download className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="icon-sm" aria-label="编辑" onClick={() => setEditing(artifact)}>
+                      <Button variant="ghost" size="icon-sm" aria-label={t('common.edit')} onClick={() => setEditing(artifact)}>
                         <Pencil className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="icon-sm" aria-label="删除" className="text-red-400" onClick={() => setDeleteTarget(artifact)}>
+                      <Button variant="ghost" size="icon-sm" aria-label={t('common.delete')} className="text-red-400" onClick={() => setDeleteTarget(artifact)}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
@@ -323,12 +325,12 @@ export default function ReleasesPage() {
       <Dialog open={uploadOpen} onOpenChange={setUploadOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>上传 Agent Artifact</DialogTitle>
-            <DialogDescription>选择 Agent 可执行文件并填写版本与平台信息，后端会上传到 Cloudflare R2。</DialogDescription>
+            <DialogTitle>{t('artifacts.uploadTitle')}</DialogTitle>
+            <DialogDescription>{t('artifacts.uploadDesc')}</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleUpload} className="space-y-4">
             <div>
-              <Label htmlFor="artifact-file" className="mb-1.5 text-xs text-text-muted">文件</Label>
+              <Label htmlFor="artifact-file" className="mb-1.5 text-xs text-text-muted">{t('common.file')}</Label>
               <input
                 ref={fileInputRef}
                 id="artifact-file"
@@ -339,13 +341,13 @@ export default function ReleasesPage() {
             </div>
             <div className="grid gap-3 sm:grid-cols-3">
               <div>
-                <Label htmlFor="artifact-upload-version" className="mb-1.5 text-xs text-text-muted">版本</Label>
+                <Label htmlFor="artifact-upload-version" className="mb-1.5 text-xs text-text-muted">{t('common.version')}</Label>
                 <Input id="artifact-upload-version" value={uploadVersion} onChange={(event) => setUploadVersion(event.target.value)} required />
               </div>
               <div>
                 <Label htmlFor="artifact-upload-os" className="mb-1.5 text-xs text-text-muted">OS</Label>
                 <Select value={uploadOs} onValueChange={(value) => setUploadOs(value ?? 'linux')}>
-                  <SelectTrigger id="artifact-upload-os" aria-label="上传 OS" className="w-full bg-background/95">
+                  <SelectTrigger id="artifact-upload-os" aria-label={`${t('common.upload')} OS`} className="w-full bg-background/95">
                     <SelectValue>{(value: string | null) => osLabel(value, 'Linux')}</SelectValue>
                   </SelectTrigger>
                   <SelectContent>{OS_OPTIONS.map((os) => <SelectItem key={os.value} value={os.value}>{os.label}</SelectItem>)}</SelectContent>
@@ -354,7 +356,7 @@ export default function ReleasesPage() {
               <div>
                 <Label htmlFor="artifact-upload-arch" className="mb-1.5 text-xs text-text-muted">Arch</Label>
                 <Select value={uploadArch} onValueChange={(value) => setUploadArch(value ?? 'x86_64')}>
-                  <SelectTrigger id="artifact-upload-arch" aria-label="上传 Arch" className="w-full bg-background/95">
+                  <SelectTrigger id="artifact-upload-arch" aria-label={`${t('common.upload')} Arch`} className="w-full bg-background/95">
                     <SelectValue>{(value: string | null) => archLabel(value, 'x86_64 (AMD64)')}</SelectValue>
                   </SelectTrigger>
                   <SelectContent>{ARCH_OPTIONS.map((arch) => <SelectItem key={arch.value} value={arch.value}>{arch.label}</SelectItem>)}</SelectContent>
@@ -363,19 +365,19 @@ export default function ReleasesPage() {
             </div>
             <div className="flex items-center justify-between rounded-lg border border-border/70 p-3">
               <div>
-                <div className="text-sm font-medium text-text-primary">启用版本</div>
-                <div className="text-xs text-text-muted">启用后会出现在默认下载候选列表中。</div>
+                <div className="text-sm font-medium text-text-primary">{t('artifacts.activeVersion')}</div>
+                <div className="text-xs text-text-muted">{t('artifacts.activeVersionDesc')}</div>
               </div>
-              <ToggleSwitch aria-label="启用版本" checked={uploadActive} onChange={setUploadActive} />
+              <ToggleSwitch aria-label={t('artifacts.activeVersion')} checked={uploadActive} onChange={setUploadActive} />
             </div>
             <div>
-              <Label htmlFor="artifact-upload-comment" className="mb-1.5 text-xs text-text-muted">备注</Label>
+              <Label htmlFor="artifact-upload-comment" className="mb-1.5 text-xs text-text-muted">{t('common.comment')}</Label>
               <Textarea id="artifact-upload-comment" value={uploadComment} onChange={(event) => setUploadComment(event.target.value)} rows={3} />
             </div>
             <DialogFooter>
               <Button type="submit" disabled={uploadArtifact.isPending}>
                 <Plus className="w-4 h-4" />
-                {uploadArtifact.isPending ? '上传中' : '上传'}
+                {uploadArtifact.isPending ? t('artifacts.uploading') : t('common.upload')}
               </Button>
             </DialogFooter>
           </form>
@@ -385,20 +387,20 @@ export default function ReleasesPage() {
       <Dialog open={editing !== null} onOpenChange={(open) => { if (!open) setEditing(null) }}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>编辑 Artifact</DialogTitle>
-            <DialogDescription>只修改元数据，不会变更 Cloudflare R2 中的文件本体。</DialogDescription>
+            <DialogTitle>{t('artifacts.editTitle')}</DialogTitle>
+            <DialogDescription>{t('artifacts.editDesc')}</DialogDescription>
           </DialogHeader>
           {editing && (
             <form onSubmit={handleUpdate} className="space-y-4">
               <div className="grid gap-3 sm:grid-cols-3">
                 <div>
-                  <Label htmlFor="artifact-edit-version" className="mb-1.5 text-xs text-text-muted">版本</Label>
+                  <Label htmlFor="artifact-edit-version" className="mb-1.5 text-xs text-text-muted">{t('common.version')}</Label>
                   <Input id="artifact-edit-version" value={editing.version} onChange={(event) => setEditing({ ...editing, version: event.target.value })} required />
                 </div>
                 <div>
                   <Label htmlFor="artifact-edit-os" className="mb-1.5 text-xs text-text-muted">OS</Label>
                   <Select value={editing.os} onValueChange={(value) => setEditing({ ...editing, os: value ?? 'linux' })}>
-                    <SelectTrigger id="artifact-edit-os" aria-label="编辑 OS" className="w-full bg-background/95">
+                    <SelectTrigger id="artifact-edit-os" aria-label={`${t('common.edit')} OS`} className="w-full bg-background/95">
                       <SelectValue>{(value: string | null) => osLabel(value)}</SelectValue>
                     </SelectTrigger>
                     <SelectContent>{OS_OPTIONS.map((os) => <SelectItem key={os.value} value={os.value}>{os.label}</SelectItem>)}</SelectContent>
@@ -407,7 +409,7 @@ export default function ReleasesPage() {
                 <div>
                   <Label htmlFor="artifact-edit-arch" className="mb-1.5 text-xs text-text-muted">Arch</Label>
                   <Select value={normalizeArch(editing.arch)} onValueChange={(value) => setEditing({ ...editing, arch: value ?? 'x86_64' })}>
-                    <SelectTrigger id="artifact-edit-arch" aria-label="编辑 Arch" className="w-full bg-background/95">
+                    <SelectTrigger id="artifact-edit-arch" aria-label={`${t('common.edit')} Arch`} className="w-full bg-background/95">
                       <SelectValue>{(value: string | null) => archLabel(value)}</SelectValue>
                     </SelectTrigger>
                     <SelectContent>{ARCH_OPTIONS.map((arch) => <SelectItem key={arch.value} value={arch.value}>{arch.label}</SelectItem>)}</SelectContent>
@@ -416,18 +418,18 @@ export default function ReleasesPage() {
               </div>
               <div className="flex items-center justify-between rounded-lg border border-border/70 p-3">
                 <div>
-                  <div className="text-sm font-medium text-text-primary">启用状态</div>
-                  <div className="text-xs text-text-muted">停用后保留记录但不作为可用版本展示。</div>
+                  <div className="text-sm font-medium text-text-primary">{t('artifacts.activeStatus')}</div>
+                  <div className="text-xs text-text-muted">{t('artifacts.activeStatusDesc')}</div>
                 </div>
-                <ToggleSwitch aria-label="启用状态" checked={editing.is_active} onChange={(checked) => setEditing({ ...editing, is_active: checked })} />
+                <ToggleSwitch aria-label={t('artifacts.activeStatus')} checked={editing.is_active} onChange={(checked) => setEditing({ ...editing, is_active: checked })} />
               </div>
               <div>
-                <Label htmlFor="artifact-edit-comment" className="mb-1.5 text-xs text-text-muted">备注</Label>
+                <Label htmlFor="artifact-edit-comment" className="mb-1.5 text-xs text-text-muted">{t('common.comment')}</Label>
                 <Textarea id="artifact-edit-comment" value={editing.comment ?? ''} onChange={(event) => setEditing({ ...editing, comment: event.target.value })} rows={3} />
               </div>
               <DialogFooter>
-                <Button variant="outline" type="button" onClick={() => setEditing(null)}>取消</Button>
-                <Button type="submit" disabled={updateArtifact.isPending}>{updateArtifact.isPending ? '保存中' : '保存'}</Button>
+                <Button variant="outline" type="button" onClick={() => setEditing(null)}>{t('common.cancel')}</Button>
+                <Button type="submit" disabled={updateArtifact.isPending}>{updateArtifact.isPending ? t('common.saving') : t('common.save')}</Button>
               </DialogFooter>
             </form>
           )}
@@ -437,15 +439,18 @@ export default function ReleasesPage() {
       <Dialog open={deleteTarget !== null} onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>删除 Artifact</DialogTitle>
+            <DialogTitle>{t('artifacts.deleteTitle')}</DialogTitle>
             <DialogDescription>
-              确认删除 {deleteTarget?.version} ({deleteTarget ? artifactPlatform(deleteTarget) : ''})？该操作会软删除记录并尝试删除 R2 对象。
+              {t('artifacts.deleteDesc', {
+                version: deleteTarget?.version,
+                platform: deleteTarget ? artifactPlatform(deleteTarget) : '',
+              })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteTarget(null)}>取消</Button>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)}>{t('common.cancel')}</Button>
             <Button variant="destructive" onClick={handleDelete} disabled={deleteArtifact.isPending}>
-              {deleteArtifact.isPending ? '删除中' : '删除'}
+              {deleteArtifact.isPending ? t('common.deleting') : t('common.delete')}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { type TFunction } from 'i18next'
+import { useTranslation } from 'react-i18next'
 import { ChevronDown, ChevronRight, Pencil, Plus, Search, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -64,6 +66,7 @@ const DEFAULT_FORM: GeoFormState = {
 }
 
 export default function GeoManagementPage() {
+  const { t } = useTranslation()
   const [keyword, setKeyword] = useState('')
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set())
   const [dialog, setDialog] = useState<GeoDialogState | null>(null)
@@ -85,12 +88,12 @@ export default function GeoManagementPage() {
     <div className="space-y-5">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary">GEO 管理</h1>
-          <p className="text-sm text-text-muted">维护 Target 和 Agent 表单可检索的大洲、国家和城市目录。</p>
+          <h1 className="text-2xl font-bold text-text-primary">{t('geoManagement.title')}</h1>
+          <p className="text-sm text-text-muted">{t('geoManagement.description')}</p>
         </div>
         <Button onClick={() => openDialog({ mode: 'create', type: 'continent' })}>
           <Plus className="size-4" />
-          新增大洲
+          {t('geoManagement.addContinent')}
         </Button>
       </div>
 
@@ -101,14 +104,14 @@ export default function GeoManagementPage() {
             <Input
               value={keyword}
               onChange={(event) => setKeyword(event.target.value)}
-              placeholder="搜索大洲、国家、城市或代码"
+              placeholder={t('geoManagement.searchPlaceholder')}
               className="pl-9"
             />
           </div>
           <div className="flex flex-wrap gap-2 text-xs text-text-muted">
-            <span>大洲 {data?.total_continent_count ?? 0}</span>
-            <span>国家 {data?.total_country_count ?? 0}</span>
-            <span>城市 {data?.total_city_count ?? 0}</span>
+            <span>{t('geoManagement.continentCount', { count: data?.total_continent_count ?? 0 })}</span>
+            <span>{t('geoManagement.countryCount', { count: data?.total_country_count ?? 0 })}</span>
+            <span>{t('geoManagement.cityCount', { count: data?.total_city_count ?? 0 })}</span>
           </div>
         </div>
 
@@ -117,15 +120,15 @@ export default function GeoManagementPage() {
             {Array.from({ length: 7 }, (_, index) => <Skeleton key={index} className="h-11 w-full" />)}
           </div>
         ) : treeQuery.error ? (
-          <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-6 text-center text-sm text-red-300">GEO 树加载失败</div>
+          <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-6 text-center text-sm text-red-300">{t('geoManagement.loadFailed')}</div>
         ) : !data?.items.length ? (
-          <div className="rounded-lg border border-border bg-muted/20 p-6 text-center text-sm text-text-muted">暂无 GEO 数据</div>
+          <div className="rounded-lg border border-border bg-muted/20 p-6 text-center text-sm text-text-muted">{t('geoManagement.empty')}</div>
         ) : (
-          <div aria-label="GEO 树形目录" className="overflow-hidden rounded-lg border border-border">
+          <div aria-label={t('geoManagement.treeAria')} className="overflow-hidden rounded-lg border border-border">
             <div className="grid grid-cols-[minmax(0,1fr)_88px_116px] gap-3 border-b border-border bg-muted/30 px-3 py-2 text-xs font-medium text-text-muted">
-              <span>名称</span>
-              <span>代码</span>
-              <span className="text-right">操作</span>
+              <span>{t('common.name')}</span>
+              <span>{t('common.code')}</span>
+              <span className="text-right">{t('common.actions')}</span>
             </div>
             <div className="divide-y divide-border/70">
               {data.items.map((continent) => (
@@ -158,6 +161,7 @@ function GeoContinentRow({
   onToggle: (id: string) => void
   onOpenDialog: (state: GeoDialogState) => void
 }) {
+  const { t } = useTranslation()
   const id = `continent:${continent.continent_uuid}`
   const isOpen = expanded.has(id)
   const deleteContinent = useDeleteGeoContinent()
@@ -168,15 +172,15 @@ function GeoContinentRow({
         label={continent.name}
         subLabel={continent.name_zh ?? undefined}
         code={continent.code ?? '-'}
-        count={`${continent.country_count} 国家 / ${continent.city_count} 城市`}
+        count={t('geoManagement.countCountriesCities', { countries: continent.country_count, cities: continent.city_count })}
         isOpen={isOpen}
         canExpand={continent.countries.length > 0}
         onToggle={() => onToggle(id)}
         onAdd={() => onOpenDialog({ mode: 'create', type: 'country', parent: continent })}
         onEdit={() => onOpenDialog({ mode: 'edit', type: 'continent', item: continent })}
         onDelete={() => deleteContinent.mutate(continent.continent_uuid, {
-          onSuccess: () => toast.success('大洲已删除'),
-          onError: (error) => toast.error(error.message || '删除失败'),
+          onSuccess: () => toast.success(t('geoManagement.deleted', { type: typeLabel('continent', t) })),
+          onError: (error) => toast.error(error.message || t('geoManagement.saveFailed')),
         })}
       />
       {isOpen && continent.countries.map((country) => (
@@ -203,6 +207,7 @@ function GeoCountryRow({
   onToggle: (id: string) => void
   onOpenDialog: (state: GeoDialogState) => void
 }) {
+  const { t } = useTranslation()
   const id = `country:${country.country_uuid}`
   const isOpen = expanded.has(id)
   const deleteCountry = useDeleteGeoCountry()
@@ -213,15 +218,15 @@ function GeoCountryRow({
         label={country.name}
         subLabel={country.name_zh ?? undefined}
         code={country.code ?? '-'}
-        count={`${country.city_count} 城市`}
+        count={t('geoManagement.countCities', { count: country.city_count })}
         isOpen={isOpen}
         canExpand={country.cities.length > 0}
         onToggle={() => onToggle(id)}
         onAdd={() => onOpenDialog({ mode: 'create', type: 'city', parent: country })}
         onEdit={() => onOpenDialog({ mode: 'edit', type: 'country', item: country })}
         onDelete={() => deleteCountry.mutate(country.country_uuid, {
-          onSuccess: () => toast.success('国家已删除'),
-          onError: (error) => toast.error(error.message || '删除失败'),
+          onSuccess: () => toast.success(t('geoManagement.deleted', { type: typeLabel('country', t) })),
+          onError: (error) => toast.error(error.message || t('geoManagement.saveFailed')),
         })}
       />
       {isOpen && country.cities.map((city) => (
@@ -232,6 +237,7 @@ function GeoCountryRow({
 }
 
 function GeoCityRow({ city, onOpenDialog }: { city: GeoTreeCity; onOpenDialog: (state: GeoDialogState) => void }) {
+  const { t } = useTranslation()
   const deleteCity = useDeleteGeoCity()
   return (
     <TreeLine
@@ -239,12 +245,12 @@ function GeoCityRow({ city, onOpenDialog }: { city: GeoTreeCity; onOpenDialog: (
       label={city.name}
       subLabel={city.name_zh ?? undefined}
       code={city.code ?? '-'}
-      count={city.is_capital ? '首都 / 首府' : `权重 ${city.popularity}`}
+      count={city.is_capital ? t('geoManagement.capital') : t('geoManagement.weight', { weight: city.popularity })}
       canExpand={false}
       onEdit={() => onOpenDialog({ mode: 'edit', type: 'city', item: city })}
       onDelete={() => deleteCity.mutate(city.city_uuid, {
-        onSuccess: () => toast.success('城市已删除'),
-        onError: (error) => toast.error(error.message || '删除失败'),
+        onSuccess: () => toast.success(t('geoManagement.deleted', { type: typeLabel('city', t) })),
+        onError: (error) => toast.error(error.message || t('geoManagement.saveFailed')),
       })}
     />
   )
@@ -275,6 +281,7 @@ function TreeLine({
   onEdit: () => void
   onDelete: () => void
 }) {
+  const { t } = useTranslation()
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_88px_116px] items-center gap-3 px-3 py-2.5 text-sm hover:bg-muted/20">
       <div className="flex min-w-0 items-center gap-2" style={{ paddingLeft: depth * 20 }}>
@@ -295,14 +302,14 @@ function TreeLine({
       <div className="font-[family-name:var(--font-mono)] text-xs text-text-secondary">{code}</div>
       <div className="flex justify-end gap-1">
         {onAdd && (
-          <Button variant="ghost" size="icon" aria-label={`新增 ${label} 下级`} onClick={onAdd}>
+          <Button variant="ghost" size="icon" aria-label={t('geoManagement.addChild', { label })} onClick={onAdd}>
             <Plus className="size-4" />
           </Button>
         )}
-        <Button variant="ghost" size="icon" aria-label={`编辑 ${label}`} onClick={onEdit}>
+        <Button variant="ghost" size="icon" aria-label={t('geoManagement.editLabel', { label })} onClick={onEdit}>
           <Pencil className="size-4" />
         </Button>
-        <Button variant="ghost" size="icon" aria-label={`删除 ${label}`} className="text-red-400 hover:text-red-300" onClick={onDelete}>
+        <Button variant="ghost" size="icon" aria-label={t('geoManagement.deleteLabel', { label })} className="text-red-400 hover:text-red-300" onClick={onDelete}>
           <Trash2 className="size-4" />
         </Button>
       </div>
@@ -342,6 +349,7 @@ function dialogKey(dialog: GeoDialogState): string {
 }
 
 function GeoEditDialog({ dialog, onClose }: { dialog: GeoDialogState; onClose: () => void }) {
+  const { t } = useTranslation()
   const [form, setForm] = useState<GeoFormState>(() => initialGeoForm(dialog))
   const continentsQuery = useGeoContinents({ limit: 500, enabled: true })
   const countriesQuery = useGeoCountries({ continent_uuid: form.continent_uuid, limit: 500 })
@@ -352,17 +360,17 @@ function GeoEditDialog({ dialog, onClose }: { dialog: GeoDialogState; onClose: (
   const createCity = useCreateGeoCity()
   const updateCity = useUpdateGeoCity()
 
-  const title = `${dialog.mode === 'create' ? '新增' : '编辑'}${typeLabel(dialog.type)}`
+  const title = `${dialog.mode === 'create' ? t('geoManagement.createPrefix') : t('geoManagement.editPrefix')}${typeLabel(dialog.type, t)}`
 
   const submit = (event: React.FormEvent) => {
     event.preventDefault()
     const common = { name: form.name, code: form.code || null, name_zh: form.name_zh || null }
     const options = {
       onSuccess: () => {
-        toast.success(`${typeLabel(dialog.type)}已保存`)
+        toast.success(t('geoManagement.saved', { type: typeLabel(dialog.type, t) }))
         onClose()
       },
-      onError: (error: Error) => toast.error(error.message || '保存失败'),
+      onError: (error: Error) => toast.error(error.message || t('geoManagement.saveFailed')),
     }
     if (dialog.type === 'continent') {
       if (dialog.mode === 'create') createContinent.mutate(common, options)
@@ -383,12 +391,12 @@ function GeoEditDialog({ dialog, onClose }: { dialog: GeoDialogState; onClose: (
   }
 
   const continentLabel = (continentUuid: string | null) => {
-    if (!continentUuid) return '选择大洲'
+    if (!continentUuid) return t('geoManagement.selectContinent')
     return (continentsQuery.data?.items ?? []).find((continent: GeoContinent) => continent.continent_uuid === continentUuid)?.name ?? continentUuid
   }
 
   const countryLabel = (countryUuid: string | null) => {
-    if (!countryUuid) return '选择国家'
+    if (!countryUuid) return t('geoManagement.selectCountry')
     return (countriesQuery.data?.items ?? []).find((country: GeoCountry) => country.country_uuid === countryUuid)?.name ?? countryUuid
   }
 
@@ -397,14 +405,14 @@ function GeoEditDialog({ dialog, onClose }: { dialog: GeoDialogState; onClose: (
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>维护 GEO 树节点，保存后 Target 和 Agent 表单会立即使用最新检索数据。</DialogDescription>
+          <DialogDescription>{t('geoManagement.dialogDesc')}</DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="space-y-4">
           {dialog?.type === 'country' && dialog.mode === 'edit' && (
             <div>
-              <Label className="mb-1.5 text-xs text-text-secondary">所属大洲</Label>
+              <Label className="mb-1.5 text-xs text-text-secondary">{t('geoManagement.parentContinent')}</Label>
               <Select value={form.continent_uuid || undefined} onValueChange={(value) => setForm({ ...form, continent_uuid: value ?? '' })}>
-                <SelectTrigger aria-label="所属大洲" className="w-full">
+                <SelectTrigger aria-label={t('geoManagement.parentContinent')} className="w-full">
                   <SelectValue>
                     {(value: string | null) => continentLabel(value)}
                   </SelectValue>
@@ -419,9 +427,9 @@ function GeoEditDialog({ dialog, onClose }: { dialog: GeoDialogState; onClose: (
           )}
           {dialog?.type === 'city' && dialog.mode === 'edit' && (
             <div>
-              <Label className="mb-1.5 text-xs text-text-secondary">所属国家</Label>
+              <Label className="mb-1.5 text-xs text-text-secondary">{t('geoManagement.parentCountry')}</Label>
               <Select value={form.country_uuid || undefined} onValueChange={(value) => setForm({ ...form, country_uuid: value ?? '' })}>
-                <SelectTrigger aria-label="所属国家" className="w-full">
+                <SelectTrigger aria-label={t('geoManagement.parentCountry')} className="w-full">
                   <SelectValue>
                     {(value: string | null) => countryLabel(value)}
                   </SelectValue>
@@ -435,22 +443,22 @@ function GeoEditDialog({ dialog, onClose }: { dialog: GeoDialogState; onClose: (
             </div>
           )}
           <div className="grid gap-3 md:grid-cols-2">
-            <GeoText label="英文名" value={form.name} onChange={(name) => setForm({ ...form, name })} required />
-            <GeoText label="代码" value={form.code} onChange={(code) => setForm({ ...form, code })} />
-            <GeoText label="中文名" value={form.name_zh} onChange={(name_zh) => setForm({ ...form, name_zh })} />
+            <GeoText label={t('geoManagement.englishName')} value={form.name} onChange={(name) => setForm({ ...form, name })} required />
+            <GeoText label={t('common.code')} value={form.code} onChange={(code) => setForm({ ...form, code })} />
+            <GeoText label={t('geoManagement.chineseName')} value={form.name_zh} onChange={(name_zh) => setForm({ ...form, name_zh })} />
             {dialog?.type === 'city' && (
-              <GeoText label="排序权重" value={form.popularity} onChange={(popularity) => setForm({ ...form, popularity })} />
+              <GeoText label={t('geoManagement.sortWeight')} value={form.popularity} onChange={(popularity) => setForm({ ...form, popularity })} />
             )}
           </div>
           {dialog?.type === 'city' && (
             <label className="flex items-center gap-2 text-sm text-text-secondary">
               <input type="checkbox" checked={form.is_capital} onChange={(event) => setForm({ ...form, is_capital: event.target.checked })} />
-              首都 / 行政首府
+              {t('geoManagement.isCapital')}
             </label>
           )}
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>取消</Button>
-            <Button type="submit">保存</Button>
+            <Button type="button" variant="outline" onClick={onClose}>{t('common.cancel')}</Button>
+            <Button type="submit">{t('common.save')}</Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -467,8 +475,8 @@ function GeoText({ label, value, onChange, required = false }: { label: string; 
   )
 }
 
-function typeLabel(type: GeoDialogState['type']) {
-  if (type === 'continent') return '大洲'
-  if (type === 'country') return '国家'
-  return '城市'
+function typeLabel(type: GeoDialogState['type'], t: TFunction<'translation'>) {
+  if (type === 'continent') return t('geoManagement.continent')
+  if (type === 'country') return t('geoManagement.country')
+  return t('geoManagement.city')
 }

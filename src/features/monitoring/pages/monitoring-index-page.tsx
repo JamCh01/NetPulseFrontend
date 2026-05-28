@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { type TFunction } from 'i18next'
 import { Link, useLocation } from 'react-router'
 import { ArrowLeft, Filter, MapPin, Radio, Search, Server, ShieldCheck } from 'lucide-react'
 import { usePublicMonitoringTasks } from '@/api/hooks/use-public-monitoring-tasks'
@@ -21,20 +23,15 @@ import {
 } from '@/features/monitoring/lib/monitoring-models'
 
 type ProtocolFilter = 'all' | 'icmp' | 'tcp' | 'mtr' | 'iperf3'
+type StatusUi = { label: string; variant: 'success' | 'warning' | 'error' | 'inactive' }
 
-const protocolFilters: Array<{ value: ProtocolFilter; label: string }> = [
-  { value: 'all', label: '全部' },
-  { value: 'icmp', label: 'ICMP' },
-  { value: 'tcp', label: 'TCP' },
-  { value: 'mtr', label: 'MTR' },
-  { value: 'iperf3', label: 'IPERF3' },
-]
-
-const statusCopy: Record<LatestResultState, { label: string; variant: 'success' | 'warning' | 'error' | 'inactive' }> = {
-  ok: { label: '正常', variant: 'success' },
-  missing: { label: '无数据', variant: 'warning' },
-  failed: { label: '异常', variant: 'error' },
-  unknown: { label: '未知', variant: 'inactive' },
+function statusCopy(t: TFunction<'translation'>): Record<LatestResultState, StatusUi> {
+  return {
+    ok: { label: t('monitoring.statusOk'), variant: 'success' },
+    missing: { label: t('monitoring.statusNoData'), variant: 'warning' },
+    failed: { label: t('monitoring.statusFailed'), variant: 'error' },
+    unknown: { label: t('monitoring.statusUnknown'), variant: 'inactive' },
+  }
 }
 
 function taskHref(basePath: string, task: MonitoringTask) {
@@ -54,8 +51,9 @@ function protocolCoverage(group: MonitoringTargetGroup, protocol: MonitoringProt
   )
 }
 
-function TaskRow({ task, basePath }: { task: MonitoringTask; basePath: string }) {
-  const status = statusCopy[classifyTaskStatus(task)]
+function TaskRow({ task, basePath, statusMap }: { task: MonitoringTask; basePath: string; statusMap: Record<LatestResultState, StatusUi> }) {
+  const { t, i18n } = useTranslation()
+  const status = statusMap[classifyTaskStatus(task)]
   const port = typeof task.probe_config?.port === 'number' ? `:${task.probe_config.port}` : ''
   return (
     <Link
@@ -70,7 +68,7 @@ function TaskRow({ task, basePath }: { task: MonitoringTask; basePath: string })
           <span className="truncate text-sm font-medium text-text-primary">{task.name}</span>
         </div>
         <div className="mt-1 truncate text-xs text-text-muted">
-          {task.agent?.name ?? '未绑定 Agent'} · {formatAgentLocation(task.agent)} · {task.target.target}{port}
+          {task.agent?.name ?? t('monitoring.agentUnassigned')} · {formatAgentLocation(task.agent, t('monitoring.locationUnknown'), t('monitoring.agentNotBound'))} · {task.target.target}{port}
         </div>
       </div>
       <div className="flex items-center text-xs text-text-muted sm:justify-end">
@@ -78,7 +76,7 @@ function TaskRow({ task, basePath }: { task: MonitoringTask; basePath: string })
         {task.interval_sec}s
       </div>
       <div className="flex items-center text-xs text-text-muted sm:justify-end">
-        {formatLatestSample(task.latest_result.latest_sample_at)}
+        {formatLatestSample(task.latest_result.latest_sample_at, i18n.language, t('monitoring.noSample'))}
       </div>
       <div className="flex items-center sm:justify-end">
         <Badge variant={status.variant}>{status.label}</Badge>
@@ -87,8 +85,9 @@ function TaskRow({ task, basePath }: { task: MonitoringTask; basePath: string })
   )
 }
 
-function TargetGroupPanel({ group, basePath }: { group: MonitoringTargetGroup; basePath: string }) {
-  const status = statusCopy[group.status]
+function TargetGroupPanel({ group, basePath, statusMap }: { group: MonitoringTargetGroup; basePath: string; statusMap: Record<LatestResultState, StatusUi> }) {
+  const { t } = useTranslation()
+  const status = statusMap[group.status]
   const sortedTasks = [...group.tasks].sort((a, b) => {
     const order: Record<string, number> = { icmp: 0, tcp: 1, mtr: 2, iperf3: 3 }
     return (order[a.task_type] ?? 10) - (order[b.task_type] ?? 10) || a.name.localeCompare(b.name)
@@ -106,7 +105,7 @@ function TargetGroupPanel({ group, basePath }: { group: MonitoringTargetGroup; b
             </div>
             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-muted">
               <span className="font-mono text-text-secondary">{group.target.target}</span>
-              <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{formatTargetLocation(group.target)}</span>
+              <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{formatTargetLocation(group.target, t('monitoring.locationUnknown'))}</span>
               {group.target.carrier && <span className="inline-flex items-center gap-1"><Server className="h-3.5 w-3.5" />{group.target.carrier}</span>}
             </div>
           </div>
@@ -123,7 +122,7 @@ function TargetGroupPanel({ group, basePath }: { group: MonitoringTargetGroup; b
       </div>
       <div className="space-y-2 p-3">
         {sortedTasks.map((task) => (
-          <TaskRow key={task.task_uuid} task={task} basePath={basePath} />
+          <TaskRow key={task.task_uuid} task={task} basePath={basePath} statusMap={statusMap} />
         ))}
       </div>
     </section>
@@ -131,12 +130,21 @@ function TargetGroupPanel({ group, basePath }: { group: MonitoringTargetGroup; b
 }
 
 export default function MonitoringIndexPage() {
+  const { t } = useTranslation()
   const location = useLocation()
   const basePath = location.pathname.startsWith('/app/monitoring') ? '/app/monitoring' : '/monitoring'
   const { data, isLoading, error, refetch } = usePublicMonitoringTasks(100)
   const [query, setQuery] = useState('')
   const [protocol, setProtocol] = useState<ProtocolFilter>('all')
   const selectedTargetUuid = new URLSearchParams(location.search).get('target_uuid')
+  const statuses = statusCopy(t)
+  const protocolFilters: Array<{ value: ProtocolFilter; label: string }> = [
+    { value: 'all', label: t('common.all') },
+    { value: 'icmp', label: 'ICMP' },
+    { value: 'tcp', label: 'TCP' },
+    { value: 'mtr', label: 'MTR' },
+    { value: 'iperf3', label: 'IPERF3' },
+  ]
 
   const groups = useMemo(() => data?.groups ?? [], [data?.groups])
   const selectedTargetName = selectedTargetUuid
@@ -172,13 +180,13 @@ export default function MonitoringIndexPage() {
       {selectedTargetUuid ? (
         <div className="flex flex-col gap-2 rounded-xl border border-border bg-bg-surface p-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0 text-sm text-text-muted">
-            当前 Target：
+            {t('monitoring.currentTarget')}
             <span className="font-medium text-text-primary">{selectedTargetName ?? selectedTargetUuid}</span>
           </div>
           <Link to={basePath}>
             <Button size="sm" variant="outline">
               <ArrowLeft className="h-4 w-4" />
-              返回所有 Target
+              {t('monitoring.backToAllTargets')}
             </Button>
           </Link>
         </div>
@@ -189,7 +197,7 @@ export default function MonitoringIndexPage() {
             <Input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="搜索 Target、Agent、运营商或任务"
+              placeholder={t('monitoring.searchPlaceholder')}
               className="pl-9"
             />
           </div>
@@ -214,10 +222,10 @@ export default function MonitoringIndexPage() {
         <TargetMonitoringPanel targetUuid={selectedTargetUuid} fallbackGroup={selectedGroup} basePath={basePath} />
       ) : error ? (
         <div className="rounded-xl border border-status-error-border bg-status-error-bg p-5">
-          <div className="text-sm font-medium text-status-error-fg">监控任务加载失败</div>
-          <div className="mt-1 text-xs text-status-error-fg/80">无法读取 `/api/v1/monitoring/tasks`。</div>
+          <div className="text-sm font-medium text-status-error-fg">{t('monitoring.tasksLoadFailed')}</div>
+          <div className="mt-1 text-xs text-status-error-fg/80">{t('monitoring.tasksLoadFailedDesc')}</div>
           <Button className="mt-3" size="sm" variant="outline" onClick={() => void refetch()}>
-            重试
+            {t('common.retry')}
           </Button>
         </div>
       ) : isLoading ? (
@@ -229,13 +237,13 @@ export default function MonitoringIndexPage() {
       ) : filteredGroups.length === 0 ? (
         <div className="rounded-xl border border-border bg-bg-surface p-8 text-center">
           <ShieldCheck className="mx-auto h-8 w-8 text-text-dim" />
-          <div className="mt-3 text-sm font-medium text-text-primary">没有匹配的监控目标</div>
-          <div className="mt-1 text-xs text-text-muted">调整搜索条件或协议筛选。</div>
+          <div className="mt-3 text-sm font-medium text-text-primary">{t('monitoring.noMatchedTargets')}</div>
+          <div className="mt-1 text-xs text-text-muted">{t('monitoring.noMatchedTargetsDesc')}</div>
         </div>
       ) : (
         <div className="space-y-3">
           {filteredGroups.map((group) => (
-            <TargetGroupPanel key={group.target.target_uuid} group={group} basePath={basePath} />
+            <TargetGroupPanel key={group.target.target_uuid} group={group} basePath={basePath} statusMap={statuses} />
           ))}
         </div>
       )}

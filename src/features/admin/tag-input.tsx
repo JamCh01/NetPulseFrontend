@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Plus, X } from 'lucide-react'
 
 import { type ResourceTag, useTags } from '@/api/hooks/admin-api'
@@ -33,6 +34,7 @@ function serializeTags(tags: string[]): string {
 }
 
 export function TagInput({ label, value, onChange, resourceType }: TagInputProps) {
+  const { t } = useTranslation()
   const [draft, setDraft] = useState('')
   const selectedTags = useMemo(() => parseTags(value), [value])
   const tagsQuery = useTags({ resource_type: resourceType, keyword: draft, limit: 20 })
@@ -69,9 +71,9 @@ export function TagInput({ label, value, onChange, resourceType }: TagInputProps
               addTag(draft.replace(',', ''))
             }
           }}
-          placeholder="输入标签并搜索，Enter 添加"
+          placeholder={t('adminInputs.tagPlaceholder')}
         />
-        <Button type="button" variant="outline" size="icon" onClick={() => addTag(draft)} aria-label="添加标签">
+        <Button type="button" variant="outline" size="icon" onClick={() => addTag(draft)} aria-label={t('adminInputs.addTag')}>
           <Plus className="size-4" />
         </Button>
       </div>

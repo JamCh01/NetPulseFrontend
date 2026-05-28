@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { MtrResultDetailView } from '@/features/monitoring/lib/monitoring-models'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -9,6 +10,7 @@ interface MtrDetailTableProps {
 }
 
 export function MtrDetailTable({ result, isLoading, showHeader = true }: MtrDetailTableProps) {
+  const { t } = useTranslation()
   if (isLoading && !result) {
     return (
       <div className="rounded-xl border border-border bg-bg-surface p-4">
@@ -23,8 +25,8 @@ export function MtrDetailTable({ result, isLoading, showHeader = true }: MtrDeta
   if (!result) {
     return (
       <div className="rounded-xl border border-border bg-bg-surface p-8 text-center">
-        <div className="text-sm font-medium text-text-primary">选择一个 MTR result</div>
-        <div className="mt-1 text-xs text-text-muted">从上方时间线选择一次执行结果后查看 hop 级证据。</div>
+        <div className="text-sm font-medium text-text-primary">{t('monitoring.selectMtrResult')}</div>
+        <div className="mt-1 text-xs text-text-muted">{t('monitoring.selectMtrResultDesc')}</div>
       </div>
     )
   }
@@ -35,7 +37,7 @@ export function MtrDetailTable({ result, isLoading, showHeader = true }: MtrDeta
         <div className="flex flex-col gap-2 border-b border-border px-4 py-3 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant={result.target_reached ? 'success' : 'error'}>
-              {result.target_reached ? '已到达目标' : '未到达目标'}
+              {result.target_reached ? t('monitoring.targetReached') : t('monitoring.targetUnreached')}
             </Badge>
             <span className="font-mono text-xs text-text-muted">{result.result_uuid}</span>
           </div>

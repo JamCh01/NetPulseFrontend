@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Activity, Clock3, Route, Waypoints } from 'lucide-react'
 import { MtrDetailTable } from '@/features/monitoring/components/mtr/mtr-detail-table'
 import { buildMtrTimelineItems, colorForMtrAgent } from '@/features/monitoring/lib/mtr-views'
@@ -22,6 +23,7 @@ export function MtrResultViews({
   detailLoading?: boolean
   listLoading?: boolean
 }) {
+  const { t, i18n } = useTranslation()
   const reachedCount = results.filter((result) => result.target_reached).length
   const failedCount = results.length - reachedCount
   const latest = results[0]
@@ -34,9 +36,9 @@ export function MtrResultViews({
     <div className="space-y-4">
       <div className="grid gap-2 sm:grid-cols-4">
         <MtrSummaryPill label="Result" value={String(total)} icon={Waypoints} />
-        <MtrSummaryPill label="到达" value={String(reachedCount)} icon={Activity} tone="success" />
-        <MtrSummaryPill label="未到达" value={String(failedCount)} icon={Activity} tone={failedCount > 0 ? 'error' : 'success'} />
-        <MtrSummaryPill label="最近" value={formatLatestSample(latest?.timestamp)} icon={Route} />
+        <MtrSummaryPill label={t('monitoring.reached')} value={String(reachedCount)} icon={Activity} tone="success" />
+        <MtrSummaryPill label={t('monitoring.unreached')} value={String(failedCount)} icon={Activity} tone={failedCount > 0 ? 'error' : 'success'} />
+        <MtrSummaryPill label={t('monitoring.latest')} value={formatLatestSample(latest?.timestamp, i18n.language, t('monitoring.noSample'))} icon={Route} />
       </div>
 
       <MtrResultTimeline
@@ -92,6 +94,7 @@ function MtrResultTimeline({
   onSelectResult: (resultUuid: string) => void
   isLoading?: boolean
 }) {
+  const { t, i18n } = useTranslation()
   if (isLoading && items.length === 0) {
     return (
       <div className="rounded-xl border border-border bg-bg-surface-light p-4">
@@ -103,7 +106,7 @@ function MtrResultTimeline({
   return (
     <div className="rounded-xl border border-border bg-bg-surface">
       <div className="flex flex-col gap-1 border-b border-border px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="text-xs font-semibold text-text-primary">MTR Result 时间轴</div>
+        <div className="text-xs font-semibold text-text-primary">{t('monitoring.resultTimeline', { name: 'MTR' })}</div>
         <div className="flex flex-wrap gap-3 text-[11px] text-text-muted">
           {agents.map((agent) => (
             <span key={agent.agentUuid} className="inline-flex items-center gap-1">
@@ -113,12 +116,12 @@ function MtrResultTimeline({
           ))}
           <span className="inline-flex items-center gap-1">
             <span className="h-2.5 w-2.5 rounded-full border-2 border-status-error-fg" />
-            未到达
+            {t('monitoring.unreached')}
           </span>
         </div>
       </div>
       {items.length === 0 ? (
-        <div className="px-3 py-6 text-center text-xs text-text-muted">当前 Agent 和时间范围内没有 MTR result。</div>
+        <div className="px-3 py-6 text-center text-xs text-text-muted">{t('monitoring.noMtrResultInRange')}</div>
       ) : (
         <div className="overflow-x-auto px-4 py-5">
           <div className="relative flex min-w-max items-start gap-8">
@@ -142,7 +145,7 @@ function MtrResultTimeline({
                   >
                     {active && <Clock3 className="h-3 w-3 text-bg-surface" />}
                   </span>
-                  <span className="line-clamp-1 text-[11px] font-medium text-text-primary">{formatLatestSample(item.timestamp)}</span>
+                  <span className="line-clamp-1 text-[11px] font-medium text-text-primary">{formatLatestSample(item.timestamp, i18n.language, t('monitoring.noSample'))}</span>
                   <span className="line-clamp-1 text-[10px] text-text-muted">{item.agentName}</span>
                   <span className="font-mono text-[10px] text-text-dim">{item.totalHops} hops</span>
                 </button>

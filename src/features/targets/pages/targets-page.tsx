@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { toast } from 'sonner'
 
@@ -40,6 +41,7 @@ const PAGE_SIZE = 100
 const PROTOCOLS: TargetProtocol[] = [...MONITORING_PROTOCOLS]
 
 export default function TargetsPage() {
+  const { t } = useTranslation()
   const [page, setPage] = useState(1)
   const [keyword, setKeyword] = useState('')
   const [createOpen, setCreateOpen] = useState(false)
@@ -147,19 +149,19 @@ export default function TargetsPage() {
         data: targetPayload(),
       }, {
         onSuccess: () => {
-          toast.success('Target 已更新')
+          toast.success(t('targets.updatedToast'))
           closeTargetDialog()
         },
-        onError: (error) => toast.error(error.message || '更新 Target 失败'),
+        onError: (error) => toast.error(error.message || t('targets.updateError')),
       })
       return
     }
     createTarget.mutate(targetPayload(), {
       onSuccess: () => {
-        toast.success('Target 已创建')
+        toast.success(t('targets.createdToast'))
         closeTargetDialog()
       },
-      onError: (error) => toast.error(error.message || '创建 Target 失败'),
+      onError: (error) => toast.error(error.message || t('targets.createError')),
     })
   }
 
@@ -170,11 +172,11 @@ export default function TargetsPage() {
       agent_uuid: selectedAgentUuid,
     }, {
       onSuccess: (tasks) => {
-        toast.success(`已快速关联，创建或复用 ${tasks.length} 个任务`)
+        toast.success(t('targets.quickAssociateSuccess', { count: tasks.length }))
         setAssociateTarget(null)
         setSelectedAgentUuid('')
       },
-      onError: (error) => toast.error(error.message || '快速关联失败'),
+      onError: (error) => toast.error(error.message || t('targets.quickAssociateError')),
     })
   }
 
@@ -182,14 +184,14 @@ export default function TargetsPage() {
     <div className="space-y-5">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary">Target 管理</h1>
-          <p className="text-sm text-text-muted">通过 /api/v1/targets/* 维护监控目标，并可快速关联 Agent。</p>
+          <h1 className="text-2xl font-bold text-text-primary">{t('targets.managementTitle')}</h1>
+          <p className="text-sm text-text-muted">{t('targets.managementDesc')}</p>
         </div>
         <Button onClick={() => {
           setEditingTarget(null)
           resetForm()
           setCreateOpen(true)
-        }}>新增 Target</Button>
+        }}>{t('targets.newTarget')}</Button>
       </div>
 
       <div className="glass-light rounded-xl p-4">
@@ -200,10 +202,10 @@ export default function TargetsPage() {
               setKeyword(event.target.value)
               setPage(1)
             }}
-            placeholder="按名称、地址或运营商搜索"
+            placeholder={t('targets.searchPlaceholder')}
             className="md:max-w-sm"
           />
-          <Button variant="outline" onClick={() => void targetsQuery.refetch()}>刷新</Button>
+          <Button variant="outline" onClick={() => void targetsQuery.refetch()}>{t('targets.refresh')}</Button>
         </div>
 
         {targetsQuery.isLoading ? (
@@ -211,20 +213,20 @@ export default function TargetsPage() {
             {Array.from({ length: 6 }, (_, index) => <Skeleton key={index} className="h-10 w-full" />)}
           </div>
         ) : targetsQuery.error ? (
-          <div className="p-6 text-center text-sm text-red-400">Target 列表加载失败</div>
+          <div className="p-6 text-center text-sm text-red-400">{t('targets.listFailed')}</div>
         ) : targets.length === 0 ? (
-          <div className="p-6 text-center text-sm text-text-muted">暂无 Target</div>
+          <div className="p-6 text-center text-sm text-text-muted">{t('targets.emptyList')}</div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow className="border-white/5 hover:bg-transparent">
-                <TableHead>名称</TableHead>
-                <TableHead>目标地址</TableHead>
-                <TableHead>位置</TableHead>
-                <TableHead>协议</TableHead>
-                <TableHead>状态</TableHead>
-                <TableHead>更新时间</TableHead>
-                <TableHead>操作</TableHead>
+                <TableHead>{t('common.name')}</TableHead>
+                <TableHead>{t('targets.targetAddress')}</TableHead>
+                <TableHead>{t('targets.location')}</TableHead>
+                <TableHead>{t('targets.protocols')}</TableHead>
+                <TableHead>{t('common.status')}</TableHead>
+                <TableHead>{t('targets.updatedAt')}</TableHead>
+                <TableHead>{t('common.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -245,37 +247,37 @@ export default function TargetsPage() {
                   </TableCell>
                   <TableCell>
                     <Badge variant={target.is_enabled ? 'success' : 'inactive'}>
-                      {target.is_enabled ? '启用' : '停用'}
+                      {target.is_enabled ? t('targets.enabled') : t('targets.stopped')}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-sm text-text-secondary">{formatDateTime(target.updated_at)}</TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => openEditTarget(target)}>编辑</Button>
-                      <Button variant="ghost" size="sm" onClick={() => setAssociateTarget(target)}>关联 Agent</Button>
+                      <Button variant="ghost" size="sm" onClick={() => openEditTarget(target)}>{t('common.edit')}</Button>
+                      <Button variant="ghost" size="sm" onClick={() => setAssociateTarget(target)}>{t('targets.associateAgent')}</Button>
                       <Link to={`/app/monitoring?target_uuid=${target.target_uuid}`}>
-                        <Button variant="ghost" size="sm">查看数据</Button>
+                        <Button variant="ghost" size="sm">{t('targets.viewData')}</Button>
                       </Link>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => setTargetEnabled.mutate(
                           { uuid: target.target_uuid, enabled: !target.is_enabled },
-                          { onError: (error) => toast.error(error.message || '状态更新失败') },
+                          { onError: (error) => toast.error(error.message || t('targets.statusUpdateFailed')) },
                         )}
                       >
-                        {target.is_enabled ? '停用' : '启用'}
+                        {target.is_enabled ? t('targets.stopped') : t('targets.enabled')}
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
                         className="text-red-400 hover:text-red-300"
                         onClick={() => deleteTarget.mutate(target.target_uuid, {
-                          onSuccess: () => toast.success('Target 已删除'),
-                          onError: (error) => toast.error(error.message || '删除失败'),
+                          onSuccess: () => toast.success(t('targets.deletedToast')),
+                          onError: (error) => toast.error(error.message || t('targets.deleteError')),
                         })}
                       >
-                        删除
+                        {t('common.delete')}
                       </Button>
                     </div>
                   </TableCell>
@@ -287,9 +289,9 @@ export default function TargetsPage() {
 
         {pagination && pagination.total_pages > 1 && (
           <div className="mt-4 flex items-center justify-end gap-2 text-sm text-text-muted">
-            <span>第 {pagination.page} / {pagination.total_pages} 页，共 {pagination.total} 条</span>
-            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((value) => value - 1)}>上一页</Button>
-            <Button variant="outline" size="sm" disabled={page >= pagination.total_pages} onClick={() => setPage((value) => value + 1)}>下一页</Button>
+            <span>{t('targets.pagination', { page: pagination.page, totalPages: pagination.total_pages, total: pagination.total })}</span>
+            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((value) => value - 1)}>{t('common.previous')}</Button>
+            <Button variant="outline" size="sm" disabled={page >= pagination.total_pages} onClick={() => setPage((value) => value + 1)}>{t('common.next')}</Button>
           </div>
         )}
       </div>
@@ -297,23 +299,23 @@ export default function TargetsPage() {
       <Dialog open={createOpen} onOpenChange={(open) => { if (open) setCreateOpen(true); else closeTargetDialog() }}>
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>{editingTarget ? '编辑 Target' : '新增 Target'}</DialogTitle>
-            <DialogDescription>Target 是监控任务绑定的目标地址，修改后后端会同步受影响的 Agent 任务快照。</DialogDescription>
+            <DialogTitle>{editingTarget ? t('targets.editTarget') : t('targets.newTarget')}</DialogTitle>
+            <DialogDescription>{t('targets.dialogDesc')}</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmitTarget} className="mt-2 grid gap-4">
             <div className="grid gap-3 md:grid-cols-2">
               <div>
-                <Label className="mb-1.5 text-xs text-text-secondary">名称</Label>
+                <Label className="mb-1.5 text-xs text-text-secondary">{t('common.name')}</Label>
                 <Input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} required />
               </div>
               <div>
-                <Label className="mb-1.5 text-xs text-text-secondary">目标地址</Label>
+                <Label className="mb-1.5 text-xs text-text-secondary">{t('targets.targetAddress')}</Label>
                 <Input value={form.target} onChange={(event) => setForm({ ...form, target: event.target.value })} required />
               </div>
               <div>
-                <Label className="mb-1.5 text-xs text-text-secondary">IP 版本</Label>
+                <Label className="mb-1.5 text-xs text-text-secondary">{t('targets.ipVersion')}</Label>
                 <Select value={form.ip_version} onValueChange={(value) => setForm({ ...form, ip_version: value as IpVersion })}>
-                  <SelectTrigger aria-label="IP 版本" className="w-full">
+                  <SelectTrigger aria-label={t('targets.ipVersion')} className="w-full">
                     <SelectValue>
                       {(value: IpVersion | null) => ipVersionLabel(value)}
                     </SelectValue>
@@ -326,7 +328,7 @@ export default function TargetsPage() {
                 </Select>
               </div>
               <div>
-                <Label className="mb-1.5 text-xs text-text-secondary">运营商 / 云厂商</Label>
+                <Label className="mb-1.5 text-xs text-text-secondary">{t('targets.carrier')}</Label>
                 <Input value={form.carrier} onChange={(event) => setForm({ ...form, carrier: event.target.value })} required />
               </div>
             </div>
@@ -337,7 +339,7 @@ export default function TargetsPage() {
             />
 
             <div>
-              <Label className="mb-1.5 text-xs text-text-secondary">支持协议</Label>
+              <Label className="mb-1.5 text-xs text-text-secondary">{t('targets.supportedProtocols')}</Label>
               <div className="flex flex-wrap gap-2">
                 {PROTOCOLS.map((protocol) => (
                   <Button
@@ -360,16 +362,16 @@ export default function TargetsPage() {
                 checked={form.is_anycast}
                 onChange={(event) => setForm({ ...form, is_anycast: event.target.checked })}
               />
-              <Label htmlFor="target-anycast" className="text-sm text-text-secondary">标记为 AnyCast</Label>
+              <Label htmlFor="target-anycast" className="text-sm text-text-secondary">{t('targets.markAnycast')}</Label>
             </div>
 
-            <TagInput label="标签" resourceType="target" value={form.tags} onChange={(tags) => setForm({ ...form, tags })} />
-            <Textarea placeholder="备注" value={form.comment} onChange={(event) => setForm({ ...form, comment: event.target.value })} />
+            <TagInput label={t('targets.tags')} resourceType="target" value={form.tags} onChange={(tags) => setForm({ ...form, tags })} />
+            <Textarea placeholder={t('targets.commentPlaceholder')} value={form.comment} onChange={(event) => setForm({ ...form, comment: event.target.value })} />
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={closeTargetDialog}>取消</Button>
+              <Button type="button" variant="outline" onClick={closeTargetDialog}>{t('common.cancel')}</Button>
               <Button type="submit" disabled={createTarget.isPending || updateTarget.isPending}>
-                {createTarget.isPending || updateTarget.isPending ? '保存中' : (editingTarget ? '保存' : '创建')}
+                {createTarget.isPending || updateTarget.isPending ? t('targets.savingShort') : (editingTarget ? t('common.save') : t('common.create'))}
               </Button>
             </DialogFooter>
           </form>
@@ -379,8 +381,8 @@ export default function TargetsPage() {
       <Dialog open={!!associateTarget} onOpenChange={(open) => { if (!open) setAssociateTarget(null) }}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>快速关联 Target 和 Agent</DialogTitle>
-            <DialogDescription>调用 /api/v1/relations/quick-associate，由后端创建该 Target 与 Agent 之间需要的监控任务。</DialogDescription>
+            <DialogTitle>{t('targets.quickAssociateTitle')}</DialogTitle>
+            <DialogDescription>{t('targets.quickAssociateDesc')}</DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
             <div className="rounded-lg border border-border bg-muted/30 p-3 text-sm text-text-secondary">
@@ -388,7 +390,7 @@ export default function TargetsPage() {
               <div>{associateTarget?.target}</div>
             </div>
             <Select value={selectedAgentUuid} onValueChange={(value) => setSelectedAgentUuid(value ?? '')}>
-              <SelectTrigger className="w-full"><SelectValue placeholder="选择 Agent" /></SelectTrigger>
+              <SelectTrigger className="w-full"><SelectValue placeholder={t('targets.selectAgent')} /></SelectTrigger>
               <SelectContent>
                 {agents.map((agent: AdminAgent) => (
                   <SelectItem key={agent.agent_uuid} value={agent.agent_uuid}>
@@ -399,9 +401,9 @@ export default function TargetsPage() {
             </Select>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setAssociateTarget(null)}>取消</Button>
+            <Button variant="outline" onClick={() => setAssociateTarget(null)}>{t('common.cancel')}</Button>
             <Button disabled={!selectedAgentUuid || quickAssociate.isPending} onClick={handleAssociate}>
-              {quickAssociate.isPending ? '关联中' : '快速关联'}
+              {quickAssociate.isPending ? t('targets.associating') : t('targets.quickAssociate')}
             </Button>
           </DialogFooter>
         </DialogContent>

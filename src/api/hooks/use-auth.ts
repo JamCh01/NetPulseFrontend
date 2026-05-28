@@ -6,6 +6,7 @@ import {
 } from '@/api/generated/sdk.gen'
 import { useAuthStore } from '@/stores/auth-store'
 import { decodeJwt } from '@/lib/jwt'
+import i18n from '@/i18n'
 import type { AdminLoginRequest } from '@/api/generated/types.gen'
 
 interface NormalizedAuthResponse {
@@ -91,7 +92,7 @@ export function useLogout() {
 export function useRegister() {
   return useMutation({
     mutationFn: async () => {
-      throw new Error('注册接口已被后端移除，请使用管理员账号登录。')
+      throw new Error(i18n.t('auth.registerRemoved'))
     },
   })
 }

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { useResultIngestionEvents } from '@/api/hooks/admin-api'
 import { Badge } from '@/components/ui/badge'
@@ -11,11 +12,11 @@ import { formatDateTime } from '@/features/admin/utils'
 
 const PAGE_SIZE = 50
 
-function eventStatusLabel(status: string | null) {
+function eventStatusLabel(status: string | null, allStatusesLabel: string) {
   if (status === 'processed') return 'processed'
   if (status === 'duplicate') return 'duplicate'
   if (status === 'failed') return 'failed'
-  return '全部状态'
+  return allStatusesLabel
 }
 
 function statusVariant(status: string) {
@@ -26,6 +27,7 @@ function statusVariant(status: string) {
 }
 
 export default function ResultIngestionEventsPage() {
+  const { t } = useTranslation()
   const [page, setPage] = useState(1)
   const [messageId, setMessageId] = useState('')
   const [status, setStatus] = useState('all')
@@ -41,8 +43,8 @@ export default function ResultIngestionEventsPage() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-bold text-text-primary">结果入库事件</h1>
-        <p className="text-sm text-text-muted">通过 /api/v1/results/* 查看 NATS worker 的入库记录、重复消息和失败原因。</p>
+        <h1 className="text-2xl font-bold text-text-primary">{t('results.title')}</h1>
+        <p className="text-sm text-text-muted">{t('results.description')}</p>
       </div>
 
       <div className="glass-light rounded-xl p-4">
@@ -53,26 +55,26 @@ export default function ResultIngestionEventsPage() {
               setMessageId(event.target.value)
               setPage(1)
             }}
-            placeholder="按 message_id 搜索"
+            placeholder={t('results.searchPlaceholder')}
             className="md:max-w-md"
           />
           <Select value={status} onValueChange={(value) => {
             setStatus(value ?? 'all')
             setPage(1)
           }}>
-            <SelectTrigger aria-label="事件状态" className="w-full md:w-44">
+            <SelectTrigger aria-label={t('results.status')} className="w-full md:w-44">
               <SelectValue>
-                {(value: string | null) => eventStatusLabel(value)}
+                {(value: string | null) => eventStatusLabel(value, t('results.allStatuses'))}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">全部状态</SelectItem>
+              <SelectItem value="all">{t('results.allStatuses')}</SelectItem>
               <SelectItem value="processed">processed</SelectItem>
               <SelectItem value="duplicate">duplicate</SelectItem>
               <SelectItem value="failed">failed</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" onClick={() => void eventsQuery.refetch()}>刷新</Button>
+          <Button variant="outline" onClick={() => void eventsQuery.refetch()}>{t('results.refresh')}</Button>
         </div>
 
         {eventsQuery.isLoading ? (
@@ -80,19 +82,19 @@ export default function ResultIngestionEventsPage() {
             {Array.from({ length: 6 }, (_, index) => <Skeleton key={index} className="h-10 w-full" />)}
           </div>
         ) : eventsQuery.error ? (
-          <div className="p-6 text-center text-sm text-red-400">入库事件加载失败</div>
+          <div className="p-6 text-center text-sm text-red-400">{t('results.failedToLoad')}</div>
         ) : events.length === 0 ? (
-          <div className="p-6 text-center text-sm text-text-muted">暂无入库事件</div>
+          <div className="p-6 text-center text-sm text-text-muted">{t('results.empty')}</div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow className="border-white/5 hover:bg-transparent">
-                <TableHead>状态</TableHead>
-                <TableHead>消息</TableHead>
-                <TableHead>关联对象</TableHead>
-                <TableHead>原因 / 错误</TableHead>
-                <TableHead>接收时间</TableHead>
-                <TableHead>更新时间</TableHead>
+                <TableHead>{t('common.status')}</TableHead>
+                <TableHead>{t('results.message')}</TableHead>
+                <TableHead>{t('results.relatedObjects')}</TableHead>
+                <TableHead>{t('results.reasonOrError')}</TableHead>
+                <TableHead>{t('results.receivedAt')}</TableHead>
+                <TableHead>{t('results.updatedAt')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -123,9 +125,9 @@ export default function ResultIngestionEventsPage() {
 
         {pagination && pagination.total_pages > 1 && (
           <div className="mt-4 flex items-center justify-end gap-2 text-sm text-text-muted">
-            <span>第 {pagination.page} / {pagination.total_pages} 页，共 {pagination.total} 条</span>
-            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((value) => value - 1)}>上一页</Button>
-            <Button variant="outline" size="sm" disabled={page >= pagination.total_pages} onClick={() => setPage((value) => value + 1)}>下一页</Button>
+            <span>{t('results.pagination', { page: pagination.page, totalPages: pagination.total_pages, total: pagination.total })}</span>
+            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((value) => value - 1)}>{t('common.previous')}</Button>
+            <Button variant="outline" size="sm" disabled={page >= pagination.total_pages} onClick={() => setPage((value) => value + 1)}>{t('common.next')}</Button>
           </div>
         )}
       </div>

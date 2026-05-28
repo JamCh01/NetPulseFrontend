@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Activity, Clock3, Gauge, GitBranch, HardDriveDownload, RadioTower, RotateCcw } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -19,6 +20,7 @@ export function Iperf3ResultViews({
   onSelectResult: (resultUuid: string) => void
   listLoading?: boolean
 }) {
+  const { t, i18n } = useTranslation()
   const successCount = results.filter((result) => result.success).length
   const failedCount = results.length - successCount
   const latest = results[0]
@@ -40,11 +42,11 @@ export function Iperf3ResultViews({
     <div className="space-y-4">
       <div className="grid gap-2 sm:grid-cols-6">
         <Iperf3SummaryPill label="Result" value={String(total)} icon={RadioTower} />
-        <Iperf3SummaryPill label="成功" value={String(successCount)} icon={Activity} tone="success" />
-        <Iperf3SummaryPill label="失败" value={String(failedCount)} icon={Activity} tone={failedCount > 0 ? 'error' : 'success'} />
-        <Iperf3SummaryPill label="上传峰值" value={formatMbps(peakUploadMbps)} icon={Gauge} />
-        <Iperf3SummaryPill label="下载峰值" value={formatMbps(peakDownloadMbps)} icon={HardDriveDownload} />
-        <Iperf3SummaryPill label="最近" value={formatLatestSample(latest?.timestamp)} icon={Clock3} />
+        <Iperf3SummaryPill label={t('common.success')} value={String(successCount)} icon={Activity} tone="success" />
+        <Iperf3SummaryPill label={t('common.failed')} value={String(failedCount)} icon={Activity} tone={failedCount > 0 ? 'error' : 'success'} />
+        <Iperf3SummaryPill label={t('monitoring.uploadPeak')} value={formatMbps(peakUploadMbps)} icon={Gauge} />
+        <Iperf3SummaryPill label={t('monitoring.downloadPeak')} value={formatMbps(peakDownloadMbps)} icon={HardDriveDownload} />
+        <Iperf3SummaryPill label={t('monitoring.latest')} value={formatLatestSample(latest?.timestamp, i18n.language, t('monitoring.noSample'))} icon={Clock3} />
       </div>
 
       <Iperf3ResultTimeline
@@ -96,6 +98,7 @@ function Iperf3ResultTimeline({
   onSelectResult: (resultUuid: string) => void
   isLoading?: boolean
 }) {
+  const { t, i18n } = useTranslation()
   if (isLoading && items.length === 0) {
     return (
       <div className="rounded-xl border border-border bg-bg-surface-light p-4">
@@ -107,7 +110,7 @@ function Iperf3ResultTimeline({
   return (
     <div className="rounded-xl border border-border bg-bg-surface">
       <div className="flex flex-col gap-1 border-b border-border px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="text-xs font-semibold text-text-primary">iperf3 Result 时间轴</div>
+        <div className="text-xs font-semibold text-text-primary">{t('monitoring.resultTimeline', { name: 'iperf3' })}</div>
         <div className="flex flex-wrap gap-3 text-[11px] text-text-muted">
           {agents.map((agent) => (
             <span key={agent.agentUuid} className="inline-flex items-center gap-1">
@@ -117,12 +120,12 @@ function Iperf3ResultTimeline({
           ))}
           <span className="inline-flex items-center gap-1">
             <span className="h-2.5 w-2.5 rounded-full border-2 border-status-error-fg" />
-            失败
+            {t('common.failed')}
           </span>
         </div>
       </div>
       {items.length === 0 ? (
-        <div className="px-3 py-6 text-center text-xs text-text-muted">当前 Agent 和时间范围内没有 iperf3 result。</div>
+        <div className="px-3 py-6 text-center text-xs text-text-muted">{t('monitoring.noIperf3ResultInRange')}</div>
       ) : (
         <div className="overflow-x-auto px-4 py-5">
           <div className="relative flex min-w-max items-start gap-8">
@@ -136,7 +139,12 @@ function Iperf3ResultTimeline({
                   type="button"
                   onClick={() => onSelectResult(item.resultUuid)}
                   className="group relative flex w-28 flex-col items-center gap-2 text-center"
-                  title={`${item.agentName} ${new Date(item.timestamp).toLocaleString()} 上传 ${formatMbps(item.uploadMbps)} / 下载 ${formatMbps(item.downloadMbps)}`}
+                  title={t('monitoring.timelineTitleUploadDownload', {
+                    agent: item.agentName,
+                    time: new Date(item.timestamp).toLocaleString(),
+                    upload: formatMbps(item.uploadMbps),
+                    download: formatMbps(item.downloadMbps),
+                  })}
                 >
                   <span
                     style={{ backgroundColor: agentColor, borderColor: item.success ? agentColor : 'var(--status-error-fg)' }}
@@ -146,7 +154,7 @@ function Iperf3ResultTimeline({
                   >
                     {active && <Clock3 className="h-3 w-3 text-bg-surface" />}
                   </span>
-                  <span className="line-clamp-1 text-[11px] font-medium text-text-primary">{formatLatestSample(item.timestamp)}</span>
+                  <span className="line-clamp-1 text-[11px] font-medium text-text-primary">{formatLatestSample(item.timestamp, i18n.language, t('monitoring.noSample'))}</span>
                   <span className="line-clamp-1 text-[10px] text-text-muted">{item.agentName}</span>
                   <span className="font-mono text-[10px] text-text-dim">↑ {formatMbps(item.uploadMbps)}</span>
                   <span className="font-mono text-[10px] text-text-dim">↓ {formatMbps(item.downloadMbps)}</span>
@@ -167,6 +175,7 @@ function Iperf3DetailPanel({
   result?: Iperf3ResultSummaryView
   isLoading?: boolean
 }) {
+  const { t } = useTranslation()
   if (isLoading && !result) {
     return (
       <div className="rounded-xl border border-border bg-bg-surface p-4">
@@ -181,44 +190,44 @@ function Iperf3DetailPanel({
   if (!result) {
     return (
       <div className="rounded-xl border border-border bg-bg-surface p-8 text-center">
-        <div className="text-sm font-medium text-text-primary">选择一个 iperf3 result</div>
-        <div className="mt-1 text-xs text-text-muted">从上方时间线选择一次执行结果后查看上传、下载、重传和执行参数。</div>
+        <div className="text-sm font-medium text-text-primary">{t('monitoring.selectIperf3Result')}</div>
+        <div className="mt-1 text-xs text-text-muted">{t('monitoring.selectIperf3ResultDesc')}</div>
       </div>
     )
   }
 
-  const modeLabel = result.mode === 'multi_thread' ? '多线程' : '单线程'
+  const modeLabel = result.mode === 'multi_thread' ? t('monitoring.multiThread') : t('monitoring.singleThread')
 
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-bg-surface">
       <div className="flex flex-col gap-2 border-b border-border px-4 py-3 md:flex-row md:items-center md:justify-between">
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant={result.success ? 'success' : 'error'}>
-            {result.success ? '执行成功' : '执行失败'}
+            {result.success ? t('monitoring.runSuccess') : t('monitoring.runFailed')}
           </Badge>
           <Badge variant="info">{modeLabel}</Badge>
           <span className="font-mono text-xs text-text-muted">{result.result_uuid}</span>
         </div>
         <div className="flex flex-wrap items-center gap-3 text-xs text-text-muted">
           <span>{new Date(result.timestamp).toLocaleString()}</span>
-          <span>{result.parallel} 线程</span>
+          <span>{t('monitoring.threads', { count: result.parallel })}</span>
           <span>{result.duration_sec}s</span>
           <span>:{result.port}</span>
         </div>
       </div>
 
       <div className="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Iperf3DetailMetric label="上传带宽" value={formatMbps(result.upload_mbps)} icon={Gauge} prominent />
-        <Iperf3DetailMetric label="下载带宽" value={formatMbps(result.download_mbps)} icon={HardDriveDownload} prominent />
-        <Iperf3DetailMetric label="上传字节" value={formatBytes(result.upload_bytes)} icon={HardDriveDownload} />
-        <Iperf3DetailMetric label="下载字节" value={formatBytes(result.download_bytes)} icon={HardDriveDownload} />
-        <Iperf3DetailMetric label="上传重传" value={result.upload_retransmits === null || result.upload_retransmits === undefined ? '-' : String(result.upload_retransmits)} icon={RotateCcw} />
-        <Iperf3DetailMetric label="下载重传" value={result.download_retransmits === null || result.download_retransmits === undefined ? '-' : String(result.download_retransmits)} icon={RotateCcw} />
-        <Iperf3DetailMetric label="并发线程" value={String(result.parallel)} icon={GitBranch} />
-        <Iperf3DetailMetric label="端口" value={String(result.port)} icon={RadioTower} />
-        <Iperf3DetailMetric label="执行时长" value={`${result.duration_sec}s`} icon={Clock3} />
+        <Iperf3DetailMetric label={t('monitoring.uploadBandwidth')} value={formatMbps(result.upload_mbps)} icon={Gauge} prominent />
+        <Iperf3DetailMetric label={t('monitoring.downloadBandwidth')} value={formatMbps(result.download_mbps)} icon={HardDriveDownload} prominent />
+        <Iperf3DetailMetric label={t('monitoring.uploadBytes')} value={formatBytes(result.upload_bytes)} icon={HardDriveDownload} />
+        <Iperf3DetailMetric label={t('monitoring.downloadBytes')} value={formatBytes(result.download_bytes)} icon={HardDriveDownload} />
+        <Iperf3DetailMetric label={t('monitoring.uploadRetransmits')} value={result.upload_retransmits === null || result.upload_retransmits === undefined ? '-' : String(result.upload_retransmits)} icon={RotateCcw} />
+        <Iperf3DetailMetric label={t('monitoring.downloadRetransmits')} value={result.download_retransmits === null || result.download_retransmits === undefined ? '-' : String(result.download_retransmits)} icon={RotateCcw} />
+        <Iperf3DetailMetric label={t('monitoring.parallelThreads')} value={String(result.parallel)} icon={GitBranch} />
+        <Iperf3DetailMetric label={t('monitoring.port')} value={String(result.port)} icon={RadioTower} />
+        <Iperf3DetailMetric label={t('monitoring.duration')} value={`${result.duration_sec}s`} icon={Clock3} />
         <Iperf3DetailMetric label="Resolved IP" value={result.resolved_ip ?? '-'} icon={Activity} />
-        <Iperf3DetailMetric label="运行状态" value={result.latest_run_status || '-'} icon={Activity} />
+        <Iperf3DetailMetric label={t('monitoring.runStatus')} value={result.latest_run_status || '-'} icon={Activity} />
       </div>
 
       <Iperf3ProcessPanel result={result} />
@@ -235,6 +244,7 @@ function Iperf3DetailPanel({
 }
 
 function Iperf3ProcessPanel({ result }: { result: Iperf3ResultSummaryView }) {
+  const { t } = useTranslation()
   const uploadCpu = readNestedNumber(result.upload_end, ['cpu_utilization_percent', 'host_total'])
   const downloadCpu = readNestedNumber(result.download_end, ['cpu_utilization_percent', 'host_total'])
   const uploadCongestion = readNestedString(result.upload_end, ['sender_tcp_congestion'])
@@ -243,33 +253,33 @@ function Iperf3ProcessPanel({ result }: { result: Iperf3ResultSummaryView }) {
   return (
     <div className="border-t border-border p-4">
       <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_18rem]">
-        <Iperf3IntervalTable title="上传过程" intervals={result.upload_intervals} />
-        <Iperf3IntervalTable title="下载过程" intervals={result.download_intervals} />
+        <Iperf3IntervalTable title={t('monitoring.uploadProcess')} intervals={result.upload_intervals} />
+        <Iperf3IntervalTable title={t('monitoring.downloadProcess')} intervals={result.download_intervals} />
         <div className="rounded-lg border border-border bg-bg-surface-light p-3">
-          <div className="text-xs font-semibold text-text-primary">最终统计</div>
+          <div className="text-xs font-semibold text-text-primary">{t('monitoring.finalStats')}</div>
           <div className="mt-3 space-y-2 text-xs text-text-muted">
             <div className="flex justify-between gap-3">
-              <span>上传 CPU</span>
+              <span>{t('monitoring.uploadCpu')}</span>
               <span className="font-mono text-text-secondary">{formatPercent(uploadCpu)}</span>
             </div>
             <div className="flex justify-between gap-3">
-              <span>下载 CPU</span>
+              <span>{t('monitoring.downloadCpu')}</span>
               <span className="font-mono text-text-secondary">{formatPercent(downloadCpu)}</span>
             </div>
             <div className="flex justify-between gap-3">
-              <span>发送拥塞控制</span>
+              <span>{t('monitoring.senderCongestion')}</span>
               <span className="font-mono text-text-secondary">{uploadCongestion ?? '-'}</span>
             </div>
             <div className="flex justify-between gap-3">
-              <span>接收拥塞控制</span>
+              <span>{t('monitoring.receiverCongestion')}</span>
               <span className="font-mono text-text-secondary">{downloadCongestion ?? '-'}</span>
             </div>
             <div className="flex justify-between gap-3">
-              <span>上传 interval</span>
+              <span>{t('monitoring.uploadInterval')}</span>
               <span className="font-mono text-text-secondary">{result.upload_intervals.length}</span>
             </div>
             <div className="flex justify-between gap-3">
-              <span>下载 interval</span>
+              <span>{t('monitoring.downloadInterval')}</span>
               <span className="font-mono text-text-secondary">{result.download_intervals.length}</span>
             </div>
           </div>
@@ -286,6 +296,7 @@ function Iperf3IntervalTable({
   title: string
   intervals: Iperf3ResultSummaryView['upload_intervals']
 }) {
+  const { t } = useTranslation()
   const visibleIntervals = intervals.slice(0, 12)
   return (
     <div className="overflow-hidden rounded-lg border border-border bg-bg-surface-light">
@@ -294,16 +305,16 @@ function Iperf3IntervalTable({
         <div className="font-mono text-[11px] text-text-muted">{intervals.length} slices</div>
       </div>
       {visibleIntervals.length === 0 ? (
-        <div className="px-3 py-6 text-center text-xs text-text-muted">暂无过程切片。</div>
+        <div className="px-3 py-6 text-center text-xs text-text-muted">{t('monitoring.noProcessSlices')}</div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full min-w-[30rem] text-left text-[11px]">
             <thead className="bg-bg-surface text-text-dim">
               <tr>
-                <th className="px-3 py-2 font-medium">区间</th>
-                <th className="px-3 py-2 font-medium">带宽</th>
-                <th className="px-3 py-2 font-medium">字节</th>
-                <th className="px-3 py-2 font-medium">重传</th>
+                <th className="px-3 py-2 font-medium">{t('monitoring.interval')}</th>
+                <th className="px-3 py-2 font-medium">{t('monitoring.bandwidth')}</th>
+                <th className="px-3 py-2 font-medium">{t('monitoring.bytes')}</th>
+                <th className="px-3 py-2 font-medium">{t('monitoring.retransmits')}</th>
                 <th className="px-3 py-2 font-medium">RTT</th>
                 <th className="px-3 py-2 font-medium">RTTVar</th>
               </tr>
@@ -324,7 +335,7 @@ function Iperf3IntervalTable({
         </div>
       )}
       {intervals.length > visibleIntervals.length && (
-        <div className="border-t border-border px-3 py-2 text-[11px] text-text-muted">仅展示前 {visibleIntervals.length} 个 interval。</div>
+        <div className="border-t border-border px-3 py-2 text-[11px] text-text-muted">{t('monitoring.showingFirstIntervals', { count: visibleIntervals.length })}</div>
       )}
     </div>
   )
