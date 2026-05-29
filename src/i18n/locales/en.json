@@ -269,10 +269,16 @@
     "createdDialogDesc": "The credentials and install command below are returned in full only once in the creation response. Save them immediately for first-time Agent installation.",
     "credentialWarning": "Credentials are returned in full only once in the creation response.",
     "oneClickInstall": "One-click install",
+    "oneTimeOnly": "Shown once",
+    "createdAgent": "New Agent",
     "agentToken": "Agent Token",
     "natsUsername": "NATS Username",
     "natsPassword": "NATS Password",
     "systemdService": "systemd Service",
+    "installStepsTitle": "Install Steps",
+    "natsConfigStepTitle": "1. Sync NATS User Config",
+    "installCommandStepTitle": "2. Run One-click Install Command",
+    "credentialDetailsTitle": "One-time Credentials",
     "installCommand": "One-click Install Command",
     "installCommandDesc": "Run this as root on the target machine. The script downloads the matching Agent Artifact and writes systemd configuration.",
     "installCommandUnavailable": "No install command was included in this response.",
@@ -283,7 +289,8 @@
     "copyNatsConfigSnippet": "Copy NATS Config",
     "copyNatsPassword": "Copy NATS Password",
     "copied": "Copied",
-    "copyToken": "Copy Token"
+    "copyToken": "Copy Token",
+    "closeDialog": "Close"
   },
   "adminInputs": {
     "continent": "Continent",

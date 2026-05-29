@@ -39,98 +39,140 @@ export function AgentInstallDialog({ agent, onClose }: AgentInstallDialogProps) 
   }
 
   return (
-    <Dialog open={!!agent} onOpenChange={(open) => { if (!open) onClose() }}>
-      <DialogContent className="sm:max-w-3xl">
-        <DialogHeader>
-          <DialogTitle>{t('agentAdmin.createdDialogTitle')}</DialogTitle>
-          <DialogDescription>{t('agentAdmin.createdDialogDesc')}</DialogDescription>
+    <Dialog
+      open={!!agent}
+      disablePointerDismissal
+      onOpenChange={(open) => { if (!open) onClose() }}
+    >
+      <DialogContent className="max-h-[92vh] overflow-hidden p-0 sm:max-w-4xl">
+        <DialogHeader className="border-b border-border px-5 py-4 pr-12">
+          <DialogTitle className="text-lg">{t('agentAdmin.createdDialogTitle')}</DialogTitle>
+          <DialogDescription className="max-w-2xl">{t('agentAdmin.createdDialogDesc')}</DialogDescription>
         </DialogHeader>
         {agent && (
-          <div className="space-y-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm font-medium text-text-primary">{agent.name}</span>
-              {agent.install_command_available && (
-                <Badge className="border border-emerald-400/40 bg-emerald-400/10 text-emerald-200">
-                  {t('agentAdmin.oneClickInstall')}
+          <div className="max-h-[calc(92vh-9rem)] space-y-5 overflow-y-auto px-5 py-4">
+            <div className="flex flex-col gap-3 rounded-lg border border-border bg-white/[0.03] p-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="space-y-1">
+                <div className="text-xs font-medium uppercase tracking-wide text-text-muted">
+                  {t('agentAdmin.createdAgent')}
+                </div>
+                <div className="break-all text-base font-semibold text-text-primary">{agent.name}</div>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {agent.install_command_available && (
+                  <Badge className="border border-emerald-400/40 bg-emerald-400/10 text-emerald-200">
+                    {t('agentAdmin.oneClickInstall')}
+                  </Badge>
+                )}
+                <Badge className="border border-amber-400/40 bg-amber-400/10 text-amber-100">
+                  {t('agentAdmin.oneTimeOnly')}
                 </Badge>
-              )}
+              </div>
             </div>
 
             <p className="rounded-lg border border-amber-400/25 bg-amber-400/10 px-3 py-2 text-sm text-amber-100">
               {t('agentAdmin.credentialWarning')}
             </p>
 
-            <div className="grid gap-3 md:grid-cols-2">
-              <CredentialBlock
-                label={t('agentAdmin.agentToken')}
-                value={agent.auth_token}
-                copyLabel={copiedField === 'token' ? t('agentAdmin.copied') : t('agentAdmin.copyToken')}
-                onCopy={() => void copyValue(agent.auth_token, 'token')}
-              />
-              <CredentialBlock
-                label={t('agentAdmin.natsUsername')}
-                value={agent.nats_username}
-              />
-              <CredentialBlock
-                label={t('agentAdmin.natsPassword')}
-                value={agent.nats_password}
-                copyLabel={copiedField === 'natsPassword' ? t('agentAdmin.copied') : t('agentAdmin.copyNatsPassword')}
-                onCopy={() => void copyValue(agent.nats_password, 'natsPassword')}
-              />
-              <CredentialBlock
-                label={t('agentAdmin.systemdService')}
-                value={agent.install_command?.service_name}
-              />
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold text-text-primary">{t('agentAdmin.installStepsTitle')}</h3>
+              <div className="grid gap-3 lg:grid-cols-2">
+                <InstallStepBlock
+                  title={t('agentAdmin.natsConfigStepTitle')}
+                  description={t('agentAdmin.natsConfigSnippetDesc')}
+                  code={natsConfigSnippet ?? t('agentAdmin.natsConfigSnippetUnavailable')}
+                  codeClassName="text-cyan-100"
+                  copyLabel={copiedField === 'natsConfig' ? t('agentAdmin.copied') : t('agentAdmin.copyNatsConfigSnippet')}
+                  copyDisabled={!natsConfigSnippet}
+                  onCopy={() => void copyValue(natsConfigSnippet, 'natsConfig')}
+                />
+                <InstallStepBlock
+                  title={t('agentAdmin.installCommandStepTitle')}
+                  description={t('agentAdmin.installCommandDesc')}
+                  code={installCommand ?? t('agentAdmin.installCommandUnavailable')}
+                  codeClassName="text-emerald-200"
+                  copyLabel={copiedField === 'installCommand' ? t('agentAdmin.copied') : t('agentAdmin.copyInstallCommand')}
+                  copyDisabled={!installCommand}
+                  onCopy={() => void copyValue(installCommand, 'installCommand')}
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <div className="text-sm font-medium text-text-primary">{t('agentAdmin.installCommand')}</div>
-                  <div className="text-xs text-text-muted">{t('agentAdmin.installCommandDesc')}</div>
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  disabled={!installCommand}
-                  onClick={() => void copyValue(installCommand, 'installCommand')}
-                >
-                  {copiedField === 'installCommand' ? t('agentAdmin.copied') : t('agentAdmin.copyInstallCommand')}
-                </Button>
+              <h3 className="text-sm font-semibold text-text-primary">{t('agentAdmin.credentialDetailsTitle')}</h3>
+              <div className="grid gap-3 md:grid-cols-2">
+                <CredentialBlock
+                  label={t('agentAdmin.agentToken')}
+                  value={agent.auth_token}
+                  copyLabel={copiedField === 'token' ? t('agentAdmin.copied') : t('agentAdmin.copyToken')}
+                  onCopy={() => void copyValue(agent.auth_token, 'token')}
+                />
+                <CredentialBlock
+                  label={t('agentAdmin.natsUsername')}
+                  value={agent.nats_username}
+                />
+                <CredentialBlock
+                  label={t('agentAdmin.natsPassword')}
+                  value={agent.nats_password}
+                  copyLabel={copiedField === 'natsPassword' ? t('agentAdmin.copied') : t('agentAdmin.copyNatsPassword')}
+                  onCopy={() => void copyValue(agent.nats_password, 'natsPassword')}
+                />
+                <CredentialBlock
+                  label={t('agentAdmin.systemdService')}
+                  value={agent.install_command?.service_name}
+                />
               </div>
-              <pre className="max-h-72 overflow-auto rounded-lg border border-border bg-muted/40 p-3 text-xs leading-5 text-emerald-200">
-                <code>{installCommand ?? t('agentAdmin.installCommandUnavailable')}</code>
-              </pre>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <div className="text-sm font-medium text-text-primary">{t('agentAdmin.natsConfigSnippet')}</div>
-                  <div className="text-xs text-text-muted">{t('agentAdmin.natsConfigSnippetDesc')}</div>
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  disabled={!natsConfigSnippet}
-                  onClick={() => void copyValue(natsConfigSnippet, 'natsConfig')}
-                >
-                  {copiedField === 'natsConfig' ? t('agentAdmin.copied') : t('agentAdmin.copyNatsConfigSnippet')}
-                </Button>
-              </div>
-              <pre className="max-h-72 overflow-auto rounded-lg border border-border bg-muted/40 p-3 text-xs leading-5 text-cyan-100">
-                <code>{natsConfigSnippet ?? t('agentAdmin.natsConfigSnippetUnavailable')}</code>
-              </pre>
             </div>
           </div>
         )}
         <DialogFooter>
-          <Button onClick={onClose}>{t('common.done')}</Button>
+          <Button onClick={onClose}>{t('agentAdmin.closeDialog')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  )
+}
+
+interface InstallStepBlockProps {
+  title: string
+  description: string
+  code: string
+  codeClassName: string
+  copyLabel: string
+  copyDisabled: boolean
+  onCopy: () => void
+}
+
+function InstallStepBlock({
+  title,
+  description,
+  code,
+  codeClassName,
+  copyLabel,
+  copyDisabled,
+  onCopy,
+}: InstallStepBlockProps) {
+  return (
+    <section className="grid min-h-0 gap-3 rounded-lg border border-border bg-white/[0.03] p-3">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div className="min-w-0 space-y-1">
+          <div className="text-sm font-medium text-text-primary">{title}</div>
+          <div className="text-xs leading-5 text-text-muted">{description}</div>
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={copyDisabled}
+          onClick={onCopy}
+        >
+          {copyLabel}
+        </Button>
+      </div>
+      <pre className={`max-h-72 overflow-auto rounded-md border border-border bg-muted/40 p-3 text-xs leading-5 ${codeClassName}`}>
+        <code>{code}</code>
+      </pre>
+    </section>
   )
 }
 

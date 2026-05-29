@@ -39,8 +39,10 @@ describe('AgentInstallDialog', () => {
     expect(within(dialog).getByText('nats-password-once')).toBeInTheDocument()
     expect(within(dialog).getByText(/sudo bash -s/)).toBeInTheDocument()
     expect(within(dialog).getByText(/user: "agent-00000000/)).toBeInTheDocument()
-    expect(within(dialog).getByText('一键安装命令')).toBeInTheDocument()
-    expect(within(dialog).getByText('NATS 用户配置')).toBeInTheDocument()
+    expect(within(dialog).getByText('安装步骤')).toBeInTheDocument()
+    expect(within(dialog).getByText('1. 同步 NATS 用户配置')).toBeInTheDocument()
+    expect(within(dialog).getByText('2. 执行一键安装命令')).toBeInTheDocument()
+    expect(within(dialog).getByText('一次性凭据')).toBeInTheDocument()
     expect(within(dialog).getByText('凭据只在创建响应中完整返回一次。')).toBeInTheDocument()
 
     await user.click(within(dialog).getByRole('button', { name: '复制安装命令' }))
@@ -51,5 +53,23 @@ describe('AgentInstallDialog', () => {
     await user.click(within(dialog).getByRole('button', { name: '复制 NATS 配置' }))
 
     expect(writeText).toHaveBeenCalledWith(agent.install_command?.nats_config_snippet)
+  })
+
+  it('requires an explicit close action and ignores outside clicks', async () => {
+    const user = userEvent.setup()
+    const onClose = vi.fn()
+    const agent = createMockAgent({ name: 'Seoul Edge Agent' })
+
+    renderWithProviders(<AgentInstallDialog agent={agent} onClose={onClose} />)
+
+    const dialog = screen.getByRole('dialog', { name: 'Agent 已创建' })
+    await user.click(document.body)
+
+    expect(onClose).not.toHaveBeenCalled()
+    expect(dialog).toBeInTheDocument()
+
+    await user.click(within(dialog).getByRole('button', { name: '关闭' }))
+
+    expect(onClose).toHaveBeenCalledTimes(1)
   })
 })

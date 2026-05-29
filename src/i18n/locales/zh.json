@@ -269,10 +269,16 @@
     "createdDialogDesc": "以下凭据和安装命令只在创建响应中完整返回一次，请立即保存并用于 Agent 首次安装。",
     "credentialWarning": "凭据只在创建响应中完整返回一次。",
     "oneClickInstall": "一键安装",
+    "oneTimeOnly": "仅显示一次",
+    "createdAgent": "新 Agent",
     "agentToken": "Agent Token",
     "natsUsername": "NATS 用户名",
     "natsPassword": "NATS 密码",
     "systemdService": "systemd 服务",
+    "installStepsTitle": "安装步骤",
+    "natsConfigStepTitle": "1. 同步 NATS 用户配置",
+    "installCommandStepTitle": "2. 执行一键安装命令",
+    "credentialDetailsTitle": "一次性凭据",
     "installCommand": "一键安装命令",
     "installCommandDesc": "在目标机器上以 root 权限执行，脚本会下载匹配平台的 Agent Artifact 并写入 systemd 配置。",
     "installCommandUnavailable": "当前响应未包含安装命令。",
@@ -283,7 +289,8 @@
     "copyNatsConfigSnippet": "复制 NATS 配置",
     "copyNatsPassword": "复制 NATS 密码",
     "copied": "已复制",
-    "copyToken": "复制 Token"
+    "copyToken": "复制 Token",
+    "closeDialog": "关闭"
   },
   "adminInputs": {
     "continent": "大洲",
