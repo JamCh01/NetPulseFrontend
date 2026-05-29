@@ -13,6 +13,7 @@ import {
   useSetAgentEnabled,
   useUpdateAgent,
 } from '@/api/hooks/admin-api'
+import { AgentInstallDialog } from './agent-install-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -52,7 +53,6 @@ export default function AgentsPage() {
   const [createOpen, setCreateOpen] = useState(false)
   const [editingAgent, setEditingAgent] = useState<AdminAgent | null>(null)
   const [createdAgent, setCreatedAgent] = useState<AdminAgent | null>(null)
-  const [copiedToken, setCopiedToken] = useState(false)
   const [form, setForm] = useState({
     name: '',
     ip_version: '4+6' as IpVersion,
@@ -153,17 +153,6 @@ export default function AgentsPage() {
       },
       onError: (error) => toast.error(error.message || t('agentAdmin.createError')),
     })
-  }
-
-  const copyToken = async () => {
-    if (!createdAgent?.auth_token) return
-    try {
-      await navigator.clipboard.writeText(createdAgent.auth_token)
-      setCopiedToken(true)
-      setTimeout(() => setCopiedToken(false), 1800)
-    } catch {
-      toast.error(t('agentAdmin.copyFailed'))
-    }
   }
 
   return (
@@ -346,24 +335,7 @@ export default function AgentsPage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={!!createdAgent} onOpenChange={(open) => { if (!open) setCreatedAgent(null) }}>
-        <DialogContent className="sm:max-w-xl">
-          <DialogHeader>
-            <DialogTitle>{t('agentAdmin.createdDialogTitle')}</DialogTitle>
-            <DialogDescription>{t('agentAdmin.createdDialogDesc')}</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3">
-            <div className="text-sm text-text-secondary">{createdAgent?.name}</div>
-            <code className="block rounded-lg border border-border bg-muted/40 p-3 text-sm text-emerald-300 break-all">
-              {createdAgent?.auth_token ?? '-'}
-            </code>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={copyToken}>{copiedToken ? t('agentAdmin.copied') : t('agentAdmin.copyToken')}</Button>
-            <Button onClick={() => setCreatedAgent(null)}>{t('common.done')}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AgentInstallDialog agent={createdAgent} onClose={() => setCreatedAgent(null)} />
     </div>
   )
 }

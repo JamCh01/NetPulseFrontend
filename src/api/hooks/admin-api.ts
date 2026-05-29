@@ -77,9 +77,25 @@ export interface AdminAgent {
   updated_at: string
   deleted_at?: string | null
   auth_token?: string
+  nats_username?: string
+  nats_password?: string
+  install_command_available?: boolean
+  install_command?: AgentInstallCommand
   agent_name: string
   agent_version?: string | null
   platform?: string | null
+}
+
+export interface AgentInstallCommand {
+  agent_uuid: string
+  nats_username: string
+  service_name: string
+  install_path: string
+  env_file: string
+  contains_secrets: boolean
+  command: string
+  script: string
+  nats_config_snippet?: string
 }
 
 export interface AdminTask {
