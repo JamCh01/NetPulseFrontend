@@ -44,62 +44,51 @@ export function AgentInstallDialog({ agent, onClose }: AgentInstallDialogProps) 
       disablePointerDismissal
       onOpenChange={(open) => { if (!open) onClose() }}
     >
-      <DialogContent className="max-h-[92vh] overflow-hidden p-0 sm:max-w-4xl">
-        <DialogHeader className="border-b border-border px-5 py-4 pr-12">
-          <DialogTitle className="text-lg">{t('agentAdmin.createdDialogTitle')}</DialogTitle>
-          <DialogDescription className="max-w-2xl">{t('agentAdmin.createdDialogDesc')}</DialogDescription>
+      <DialogContent className="max-h-[92vh] overflow-hidden border border-slate-600/80 bg-slate-900 p-0 text-slate-100 ring-slate-500/40 sm:max-w-4xl">
+        <DialogHeader className="border-b border-slate-700/80 bg-slate-900 px-5 py-4 pr-12">
+          <DialogTitle className="text-lg text-slate-50">{t('agentAdmin.createdDialogTitle')}</DialogTitle>
+          <DialogDescription className="max-w-2xl text-slate-200">{t('agentAdmin.createdDialogDesc')}</DialogDescription>
         </DialogHeader>
         {agent && (
           <div className="max-h-[calc(92vh-9rem)] space-y-5 overflow-y-auto px-5 py-4">
-            <div className="flex flex-col gap-3 rounded-lg border border-border bg-white/[0.03] p-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex flex-col gap-3 rounded-lg border border-slate-600/80 bg-slate-800/80 p-4 shadow-sm sm:flex-row sm:items-start sm:justify-between">
               <div className="space-y-1">
-                <div className="text-xs font-medium uppercase tracking-wide text-text-muted">
+                <div className="text-xs font-medium uppercase text-slate-300">
                   {t('agentAdmin.createdAgent')}
                 </div>
-                <div className="break-all text-base font-semibold text-text-primary">{agent.name}</div>
+                <div className="break-all text-base font-semibold text-slate-50">{agent.name}</div>
               </div>
               <div className="flex flex-wrap gap-2">
                 {agent.install_command_available && (
-                  <Badge className="border border-emerald-400/40 bg-emerald-400/10 text-emerald-200">
+                  <Badge className="border border-emerald-300/60 bg-emerald-950/70 text-emerald-50">
                     {t('agentAdmin.oneClickInstall')}
                   </Badge>
                 )}
-                <Badge className="border border-amber-400/40 bg-amber-400/10 text-amber-100">
+                <Badge className="border border-amber-300/60 bg-amber-950/70 text-amber-50">
                   {t('agentAdmin.oneTimeOnly')}
                 </Badge>
               </div>
             </div>
 
-            <p className="rounded-lg border border-amber-400/25 bg-amber-400/10 px-3 py-2 text-sm text-amber-100">
+            <p className="rounded-lg border border-amber-300/60 bg-amber-950/70 px-3 py-2 text-sm text-amber-50">
               {t('agentAdmin.credentialWarning')}
             </p>
 
             <div className="space-y-2">
-              <h3 className="text-sm font-semibold text-text-primary">{t('agentAdmin.installStepsTitle')}</h3>
-              <div className="grid gap-3 lg:grid-cols-2">
-                <InstallStepBlock
-                  title={t('agentAdmin.natsConfigStepTitle')}
-                  description={t('agentAdmin.natsConfigSnippetDesc')}
-                  code={natsConfigSnippet ?? t('agentAdmin.natsConfigSnippetUnavailable')}
-                  codeClassName="text-cyan-100"
-                  copyLabel={copiedField === 'natsConfig' ? t('agentAdmin.copied') : t('agentAdmin.copyNatsConfigSnippet')}
-                  copyDisabled={!natsConfigSnippet}
-                  onCopy={() => void copyValue(natsConfigSnippet, 'natsConfig')}
-                />
-                <InstallStepBlock
-                  title={t('agentAdmin.installCommandStepTitle')}
-                  description={t('agentAdmin.installCommandDesc')}
-                  code={installCommand ?? t('agentAdmin.installCommandUnavailable')}
-                  codeClassName="text-emerald-200"
-                  copyLabel={copiedField === 'installCommand' ? t('agentAdmin.copied') : t('agentAdmin.copyInstallCommand')}
-                  copyDisabled={!installCommand}
-                  onCopy={() => void copyValue(installCommand, 'installCommand')}
-                />
-              </div>
+              <h3 className="text-sm font-semibold text-slate-50">{t('agentAdmin.oneCommandInstallTitle')}</h3>
+              <InstallStepBlock
+                title={t('agentAdmin.oneCommandInstallAction')}
+                description={t('agentAdmin.oneCommandInstallDesc')}
+                code={installCommand ?? t('agentAdmin.installCommandUnavailable')}
+                codeClassName="border-emerald-300/50 text-emerald-50"
+                copyLabel={copiedField === 'installCommand' ? t('agentAdmin.copied') : t('agentAdmin.copyInstallCommand')}
+                copyDisabled={!installCommand}
+                onCopy={() => void copyValue(installCommand, 'installCommand')}
+              />
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-sm font-semibold text-text-primary">{t('agentAdmin.credentialDetailsTitle')}</h3>
+              <h3 className="text-sm font-semibold text-slate-50">{t('agentAdmin.credentialDetailsTitle')}</h3>
               <div className="grid gap-3 md:grid-cols-2">
                 <CredentialBlock
                   label={t('agentAdmin.agentToken')}
@@ -122,6 +111,19 @@ export function AgentInstallDialog({ agent, onClose }: AgentInstallDialogProps) 
                   value={agent.install_command?.service_name}
                 />
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold text-slate-50">{t('agentAdmin.advancedInfoTitle')}</h3>
+              <InstallStepBlock
+                title={t('agentAdmin.natsConfigSnippet')}
+                description={t('agentAdmin.natsConfigSnippetDesc')}
+                code={natsConfigSnippet ?? t('agentAdmin.natsConfigSnippetUnavailable')}
+                codeClassName="border-slate-600/80 text-slate-100"
+                copyLabel={copiedField === 'natsConfig' ? t('agentAdmin.copied') : t('agentAdmin.copyNatsConfigSnippet')}
+                copyDisabled={!natsConfigSnippet}
+                onCopy={() => void copyValue(natsConfigSnippet, 'natsConfig')}
+              />
             </div>
           </div>
         )}
@@ -153,11 +155,11 @@ function InstallStepBlock({
   onCopy,
 }: InstallStepBlockProps) {
   return (
-    <section className="grid min-h-0 gap-3 rounded-lg border border-border bg-white/[0.03] p-3">
+    <section className="grid min-h-0 gap-3 rounded-lg border border-slate-600/80 bg-slate-800/70 p-3">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0 space-y-1">
-          <div className="text-sm font-medium text-text-primary">{title}</div>
-          <div className="text-xs leading-5 text-text-muted">{description}</div>
+          <div className="text-sm font-medium text-slate-50">{title}</div>
+          <div className="text-xs leading-5 text-slate-200">{description}</div>
         </div>
         <Button
           type="button"
@@ -169,7 +171,7 @@ function InstallStepBlock({
           {copyLabel}
         </Button>
       </div>
-      <pre className={`max-h-72 overflow-auto rounded-md border border-border bg-muted/40 p-3 text-xs leading-5 ${codeClassName}`}>
+      <pre className={`max-h-72 overflow-auto rounded-md border bg-slate-950/90 p-3 text-xs leading-5 shadow-inner ${codeClassName}`}>
         <code>{code}</code>
       </pre>
     </section>
@@ -185,16 +187,16 @@ interface CredentialBlockProps {
 
 function CredentialBlock({ label, value, copyLabel, onCopy }: CredentialBlockProps) {
   return (
-    <div className="space-y-1.5 rounded-lg border border-border bg-white/[0.03] p-3">
+    <div className="space-y-1.5 rounded-lg border border-slate-600/80 bg-slate-950/70 p-3">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-xs font-medium uppercase tracking-wide text-text-muted">{label}</span>
+        <span className="text-xs font-medium uppercase text-slate-300">{label}</span>
         {copyLabel && onCopy && (
-          <Button type="button" variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={onCopy}>
+          <Button type="button" variant="ghost" size="sm" className="h-7 px-2 text-xs text-cyan-100 hover:bg-cyan-950/80 hover:text-cyan-50" onClick={onCopy}>
             {copyLabel}
           </Button>
         )}
       </div>
-      <code className="block break-all text-sm text-emerald-300">{value ?? '-'}</code>
+      <code className="block break-all text-sm text-slate-50">{value ?? '-'}</code>
     </div>
   )
 }
