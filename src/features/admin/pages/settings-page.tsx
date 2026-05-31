@@ -13,6 +13,7 @@ import { ToggleSwitch } from '@/components/ui/toggle-switch'
 
 type SettingsFormState = AppSettingsResponse & {
   artifact_r2_secret_access_key: string
+  agent_install_token_secret: string
 }
 
 type SettingsTranslationKey =
@@ -65,6 +66,11 @@ type SettingsTranslationKey =
   | 'settings.downloadUrlTtlDesc'
   | 'settings.uploadMaxBytes'
   | 'settings.uploadMaxBytesDesc'
+  | 'settings.agentInstallDesc'
+  | 'settings.agentInstallTokenSecret'
+  | 'settings.agentInstallTokenSecretDesc'
+  | 'settings.agentInstallTokenTtl'
+  | 'settings.agentInstallTokenTtlDesc'
 
 interface FieldConfig {
   key: keyof SettingsFormState
@@ -156,12 +162,21 @@ const SECTIONS: SectionConfig[] = [
       { key: 'artifact_upload_max_bytes', labelKey: 'settings.uploadMaxBytes', descriptionKey: 'settings.uploadMaxBytesDesc', type: 'number' },
     ],
   },
+  {
+    title: 'Agent Install',
+    descriptionKey: 'settings.agentInstallDesc',
+    fields: [
+      { key: 'agent_install_token_secret', labelKey: 'settings.agentInstallTokenSecret', descriptionKey: 'settings.agentInstallTokenSecretDesc', type: 'secret' },
+      { key: 'agent_install_token_ttl_sec', labelKey: 'settings.agentInstallTokenTtl', descriptionKey: 'settings.agentInstallTokenTtlDesc', type: 'number' },
+    ],
+  },
 ]
 
 function toFormState(settings: AppSettingsResponse): SettingsFormState {
   return {
     ...settings,
     artifact_r2_secret_access_key: '',
+    agent_install_token_secret: '',
   }
 }
 
@@ -189,9 +204,13 @@ function buildPatchBody(form: SettingsFormState): AppSettingsUpdate {
     artifact_r2_public_base_url: form.artifact_r2_public_base_url || null,
     artifact_download_url_ttl_sec: Number(form.artifact_download_url_ttl_sec),
     artifact_upload_max_bytes: Number(form.artifact_upload_max_bytes),
+    agent_install_token_ttl_sec: Number(form.agent_install_token_ttl_sec),
   }
   if (form.artifact_r2_secret_access_key.trim()) {
     body.artifact_r2_secret_access_key = form.artifact_r2_secret_access_key.trim()
+  }
+  if (form.agent_install_token_secret.trim()) {
+    body.agent_install_token_secret = form.agent_install_token_secret.trim()
   }
   return body
 }
@@ -271,9 +290,14 @@ function SettingsForm({ settings }: { settings: AppSettingsResponse }) {
 
   const saveDisabled = updateSettings.isPending
   const secretStatus = useMemo(() => {
-    return settings.artifact_r2_secret_access_key_configured
-      ? { label: t('settings.secretConfigured'), className: 'font-medium text-emerald-400' }
-      : { label: t('settings.secretMissing'), className: 'font-medium text-red-400' }
+    return {
+      artifact_r2_secret_access_key: settings.artifact_r2_secret_access_key_configured
+        ? { label: t('settings.r2SecretConfigured'), className: 'font-medium text-emerald-400' }
+        : { label: t('settings.r2SecretMissing'), className: 'font-medium text-red-400' },
+      agent_install_token_secret: settings.agent_install_token_secret_configured
+        ? { label: t('settings.agentInstallTokenSecretConfigured'), className: 'font-medium text-emerald-400' }
+        : { label: t('settings.agentInstallTokenSecretMissing'), className: 'font-medium text-red-400' },
+    }
   }, [settings, t])
 
   const updateField = (key: keyof SettingsFormState, value: string | number | boolean) => {
@@ -305,7 +329,9 @@ function SettingsForm({ settings }: { settings: AppSettingsResponse }) {
                     <Label htmlFor={`setting-${field.key}`} className="text-sm text-text-primary">{t(field.labelKey)}</Label>
                     <p className="mt-1 text-xs leading-relaxed text-text-muted">{t(field.descriptionKey)}</p>
                     {field.type === 'secret' && (
-                      <p className={`mt-1 text-xs ${secretStatus.className}`}>{secretStatus.label}</p>
+                      <p className={`mt-1 text-xs ${secretStatus[field.key as 'artifact_r2_secret_access_key' | 'agent_install_token_secret'].className}`}>
+                        {secretStatus[field.key as 'artifact_r2_secret_access_key' | 'agent_install_token_secret'].label}
+                      </p>
                     )}
                   </div>
                   <Input

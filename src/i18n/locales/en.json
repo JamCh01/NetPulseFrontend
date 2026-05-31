@@ -318,6 +318,10 @@
     "saveSuccess": "Settings saved.",
     "secretConfigured": "Secret Access Key configured",
     "secretMissing": "Secret Access Key missing",
+    "r2SecretConfigured": "Secret Access Key configured",
+    "r2SecretMissing": "Secret Access Key missing",
+    "agentInstallTokenSecretConfigured": "Install URL signing secret configured",
+    "agentInstallTokenSecretMissing": "Install URL signing secret missing",
     "secretPlaceholder": "Leave empty to keep unchanged",
     "victoriametricsDesc": "Write and query addresses for ICMP/TCP time-series metrics. Workers use the write address; API charts use the query address.",
     "vmWriteUrl": "Write URL",
@@ -367,7 +371,12 @@
     "downloadUrlTtl": "Download URL TTL",
     "downloadUrlTtlDesc": "Presigned download URL lifetime in seconds.",
     "uploadMaxBytes": "Upload Max Bytes",
-    "uploadMaxBytesDesc": "Maximum Agent Artifact upload size in bytes."
+    "uploadMaxBytesDesc": "Maximum Agent Artifact upload size in bytes.",
+    "agentInstallDesc": "Controls signing and lifetime for Agent one-command bootstrap install URLs.",
+    "agentInstallTokenSecret": "Install URL Signing Secret",
+    "agentInstallTokenSecretDesc": "Plaintext is not returned. Leave empty when saving to keep the current secret. Use a stable random value in production.",
+    "agentInstallTokenTtl": "Install URL TTL",
+    "agentInstallTokenTtlDesc": "Lifetime in seconds for one-command install URLs returned when creating or rotating an Agent."
   },
   "tasks": {
     "title": "Tasks",

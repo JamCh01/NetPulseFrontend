@@ -983,6 +983,14 @@ export type AppSettingsResponse = {
      * Artifact Upload Max Bytes
      */
     artifact_upload_max_bytes: number;
+    /**
+     * Agent Install Token Secret Configured
+     */
+    agent_install_token_secret_configured: boolean;
+    /**
+     * Agent Install Token Ttl Sec
+     */
+    agent_install_token_ttl_sec: number;
 };
 
 /**
@@ -1127,6 +1135,18 @@ export type AppSettingsUpdate = {
      * Agent Artifact 上传大小上限，单位字节。
      */
     artifact_upload_max_bytes?: number | null;
+    /**
+     * Agent Install Token Secret
+     *
+     * Agent 一键安装 URL 签名密钥；查询接口不会返回明文。
+     */
+    agent_install_token_secret?: string | null;
+    /**
+     * Agent Install Token Ttl Sec
+     *
+     * Agent 一键安装 URL 有效期，单位秒。
+     */
+    agent_install_token_ttl_sec?: number | null;
 };
 
 /**

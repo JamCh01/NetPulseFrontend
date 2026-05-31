@@ -31,6 +31,8 @@ const settingsResponse = {
   artifact_r2_public_base_url: 'https://artifacts.example.com',
   artifact_download_url_ttl_sec: 900,
   artifact_upload_max_bytes: 209_715_200,
+  agent_install_token_secret_configured: true,
+  agent_install_token_ttl_sec: 86_400,
 }
 
 describe('SettingsPage', () => {
@@ -49,19 +51,28 @@ describe('SettingsPage', () => {
 
     expect(await screen.findByText('系统设置')).toBeInTheDocument()
     expect(await screen.findByText('Secret Access Key 已配置')).toHaveClass('font-medium', 'text-emerald-400')
+    expect(await screen.findByText('安装 URL 签名密钥已配置')).toHaveClass('font-medium', 'text-emerald-400')
     expect(screen.queryByDisplayValue('secret-key')).not.toBeInTheDocument()
+    expect(screen.queryByDisplayValue('install-token-secret')).not.toBeInTheDocument()
 
     const workerSection = screen.getByRole('region', { name: 'Result Worker' })
     const concurrency = within(workerSection).getByLabelText('处理并发数')
     await user.clear(concurrency)
     await user.type(concurrency, '48')
 
+    const agentInstallSection = screen.getByRole('region', { name: 'Agent Install' })
+    const installUrlTtl = within(agentInstallSection).getByLabelText('安装 URL TTL')
+    await user.clear(installUrlTtl)
+    await user.type(installUrlTtl, '3600')
+
     await user.click(screen.getByRole('button', { name: '保存设置' }))
 
     expect(patchedBody).toMatchObject({
       worker_processing_concurrency: 48,
+      agent_install_token_ttl_sec: 3600,
     })
     expect(patchedBody).not.toHaveProperty('artifact_r2_secret_access_key')
+    expect(patchedBody).not.toHaveProperty('agent_install_token_secret')
   })
 
   it('marks missing Secret Access Key as red', async () => {
@@ -70,6 +81,7 @@ describe('SettingsPage', () => {
         data: {
           ...settingsResponse,
           artifact_r2_secret_access_key_configured: false,
+          agent_install_token_secret_configured: false,
         },
       })),
     )
@@ -77,5 +89,6 @@ describe('SettingsPage', () => {
     renderWithProviders(<SettingsPage />)
 
     expect(await screen.findByText('Secret Access Key 未配置')).toHaveClass('font-medium', 'text-red-400')
+    expect(await screen.findByText('安装 URL 签名密钥未配置')).toHaveClass('font-medium', 'text-red-400')
   })
 })

@@ -318,6 +318,10 @@
     "saveSuccess": "设置已保存。",
     "secretConfigured": "Secret Access Key 已配置",
     "secretMissing": "Secret Access Key 未配置",
+    "r2SecretConfigured": "Secret Access Key 已配置",
+    "r2SecretMissing": "Secret Access Key 未配置",
+    "agentInstallTokenSecretConfigured": "安装 URL 签名密钥已配置",
+    "agentInstallTokenSecretMissing": "安装 URL 签名密钥未配置",
     "secretPlaceholder": "留空表示不修改",
     "victoriametricsDesc": "ICMP/TCP 时序指标的写入和查询地址。worker 使用写入地址，API 图表查询使用查询地址。",
     "vmWriteUrl": "写入地址",
@@ -367,7 +371,12 @@
     "downloadUrlTtl": "下载 URL TTL",
     "downloadUrlTtlDesc": "预签名下载 URL 有效期，单位秒。",
     "uploadMaxBytes": "上传大小上限",
-    "uploadMaxBytesDesc": "Agent Artifact 上传大小上限，单位字节。"
+    "uploadMaxBytesDesc": "Agent Artifact 上传大小上限，单位字节。",
+    "agentInstallDesc": "控制 Agent 一键安装 bootstrap URL 的签名和有效期。",
+    "agentInstallTokenSecret": "安装 URL 签名密钥",
+    "agentInstallTokenSecretDesc": "不回显明文；留空保存时保持原密钥。生产环境应设置稳定随机值。",
+    "agentInstallTokenTtl": "安装 URL TTL",
+    "agentInstallTokenTtlDesc": "创建或轮换 Agent 时返回的一键安装 URL 有效期，单位秒。"
   },
   "tasks": {
     "title": "监控任务",
