@@ -24,7 +24,8 @@ describe('AgentInstallDialog', () => {
         install_path: '/usr/local/bin/netpulse-agent',
         env_file: '/etc/netpulse-agent.env',
         contains_secrets: true,
-        command: "sudo bash -s <<'NETPULSE_AGENT_INSTALL'\necho install\nNETPULSE_AGENT_INSTALL",
+        command: 'curl -fsSL "https://api.example.test/api/v1/agents/00000000-0000-0000-0000-000000000001/install.sh?token=install-token" | sudo bash',
+        install_url: 'https://api.example.test/api/v1/agents/00000000-0000-0000-0000-000000000001/install.sh?token=install-token',
         script: '#!/usr/bin/env bash\necho install',
         nats_config_snippet: 'user: "agent-00000000-0000-0000-0000-000000000001"\npassword: "nats-password-once"',
       },
@@ -37,7 +38,7 @@ describe('AgentInstallDialog', () => {
     expect(within(dialog).getByText('agent-token-once')).toBeInTheDocument()
     expect(within(dialog).getByText('agent-00000000-0000-0000-0000-000000000001')).toBeInTheDocument()
     expect(within(dialog).getByText('nats-password-once')).toBeInTheDocument()
-    expect(within(dialog).getByText(/sudo bash -s/)).toBeInTheDocument()
+    expect(within(dialog).getByText(/curl -fsSL/)).toBeInTheDocument()
     expect(within(dialog).getByText(/user: "agent-00000000/)).toBeInTheDocument()
     expect(within(dialog).getByText('一条命令完成安装')).toBeInTheDocument()
     expect(within(dialog).getByText('在 Agent 主机上执行以下命令即可完成安装、写入配置并启动 systemd 服务。')).toBeInTheDocument()
@@ -85,7 +86,8 @@ describe('AgentInstallDialog', () => {
         install_path: '/usr/local/bin/netpulse-agent',
         env_file: '/etc/netpulse-agent.env',
         contains_secrets: true,
-        command: "sudo bash -s <<'NETPULSE_AGENT_INSTALL'\necho install\nNETPULSE_AGENT_INSTALL",
+        command: 'curl -fsSL "https://api.example.test/api/v1/agents/00000000-0000-0000-0000-000000000001/install.sh?token=install-token" | sudo bash',
+        install_url: 'https://api.example.test/api/v1/agents/00000000-0000-0000-0000-000000000001/install.sh?token=install-token',
         script: '#!/usr/bin/env bash\necho install',
         nats_config_snippet: 'user: "agent-00000000-0000-0000-0000-000000000001"\npassword: "nats-password-once"',
       },
@@ -95,7 +97,7 @@ describe('AgentInstallDialog', () => {
 
     const dialog = screen.getByRole('dialog', { name: 'Agent 已创建' })
     const natsCode = within(dialog).getByText(/user: "agent-00000000/)
-    const installCode = within(dialog).getByText(/sudo bash -s/)
+    const installCode = within(dialog).getByText(/curl -fsSL/)
     const tokenCode = within(dialog).getByText('agent-token-once')
 
     expect(natsCode.closest('pre')).toHaveClass('bg-slate-950/90', 'border-slate-600/80', 'text-slate-100')

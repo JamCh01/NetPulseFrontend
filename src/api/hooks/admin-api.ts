@@ -94,6 +94,7 @@ export interface AgentInstallCommand {
   env_file: string
   contains_secrets: boolean
   command: string
+  install_url?: string | null
   script: string
   nats_config_snippet?: string
 }
