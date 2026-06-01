@@ -67,6 +67,16 @@ type SettingsTranslationKey =
   | 'settings.uploadMaxBytes'
   | 'settings.uploadMaxBytesDesc'
   | 'settings.agentInstallDesc'
+  | 'settings.agentPublicApiBaseUrl'
+  | 'settings.agentPublicApiBaseUrlDesc'
+  | 'settings.agentPublicNatsUrl'
+  | 'settings.agentPublicNatsUrlDesc'
+  | 'settings.agentInstallServiceName'
+  | 'settings.agentInstallServiceNameDesc'
+  | 'settings.agentDefaultHeartbeatInterval'
+  | 'settings.agentDefaultHeartbeatIntervalDesc'
+  | 'settings.agentDefaultLogLevel'
+  | 'settings.agentDefaultLogLevelDesc'
   | 'settings.agentInstallTokenSecret'
   | 'settings.agentInstallTokenSecretDesc'
   | 'settings.agentInstallTokenTtl'
@@ -166,6 +176,11 @@ const SECTIONS: SectionConfig[] = [
     title: 'Agent Install',
     descriptionKey: 'settings.agentInstallDesc',
     fields: [
+      { key: 'agent_public_api_base_url', labelKey: 'settings.agentPublicApiBaseUrl', descriptionKey: 'settings.agentPublicApiBaseUrlDesc', type: 'text' },
+      { key: 'agent_public_nats_url', labelKey: 'settings.agentPublicNatsUrl', descriptionKey: 'settings.agentPublicNatsUrlDesc', type: 'text' },
+      { key: 'agent_install_service_name', labelKey: 'settings.agentInstallServiceName', descriptionKey: 'settings.agentInstallServiceNameDesc', type: 'text' },
+      { key: 'agent_default_heartbeat_interval_sec', labelKey: 'settings.agentDefaultHeartbeatInterval', descriptionKey: 'settings.agentDefaultHeartbeatIntervalDesc', type: 'number' },
+      { key: 'agent_default_log_level', labelKey: 'settings.agentDefaultLogLevel', descriptionKey: 'settings.agentDefaultLogLevelDesc', type: 'text' },
       { key: 'agent_install_token_secret', labelKey: 'settings.agentInstallTokenSecret', descriptionKey: 'settings.agentInstallTokenSecretDesc', type: 'secret' },
       { key: 'agent_install_token_ttl_sec', labelKey: 'settings.agentInstallTokenTtl', descriptionKey: 'settings.agentInstallTokenTtlDesc', type: 'number' },
     ],
@@ -204,6 +219,11 @@ function buildPatchBody(form: SettingsFormState): AppSettingsUpdate {
     artifact_r2_public_base_url: form.artifact_r2_public_base_url || null,
     artifact_download_url_ttl_sec: Number(form.artifact_download_url_ttl_sec),
     artifact_upload_max_bytes: Number(form.artifact_upload_max_bytes),
+    agent_public_api_base_url: form.agent_public_api_base_url,
+    agent_public_nats_url: form.agent_public_nats_url,
+    agent_install_service_name: form.agent_install_service_name,
+    agent_default_heartbeat_interval_sec: Number(form.agent_default_heartbeat_interval_sec),
+    agent_default_log_level: form.agent_default_log_level,
     agent_install_token_ttl_sec: Number(form.agent_install_token_ttl_sec),
   }
   if (form.artifact_r2_secret_access_key.trim()) {

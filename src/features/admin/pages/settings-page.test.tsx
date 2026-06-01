@@ -31,6 +31,11 @@ const settingsResponse = {
   artifact_r2_public_base_url: 'https://artifacts.example.com',
   artifact_download_url_ttl_sec: 900,
   artifact_upload_max_bytes: 209_715_200,
+  agent_public_api_base_url: 'https://netpulse-api.lowendaff.com',
+  agent_public_nats_url: 'tls://nats.lowendaff.com:4222',
+  agent_install_service_name: 'netpulse-agent',
+  agent_default_heartbeat_interval_sec: 30,
+  agent_default_log_level: 'info',
   agent_install_token_secret_configured: true,
   agent_install_token_ttl_sec: 86_400,
 }
@@ -52,6 +57,9 @@ describe('SettingsPage', () => {
     expect(await screen.findByText('系统设置')).toBeInTheDocument()
     expect(await screen.findByText('Secret Access Key 已配置')).toHaveClass('font-medium', 'text-emerald-400')
     expect(await screen.findByText('安装 URL 签名密钥已配置')).toHaveClass('font-medium', 'text-emerald-400')
+    expect(screen.getByDisplayValue('https://netpulse-api.lowendaff.com')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('tls://nats.lowendaff.com:4222')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('netpulse-agent')).toBeInTheDocument()
     expect(screen.queryByDisplayValue('secret-key')).not.toBeInTheDocument()
     expect(screen.queryByDisplayValue('install-token-secret')).not.toBeInTheDocument()
 
@@ -61,6 +69,12 @@ describe('SettingsPage', () => {
     await user.type(concurrency, '48')
 
     const agentInstallSection = screen.getByRole('region', { name: 'Agent Install' })
+    const publicApiBaseUrl = within(agentInstallSection).getByLabelText('Public API Base URL')
+    await user.clear(publicApiBaseUrl)
+    await user.type(publicApiBaseUrl, 'https://netpulse-api.example.com')
+    const publicNatsUrl = within(agentInstallSection).getByLabelText('Public NATS URL')
+    await user.clear(publicNatsUrl)
+    await user.type(publicNatsUrl, 'tls://nats.example.com:4222')
     const installUrlTtl = within(agentInstallSection).getByLabelText('安装 URL TTL')
     await user.clear(installUrlTtl)
     await user.type(installUrlTtl, '3600')
@@ -69,6 +83,11 @@ describe('SettingsPage', () => {
 
     expect(patchedBody).toMatchObject({
       worker_processing_concurrency: 48,
+      agent_public_api_base_url: 'https://netpulse-api.example.com',
+      agent_public_nats_url: 'tls://nats.example.com:4222',
+      agent_install_service_name: 'netpulse-agent',
+      agent_default_heartbeat_interval_sec: 30,
+      agent_default_log_level: 'info',
       agent_install_token_ttl_sec: 3600,
     })
     expect(patchedBody).not.toHaveProperty('artifact_r2_secret_access_key')

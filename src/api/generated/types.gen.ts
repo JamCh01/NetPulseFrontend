@@ -984,6 +984,26 @@ export type AppSettingsResponse = {
      */
     artifact_upload_max_bytes: number;
     /**
+     * Agent Public Api Base Url
+     */
+    agent_public_api_base_url: string;
+    /**
+     * Agent Public Nats Url
+     */
+    agent_public_nats_url: string;
+    /**
+     * Agent Install Service Name
+     */
+    agent_install_service_name: string;
+    /**
+     * Agent Default Heartbeat Interval Sec
+     */
+    agent_default_heartbeat_interval_sec: number;
+    /**
+     * Agent Default Log Level
+     */
+    agent_default_log_level: string;
+    /**
      * Agent Install Token Secret Configured
      */
     agent_install_token_secret_configured: boolean;
@@ -1135,6 +1155,36 @@ export type AppSettingsUpdate = {
      * Agent Artifact 上传大小上限，单位字节。
      */
     artifact_upload_max_bytes?: number | null;
+    /**
+     * Agent Public Api Base Url
+     *
+     * Agent 安装脚本写入的后端 API Base URL。
+     */
+    agent_public_api_base_url?: string | null;
+    /**
+     * Agent Public Nats Url
+     *
+     * Agent 安装脚本使用的 NATS 地址，不包含用户名和密码。
+     */
+    agent_public_nats_url?: string | null;
+    /**
+     * Agent Install Service Name
+     *
+     * Agent systemd 服务名。
+     */
+    agent_install_service_name?: string | null;
+    /**
+     * Agent Default Heartbeat Interval Sec
+     *
+     * Agent 默认心跳间隔，单位秒。
+     */
+    agent_default_heartbeat_interval_sec?: number | null;
+    /**
+     * Agent Default Log Level
+     *
+     * Agent 默认日志级别。
+     */
+    agent_default_log_level?: string | null;
     /**
      * Agent Install Token Secret
      *
