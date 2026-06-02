@@ -1583,6 +1583,10 @@ export type AppSettingsResponse = {
      */
     artifact_download_url_ttl_sec: number;
     /**
+     * Artifact Download Token Secret Configured
+     */
+    artifact_download_token_secret_configured: boolean;
+    /**
      * Artifact Upload Max Bytes
      */
     artifact_upload_max_bytes: number;
@@ -1728,6 +1732,12 @@ export type AppSettingsUpdate = {
      * 下载 URL 有效期，单位秒。
      */
     artifact_download_url_ttl_sec?: number | null;
+    /**
+     * Artifact Download Token Secret
+     *
+     * Agent Artifact 下载 URL 签名密钥；查询接口不会返回明文。
+     */
+    artifact_download_token_secret?: string | null;
     /**
      * Artifact Upload Max Bytes
      *

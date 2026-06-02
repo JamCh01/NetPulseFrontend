@@ -13,6 +13,7 @@ import { ToggleSwitch } from '@/components/ui/toggle-switch'
 
 type SettingsFormState = AppSettingsResponse & {
   agent_install_token_secret: string
+  artifact_download_token_secret: string
 }
 
 type SettingsTranslationKey =
@@ -55,6 +56,8 @@ type SettingsTranslationKey =
   | 'settings.publicBaseUrlDesc'
   | 'settings.downloadUrlTtl'
   | 'settings.downloadUrlTtlDesc'
+  | 'settings.artifactDownloadTokenSecret'
+  | 'settings.artifactDownloadTokenSecretDesc'
   | 'settings.uploadMaxBytes'
   | 'settings.uploadMaxBytesDesc'
   | 'settings.agentInstallDesc'
@@ -156,6 +159,7 @@ const SECTIONS: SectionConfig[] = [
       { key: 'artifact_local_storage_dir', labelKey: 'settings.localStorageDir', descriptionKey: 'settings.localStorageDirDesc', type: 'text' },
       { key: 'artifact_local_public_base_url', labelKey: 'settings.publicBaseUrl', descriptionKey: 'settings.publicBaseUrlDesc', type: 'text' },
       { key: 'artifact_download_url_ttl_sec', labelKey: 'settings.downloadUrlTtl', descriptionKey: 'settings.downloadUrlTtlDesc', type: 'number' },
+      { key: 'artifact_download_token_secret', labelKey: 'settings.artifactDownloadTokenSecret', descriptionKey: 'settings.artifactDownloadTokenSecretDesc', type: 'secret' },
       { key: 'artifact_upload_max_bytes', labelKey: 'settings.uploadMaxBytes', descriptionKey: 'settings.uploadMaxBytesDesc', type: 'number' },
     ],
   },
@@ -178,6 +182,7 @@ function toFormState(settings: AppSettingsResponse): SettingsFormState {
   return {
     ...settings,
     agent_install_token_secret: '',
+    artifact_download_token_secret: '',
   }
 }
 
@@ -211,6 +216,9 @@ function buildPatchBody(form: SettingsFormState): AppSettingsUpdate {
   }
   if (form.agent_install_token_secret.trim()) {
     body.agent_install_token_secret = form.agent_install_token_secret.trim()
+  }
+  if (form.artifact_download_token_secret.trim()) {
+    body.artifact_download_token_secret = form.artifact_download_token_secret.trim()
   }
   return body
 }
@@ -294,6 +302,9 @@ function SettingsForm({ settings }: { settings: AppSettingsResponse }) {
       agent_install_token_secret: settings.agent_install_token_secret_configured
         ? { label: t('settings.agentInstallTokenSecretConfigured'), className: 'font-medium text-emerald-400' }
         : { label: t('settings.agentInstallTokenSecretMissing'), className: 'font-medium text-red-400' },
+      artifact_download_token_secret: settings.artifact_download_token_secret_configured
+        ? { label: t('settings.artifactDownloadTokenSecretConfigured'), className: 'font-medium text-emerald-400' }
+        : { label: t('settings.artifactDownloadTokenSecretMissing'), className: 'font-medium text-red-400' },
     }
   }, [settings, t])
 
@@ -326,8 +337,8 @@ function SettingsForm({ settings }: { settings: AppSettingsResponse }) {
                     <Label htmlFor={`setting-${field.key}`} className="text-sm text-text-primary">{t(field.labelKey)}</Label>
                     <p className="mt-1 text-xs leading-relaxed text-text-muted">{t(field.descriptionKey)}</p>
                     {field.type === 'secret' && (
-                      <p className={`mt-1 text-xs ${secretStatus[field.key as 'agent_install_token_secret'].className}`}>
-                        {secretStatus[field.key as 'agent_install_token_secret'].label}
+                      <p className={`mt-1 text-xs ${secretStatus[field.key as keyof typeof secretStatus].className}`}>
+                        {secretStatus[field.key as keyof typeof secretStatus].label}
                       </p>
                     )}
                   </div>

@@ -27,6 +27,7 @@ const settingsResponse = {
   artifact_local_public_base_url: 'https://netpulse-api.lowendaff.com/artifacts',
   artifact_download_url_ttl_sec: 900,
   artifact_upload_max_bytes: 209_715_200,
+  artifact_download_token_secret_configured: true,
   agent_public_api_base_url: 'https://netpulse-api.lowendaff.com',
   agent_public_nats_url: 'tls://nats.lowendaff.com:4222',
   agent_install_service_name: 'netpulse-agent',
@@ -52,6 +53,7 @@ describe('SettingsPage', () => {
 
     expect(await screen.findByText('系统设置')).toBeInTheDocument()
     expect(await screen.findByText('安装 URL 签名密钥已配置')).toHaveClass('font-medium', 'text-emerald-400')
+    expect(await screen.findByText('Artifact 下载签名密钥已配置')).toHaveClass('font-medium', 'text-emerald-400')
     expect(screen.getByDisplayValue('https://netpulse-api.lowendaff.com')).toBeInTheDocument()
     expect(screen.getByDisplayValue('tls://nats.lowendaff.com:4222')).toBeInTheDocument()
     expect(screen.getByDisplayValue('/opt/netpulse-runtime/artifacts')).toBeInTheDocument()
@@ -94,14 +96,16 @@ describe('SettingsPage', () => {
       agent_install_token_ttl_sec: 3600,
     })
     expect(patchedBody).not.toHaveProperty('agent_install_token_secret')
+    expect(patchedBody).not.toHaveProperty('artifact_download_token_secret')
   })
 
-  it('marks missing install signing secret as red', async () => {
+  it('marks missing signing secrets as red', async () => {
     server.use(
       http.get('*/api/v1/settings', () => HttpResponse.json({
         data: {
           ...settingsResponse,
           agent_install_token_secret_configured: false,
+          artifact_download_token_secret_configured: false,
         },
       })),
     )
@@ -109,5 +113,6 @@ describe('SettingsPage', () => {
     renderWithProviders(<SettingsPage />)
 
     expect(await screen.findByText('安装 URL 签名密钥未配置')).toHaveClass('font-medium', 'text-red-400')
+    expect(await screen.findByText('Artifact 下载签名密钥未配置')).toHaveClass('font-medium', 'text-red-400')
   })
 })
