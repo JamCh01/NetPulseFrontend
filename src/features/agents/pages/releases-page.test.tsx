@@ -17,7 +17,7 @@ const artifact = {
   content_type: 'application/octet-stream',
   size_bytes: 12_345_678,
   sha256: 'abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
-  storage_provider: 'cloudflare_r2',
+  storage_provider: 'local_filesystem',
   storage_bucket: 'netpulse-artifacts',
   storage_key: 'agent-binaries/linux/x86_64/netpulse-agent',
   is_active: true,
@@ -56,7 +56,7 @@ describe('ReleasesPage agent artifacts', () => {
     expect(await screen.findByText('Agent Artifacts')).toBeInTheDocument()
     expect(await screen.findByText('1.2.3')).toBeInTheDocument()
     expect(screen.getByText('Linux / x86_64 (AMD64)')).toBeInTheDocument()
-    expect(screen.getByText('cloudflare_r2')).toBeInTheDocument()
+    expect(screen.getByText('local_filesystem')).toBeInTheDocument()
     expect(screen.queryByText('push update')).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: '删除' }))

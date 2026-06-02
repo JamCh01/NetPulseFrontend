@@ -485,6 +485,19 @@ export type AgentCreateResponse = {
      * Auth Token
      */
     auth_token: string;
+    /**
+     * Nats Username
+     */
+    nats_username: string;
+    /**
+     * Nats Password
+     */
+    nats_password: string;
+    /**
+     * Install Command Available
+     */
+    install_command_available: boolean;
+    install_command: AgentInstallCommandResponse;
 };
 
 /**
@@ -584,6 +597,14 @@ export type AgentHeartbeat = {
     scheduler_stats?: {
         [key: string]: unknown;
     } | null;
+    /**
+     * Capabilities
+     *
+     * Agent 能力声明，例如是否支持自动更新及可用安装方式。
+     */
+    capabilities?: {
+        [key: string]: unknown;
+    } | null;
 };
 
 /**
@@ -603,6 +624,128 @@ export type AgentHeartbeatEnvelope = {
      */
     request_id: string;
     data: AgentResponse;
+};
+
+/**
+ * AgentInstallArtifactEnvelope
+ */
+export type AgentInstallArtifactEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: AgentInstallArtifactResponse;
+};
+
+/**
+ * AgentInstallArtifactResponse
+ */
+export type AgentInstallArtifactResponse = {
+    /**
+     * Artifact Uuid
+     */
+    artifact_uuid: string;
+    /**
+     * Version
+     */
+    version: string;
+    /**
+     * Os
+     */
+    os: string;
+    /**
+     * Arch
+     */
+    arch: string;
+    /**
+     * Filename
+     */
+    filename: string;
+    /**
+     * Size Bytes
+     */
+    size_bytes: number;
+    /**
+     * Sha256
+     */
+    sha256: string;
+    /**
+     * Download Url
+     */
+    download_url: string;
+};
+
+/**
+ * AgentInstallCommandEnvelope
+ */
+export type AgentInstallCommandEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: AgentInstallCommandResponse;
+};
+
+/**
+ * AgentInstallCommandResponse
+ */
+export type AgentInstallCommandResponse = {
+    /**
+     * Agent Uuid
+     */
+    agent_uuid: string;
+    /**
+     * Nats Username
+     */
+    nats_username: string;
+    /**
+     * Service Name
+     */
+    service_name: string;
+    /**
+     * Install Path
+     */
+    install_path: string;
+    /**
+     * Env File
+     */
+    env_file: string;
+    /**
+     * Contains Secrets
+     */
+    contains_secrets: boolean;
+    /**
+     * Command
+     */
+    command: string;
+    /**
+     * Install Url
+     */
+    install_url?: string | null;
+    /**
+     * Script
+     */
+    script: string;
+    /**
+     * Nats Config Snippet
+     */
+    nats_config_snippet: string;
 };
 
 /**
@@ -806,6 +949,19 @@ export type AgentTokenRotateResponse = {
      * Auth Token
      */
     auth_token: string;
+    /**
+     * Nats Username
+     */
+    nats_username: string;
+    /**
+     * Nats Password
+     */
+    nats_password: string;
+    /**
+     * Install Command Available
+     */
+    install_command_available: boolean;
+    install_command: AgentInstallCommandResponse;
 };
 
 /**
@@ -866,6 +1022,469 @@ export type AgentUpdate = {
      * 新的 Agent 标签列表；不传则保持不变。
      */
     tags?: Array<string> | null;
+};
+
+/**
+ * AgentUpdateAssignment
+ */
+export type AgentUpdateAssignment = {
+    /**
+     * Assignment Uuid
+     */
+    assignment_uuid?: string;
+    /**
+     * Policy Uuid
+     */
+    policy_uuid: string;
+    /**
+     * Agent Uuid
+     */
+    agent_uuid: string;
+    /**
+     * Artifact Uuid
+     */
+    artifact_uuid: string;
+    /**
+     * From Version
+     */
+    from_version?: string | null;
+    /**
+     * To Version
+     */
+    to_version: string;
+    /**
+     * State
+     */
+    state?: 'pending' | 'dispatched' | 'downloading' | 'downloaded' | 'installing' | 'restart_requested' | 'installed' | 'failed' | 'rolled_back' | 'cancelled';
+    /**
+     * Attempt Count
+     */
+    attempt_count?: number;
+    /**
+     * Last Error Type
+     */
+    last_error_type?: string | null;
+    /**
+     * Last Error Message
+     */
+    last_error_message?: string | null;
+    /**
+     * Claimed By
+     */
+    claimed_by?: string | null;
+    /**
+     * Claimed At
+     */
+    claimed_at?: string | null;
+    /**
+     * Dispatched At
+     */
+    dispatched_at?: string | null;
+    /**
+     * Downloaded At
+     */
+    downloaded_at?: string | null;
+    /**
+     * Installed At
+     */
+    installed_at?: string | null;
+    /**
+     * Heartbeat Confirmed At
+     */
+    heartbeat_confirmed_at?: string | null;
+    /**
+     * Failed At
+     */
+    failed_at?: string | null;
+    /**
+     * Cancelled At
+     */
+    cancelled_at?: string | null;
+    /**
+     * Created At
+     */
+    created_at?: string;
+    /**
+     * Updated At
+     */
+    updated_at?: string;
+};
+
+/**
+ * AgentUpdateAssignmentEnvelope
+ */
+export type AgentUpdateAssignmentEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    /**
+     * Data
+     */
+    data: AgentUpdateAssignment | {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * AgentUpdateAssignmentListData
+ */
+export type AgentUpdateAssignmentListData = {
+    /**
+     * Items
+     */
+    items: Array<AgentUpdateAssignment>;
+};
+
+/**
+ * AgentUpdateAssignmentListEnvelope
+ */
+export type AgentUpdateAssignmentListEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: AgentUpdateAssignmentListData;
+};
+
+/**
+ * AgentUpdateDispatchEnvelope
+ */
+export type AgentUpdateDispatchEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    /**
+     * Data
+     */
+    data: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * AgentUpdatePolicy
+ */
+export type AgentUpdatePolicy = {
+    /**
+     * Policy Uuid
+     */
+    policy_uuid?: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Artifact Uuid
+     */
+    artifact_uuid: string;
+    /**
+     * Os
+     */
+    os: string;
+    /**
+     * Arch
+     */
+    arch: string;
+    /**
+     * Is Enabled
+     */
+    is_enabled?: boolean;
+    /**
+     * Rollout Mode
+     */
+    rollout_mode?: 'manual' | 'automatic';
+    /**
+     * Rollout Percent
+     */
+    rollout_percent?: number;
+    /**
+     * Max In Progress
+     */
+    max_in_progress?: number;
+    /**
+     * Max Retries
+     */
+    max_retries?: number;
+    /**
+     * Failure Pause Threshold Pct
+     */
+    failure_pause_threshold_pct?: number;
+    /**
+     * Allow Downgrade
+     */
+    allow_downgrade?: boolean;
+    /**
+     * Install Method Preference
+     */
+    install_method_preference?: Array<string>;
+    /**
+     * Created At
+     */
+    created_at?: string;
+    /**
+     * Updated At
+     */
+    updated_at?: string;
+};
+
+/**
+ * AgentUpdatePolicyCreate
+ */
+export type AgentUpdatePolicyCreate = {
+    /**
+     * Name
+     *
+     * Agent 自动更新策略名称。
+     */
+    name: string;
+    /**
+     * Artifact Uuid
+     *
+     * 目标 Agent Artifact UUID。
+     */
+    artifact_uuid: string;
+    /**
+     * Os
+     *
+     * 目标 Agent 操作系统，例如 `linux`。
+     */
+    os: string;
+    /**
+     * Arch
+     *
+     * 目标 Agent CPU 架构，例如 `x86_64`。
+     */
+    arch: string;
+    /**
+     * Is Enabled
+     *
+     * 策略是否启用。
+     */
+    is_enabled?: boolean;
+    /**
+     * Rollout Mode
+     *
+     * 发布模式，MVP 使用 `manual`。
+     */
+    rollout_mode?: 'manual' | 'automatic';
+    /**
+     * Rollout Percent
+     *
+     * 发布比例，1 到 100。
+     */
+    rollout_percent?: number;
+    /**
+     * Max In Progress
+     *
+     * 该策略允许同时处于进行中的最大 Agent 数。
+     */
+    max_in_progress?: number;
+    /**
+     * Max Retries
+     *
+     * 单个 Agent 更新失败后的最大重试次数。
+     */
+    max_retries?: number;
+    /**
+     * Failure Pause Threshold Pct
+     *
+     * 失败率达到该百分比时暂停策略。
+     */
+    failure_pause_threshold_pct?: number;
+    /**
+     * Allow Downgrade
+     *
+     * 是否允许 Agent 降级安装。
+     */
+    allow_downgrade?: boolean;
+    /**
+     * Install Method Preference
+     *
+     * 安装方式优先级。当前仅支持 `systemd`，Agent 二进制固定安装到 `/usr/local/bin/netpulse-agent`。
+     */
+    install_method_preference?: Array<string>;
+};
+
+/**
+ * AgentUpdatePolicyEnvelope
+ */
+export type AgentUpdatePolicyEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: AgentUpdatePolicy;
+};
+
+/**
+ * AgentUpdatePolicyListData
+ */
+export type AgentUpdatePolicyListData = {
+    /**
+     * Items
+     */
+    items: Array<AgentUpdatePolicy>;
+};
+
+/**
+ * AgentUpdatePolicyListEnvelope
+ */
+export type AgentUpdatePolicyListEnvelope = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Request Id
+     */
+    request_id: string;
+    data: AgentUpdatePolicyListData;
+};
+
+/**
+ * AgentUpdatePolicyUpdate
+ */
+export type AgentUpdatePolicyUpdate = {
+    /**
+     * Name
+     *
+     * 新的 Agent 自动更新策略名称；不传则保持不变。
+     */
+    name?: string | null;
+    /**
+     * Artifact Uuid
+     *
+     * 新的目标 Agent Artifact UUID；不传则保持不变。
+     */
+    artifact_uuid?: string | null;
+    /**
+     * Os
+     *
+     * 新的目标 Agent 操作系统；不传则保持不变。
+     */
+    os?: string | null;
+    /**
+     * Arch
+     *
+     * 新的目标 Agent CPU 架构；不传则保持不变。
+     */
+    arch?: string | null;
+    /**
+     * Is Enabled
+     *
+     * 是否启用策略；不传则保持不变。
+     */
+    is_enabled?: boolean | null;
+    /**
+     * Rollout Mode
+     *
+     * 新的发布模式；不传则保持不变。
+     */
+    rollout_mode?: 'manual' | 'automatic' | null;
+    /**
+     * Rollout Percent
+     *
+     * 新的发布比例，1 到 100；不传则保持不变。
+     */
+    rollout_percent?: number | null;
+    /**
+     * Max In Progress
+     *
+     * 新的最大进行中 Agent 数；不传则保持不变。
+     */
+    max_in_progress?: number | null;
+    /**
+     * Max Retries
+     *
+     * 新的最大重试次数；不传则保持不变。
+     */
+    max_retries?: number | null;
+    /**
+     * Failure Pause Threshold Pct
+     *
+     * 新的失败率暂停阈值；不传则保持不变。
+     */
+    failure_pause_threshold_pct?: number | null;
+    /**
+     * Allow Downgrade
+     *
+     * 是否允许降级；不传则保持不变。
+     */
+    allow_downgrade?: boolean | null;
+    /**
+     * Install Method Preference
+     *
+     * 新的安装方式优先级；当前仅支持 `systemd`。
+     */
+    install_method_preference?: Array<string> | null;
+};
+
+/**
+ * AgentUpdateStatusReport
+ */
+export type AgentUpdateStatusReport = {
+    /**
+     * State
+     *
+     * Agent 自动更新当前状态。
+     */
+    state: 'pending' | 'dispatched' | 'downloading' | 'downloaded' | 'installing' | 'restart_requested' | 'installed' | 'failed' | 'rolled_back' | 'cancelled';
+    /**
+     * Install Method
+     *
+     * Agent 实际采用的安装方式；当前仅支持 `systemd`。
+     */
+    install_method?: string | null;
+    /**
+     * Error Type
+     *
+     * 失败时的错误类型；成功状态为 null。
+     */
+    error_type?: string | null;
+    /**
+     * Error Message
+     *
+     * 失败时的错误详情；成功状态为 null。
+     */
+    error_message?: string | null;
 };
 
 /**
@@ -952,29 +1571,13 @@ export type AppSettingsResponse = {
      */
     result_ingestion_event_retention_days: number;
     /**
-     * Artifact Storage Provider
+     * Artifact Local Storage Dir
      */
-    artifact_storage_provider: string;
+    artifact_local_storage_dir: string;
     /**
-     * Artifact R2 Endpoint Url
+     * Artifact Local Public Base Url
      */
-    artifact_r2_endpoint_url?: string | null;
-    /**
-     * Artifact R2 Access Key Id
-     */
-    artifact_r2_access_key_id?: string | null;
-    /**
-     * Artifact R2 Secret Access Key Configured
-     */
-    artifact_r2_secret_access_key_configured: boolean;
-    /**
-     * Artifact R2 Bucket
-     */
-    artifact_r2_bucket: string;
-    /**
-     * Artifact R2 Public Base Url
-     */
-    artifact_r2_public_base_url?: string | null;
+    artifact_local_public_base_url: string;
     /**
      * Artifact Download Url Ttl Sec
      */
@@ -1108,41 +1711,17 @@ export type AppSettingsUpdate = {
      */
     result_ingestion_event_retention_days?: number | null;
     /**
-     * Artifact Storage Provider
+     * Artifact Local Storage Dir
      *
-     * Artifact 对象存储提供方，当前支持 `cloudflare_r2`。
+     * Agent Artifact 本地文件系统存储目录。
      */
-    artifact_storage_provider?: string | null;
+    artifact_local_storage_dir?: string | null;
     /**
-     * Artifact R2 Endpoint Url
+     * Artifact Local Public Base Url
      *
-     * Cloudflare R2 的 S3 API endpoint URL。
+     * Agent Artifact 对外下载基础 URL。
      */
-    artifact_r2_endpoint_url?: string | null;
-    /**
-     * Artifact R2 Access Key Id
-     *
-     * Cloudflare R2 的 Access Key ID。
-     */
-    artifact_r2_access_key_id?: string | null;
-    /**
-     * Artifact R2 Secret Access Key
-     *
-     * Cloudflare R2 Secret Access Key；查询接口不会返回明文。
-     */
-    artifact_r2_secret_access_key?: string | null;
-    /**
-     * Artifact R2 Bucket
-     *
-     * Cloudflare R2 Bucket 名称。
-     */
-    artifact_r2_bucket?: string | null;
-    /**
-     * Artifact R2 Public Base Url
-     *
-     * 可选的公开下载基础 URL；不传时使用预签名 S3 URL。
-     */
-    artifact_r2_public_base_url?: string | null;
+    artifact_local_public_base_url?: string | null;
     /**
      * Artifact Download Url Ttl Sec
      *
@@ -1224,7 +1803,7 @@ export type BodyPostAgentArtifactApiV1ArtifactsAgentsPost = {
     /**
      * File
      *
-     * Agent 可执行文件本体，后端会上传到 Cloudflare R2。
+     * Agent 可执行文件本体，后端会写入本地文件系统。
      */
     file: Blob | File;
     /**
@@ -2395,6 +2974,14 @@ export type MonitoringIperf3ResultSummary = {
      * Retransmits
      */
     retransmits?: number | null;
+    /**
+     * Error Type
+     */
+    error_type?: string | null;
+    /**
+     * Error Message
+     */
+    error_message?: string | null;
 };
 
 /**
@@ -5421,6 +6008,251 @@ export type DownloadAgentArtifactApiV1ArtifactsAgentsArtifactUuidDownloadGetErro
 
 export type DownloadAgentArtifactApiV1ArtifactsAgentsArtifactUuidDownloadGetError = DownloadAgentArtifactApiV1ArtifactsAgentsArtifactUuidDownloadGetErrors[keyof DownloadAgentArtifactApiV1ArtifactsAgentsArtifactUuidDownloadGetErrors];
 
+export type GetAgentUpdatePoliciesApiV1AgentUpdatePoliciesGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/agent-update/policies';
+};
+
+export type GetAgentUpdatePoliciesApiV1AgentUpdatePoliciesGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: AgentUpdatePolicyListEnvelope;
+};
+
+export type GetAgentUpdatePoliciesApiV1AgentUpdatePoliciesGetResponse = GetAgentUpdatePoliciesApiV1AgentUpdatePoliciesGetResponses[keyof GetAgentUpdatePoliciesApiV1AgentUpdatePoliciesGetResponses];
+
+export type PostAgentUpdatePolicyApiV1AgentUpdatePoliciesPostData = {
+    body: AgentUpdatePolicyCreate;
+    path?: never;
+    query?: never;
+    url: '/api/v1/agent-update/policies';
+};
+
+export type PostAgentUpdatePolicyApiV1AgentUpdatePoliciesPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PostAgentUpdatePolicyApiV1AgentUpdatePoliciesPostError = PostAgentUpdatePolicyApiV1AgentUpdatePoliciesPostErrors[keyof PostAgentUpdatePolicyApiV1AgentUpdatePoliciesPostErrors];
+
+export type PostAgentUpdatePolicyApiV1AgentUpdatePoliciesPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: AgentUpdatePolicyEnvelope;
+};
+
+export type PostAgentUpdatePolicyApiV1AgentUpdatePoliciesPostResponse = PostAgentUpdatePolicyApiV1AgentUpdatePoliciesPostResponses[keyof PostAgentUpdatePolicyApiV1AgentUpdatePoliciesPostResponses];
+
+export type PatchAgentUpdatePolicyApiV1AgentUpdatePoliciesPolicyUuidPatchData = {
+    body: AgentUpdatePolicyUpdate;
+    path: {
+        /**
+         * Policy Uuid
+         *
+         * Agent 自动更新策略 UUID。
+         */
+        policy_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/agent-update/policies/{policy_uuid}';
+};
+
+export type PatchAgentUpdatePolicyApiV1AgentUpdatePoliciesPolicyUuidPatchErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PatchAgentUpdatePolicyApiV1AgentUpdatePoliciesPolicyUuidPatchError = PatchAgentUpdatePolicyApiV1AgentUpdatePoliciesPolicyUuidPatchErrors[keyof PatchAgentUpdatePolicyApiV1AgentUpdatePoliciesPolicyUuidPatchErrors];
+
+export type PatchAgentUpdatePolicyApiV1AgentUpdatePoliciesPolicyUuidPatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: AgentUpdatePolicyEnvelope;
+};
+
+export type PatchAgentUpdatePolicyApiV1AgentUpdatePoliciesPolicyUuidPatchResponse = PatchAgentUpdatePolicyApiV1AgentUpdatePoliciesPolicyUuidPatchResponses[keyof PatchAgentUpdatePolicyApiV1AgentUpdatePoliciesPolicyUuidPatchResponses];
+
+export type DispatchAgentUpdatePolicyApiV1AgentUpdatePoliciesPolicyUuidDispatchPostData = {
+    body?: never;
+    path: {
+        /**
+         * Policy Uuid
+         *
+         * Agent 自动更新策略 UUID。
+         */
+        policy_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/agent-update/policies/{policy_uuid}/dispatch';
+};
+
+export type DispatchAgentUpdatePolicyApiV1AgentUpdatePoliciesPolicyUuidDispatchPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DispatchAgentUpdatePolicyApiV1AgentUpdatePoliciesPolicyUuidDispatchPostError = DispatchAgentUpdatePolicyApiV1AgentUpdatePoliciesPolicyUuidDispatchPostErrors[keyof DispatchAgentUpdatePolicyApiV1AgentUpdatePoliciesPolicyUuidDispatchPostErrors];
+
+export type DispatchAgentUpdatePolicyApiV1AgentUpdatePoliciesPolicyUuidDispatchPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: AgentUpdateDispatchEnvelope;
+};
+
+export type DispatchAgentUpdatePolicyApiV1AgentUpdatePoliciesPolicyUuidDispatchPostResponse = DispatchAgentUpdatePolicyApiV1AgentUpdatePoliciesPolicyUuidDispatchPostResponses[keyof DispatchAgentUpdatePolicyApiV1AgentUpdatePoliciesPolicyUuidDispatchPostResponses];
+
+export type GetAgentUpdateAssignmentsApiV1AgentUpdateAssignmentsGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Agent Uuid
+         *
+         * 按 Agent UUID 过滤。
+         */
+        agent_uuid?: string | null;
+        /**
+         * Policy Uuid
+         *
+         * 按 Agent 自动更新策略 UUID 过滤。
+         */
+        policy_uuid?: string | null;
+        /**
+         * State
+         *
+         * 按更新状态过滤，例如 `dispatched`、`downloaded`、`installed`、`failed`。
+         */
+        state?: string | null;
+    };
+    url: '/api/v1/agent-update/assignments';
+};
+
+export type GetAgentUpdateAssignmentsApiV1AgentUpdateAssignmentsGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetAgentUpdateAssignmentsApiV1AgentUpdateAssignmentsGetError = GetAgentUpdateAssignmentsApiV1AgentUpdateAssignmentsGetErrors[keyof GetAgentUpdateAssignmentsApiV1AgentUpdateAssignmentsGetErrors];
+
+export type GetAgentUpdateAssignmentsApiV1AgentUpdateAssignmentsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: AgentUpdateAssignmentListEnvelope;
+};
+
+export type GetAgentUpdateAssignmentsApiV1AgentUpdateAssignmentsGetResponse = GetAgentUpdateAssignmentsApiV1AgentUpdateAssignmentsGetResponses[keyof GetAgentUpdateAssignmentsApiV1AgentUpdateAssignmentsGetResponses];
+
+export type GetAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidGetData = {
+    body?: never;
+    path: {
+        /**
+         * Assignment Uuid
+         *
+         * Agent 自动更新 assignment UUID。
+         */
+        assignment_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/agent-update/assignments/{assignment_uuid}';
+};
+
+export type GetAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidGetError = GetAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidGetErrors[keyof GetAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidGetErrors];
+
+export type GetAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: AgentUpdateAssignmentEnvelope;
+};
+
+export type GetAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidGetResponse = GetAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidGetResponses[keyof GetAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidGetResponses];
+
+export type RetryAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidRetryPostData = {
+    body?: never;
+    path: {
+        /**
+         * Assignment Uuid
+         *
+         * Agent 自动更新 assignment UUID。
+         */
+        assignment_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/agent-update/assignments/{assignment_uuid}/retry';
+};
+
+export type RetryAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidRetryPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RetryAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidRetryPostError = RetryAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidRetryPostErrors[keyof RetryAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidRetryPostErrors];
+
+export type RetryAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidRetryPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: AgentUpdateAssignmentEnvelope;
+};
+
+export type RetryAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidRetryPostResponse = RetryAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidRetryPostResponses[keyof RetryAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidRetryPostResponses];
+
+export type CancelAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidCancelPostData = {
+    body?: never;
+    path: {
+        /**
+         * Assignment Uuid
+         *
+         * Agent 自动更新 assignment UUID。
+         */
+        assignment_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/agent-update/assignments/{assignment_uuid}/cancel';
+};
+
+export type CancelAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidCancelPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CancelAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidCancelPostError = CancelAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidCancelPostErrors[keyof CancelAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidCancelPostErrors];
+
+export type CancelAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidCancelPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: AgentUpdateAssignmentEnvelope;
+};
+
+export type CancelAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidCancelPostResponse = CancelAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidCancelPostResponses[keyof CancelAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidCancelPostResponses];
+
 export type GetGeoContinentsApiV1GeoContinentsGetData = {
     body?: never;
     path?: never;
@@ -6270,6 +7102,83 @@ export type PostAgentApiV1AgentsPostResponses = {
 
 export type PostAgentApiV1AgentsPostResponse = PostAgentApiV1AgentsPostResponses[keyof PostAgentApiV1AgentsPostResponses];
 
+export type PostAgentInstallCommandApiV1AgentsAgentUuidInstallCommandPostData = {
+    body?: never;
+    path: {
+        /**
+         * Agent Uuid
+         *
+         * Agent 的唯一标识 UUID。
+         */
+        agent_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/agents/{agent_uuid}/install-command';
+};
+
+export type PostAgentInstallCommandApiV1AgentsAgentUuidInstallCommandPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PostAgentInstallCommandApiV1AgentsAgentUuidInstallCommandPostError = PostAgentInstallCommandApiV1AgentsAgentUuidInstallCommandPostErrors[keyof PostAgentInstallCommandApiV1AgentsAgentUuidInstallCommandPostErrors];
+
+export type PostAgentInstallCommandApiV1AgentsAgentUuidInstallCommandPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: AgentInstallCommandEnvelope;
+};
+
+export type PostAgentInstallCommandApiV1AgentsAgentUuidInstallCommandPostResponse = PostAgentInstallCommandApiV1AgentsAgentUuidInstallCommandPostResponses[keyof PostAgentInstallCommandApiV1AgentsAgentUuidInstallCommandPostResponses];
+
+export type GetAgentInstallArtifactApiV1AgentsAgentUuidInstallArtifactGetData = {
+    body?: never;
+    path: {
+        /**
+         * Agent Uuid
+         *
+         * Agent 的唯一标识 UUID。
+         */
+        agent_uuid: string;
+    };
+    query: {
+        /**
+         * Os
+         *
+         * 安装主机操作系统名称，例如 `linux`。
+         */
+        os: string;
+        /**
+         * Arch
+         *
+         * 安装主机 CPU 架构，例如 `x86_64` 或 `aarch64`。
+         */
+        arch: string;
+    };
+    url: '/api/v1/agents/{agent_uuid}/install-artifact';
+};
+
+export type GetAgentInstallArtifactApiV1AgentsAgentUuidInstallArtifactGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetAgentInstallArtifactApiV1AgentsAgentUuidInstallArtifactGetError = GetAgentInstallArtifactApiV1AgentsAgentUuidInstallArtifactGetErrors[keyof GetAgentInstallArtifactApiV1AgentsAgentUuidInstallArtifactGetErrors];
+
+export type GetAgentInstallArtifactApiV1AgentsAgentUuidInstallArtifactGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: AgentInstallArtifactEnvelope;
+};
+
+export type GetAgentInstallArtifactApiV1AgentsAgentUuidInstallArtifactGetResponse = GetAgentInstallArtifactApiV1AgentsAgentUuidInstallArtifactGetResponses[keyof GetAgentInstallArtifactApiV1AgentsAgentUuidInstallArtifactGetResponses];
+
 export type DeleteAgentApiV1AgentsAgentUuidDeleteData = {
     body?: never;
     path: {
@@ -6589,6 +7498,76 @@ export type PostTaskSnapshotAckApiV1AgentsAgentUuidTaskSnapshotAckPostResponses 
 };
 
 export type PostTaskSnapshotAckApiV1AgentsAgentUuidTaskSnapshotAckPostResponse = PostTaskSnapshotAckApiV1AgentsAgentUuidTaskSnapshotAckPostResponses[keyof PostTaskSnapshotAckApiV1AgentsAgentUuidTaskSnapshotAckPostResponses];
+
+export type GetAgentCurrentUpdateApiV1AgentsAgentUuidUpdatesCurrentGetData = {
+    body?: never;
+    path: {
+        /**
+         * Agent Uuid
+         *
+         * Agent 的唯一标识 UUID。
+         */
+        agent_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/agents/{agent_uuid}/updates/current';
+};
+
+export type GetAgentCurrentUpdateApiV1AgentsAgentUuidUpdatesCurrentGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetAgentCurrentUpdateApiV1AgentsAgentUuidUpdatesCurrentGetError = GetAgentCurrentUpdateApiV1AgentsAgentUuidUpdatesCurrentGetErrors[keyof GetAgentCurrentUpdateApiV1AgentsAgentUuidUpdatesCurrentGetErrors];
+
+export type GetAgentCurrentUpdateApiV1AgentsAgentUuidUpdatesCurrentGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: AgentUpdateAssignmentEnvelope;
+};
+
+export type GetAgentCurrentUpdateApiV1AgentsAgentUuidUpdatesCurrentGetResponse = GetAgentCurrentUpdateApiV1AgentsAgentUuidUpdatesCurrentGetResponses[keyof GetAgentCurrentUpdateApiV1AgentsAgentUuidUpdatesCurrentGetResponses];
+
+export type PostAgentUpdateStatusFallbackApiV1AgentsAgentUuidUpdatesAssignmentUuidStatusPostData = {
+    body: AgentUpdateStatusReport;
+    path: {
+        /**
+         * Agent Uuid
+         *
+         * Agent 的唯一标识 UUID。
+         */
+        agent_uuid: string;
+        /**
+         * Assignment Uuid
+         *
+         * Agent 自动更新 assignment UUID。
+         */
+        assignment_uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/agents/{agent_uuid}/updates/{assignment_uuid}/status';
+};
+
+export type PostAgentUpdateStatusFallbackApiV1AgentsAgentUuidUpdatesAssignmentUuidStatusPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PostAgentUpdateStatusFallbackApiV1AgentsAgentUuidUpdatesAssignmentUuidStatusPostError = PostAgentUpdateStatusFallbackApiV1AgentsAgentUuidUpdatesAssignmentUuidStatusPostErrors[keyof PostAgentUpdateStatusFallbackApiV1AgentsAgentUuidUpdatesAssignmentUuidStatusPostErrors];
+
+export type PostAgentUpdateStatusFallbackApiV1AgentsAgentUuidUpdatesAssignmentUuidStatusPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: AgentUpdateAssignmentEnvelope;
+};
+
+export type PostAgentUpdateStatusFallbackApiV1AgentsAgentUuidUpdatesAssignmentUuidStatusPostResponse = PostAgentUpdateStatusFallbackApiV1AgentsAgentUuidUpdatesAssignmentUuidStatusPostResponses[keyof PostAgentUpdateStatusFallbackApiV1AgentsAgentUuidUpdatesAssignmentUuidStatusPostResponses];
 
 export type GetTasksApiV1TasksGetData = {
     body?: never;

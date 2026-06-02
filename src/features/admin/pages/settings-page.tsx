@@ -12,7 +12,6 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { ToggleSwitch } from '@/components/ui/toggle-switch'
 
 type SettingsFormState = AppSettingsResponse & {
-  artifact_r2_secret_access_key: string
   agent_install_token_secret: string
 }
 
@@ -49,17 +48,9 @@ type SettingsTranslationKey =
   | 'settings.resultIngestionEventsDesc'
   | 'settings.retentionDays'
   | 'settings.retentionDaysDesc'
-  | 'settings.cloudflareR2Desc'
-  | 'settings.storageProvider'
-  | 'settings.storageProviderDesc'
-  | 'settings.r2Endpoint'
-  | 'settings.r2EndpointDesc'
-  | 'settings.r2AccessKeyId'
-  | 'settings.r2AccessKeyDesc'
-  | 'settings.r2SecretAccessKey'
-  | 'settings.r2SecretDesc'
-  | 'settings.r2Bucket'
-  | 'settings.r2BucketDesc'
+  | 'settings.localArtifactStorageDesc'
+  | 'settings.localStorageDir'
+  | 'settings.localStorageDirDesc'
   | 'settings.publicBaseUrl'
   | 'settings.publicBaseUrlDesc'
   | 'settings.downloadUrlTtl'
@@ -159,15 +150,11 @@ const SECTIONS: SectionConfig[] = [
     ],
   },
   {
-    title: 'Cloudflare R2 Artifact Storage',
-    descriptionKey: 'settings.cloudflareR2Desc',
+    title: 'Local Artifact Storage',
+    descriptionKey: 'settings.localArtifactStorageDesc',
     fields: [
-      { key: 'artifact_storage_provider', labelKey: 'settings.storageProvider', descriptionKey: 'settings.storageProviderDesc', type: 'text' },
-      { key: 'artifact_r2_endpoint_url', labelKey: 'settings.r2Endpoint', descriptionKey: 'settings.r2EndpointDesc', type: 'text' },
-      { key: 'artifact_r2_access_key_id', labelKey: 'settings.r2AccessKeyId', descriptionKey: 'settings.r2AccessKeyDesc', type: 'text' },
-      { key: 'artifact_r2_secret_access_key', labelKey: 'settings.r2SecretAccessKey', descriptionKey: 'settings.r2SecretDesc', type: 'secret' },
-      { key: 'artifact_r2_bucket', labelKey: 'settings.r2Bucket', descriptionKey: 'settings.r2BucketDesc', type: 'text' },
-      { key: 'artifact_r2_public_base_url', labelKey: 'settings.publicBaseUrl', descriptionKey: 'settings.publicBaseUrlDesc', type: 'text' },
+      { key: 'artifact_local_storage_dir', labelKey: 'settings.localStorageDir', descriptionKey: 'settings.localStorageDirDesc', type: 'text' },
+      { key: 'artifact_local_public_base_url', labelKey: 'settings.publicBaseUrl', descriptionKey: 'settings.publicBaseUrlDesc', type: 'text' },
       { key: 'artifact_download_url_ttl_sec', labelKey: 'settings.downloadUrlTtl', descriptionKey: 'settings.downloadUrlTtlDesc', type: 'number' },
       { key: 'artifact_upload_max_bytes', labelKey: 'settings.uploadMaxBytes', descriptionKey: 'settings.uploadMaxBytesDesc', type: 'number' },
     ],
@@ -190,7 +177,6 @@ const SECTIONS: SectionConfig[] = [
 function toFormState(settings: AppSettingsResponse): SettingsFormState {
   return {
     ...settings,
-    artifact_r2_secret_access_key: '',
     agent_install_token_secret: '',
   }
 }
@@ -212,11 +198,8 @@ function buildPatchBody(form: SettingsFormState): AppSettingsUpdate {
     asn_enrichment_claim_stale_after_sec: Number(form.asn_enrichment_claim_stale_after_sec),
     asn_enrichment_singleton_lock_enabled: Boolean(form.asn_enrichment_singleton_lock_enabled),
     result_ingestion_event_retention_days: Number(form.result_ingestion_event_retention_days),
-    artifact_storage_provider: form.artifact_storage_provider,
-    artifact_r2_endpoint_url: form.artifact_r2_endpoint_url || null,
-    artifact_r2_access_key_id: form.artifact_r2_access_key_id || null,
-    artifact_r2_bucket: form.artifact_r2_bucket,
-    artifact_r2_public_base_url: form.artifact_r2_public_base_url || null,
+    artifact_local_storage_dir: form.artifact_local_storage_dir,
+    artifact_local_public_base_url: form.artifact_local_public_base_url,
     artifact_download_url_ttl_sec: Number(form.artifact_download_url_ttl_sec),
     artifact_upload_max_bytes: Number(form.artifact_upload_max_bytes),
     agent_public_api_base_url: form.agent_public_api_base_url,
@@ -225,9 +208,6 @@ function buildPatchBody(form: SettingsFormState): AppSettingsUpdate {
     agent_default_heartbeat_interval_sec: Number(form.agent_default_heartbeat_interval_sec),
     agent_default_log_level: form.agent_default_log_level,
     agent_install_token_ttl_sec: Number(form.agent_install_token_ttl_sec),
-  }
-  if (form.artifact_r2_secret_access_key.trim()) {
-    body.artifact_r2_secret_access_key = form.artifact_r2_secret_access_key.trim()
   }
   if (form.agent_install_token_secret.trim()) {
     body.agent_install_token_secret = form.agent_install_token_secret.trim()
@@ -311,9 +291,6 @@ function SettingsForm({ settings }: { settings: AppSettingsResponse }) {
   const saveDisabled = updateSettings.isPending
   const secretStatus = useMemo(() => {
     return {
-      artifact_r2_secret_access_key: settings.artifact_r2_secret_access_key_configured
-        ? { label: t('settings.r2SecretConfigured'), className: 'font-medium text-emerald-400' }
-        : { label: t('settings.r2SecretMissing'), className: 'font-medium text-red-400' },
       agent_install_token_secret: settings.agent_install_token_secret_configured
         ? { label: t('settings.agentInstallTokenSecretConfigured'), className: 'font-medium text-emerald-400' }
         : { label: t('settings.agentInstallTokenSecretMissing'), className: 'font-medium text-red-400' },
@@ -349,8 +326,8 @@ function SettingsForm({ settings }: { settings: AppSettingsResponse }) {
                     <Label htmlFor={`setting-${field.key}`} className="text-sm text-text-primary">{t(field.labelKey)}</Label>
                     <p className="mt-1 text-xs leading-relaxed text-text-muted">{t(field.descriptionKey)}</p>
                     {field.type === 'secret' && (
-                      <p className={`mt-1 text-xs ${secretStatus[field.key as 'artifact_r2_secret_access_key' | 'agent_install_token_secret'].className}`}>
-                        {secretStatus[field.key as 'artifact_r2_secret_access_key' | 'agent_install_token_secret'].label}
+                      <p className={`mt-1 text-xs ${secretStatus[field.key as 'agent_install_token_secret'].className}`}>
+                        {secretStatus[field.key as 'agent_install_token_secret'].label}
                       </p>
                     )}
                   </div>

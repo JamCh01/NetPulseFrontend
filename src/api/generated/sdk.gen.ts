@@ -2,7 +2,7 @@
 
 import { type Client, formDataBodySerializer, type Options as Options2, type TDataShape } from './client';
 import { client } from './client.gen';
-import type { DeleteAgentApiV1AgentsAgentUuidDeleteData, DeleteAgentApiV1AgentsAgentUuidDeleteErrors, DeleteAgentApiV1AgentsAgentUuidDeleteResponses, DeleteGeoCityEndpointApiV1GeoCitiesCityUuidDeleteData, DeleteGeoCityEndpointApiV1GeoCitiesCityUuidDeleteErrors, DeleteGeoCityEndpointApiV1GeoCitiesCityUuidDeleteResponses, DeleteGeoContinentEndpointApiV1GeoContinentsContinentUuidDeleteData, DeleteGeoContinentEndpointApiV1GeoContinentsContinentUuidDeleteErrors, DeleteGeoContinentEndpointApiV1GeoContinentsContinentUuidDeleteResponses, DeleteGeoCountryEndpointApiV1GeoCountriesCountryUuidDeleteData, DeleteGeoCountryEndpointApiV1GeoCountriesCountryUuidDeleteErrors, DeleteGeoCountryEndpointApiV1GeoCountriesCountryUuidDeleteResponses, DeleteTargetApiV1TargetsTargetUuidDeleteData, DeleteTargetApiV1TargetsTargetUuidDeleteErrors, DeleteTargetApiV1TargetsTargetUuidDeleteResponses, DeleteTaskApiV1TasksTaskUuidDeleteData, DeleteTaskApiV1TasksTaskUuidDeleteErrors, DeleteTaskApiV1TasksTaskUuidDeleteResponses, DisableAgentApiV1AgentsAgentUuidDisablePostData, DisableAgentApiV1AgentsAgentUuidDisablePostErrors, DisableAgentApiV1AgentsAgentUuidDisablePostResponses, DisableTargetApiV1TargetsTargetUuidDisablePostData, DisableTargetApiV1TargetsTargetUuidDisablePostErrors, DisableTargetApiV1TargetsTargetUuidDisablePostResponses, DisableTaskApiV1TasksTaskUuidDisablePostData, DisableTaskApiV1TasksTaskUuidDisablePostErrors, DisableTaskApiV1TasksTaskUuidDisablePostResponses, DownloadAgentArtifactApiV1ArtifactsAgentsArtifactUuidDownloadGetData, DownloadAgentArtifactApiV1ArtifactsAgentsArtifactUuidDownloadGetErrors, EnableAgentApiV1AgentsAgentUuidEnablePostData, EnableAgentApiV1AgentsAgentUuidEnablePostErrors, EnableAgentApiV1AgentsAgentUuidEnablePostResponses, EnableTargetApiV1TargetsTargetUuidEnablePostData, EnableTargetApiV1TargetsTargetUuidEnablePostErrors, EnableTargetApiV1TargetsTargetUuidEnablePostResponses, EnableTaskApiV1TasksTaskUuidEnablePostData, EnableTaskApiV1TasksTaskUuidEnablePostErrors, EnableTaskApiV1TasksTaskUuidEnablePostResponses, GetAgentApiV1AgentsAgentUuidGetData, GetAgentApiV1AgentsAgentUuidGetErrors, GetAgentApiV1AgentsAgentUuidGetResponses, GetAgentArtifactApiV1ArtifactsAgentsArtifactUuidGetData, GetAgentArtifactApiV1ArtifactsAgentsArtifactUuidGetErrors, GetAgentArtifactApiV1ArtifactsAgentsArtifactUuidGetResponses, GetAgentArtifactsApiV1ArtifactsAgentsGetData, GetAgentArtifactsApiV1ArtifactsAgentsGetErrors, GetAgentArtifactsApiV1ArtifactsAgentsGetResponses, GetAgentsApiV1AgentsGetData, GetAgentsApiV1AgentsGetErrors, GetAgentsApiV1AgentsGetResponses, GetAgentWorkApiV1AgentsAgentUuidWorkGetData, GetAgentWorkApiV1AgentsAgentUuidWorkGetErrors, GetAgentWorkApiV1AgentsAgentUuidWorkGetResponses, GetAuthMeApiV1AuthMeGetData, GetAuthMeApiV1AuthMeGetResponses, GetGeoCitiesApiV1GeoCitiesGetData, GetGeoCitiesApiV1GeoCitiesGetErrors, GetGeoCitiesApiV1GeoCitiesGetResponses, GetGeoContinentsApiV1GeoContinentsGetData, GetGeoContinentsApiV1GeoContinentsGetErrors, GetGeoContinentsApiV1GeoContinentsGetResponses, GetGeoCountriesApiV1GeoCountriesGetData, GetGeoCountriesApiV1GeoCountriesGetErrors, GetGeoCountriesApiV1GeoCountriesGetResponses, GetGeoTreeApiV1GeoTreeGetData, GetGeoTreeApiV1GeoTreeGetErrors, GetGeoTreeApiV1GeoTreeGetResponses, GetMetadataEnumsApiV1MetadataEnumsGetData, GetMetadataEnumsApiV1MetadataEnumsGetResponses, GetMonitoringAgentApiV1MonitoringAgentsAgentUuidGetData, GetMonitoringAgentApiV1MonitoringAgentsAgentUuidGetErrors, GetMonitoringAgentApiV1MonitoringAgentsAgentUuidGetResponses, GetMonitoringAgentsApiV1MonitoringAgentsGetData, GetMonitoringAgentsApiV1MonitoringAgentsGetResponses, GetMonitoringMtrResultApiV1MonitoringMtrResultsResultUuidGetData, GetMonitoringMtrResultApiV1MonitoringMtrResultsResultUuidGetErrors, GetMonitoringMtrResultApiV1MonitoringMtrResultsResultUuidGetResponses, GetMonitoringTargetApiV1MonitoringTargetsTargetUuidGetData, GetMonitoringTargetApiV1MonitoringTargetsTargetUuidGetErrors, GetMonitoringTargetApiV1MonitoringTargetsTargetUuidGetResponses, GetMonitoringTargetGeoTreeApiV1MonitoringTargetGeoTreeGetData, GetMonitoringTargetGeoTreeApiV1MonitoringTargetGeoTreeGetErrors, GetMonitoringTargetGeoTreeApiV1MonitoringTargetGeoTreeGetResponses, GetMonitoringTaskApiV1MonitoringTasksTaskUuidGetData, GetMonitoringTaskApiV1MonitoringTasksTaskUuidGetErrors, GetMonitoringTaskApiV1MonitoringTasksTaskUuidGetResponses, GetMonitoringTaskGeoTreeApiV1MonitoringTaskGeoTreeGetData, GetMonitoringTaskGeoTreeApiV1MonitoringTaskGeoTreeGetErrors, GetMonitoringTaskGeoTreeApiV1MonitoringTaskGeoTreeGetResponses, GetMonitoringTaskIperf3ResultsApiV1MonitoringTasksTaskUuidIperf3ResultsGetData, GetMonitoringTaskIperf3ResultsApiV1MonitoringTasksTaskUuidIperf3ResultsGetErrors, GetMonitoringTaskIperf3ResultsApiV1MonitoringTasksTaskUuidIperf3ResultsGetResponses, GetMonitoringTaskMetricsRouteApiV1MonitoringTasksTaskUuidMetricsGetData, GetMonitoringTaskMetricsRouteApiV1MonitoringTasksTaskUuidMetricsGetErrors, GetMonitoringTaskMetricsRouteApiV1MonitoringTasksTaskUuidMetricsGetResponses, GetMonitoringTaskMtrResultsApiV1MonitoringTasksTaskUuidMtrResultsGetData, GetMonitoringTaskMtrResultsApiV1MonitoringTasksTaskUuidMtrResultsGetErrors, GetMonitoringTaskMtrResultsApiV1MonitoringTasksTaskUuidMtrResultsGetResponses, GetMonitoringTasksApiV1MonitoringTasksGetData, GetMonitoringTasksApiV1MonitoringTasksGetErrors, GetMonitoringTasksApiV1MonitoringTasksGetResponses, GetResultIngestionEventApiV1ResultsIngestionEventsMessageIdGetData, GetResultIngestionEventApiV1ResultsIngestionEventsMessageIdGetErrors, GetResultIngestionEventApiV1ResultsIngestionEventsMessageIdGetResponses, GetResultIngestionEventsApiV1ResultsIngestionEventsGetData, GetResultIngestionEventsApiV1ResultsIngestionEventsGetErrors, GetResultIngestionEventsApiV1ResultsIngestionEventsGetResponses, GetSystemSettingsApiV1SettingsGetData, GetSystemSettingsApiV1SettingsGetResponses, GetTagsApiV1TagsGetData, GetTagsApiV1TagsGetErrors, GetTagsApiV1TagsGetResponses, GetTargetApiV1TargetsTargetUuidGetData, GetTargetApiV1TargetsTargetUuidGetErrors, GetTargetApiV1TargetsTargetUuidGetResponses, GetTargetsApiV1TargetsGetData, GetTargetsApiV1TargetsGetErrors, GetTargetsApiV1TargetsGetResponses, GetTaskApiV1TasksTaskUuidGetData, GetTaskApiV1TasksTaskUuidGetErrors, GetTaskApiV1TasksTaskUuidGetResponses, GetTasksApiV1TasksGetData, GetTasksApiV1TasksGetErrors, GetTasksApiV1TasksGetResponses, HealthHealthGetData, HealthHealthGetResponses, PatchAgentApiV1AgentsAgentUuidPatchData, PatchAgentApiV1AgentsAgentUuidPatchErrors, PatchAgentApiV1AgentsAgentUuidPatchResponses, PatchAgentArtifactApiV1ArtifactsAgentsArtifactUuidPatchData, PatchAgentArtifactApiV1ArtifactsAgentsArtifactUuidPatchErrors, PatchAgentArtifactApiV1ArtifactsAgentsArtifactUuidPatchResponses, PatchGeoCityApiV1GeoCitiesCityUuidPatchData, PatchGeoCityApiV1GeoCitiesCityUuidPatchErrors, PatchGeoCityApiV1GeoCitiesCityUuidPatchResponses, PatchGeoContinentApiV1GeoContinentsContinentUuidPatchData, PatchGeoContinentApiV1GeoContinentsContinentUuidPatchErrors, PatchGeoContinentApiV1GeoContinentsContinentUuidPatchResponses, PatchGeoCountryApiV1GeoCountriesCountryUuidPatchData, PatchGeoCountryApiV1GeoCountriesCountryUuidPatchErrors, PatchGeoCountryApiV1GeoCountriesCountryUuidPatchResponses, PatchSystemSettingsApiV1SettingsPatchData, PatchSystemSettingsApiV1SettingsPatchErrors, PatchSystemSettingsApiV1SettingsPatchResponses, PatchTargetApiV1TargetsTargetUuidPatchData, PatchTargetApiV1TargetsTargetUuidPatchErrors, PatchTargetApiV1TargetsTargetUuidPatchResponses, PatchTaskApiV1TasksTaskUuidPatchData, PatchTaskApiV1TasksTaskUuidPatchErrors, PatchTaskApiV1TasksTaskUuidPatchResponses, PostAgentApiV1AgentsPostData, PostAgentApiV1AgentsPostErrors, PostAgentApiV1AgentsPostResponses, PostAgentArtifactApiV1ArtifactsAgentsPostData, PostAgentArtifactApiV1ArtifactsAgentsPostErrors, PostAgentArtifactApiV1ArtifactsAgentsPostResponses, PostAgentHeartbeatApiV1AgentsAgentUuidHeartbeatPostData, PostAgentHeartbeatApiV1AgentsAgentUuidHeartbeatPostErrors, PostAgentHeartbeatApiV1AgentsAgentUuidHeartbeatPostResponses, PostAgentIperf3ExecutionClaimApiV1AgentsAgentUuidIperf3ExecutionClaimsPostData, PostAgentIperf3ExecutionClaimApiV1AgentsAgentUuidIperf3ExecutionClaimsPostErrors, PostAgentIperf3ExecutionClaimApiV1AgentsAgentUuidIperf3ExecutionClaimsPostResponses, PostAuthLoginApiV1AuthLoginPostData, PostAuthLoginApiV1AuthLoginPostErrors, PostAuthLoginApiV1AuthLoginPostResponses, PostAuthLogoutApiV1AuthLogoutPostData, PostAuthLogoutApiV1AuthLogoutPostErrors, PostAuthLogoutApiV1AuthLogoutPostResponses, PostGeoCityApiV1GeoCitiesPostData, PostGeoCityApiV1GeoCitiesPostErrors, PostGeoCityApiV1GeoCitiesPostResponses, PostGeoContinentApiV1GeoContinentsPostData, PostGeoContinentApiV1GeoContinentsPostErrors, PostGeoContinentApiV1GeoContinentsPostResponses, PostGeoCountryApiV1GeoCountriesPostData, PostGeoCountryApiV1GeoCountriesPostErrors, PostGeoCountryApiV1GeoCountriesPostResponses, PostQuickAssociateApiV1RelationsQuickAssociatePostData, PostQuickAssociateApiV1RelationsQuickAssociatePostErrors, PostQuickAssociateApiV1RelationsQuickAssociatePostResponses, PostTargetApiV1TargetsPostData, PostTargetApiV1TargetsPostErrors, PostTargetApiV1TargetsPostResponses, PostTaskApiV1TasksPostData, PostTaskApiV1TasksPostErrors, PostTaskApiV1TasksPostResponses, PostTaskSnapshotAckApiV1AgentsAgentUuidTaskSnapshotAckPostData, PostTaskSnapshotAckApiV1AgentsAgentUuidTaskSnapshotAckPostErrors, PostTaskSnapshotAckApiV1AgentsAgentUuidTaskSnapshotAckPostResponses, PostV1AuthRefreshApiV1AuthRefreshPostData, PostV1AuthRefreshApiV1AuthRefreshPostResponses, RemoveAgentArtifactApiV1ArtifactsAgentsArtifactUuidDeleteData, RemoveAgentArtifactApiV1ArtifactsAgentsArtifactUuidDeleteErrors, RemoveAgentArtifactApiV1ArtifactsAgentsArtifactUuidDeleteResponses, RequestAgentResyncApiV1AgentsAgentUuidResyncRequestPostData, RequestAgentResyncApiV1AgentsAgentUuidResyncRequestPostErrors, RequestAgentResyncApiV1AgentsAgentUuidResyncRequestPostResponses, ResyncAgentApiV1AgentsAgentUuidResyncPostData, ResyncAgentApiV1AgentsAgentUuidResyncPostErrors, ResyncAgentApiV1AgentsAgentUuidResyncPostResponses, RotateAgentAuthTokenApiV1AgentsAgentUuidRotateTokenPostData, RotateAgentAuthTokenApiV1AgentsAgentUuidRotateTokenPostErrors, RotateAgentAuthTokenApiV1AgentsAgentUuidRotateTokenPostResponses } from './types.gen';
+import type { CancelAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidCancelPostData, CancelAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidCancelPostErrors, CancelAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidCancelPostResponses, DeleteAgentApiV1AgentsAgentUuidDeleteData, DeleteAgentApiV1AgentsAgentUuidDeleteErrors, DeleteAgentApiV1AgentsAgentUuidDeleteResponses, DeleteGeoCityEndpointApiV1GeoCitiesCityUuidDeleteData, DeleteGeoCityEndpointApiV1GeoCitiesCityUuidDeleteErrors, DeleteGeoCityEndpointApiV1GeoCitiesCityUuidDeleteResponses, DeleteGeoContinentEndpointApiV1GeoContinentsContinentUuidDeleteData, DeleteGeoContinentEndpointApiV1GeoContinentsContinentUuidDeleteErrors, DeleteGeoContinentEndpointApiV1GeoContinentsContinentUuidDeleteResponses, DeleteGeoCountryEndpointApiV1GeoCountriesCountryUuidDeleteData, DeleteGeoCountryEndpointApiV1GeoCountriesCountryUuidDeleteErrors, DeleteGeoCountryEndpointApiV1GeoCountriesCountryUuidDeleteResponses, DeleteTargetApiV1TargetsTargetUuidDeleteData, DeleteTargetApiV1TargetsTargetUuidDeleteErrors, DeleteTargetApiV1TargetsTargetUuidDeleteResponses, DeleteTaskApiV1TasksTaskUuidDeleteData, DeleteTaskApiV1TasksTaskUuidDeleteErrors, DeleteTaskApiV1TasksTaskUuidDeleteResponses, DisableAgentApiV1AgentsAgentUuidDisablePostData, DisableAgentApiV1AgentsAgentUuidDisablePostErrors, DisableAgentApiV1AgentsAgentUuidDisablePostResponses, DisableTargetApiV1TargetsTargetUuidDisablePostData, DisableTargetApiV1TargetsTargetUuidDisablePostErrors, DisableTargetApiV1TargetsTargetUuidDisablePostResponses, DisableTaskApiV1TasksTaskUuidDisablePostData, DisableTaskApiV1TasksTaskUuidDisablePostErrors, DisableTaskApiV1TasksTaskUuidDisablePostResponses, DispatchAgentUpdatePolicyApiV1AgentUpdatePoliciesPolicyUuidDispatchPostData, DispatchAgentUpdatePolicyApiV1AgentUpdatePoliciesPolicyUuidDispatchPostErrors, DispatchAgentUpdatePolicyApiV1AgentUpdatePoliciesPolicyUuidDispatchPostResponses, DownloadAgentArtifactApiV1ArtifactsAgentsArtifactUuidDownloadGetData, DownloadAgentArtifactApiV1ArtifactsAgentsArtifactUuidDownloadGetErrors, EnableAgentApiV1AgentsAgentUuidEnablePostData, EnableAgentApiV1AgentsAgentUuidEnablePostErrors, EnableAgentApiV1AgentsAgentUuidEnablePostResponses, EnableTargetApiV1TargetsTargetUuidEnablePostData, EnableTargetApiV1TargetsTargetUuidEnablePostErrors, EnableTargetApiV1TargetsTargetUuidEnablePostResponses, EnableTaskApiV1TasksTaskUuidEnablePostData, EnableTaskApiV1TasksTaskUuidEnablePostErrors, EnableTaskApiV1TasksTaskUuidEnablePostResponses, GetAgentApiV1AgentsAgentUuidGetData, GetAgentApiV1AgentsAgentUuidGetErrors, GetAgentApiV1AgentsAgentUuidGetResponses, GetAgentArtifactApiV1ArtifactsAgentsArtifactUuidGetData, GetAgentArtifactApiV1ArtifactsAgentsArtifactUuidGetErrors, GetAgentArtifactApiV1ArtifactsAgentsArtifactUuidGetResponses, GetAgentArtifactsApiV1ArtifactsAgentsGetData, GetAgentArtifactsApiV1ArtifactsAgentsGetErrors, GetAgentArtifactsApiV1ArtifactsAgentsGetResponses, GetAgentCurrentUpdateApiV1AgentsAgentUuidUpdatesCurrentGetData, GetAgentCurrentUpdateApiV1AgentsAgentUuidUpdatesCurrentGetErrors, GetAgentCurrentUpdateApiV1AgentsAgentUuidUpdatesCurrentGetResponses, GetAgentInstallArtifactApiV1AgentsAgentUuidInstallArtifactGetData, GetAgentInstallArtifactApiV1AgentsAgentUuidInstallArtifactGetErrors, GetAgentInstallArtifactApiV1AgentsAgentUuidInstallArtifactGetResponses, GetAgentsApiV1AgentsGetData, GetAgentsApiV1AgentsGetErrors, GetAgentsApiV1AgentsGetResponses, GetAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidGetData, GetAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidGetErrors, GetAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidGetResponses, GetAgentUpdateAssignmentsApiV1AgentUpdateAssignmentsGetData, GetAgentUpdateAssignmentsApiV1AgentUpdateAssignmentsGetErrors, GetAgentUpdateAssignmentsApiV1AgentUpdateAssignmentsGetResponses, GetAgentUpdatePoliciesApiV1AgentUpdatePoliciesGetData, GetAgentUpdatePoliciesApiV1AgentUpdatePoliciesGetResponses, GetAgentWorkApiV1AgentsAgentUuidWorkGetData, GetAgentWorkApiV1AgentsAgentUuidWorkGetErrors, GetAgentWorkApiV1AgentsAgentUuidWorkGetResponses, GetAuthMeApiV1AuthMeGetData, GetAuthMeApiV1AuthMeGetResponses, GetGeoCitiesApiV1GeoCitiesGetData, GetGeoCitiesApiV1GeoCitiesGetErrors, GetGeoCitiesApiV1GeoCitiesGetResponses, GetGeoContinentsApiV1GeoContinentsGetData, GetGeoContinentsApiV1GeoContinentsGetErrors, GetGeoContinentsApiV1GeoContinentsGetResponses, GetGeoCountriesApiV1GeoCountriesGetData, GetGeoCountriesApiV1GeoCountriesGetErrors, GetGeoCountriesApiV1GeoCountriesGetResponses, GetGeoTreeApiV1GeoTreeGetData, GetGeoTreeApiV1GeoTreeGetErrors, GetGeoTreeApiV1GeoTreeGetResponses, GetMetadataEnumsApiV1MetadataEnumsGetData, GetMetadataEnumsApiV1MetadataEnumsGetResponses, GetMonitoringAgentApiV1MonitoringAgentsAgentUuidGetData, GetMonitoringAgentApiV1MonitoringAgentsAgentUuidGetErrors, GetMonitoringAgentApiV1MonitoringAgentsAgentUuidGetResponses, GetMonitoringAgentsApiV1MonitoringAgentsGetData, GetMonitoringAgentsApiV1MonitoringAgentsGetResponses, GetMonitoringMtrResultApiV1MonitoringMtrResultsResultUuidGetData, GetMonitoringMtrResultApiV1MonitoringMtrResultsResultUuidGetErrors, GetMonitoringMtrResultApiV1MonitoringMtrResultsResultUuidGetResponses, GetMonitoringTargetApiV1MonitoringTargetsTargetUuidGetData, GetMonitoringTargetApiV1MonitoringTargetsTargetUuidGetErrors, GetMonitoringTargetApiV1MonitoringTargetsTargetUuidGetResponses, GetMonitoringTargetGeoTreeApiV1MonitoringTargetGeoTreeGetData, GetMonitoringTargetGeoTreeApiV1MonitoringTargetGeoTreeGetErrors, GetMonitoringTargetGeoTreeApiV1MonitoringTargetGeoTreeGetResponses, GetMonitoringTaskApiV1MonitoringTasksTaskUuidGetData, GetMonitoringTaskApiV1MonitoringTasksTaskUuidGetErrors, GetMonitoringTaskApiV1MonitoringTasksTaskUuidGetResponses, GetMonitoringTaskGeoTreeApiV1MonitoringTaskGeoTreeGetData, GetMonitoringTaskGeoTreeApiV1MonitoringTaskGeoTreeGetErrors, GetMonitoringTaskGeoTreeApiV1MonitoringTaskGeoTreeGetResponses, GetMonitoringTaskIperf3ResultsApiV1MonitoringTasksTaskUuidIperf3ResultsGetData, GetMonitoringTaskIperf3ResultsApiV1MonitoringTasksTaskUuidIperf3ResultsGetErrors, GetMonitoringTaskIperf3ResultsApiV1MonitoringTasksTaskUuidIperf3ResultsGetResponses, GetMonitoringTaskMetricsRouteApiV1MonitoringTasksTaskUuidMetricsGetData, GetMonitoringTaskMetricsRouteApiV1MonitoringTasksTaskUuidMetricsGetErrors, GetMonitoringTaskMetricsRouteApiV1MonitoringTasksTaskUuidMetricsGetResponses, GetMonitoringTaskMtrResultsApiV1MonitoringTasksTaskUuidMtrResultsGetData, GetMonitoringTaskMtrResultsApiV1MonitoringTasksTaskUuidMtrResultsGetErrors, GetMonitoringTaskMtrResultsApiV1MonitoringTasksTaskUuidMtrResultsGetResponses, GetMonitoringTasksApiV1MonitoringTasksGetData, GetMonitoringTasksApiV1MonitoringTasksGetErrors, GetMonitoringTasksApiV1MonitoringTasksGetResponses, GetResultIngestionEventApiV1ResultsIngestionEventsMessageIdGetData, GetResultIngestionEventApiV1ResultsIngestionEventsMessageIdGetErrors, GetResultIngestionEventApiV1ResultsIngestionEventsMessageIdGetResponses, GetResultIngestionEventsApiV1ResultsIngestionEventsGetData, GetResultIngestionEventsApiV1ResultsIngestionEventsGetErrors, GetResultIngestionEventsApiV1ResultsIngestionEventsGetResponses, GetSystemSettingsApiV1SettingsGetData, GetSystemSettingsApiV1SettingsGetResponses, GetTagsApiV1TagsGetData, GetTagsApiV1TagsGetErrors, GetTagsApiV1TagsGetResponses, GetTargetApiV1TargetsTargetUuidGetData, GetTargetApiV1TargetsTargetUuidGetErrors, GetTargetApiV1TargetsTargetUuidGetResponses, GetTargetsApiV1TargetsGetData, GetTargetsApiV1TargetsGetErrors, GetTargetsApiV1TargetsGetResponses, GetTaskApiV1TasksTaskUuidGetData, GetTaskApiV1TasksTaskUuidGetErrors, GetTaskApiV1TasksTaskUuidGetResponses, GetTasksApiV1TasksGetData, GetTasksApiV1TasksGetErrors, GetTasksApiV1TasksGetResponses, HealthHealthGetData, HealthHealthGetResponses, PatchAgentApiV1AgentsAgentUuidPatchData, PatchAgentApiV1AgentsAgentUuidPatchErrors, PatchAgentApiV1AgentsAgentUuidPatchResponses, PatchAgentArtifactApiV1ArtifactsAgentsArtifactUuidPatchData, PatchAgentArtifactApiV1ArtifactsAgentsArtifactUuidPatchErrors, PatchAgentArtifactApiV1ArtifactsAgentsArtifactUuidPatchResponses, PatchAgentUpdatePolicyApiV1AgentUpdatePoliciesPolicyUuidPatchData, PatchAgentUpdatePolicyApiV1AgentUpdatePoliciesPolicyUuidPatchErrors, PatchAgentUpdatePolicyApiV1AgentUpdatePoliciesPolicyUuidPatchResponses, PatchGeoCityApiV1GeoCitiesCityUuidPatchData, PatchGeoCityApiV1GeoCitiesCityUuidPatchErrors, PatchGeoCityApiV1GeoCitiesCityUuidPatchResponses, PatchGeoContinentApiV1GeoContinentsContinentUuidPatchData, PatchGeoContinentApiV1GeoContinentsContinentUuidPatchErrors, PatchGeoContinentApiV1GeoContinentsContinentUuidPatchResponses, PatchGeoCountryApiV1GeoCountriesCountryUuidPatchData, PatchGeoCountryApiV1GeoCountriesCountryUuidPatchErrors, PatchGeoCountryApiV1GeoCountriesCountryUuidPatchResponses, PatchSystemSettingsApiV1SettingsPatchData, PatchSystemSettingsApiV1SettingsPatchErrors, PatchSystemSettingsApiV1SettingsPatchResponses, PatchTargetApiV1TargetsTargetUuidPatchData, PatchTargetApiV1TargetsTargetUuidPatchErrors, PatchTargetApiV1TargetsTargetUuidPatchResponses, PatchTaskApiV1TasksTaskUuidPatchData, PatchTaskApiV1TasksTaskUuidPatchErrors, PatchTaskApiV1TasksTaskUuidPatchResponses, PostAgentApiV1AgentsPostData, PostAgentApiV1AgentsPostErrors, PostAgentApiV1AgentsPostResponses, PostAgentArtifactApiV1ArtifactsAgentsPostData, PostAgentArtifactApiV1ArtifactsAgentsPostErrors, PostAgentArtifactApiV1ArtifactsAgentsPostResponses, PostAgentHeartbeatApiV1AgentsAgentUuidHeartbeatPostData, PostAgentHeartbeatApiV1AgentsAgentUuidHeartbeatPostErrors, PostAgentHeartbeatApiV1AgentsAgentUuidHeartbeatPostResponses, PostAgentInstallCommandApiV1AgentsAgentUuidInstallCommandPostData, PostAgentInstallCommandApiV1AgentsAgentUuidInstallCommandPostErrors, PostAgentInstallCommandApiV1AgentsAgentUuidInstallCommandPostResponses, PostAgentIperf3ExecutionClaimApiV1AgentsAgentUuidIperf3ExecutionClaimsPostData, PostAgentIperf3ExecutionClaimApiV1AgentsAgentUuidIperf3ExecutionClaimsPostErrors, PostAgentIperf3ExecutionClaimApiV1AgentsAgentUuidIperf3ExecutionClaimsPostResponses, PostAgentUpdatePolicyApiV1AgentUpdatePoliciesPostData, PostAgentUpdatePolicyApiV1AgentUpdatePoliciesPostErrors, PostAgentUpdatePolicyApiV1AgentUpdatePoliciesPostResponses, PostAgentUpdateStatusFallbackApiV1AgentsAgentUuidUpdatesAssignmentUuidStatusPostData, PostAgentUpdateStatusFallbackApiV1AgentsAgentUuidUpdatesAssignmentUuidStatusPostErrors, PostAgentUpdateStatusFallbackApiV1AgentsAgentUuidUpdatesAssignmentUuidStatusPostResponses, PostAuthLoginApiV1AuthLoginPostData, PostAuthLoginApiV1AuthLoginPostErrors, PostAuthLoginApiV1AuthLoginPostResponses, PostAuthLogoutApiV1AuthLogoutPostData, PostAuthLogoutApiV1AuthLogoutPostErrors, PostAuthLogoutApiV1AuthLogoutPostResponses, PostGeoCityApiV1GeoCitiesPostData, PostGeoCityApiV1GeoCitiesPostErrors, PostGeoCityApiV1GeoCitiesPostResponses, PostGeoContinentApiV1GeoContinentsPostData, PostGeoContinentApiV1GeoContinentsPostErrors, PostGeoContinentApiV1GeoContinentsPostResponses, PostGeoCountryApiV1GeoCountriesPostData, PostGeoCountryApiV1GeoCountriesPostErrors, PostGeoCountryApiV1GeoCountriesPostResponses, PostQuickAssociateApiV1RelationsQuickAssociatePostData, PostQuickAssociateApiV1RelationsQuickAssociatePostErrors, PostQuickAssociateApiV1RelationsQuickAssociatePostResponses, PostTargetApiV1TargetsPostData, PostTargetApiV1TargetsPostErrors, PostTargetApiV1TargetsPostResponses, PostTaskApiV1TasksPostData, PostTaskApiV1TasksPostErrors, PostTaskApiV1TasksPostResponses, PostTaskSnapshotAckApiV1AgentsAgentUuidTaskSnapshotAckPostData, PostTaskSnapshotAckApiV1AgentsAgentUuidTaskSnapshotAckPostErrors, PostTaskSnapshotAckApiV1AgentsAgentUuidTaskSnapshotAckPostResponses, PostV1AuthRefreshApiV1AuthRefreshPostData, PostV1AuthRefreshApiV1AuthRefreshPostResponses, RemoveAgentArtifactApiV1ArtifactsAgentsArtifactUuidDeleteData, RemoveAgentArtifactApiV1ArtifactsAgentsArtifactUuidDeleteErrors, RemoveAgentArtifactApiV1ArtifactsAgentsArtifactUuidDeleteResponses, RequestAgentResyncApiV1AgentsAgentUuidResyncRequestPostData, RequestAgentResyncApiV1AgentsAgentUuidResyncRequestPostErrors, RequestAgentResyncApiV1AgentsAgentUuidResyncRequestPostResponses, ResyncAgentApiV1AgentsAgentUuidResyncPostData, ResyncAgentApiV1AgentsAgentUuidResyncPostErrors, ResyncAgentApiV1AgentsAgentUuidResyncPostResponses, RetryAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidRetryPostData, RetryAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidRetryPostErrors, RetryAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidRetryPostResponses, RotateAgentAuthTokenApiV1AgentsAgentUuidRotateTokenPostData, RotateAgentAuthTokenApiV1AgentsAgentUuidRotateTokenPostErrors, RotateAgentAuthTokenApiV1AgentsAgentUuidRotateTokenPostResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -126,7 +126,7 @@ export const getTagsApiV1TagsGet = <ThrowOnError extends boolean = false>(option
 });
 
 /**
- * 查询系统运行配置，当前包含 Agent Artifact 使用的 Cloudflare R2 对象存储配置；敏感密钥只返回是否已配置
+ * 查询系统运行配置，包含 Agent Artifact 本地文件存储配置和一键安装配置；敏感密钥只返回是否已配置
  */
 export const getSystemSettingsApiV1SettingsGet = <ThrowOnError extends boolean = false>(options?: Options<GetSystemSettingsApiV1SettingsGetData, ThrowOnError>) => (options?.client ?? client).get<GetSystemSettingsApiV1SettingsGetResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
@@ -135,7 +135,7 @@ export const getSystemSettingsApiV1SettingsGet = <ThrowOnError extends boolean =
 });
 
 /**
- * 更新系统运行配置，当前用于通过 API 填入 Agent Artifact 的 Cloudflare R2 参数；不传 secret 时保留原密钥
+ * 更新系统运行配置，当前用于通过 API 配置 Agent Artifact 本地文件存储和一键安装参数；不传 secret 时保留原密钥
  */
 export const patchSystemSettingsApiV1SettingsPatch = <ThrowOnError extends boolean = false>(options: Options<PatchSystemSettingsApiV1SettingsPatchData, ThrowOnError>) => (options.client ?? client).patch<PatchSystemSettingsApiV1SettingsPatchResponses, PatchSystemSettingsApiV1SettingsPatchErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
@@ -157,7 +157,7 @@ export const getAgentArtifactsApiV1ArtifactsAgentsGet = <ThrowOnError extends bo
 });
 
 /**
- * 上传 Agent 可执行文件 Artifact 到 Cloudflare R2，并在 PostgreSQL 中保存版本、平台、哈希和对象存储位置等元数据
+ * 上传 Agent 可执行文件 Artifact 到本地文件系统，并在 PostgreSQL 中保存版本、平台、哈希和存储位置等元数据
  */
 export const postAgentArtifactApiV1ArtifactsAgentsPost = <ThrowOnError extends boolean = false>(options: Options<PostAgentArtifactApiV1ArtifactsAgentsPostData, ThrowOnError>) => (options.client ?? client).post<PostAgentArtifactApiV1ArtifactsAgentsPostResponses, PostAgentArtifactApiV1ArtifactsAgentsPostErrors, ThrowOnError>({
     ...formDataBodySerializer,
@@ -171,7 +171,7 @@ export const postAgentArtifactApiV1ArtifactsAgentsPost = <ThrowOnError extends b
 });
 
 /**
- * 软删除指定 Agent Artifact，并尝试同步删除 Cloudflare R2 中的对象，避免后续列表和下载继续暴露该版本
+ * 软删除指定 Agent Artifact，并尝试同步删除本地文件，避免后续列表和下载继续暴露该版本
  */
 export const removeAgentArtifactApiV1ArtifactsAgentsArtifactUuidDelete = <ThrowOnError extends boolean = false>(options: Options<RemoveAgentArtifactApiV1ArtifactsAgentsArtifactUuidDeleteData, ThrowOnError>) => (options.client ?? client).delete<RemoveAgentArtifactApiV1ArtifactsAgentsArtifactUuidDeleteResponses, RemoveAgentArtifactApiV1ArtifactsAgentsArtifactUuidDeleteErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
@@ -180,7 +180,7 @@ export const removeAgentArtifactApiV1ArtifactsAgentsArtifactUuidDelete = <ThrowO
 });
 
 /**
- * 查询单个 Agent Artifact 元数据，返回版本、平台、文件大小、SHA-256 和 Cloudflare R2 对象位置
+ * 查询单个 Agent Artifact 元数据，返回版本、平台、文件大小、SHA-256 和本地存储位置
  */
 export const getAgentArtifactApiV1ArtifactsAgentsArtifactUuidGet = <ThrowOnError extends boolean = false>(options: Options<GetAgentArtifactApiV1ArtifactsAgentsArtifactUuidGetData, ThrowOnError>) => (options.client ?? client).get<GetAgentArtifactApiV1ArtifactsAgentsArtifactUuidGetResponses, GetAgentArtifactApiV1ArtifactsAgentsArtifactUuidGetErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
@@ -189,7 +189,7 @@ export const getAgentArtifactApiV1ArtifactsAgentsArtifactUuidGet = <ThrowOnError
 });
 
 /**
- * 更新 Agent Artifact 元数据，例如版本号、适用平台、启用状态或备注；不会修改 R2 中的文件本体
+ * 更新 Agent Artifact 元数据，例如版本号、适用平台、启用状态或备注；不会修改本地文件本体
  */
 export const patchAgentArtifactApiV1ArtifactsAgentsArtifactUuidPatch = <ThrowOnError extends boolean = false>(options: Options<PatchAgentArtifactApiV1ArtifactsAgentsArtifactUuidPatchData, ThrowOnError>) => (options.client ?? client).patch<PatchAgentArtifactApiV1ArtifactsAgentsArtifactUuidPatchResponses, PatchAgentArtifactApiV1ArtifactsAgentsArtifactUuidPatchErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
@@ -202,11 +202,91 @@ export const patchAgentArtifactApiV1ArtifactsAgentsArtifactUuidPatch = <ThrowOnE
 });
 
 /**
- * 生成并跳转到 Agent Artifact 的 Cloudflare R2 下载地址，用于下载安装指定版本的 Agent 可执行文件
+ * 生成并跳转到 Agent Artifact 的本地公开下载地址，用于下载安装指定版本的 Agent 可执行文件
  */
 export const downloadAgentArtifactApiV1ArtifactsAgentsArtifactUuidDownloadGet = <ThrowOnError extends boolean = false>(options: Options<DownloadAgentArtifactApiV1ArtifactsAgentsArtifactUuidDownloadGetData, ThrowOnError>) => (options.client ?? client).get<unknown, DownloadAgentArtifactApiV1ArtifactsAgentsArtifactUuidDownloadGetErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/artifacts/agents/{artifact_uuid}/download',
+    ...options
+});
+
+/**
+ * 查询 Agent 自动更新策略列表，展示每个策略绑定的目标版本、平台、启用状态和并发控制参数
+ */
+export const getAgentUpdatePoliciesApiV1AgentUpdatePoliciesGet = <ThrowOnError extends boolean = false>(options?: Options<GetAgentUpdatePoliciesApiV1AgentUpdatePoliciesGetData, ThrowOnError>) => (options?.client ?? client).get<GetAgentUpdatePoliciesApiV1AgentUpdatePoliciesGetResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/agent-update/policies',
+    ...options
+});
+
+/**
+ * 创建 Agent 自动更新策略，绑定目标 Artifact、平台和发布控制参数，用于后续手动或自动下发更新
+ */
+export const postAgentUpdatePolicyApiV1AgentUpdatePoliciesPost = <ThrowOnError extends boolean = false>(options: Options<PostAgentUpdatePolicyApiV1AgentUpdatePoliciesPostData, ThrowOnError>) => (options.client ?? client).post<PostAgentUpdatePolicyApiV1AgentUpdatePoliciesPostResponses, PostAgentUpdatePolicyApiV1AgentUpdatePoliciesPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/agent-update/policies',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 更新 Agent 自动更新策略，可调整目标 Artifact、平台、启用状态、并发数量、重试次数和安装方式优先级
+ */
+export const patchAgentUpdatePolicyApiV1AgentUpdatePoliciesPolicyUuidPatch = <ThrowOnError extends boolean = false>(options: Options<PatchAgentUpdatePolicyApiV1AgentUpdatePoliciesPolicyUuidPatchData, ThrowOnError>) => (options.client ?? client).patch<PatchAgentUpdatePolicyApiV1AgentUpdatePoliciesPolicyUuidPatchResponses, PatchAgentUpdatePolicyApiV1AgentUpdatePoliciesPolicyUuidPatchErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/agent-update/policies/{policy_uuid}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 手动触发 Agent 自动更新策略，后端筛选符合平台、版本和能力要求的 Agent，并为每个 Agent 创建更新 assignment 后下发命令
+ */
+export const dispatchAgentUpdatePolicyApiV1AgentUpdatePoliciesPolicyUuidDispatchPost = <ThrowOnError extends boolean = false>(options: Options<DispatchAgentUpdatePolicyApiV1AgentUpdatePoliciesPolicyUuidDispatchPostData, ThrowOnError>) => (options.client ?? client).post<DispatchAgentUpdatePolicyApiV1AgentUpdatePoliciesPolicyUuidDispatchPostResponses, DispatchAgentUpdatePolicyApiV1AgentUpdatePoliciesPolicyUuidDispatchPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/agent-update/policies/{policy_uuid}/dispatch',
+    ...options
+});
+
+/**
+ * 查询 Agent 自动更新 assignment 列表，可按 Agent、策略或状态过滤，用于查看每个 Agent 的更新进度和失败原因
+ */
+export const getAgentUpdateAssignmentsApiV1AgentUpdateAssignmentsGet = <ThrowOnError extends boolean = false>(options?: Options<GetAgentUpdateAssignmentsApiV1AgentUpdateAssignmentsGetData, ThrowOnError>) => (options?.client ?? client).get<GetAgentUpdateAssignmentsApiV1AgentUpdateAssignmentsGetResponses, GetAgentUpdateAssignmentsApiV1AgentUpdateAssignmentsGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/agent-update/assignments',
+    ...options
+});
+
+/**
+ * 查询单个 Agent 自动更新 assignment 的详情，包括目标版本、当前状态、重试次数和最近错误信息
+ */
+export const getAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidGet = <ThrowOnError extends boolean = false>(options: Options<GetAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidGetData, ThrowOnError>) => (options.client ?? client).get<GetAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidGetResponses, GetAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/agent-update/assignments/{assignment_uuid}',
+    ...options
+});
+
+/**
+ * 将失败的 Agent 自动更新 assignment 重新置为 pending，等待下一次 dispatch 或 worker 调度重新下发
+ */
+export const retryAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidRetryPost = <ThrowOnError extends boolean = false>(options: Options<RetryAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidRetryPostData, ThrowOnError>) => (options.client ?? client).post<RetryAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidRetryPostResponses, RetryAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidRetryPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/agent-update/assignments/{assignment_uuid}/retry',
+    ...options
+});
+
+/**
+ * 取消尚未完成的 Agent 自动更新 assignment，阻止该更新继续被执行或重试
+ */
+export const cancelAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidCancelPost = <ThrowOnError extends boolean = false>(options: Options<CancelAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidCancelPostData, ThrowOnError>) => (options.client ?? client).post<CancelAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidCancelPostResponses, CancelAgentUpdateAssignmentApiV1AgentUpdateAssignmentsAssignmentUuidCancelPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/agent-update/assignments/{assignment_uuid}/cancel',
     ...options
 });
 
@@ -455,6 +535,24 @@ export const postAgentApiV1AgentsPost = <ThrowOnError extends boolean = false>(o
 });
 
 /**
+ * 生成指定 Agent 的 systemd 一键安装脚本，使用占位符提示一次性凭据需要来自创建或轮换响应
+ */
+export const postAgentInstallCommandApiV1AgentsAgentUuidInstallCommandPost = <ThrowOnError extends boolean = false>(options: Options<PostAgentInstallCommandApiV1AgentsAgentUuidInstallCommandPostData, ThrowOnError>) => (options.client ?? client).post<PostAgentInstallCommandApiV1AgentsAgentUuidInstallCommandPostResponses, PostAgentInstallCommandApiV1AgentsAgentUuidInstallCommandPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/agents/{agent_uuid}/install-command',
+    ...options
+});
+
+/**
+ * Agent 安装脚本按当前系统平台查询最新可用的 Agent Artifact 下载信息，返回预签名下载地址和 SHA-256 校验值
+ */
+export const getAgentInstallArtifactApiV1AgentsAgentUuidInstallArtifactGet = <ThrowOnError extends boolean = false>(options: Options<GetAgentInstallArtifactApiV1AgentsAgentUuidInstallArtifactGetData, ThrowOnError>) => (options.client ?? client).get<GetAgentInstallArtifactApiV1AgentsAgentUuidInstallArtifactGetResponses, GetAgentInstallArtifactApiV1AgentsAgentUuidInstallArtifactGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/agents/{agent_uuid}/install-artifact',
+    ...options
+});
+
+/**
  * 软删除指定 Agent，并发布最新任务快照以清理该探针的监控任务配置
  */
 export const deleteAgentApiV1AgentsAgentUuidDelete = <ThrowOnError extends boolean = false>(options: Options<DeleteAgentApiV1AgentsAgentUuidDeleteData, ThrowOnError>) => (options.client ?? client).delete<DeleteAgentApiV1AgentsAgentUuidDeleteResponses, DeleteAgentApiV1AgentsAgentUuidDeleteErrors, ThrowOnError>({
@@ -549,6 +647,28 @@ export const postAgentHeartbeatApiV1AgentsAgentUuidHeartbeatPost = <ThrowOnError
 export const postTaskSnapshotAckApiV1AgentsAgentUuidTaskSnapshotAckPost = <ThrowOnError extends boolean = false>(options: Options<PostTaskSnapshotAckApiV1AgentsAgentUuidTaskSnapshotAckPostData, ThrowOnError>) => (options.client ?? client).post<PostTaskSnapshotAckApiV1AgentsAgentUuidTaskSnapshotAckPostResponses, PostTaskSnapshotAckApiV1AgentsAgentUuidTaskSnapshotAckPostErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/agents/{agent_uuid}/task-snapshot-ack',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Agent 查询当前待执行的自动更新 assignment，用于启动后或 NATS 中断后恢复未完成的更新命令
+ */
+export const getAgentCurrentUpdateApiV1AgentsAgentUuidUpdatesCurrentGet = <ThrowOnError extends boolean = false>(options: Options<GetAgentCurrentUpdateApiV1AgentsAgentUuidUpdatesCurrentGetData, ThrowOnError>) => (options.client ?? client).get<GetAgentCurrentUpdateApiV1AgentsAgentUuidUpdatesCurrentGetResponses, GetAgentCurrentUpdateApiV1AgentsAgentUuidUpdatesCurrentGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/agents/{agent_uuid}/updates/current',
+    ...options
+});
+
+/**
+ * Agent 通过 HTTP fallback 上报自动更新状态，语义与 NATS agent.update.status 一致
+ */
+export const postAgentUpdateStatusFallbackApiV1AgentsAgentUuidUpdatesAssignmentUuidStatusPost = <ThrowOnError extends boolean = false>(options: Options<PostAgentUpdateStatusFallbackApiV1AgentsAgentUuidUpdatesAssignmentUuidStatusPostData, ThrowOnError>) => (options.client ?? client).post<PostAgentUpdateStatusFallbackApiV1AgentsAgentUuidUpdatesAssignmentUuidStatusPostResponses, PostAgentUpdateStatusFallbackApiV1AgentsAgentUuidUpdatesAssignmentUuidStatusPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/agents/{agent_uuid}/updates/{assignment_uuid}/status',
     ...options,
     headers: {
         'Content-Type': 'application/json',

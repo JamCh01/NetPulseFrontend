@@ -23,12 +23,8 @@ const settingsResponse = {
   asn_enrichment_claim_stale_after_sec: 600,
   asn_enrichment_singleton_lock_enabled: false,
   result_ingestion_event_retention_days: 7,
-  artifact_storage_provider: 'cloudflare_r2',
-  artifact_r2_endpoint_url: 'https://account.r2.cloudflarestorage.com',
-  artifact_r2_access_key_id: 'access-key',
-  artifact_r2_secret_access_key_configured: true,
-  artifact_r2_bucket: 'netpulse-artifacts',
-  artifact_r2_public_base_url: 'https://artifacts.example.com',
+  artifact_local_storage_dir: '/opt/netpulse-runtime/artifacts',
+  artifact_local_public_base_url: 'https://netpulse-api.lowendaff.com/artifacts',
   artifact_download_url_ttl_sec: 900,
   artifact_upload_max_bytes: 209_715_200,
   agent_public_api_base_url: 'https://netpulse-api.lowendaff.com',
@@ -55,18 +51,23 @@ describe('SettingsPage', () => {
     renderWithProviders(<SettingsPage />)
 
     expect(await screen.findByText('系统设置')).toBeInTheDocument()
-    expect(await screen.findByText('Secret Access Key 已配置')).toHaveClass('font-medium', 'text-emerald-400')
     expect(await screen.findByText('安装 URL 签名密钥已配置')).toHaveClass('font-medium', 'text-emerald-400')
     expect(screen.getByDisplayValue('https://netpulse-api.lowendaff.com')).toBeInTheDocument()
     expect(screen.getByDisplayValue('tls://nats.lowendaff.com:4222')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('/opt/netpulse-runtime/artifacts')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('https://netpulse-api.lowendaff.com/artifacts')).toBeInTheDocument()
     expect(screen.getByDisplayValue('netpulse-agent')).toBeInTheDocument()
-    expect(screen.queryByDisplayValue('secret-key')).not.toBeInTheDocument()
     expect(screen.queryByDisplayValue('install-token-secret')).not.toBeInTheDocument()
 
     const workerSection = screen.getByRole('region', { name: 'Result Worker' })
     const concurrency = within(workerSection).getByLabelText('处理并发数')
     await user.clear(concurrency)
     await user.type(concurrency, '48')
+
+    const artifactSection = screen.getByRole('region', { name: 'Local Artifact Storage' })
+    const localPublicBaseUrl = within(artifactSection).getByLabelText('公开下载 Base URL')
+    await user.clear(localPublicBaseUrl)
+    await user.type(localPublicBaseUrl, 'https://netpulse-api.example.com/artifacts')
 
     const agentInstallSection = screen.getByRole('region', { name: 'Agent Install' })
     const publicApiBaseUrl = within(agentInstallSection).getByLabelText('Public API Base URL')
@@ -83,6 +84,8 @@ describe('SettingsPage', () => {
 
     expect(patchedBody).toMatchObject({
       worker_processing_concurrency: 48,
+      artifact_local_storage_dir: '/opt/netpulse-runtime/artifacts',
+      artifact_local_public_base_url: 'https://netpulse-api.example.com/artifacts',
       agent_public_api_base_url: 'https://netpulse-api.example.com',
       agent_public_nats_url: 'tls://nats.example.com:4222',
       agent_install_service_name: 'netpulse-agent',
@@ -90,16 +93,14 @@ describe('SettingsPage', () => {
       agent_default_log_level: 'info',
       agent_install_token_ttl_sec: 3600,
     })
-    expect(patchedBody).not.toHaveProperty('artifact_r2_secret_access_key')
     expect(patchedBody).not.toHaveProperty('agent_install_token_secret')
   })
 
-  it('marks missing Secret Access Key as red', async () => {
+  it('marks missing install signing secret as red', async () => {
     server.use(
       http.get('*/api/v1/settings', () => HttpResponse.json({
         data: {
           ...settingsResponse,
-          artifact_r2_secret_access_key_configured: false,
           agent_install_token_secret_configured: false,
         },
       })),
@@ -107,7 +108,6 @@ describe('SettingsPage', () => {
 
     renderWithProviders(<SettingsPage />)
 
-    expect(await screen.findByText('Secret Access Key 未配置')).toHaveClass('font-medium', 'text-red-400')
     expect(await screen.findByText('安装 URL 签名密钥未配置')).toHaveClass('font-medium', 'text-red-400')
   })
 })
