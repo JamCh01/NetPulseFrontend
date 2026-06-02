@@ -6008,6 +6008,59 @@ export type DownloadAgentArtifactApiV1ArtifactsAgentsArtifactUuidDownloadGetErro
 
 export type DownloadAgentArtifactApiV1ArtifactsAgentsArtifactUuidDownloadGetError = DownloadAgentArtifactApiV1ArtifactsAgentsArtifactUuidDownloadGetErrors[keyof DownloadAgentArtifactApiV1ArtifactsAgentsArtifactUuidDownloadGetErrors];
 
+export type GetAgentArtifactFileApiV1ArtifactsAgentsArtifactUuidFileGetData = {
+    body?: never;
+    path: {
+        /**
+         * Artifact Uuid
+         *
+         * Agent Artifact 的唯一标识 UUID。
+         */
+        artifact_uuid: string;
+    };
+    query: {
+        /**
+         * Expires
+         *
+         * 下载 URL 过期时间，Unix timestamp。
+         */
+        expires: number;
+        /**
+         * Signature
+         *
+         * 下载 URL HMAC-SHA256 签名。
+         */
+        signature: string;
+    };
+    url: '/api/v1/artifacts/agents/{artifact_uuid}/file';
+};
+
+export type GetAgentArtifactFileApiV1ArtifactsAgentsArtifactUuidFileGetErrors = {
+    /**
+     * 下载地址已过期或签名无效。
+     */
+    403: unknown;
+    /**
+     * Artifact 不存在。
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetAgentArtifactFileApiV1ArtifactsAgentsArtifactUuidFileGetError = GetAgentArtifactFileApiV1ArtifactsAgentsArtifactUuidFileGetErrors[keyof GetAgentArtifactFileApiV1ArtifactsAgentsArtifactUuidFileGetErrors];
+
+export type GetAgentArtifactFileApiV1ArtifactsAgentsArtifactUuidFileGetResponses = {
+    /**
+     * Agent Artifact 文件内容。
+     */
+    200: Blob | File;
+};
+
+export type GetAgentArtifactFileApiV1ArtifactsAgentsArtifactUuidFileGetResponse = GetAgentArtifactFileApiV1ArtifactsAgentsArtifactUuidFileGetResponses[keyof GetAgentArtifactFileApiV1ArtifactsAgentsArtifactUuidFileGetResponses];
+
 export type GetAgentUpdatePoliciesApiV1AgentUpdatePoliciesGetData = {
     body?: never;
     path?: never;
