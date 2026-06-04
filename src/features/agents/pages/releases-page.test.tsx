@@ -29,6 +29,65 @@ const artifact = {
 }
 
 describe('ReleasesPage agent artifacts', () => {
+  it('renders update policies and dispatches a policy from the release page', async () => {
+    const user = userEvent.setup()
+    let dispatchPath = ''
+    server.use(
+      http.get('*/api/v1/artifacts/agents', () => HttpResponse.json({ data: { items: [artifact] } })),
+      http.get('*/api/v1/agent-update/policies', () => HttpResponse.json({
+        data: {
+          items: [{
+            policy_uuid: 'policy-1',
+            name: 'linux stable',
+            artifact_uuid: 'artifact-1',
+            os: 'linux',
+            arch: 'x86_64',
+            rollout_mode: 'manual',
+            install_method: 'systemd',
+            is_enabled: true,
+            created_at: '2026-05-26T00:00:00Z',
+            updated_at: '2026-05-26T00:00:00Z',
+          }],
+        },
+      })),
+      http.get('*/api/v1/agent-update/assignments', () => HttpResponse.json({
+        data: {
+          items: [{
+            assignment_uuid: 'assignment-1',
+            policy_uuid: 'policy-1',
+            agent_uuid: 'agent-1',
+            artifact_uuid: 'artifact-1',
+            target_version: '1.2.3',
+            state: 'dispatched',
+            error_message: null,
+            claimed_by: 'manual-dispatch',
+            claimed_at: '2026-05-26T00:00:00Z',
+            dispatched_at: '2026-05-26T00:00:00Z',
+            downloaded_at: null,
+            installed_at: null,
+            heartbeat_confirmed_at: null,
+            created_at: '2026-05-26T00:00:00Z',
+            updated_at: '2026-05-26T00:00:00Z',
+          }],
+        },
+      })),
+      http.post('*/api/v1/agent-update/policies/:policyUuid/dispatch', ({ params }) => {
+        dispatchPath = String(params.policyUuid)
+        return HttpResponse.json({ data: { policy_uuid: 'policy-1', created: 0, dispatched: 1 } })
+      }),
+    )
+
+    renderWithProviders(<ReleasesPage />)
+
+    expect(await screen.findByText('Agent Update Policies')).toBeInTheDocument()
+    expect(await screen.findByText('linux stable')).toBeInTheDocument()
+    expect(screen.getByText('assignment-1')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Dispatch linux stable' }))
+
+    expect(dispatchPath).toBe('policy-1')
+  })
+
   it('renders agent artifacts from the new artifact API and deletes by artifact UUID', async () => {
     const user = userEvent.setup()
     let deletePath = ''

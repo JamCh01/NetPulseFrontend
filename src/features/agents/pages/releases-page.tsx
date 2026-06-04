@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
-import { Download, Pencil, Plus, Trash2, Upload } from 'lucide-react'
+import { Download, Pencil, Plus, Send, Trash2, Upload } from 'lucide-react'
 
 import {
   useAgentArtifacts,
@@ -10,7 +10,13 @@ import {
   useUpdateAgentArtifact,
   useUploadAgentArtifact,
 } from '@/api/hooks/use-agent-artifacts'
-import type { AgentArtifactResponse } from '@/api/generated/types.gen'
+import {
+  useAgentUpdateAssignments,
+  useAgentUpdatePolicies,
+  useCreateAgentUpdatePolicy,
+  useDispatchAgentUpdatePolicy,
+} from '@/api/hooks/use-agent-updates'
+import type { AgentArtifactResponse, AgentUpdateAssignment, AgentUpdatePolicy } from '@/api/generated/types.gen'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -77,6 +83,18 @@ function artifactPlatform(artifact: AgentArtifactResponse): string {
   return `${osLabel(artifact.os)} / ${archLabel(artifact.arch)}`
 }
 
+function updateStateClass(state: string | null | undefined): string {
+  if (state === 'installed') return 'border border-emerald-500/30 bg-emerald-500/15 text-emerald-300'
+  if (state === 'failed' || state === 'rolled_back') return 'border border-red-500/30 bg-red-500/15 text-red-300'
+  if (state === 'cancelled') return 'border border-border bg-muted text-text-muted'
+  return 'border border-cyan-500/30 bg-cyan-500/15 text-cyan-300'
+}
+
+function assignmentToVersion(assignment: AgentUpdateAssignment): string {
+  const legacy = assignment as AgentUpdateAssignment & { target_version?: string }
+  return assignment.to_version ?? legacy.target_version ?? '-'
+}
+
 export default function ReleasesPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -94,6 +112,15 @@ export default function ReleasesPage() {
 
   const { data, isLoading, error } = useAgentArtifacts(queryFilters)
   const artifacts = (data?.data.items ?? []) as AgentArtifactResponse[]
+  const artifactsByUuid = useMemo(
+    () => new Map(artifacts.map((artifact) => [artifact.artifact_uuid, artifact])),
+    [artifacts],
+  )
+
+  const updatePoliciesQuery = useAgentUpdatePolicies()
+  const updateAssignmentsQuery = useAgentUpdateAssignments()
+  const updatePolicies = (updatePoliciesQuery.data?.data.items ?? []) as AgentUpdatePolicy[]
+  const updateAssignments = (updateAssignmentsQuery.data?.data.items ?? []) as AgentUpdateAssignment[]
 
   const [uploadOpen, setUploadOpen] = useState(false)
   const [uploadVersion, setUploadVersion] = useState('')
@@ -106,6 +133,12 @@ export default function ReleasesPage() {
 
   const [editing, setEditing] = useState<AgentArtifactResponse | null>(null)
   const updateArtifact = useUpdateAgentArtifact()
+
+  const [policyOpen, setPolicyOpen] = useState(false)
+  const [policyName, setPolicyName] = useState('')
+  const [policyArtifactUuid, setPolicyArtifactUuid] = useState('')
+  const createUpdatePolicy = useCreateAgentUpdatePolicy()
+  const dispatchUpdatePolicy = useDispatchAgentUpdatePolicy()
 
   const [deleteTarget, setDeleteTarget] = useState<AgentArtifactResponse | null>(null)
   const deleteArtifact = useDeleteAgentArtifact()
@@ -174,6 +207,37 @@ export default function ReleasesPage() {
         if (url) window.open(url, '_blank', 'noopener,noreferrer')
       },
     })
+  }
+
+  const openCreatePolicy = (artifact?: AgentArtifactResponse) => {
+    const target = artifact ?? artifacts.find((item) => item.is_active) ?? artifacts[0]
+    setPolicyArtifactUuid(target?.artifact_uuid ?? '')
+    setPolicyName(target ? `${target.os} ${target.arch} ${target.version}` : '')
+    setPolicyOpen(true)
+  }
+
+  const handleCreatePolicy = (event: React.FormEvent) => {
+    event.preventDefault()
+    const artifact = artifactsByUuid.get(policyArtifactUuid)
+    if (!artifact || !policyName.trim()) return
+    createUpdatePolicy.mutate(
+      {
+        name: policyName.trim(),
+        artifact_uuid: artifact.artifact_uuid,
+        os: artifact.os,
+        arch: normalizeArch(artifact.arch),
+        rollout_mode: 'manual',
+        is_enabled: true,
+        install_method_preference: ['systemd'],
+      },
+      {
+        onSuccess: () => {
+          setPolicyOpen(false)
+          setPolicyName('')
+          setPolicyArtifactUuid('')
+        },
+      },
+    )
   }
 
   return (
@@ -322,6 +386,112 @@ export default function ReleasesPage() {
         )}
       </section>
 
+      <section className="glass-light rounded-lg border border-border/60 overflow-hidden">
+        <div className="flex flex-col gap-3 border-b border-border/60 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-text-primary">Agent Update Policies</h2>
+            <p className="mt-1 text-sm text-text-muted">Bind uploaded artifacts to manual upgrade dispatch and track Agent assignment progress.</p>
+          </div>
+          <Button variant="outline" onClick={() => openCreatePolicy()} disabled={artifacts.length === 0}>
+            <Plus className="w-4 h-4" />
+            New Policy
+          </Button>
+        </div>
+        {updatePoliciesQuery.isLoading ? (
+          <div className="p-6 space-y-3">
+            {Array.from({ length: 2 }, (_, index) => <Skeleton key={index} className="h-10 w-full" />)}
+          </div>
+        ) : updatePoliciesQuery.error ? (
+          <div className="p-8 text-center text-sm text-red-400">Agent update policies failed to load.</div>
+        ) : updatePolicies.length === 0 ? (
+          <div className="p-8 text-center text-sm text-text-muted">No Agent update policies.</div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t('common.name')}</TableHead>
+                <TableHead>{t('common.version')}</TableHead>
+                <TableHead>{t('common.platform')}</TableHead>
+                <TableHead>{t('common.status')}</TableHead>
+                <TableHead>{t('common.actions')}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {updatePolicies.map((policy) => {
+                const artifact = artifactsByUuid.get(policy.artifact_uuid)
+                return (
+                  <TableRow key={policy.policy_uuid ?? policy.name}>
+                    <TableCell className="text-sm font-medium text-text-primary">{policy.name}</TableCell>
+                    <TableCell className="font-mono text-sm text-text-secondary">{artifact?.version ?? policy.artifact_uuid}</TableCell>
+                    <TableCell className="text-sm text-text-secondary">{artifact ? artifactPlatform(artifact) : `${policy.os} / ${normalizeArch(policy.arch)}`}</TableCell>
+                    <TableCell>
+                      <Badge className={policy.is_enabled ? 'border border-emerald-500/30 bg-emerald-500/15 text-emerald-300' : 'border border-border bg-muted text-text-muted'}>
+                        {policy.is_enabled ? t('common.enabled') : t('common.stopped')}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        aria-label={`Dispatch ${policy.name}`}
+                        disabled={!policy.policy_uuid || dispatchUpdatePolicy.isPending || policy.is_enabled === false}
+                        onClick={() => policy.policy_uuid && dispatchUpdatePolicy.mutate(policy.policy_uuid)}
+                      >
+                        <Send className="w-4 h-4" />
+                        Dispatch
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+            </TableBody>
+          </Table>
+        )}
+      </section>
+
+      <section className="glass-light rounded-lg border border-border/60 overflow-hidden">
+        <div className="border-b border-border/60 p-4">
+          <h2 className="text-lg font-semibold text-text-primary">Agent Update Assignments</h2>
+          <p className="mt-1 text-sm text-text-muted">Latest per-Agent upgrade state reported by dispatch, worker, or Agent heartbeat.</p>
+        </div>
+        {updateAssignmentsQuery.isLoading ? (
+          <div className="p-6 space-y-3">
+            {Array.from({ length: 2 }, (_, index) => <Skeleton key={index} className="h-10 w-full" />)}
+          </div>
+        ) : updateAssignmentsQuery.error ? (
+          <div className="p-8 text-center text-sm text-red-400">Agent update assignments failed to load.</div>
+        ) : updateAssignments.length === 0 ? (
+          <div className="p-8 text-center text-sm text-text-muted">No Agent update assignments.</div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t('common.uuid')}</TableHead>
+                <TableHead>Agent</TableHead>
+                <TableHead>{t('common.version')}</TableHead>
+                <TableHead>{t('common.status')}</TableHead>
+                <TableHead>{t('common.lastUpdated')}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {updateAssignments.map((assignment) => (
+                <TableRow key={assignment.assignment_uuid ?? `${assignment.policy_uuid}-${assignment.agent_uuid}`}>
+                  <TableCell className="font-mono text-xs text-text-primary">{assignment.assignment_uuid ?? '-'}</TableCell>
+                  <TableCell className="font-mono text-xs text-text-secondary">{assignment.agent_uuid}</TableCell>
+                  <TableCell className="font-mono text-sm text-text-secondary">{assignmentToVersion(assignment)}</TableCell>
+                  <TableCell>
+                    <Badge className={updateStateClass(assignment.state)}>{assignment.state ?? 'pending'}</Badge>
+                  </TableCell>
+                  <TableCell className="font-mono text-xs text-text-secondary">
+                    {assignment.updated_at ? formatDateTime(assignment.updated_at, 'zh') : '-'}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </section>
+
       <Dialog open={uploadOpen} onOpenChange={setUploadOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
@@ -433,6 +603,52 @@ export default function ReleasesPage() {
               </DialogFooter>
             </form>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={policyOpen} onOpenChange={setPolicyOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>New Agent Update Policy</DialogTitle>
+            <DialogDescription>Create a manual policy from an uploaded Agent artifact, then dispatch it to matching Agents.</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleCreatePolicy} className="space-y-4">
+            <div>
+              <Label htmlFor="agent-update-policy-name" className="mb-1.5 text-xs text-text-muted">{t('common.name')}</Label>
+              <Input
+                id="agent-update-policy-name"
+                value={policyName}
+                onChange={(event) => setPolicyName(event.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="agent-update-policy-artifact" className="mb-1.5 text-xs text-text-muted">Artifact</Label>
+              <Select value={policyArtifactUuid} onValueChange={(value) => setPolicyArtifactUuid(value ?? '')}>
+                <SelectTrigger id="agent-update-policy-artifact" aria-label="Artifact" className="w-full bg-background/95">
+                  <SelectValue placeholder="Select Artifact">
+                    {(value: string | null) => {
+                      const artifact = value ? artifactsByUuid.get(value) : undefined
+                      return artifact ? `${artifact.version} - ${artifactPlatform(artifact)}` : 'Select Artifact'
+                    }}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {artifacts.map((artifact) => (
+                    <SelectItem key={artifact.artifact_uuid} value={artifact.artifact_uuid}>
+                      {artifact.version} - {artifactPlatform(artifact)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" type="button" onClick={() => setPolicyOpen(false)}>{t('common.cancel')}</Button>
+              <Button type="submit" disabled={createUpdatePolicy.isPending || !policyArtifactUuid || !policyName.trim()}>
+                {createUpdatePolicy.isPending ? t('common.creating') : t('common.create')}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 

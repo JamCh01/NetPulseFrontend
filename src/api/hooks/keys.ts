@@ -84,6 +84,12 @@ export const artifactKeys = {
   agentDetail: (uuid: string) => [...artifactKeys.all, 'agents', 'detail', uuid] as const,
 }
 
+export const agentUpdateKeys = {
+  all: ['agent-update'] as const,
+  policies: () => [...agentUpdateKeys.all, 'policies'] as const,
+  assignments: (params?: unknown) => [...agentUpdateKeys.all, 'assignments', params] as const,
+}
+
 export const settingsKeys = {
   all: ['settings'] as const,
   detail: () => [...settingsKeys.all, 'detail'] as const,
