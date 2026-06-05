@@ -93,11 +93,10 @@ export function TargetGeoSidebarTree({ basePath, expanded, onToggle, compact = f
                     : 'text-text-dim hover:text-text-secondary hover:bg-muted',
                 )}
                 style={{ paddingLeft: `${22 + row.depth * 10}px` }}
-                title={`${row.label} / ${row.target}`}
+                title={row.label}
               >
                 <Server className="w-3 h-3 shrink-0" />
                 <span className="truncate flex-1">{row.label}</span>
-                <span className="shrink-0 font-mono text-[10px] text-text-dim">{row.target}</span>
               </NavLink>
             )
           })}
