@@ -181,6 +181,27 @@ function readBoolean(value: unknown, fallback = false): boolean {
   return typeof value === 'boolean' ? value : fallback
 }
 
+export function normalizeMonitoringTarget(raw: unknown): MonitoringTarget {
+  const item = isRecord(raw) ? raw : {}
+  const targetValue = readString(item.target, readString(item.name, '-'))
+  const targetName = readString(item.name, targetValue)
+
+  return {
+    target_uuid: readString(item.target_uuid, 'unknown-target'),
+    name: targetName,
+    target: targetValue,
+    comment: readNullableString(item.comment),
+    description: readNullableString(item.description),
+    target_type: readNullableString(item.target_type),
+    ip_version: readNullableString(item.ip_version),
+    is_anycast: readBoolean(item.is_anycast),
+    continent: readNullableString(item.continent),
+    country: readNullableString(item.country),
+    city: readNullableString(item.city),
+    carrier: readNullableString(item.carrier),
+  }
+}
+
 export function normalizeMonitoringTask(raw: unknown): MonitoringTask {
   const item = isRecord(raw) ? raw : {}
   const rawTarget = isRecord(item.target) ? item.target : {}
@@ -202,20 +223,12 @@ export function normalizeMonitoringTask(raw: unknown): MonitoringTask {
     packet_count: typeof item.packet_count === 'number' ? item.packet_count : null,
     is_enabled: readBoolean(item.is_enabled, true),
     probe_config: isRecord(item.probe_config) ? item.probe_config : null,
-    target: {
+    target: normalizeMonitoringTarget({
+      ...rawTarget,
       target_uuid: targetUuid,
       name: targetName,
       target: targetValue,
-      comment: readNullableString(rawTarget.comment),
-      description: readNullableString(rawTarget.description),
-      target_type: readNullableString(rawTarget.target_type),
-      ip_version: readNullableString(rawTarget.ip_version),
-      is_anycast: readBoolean(rawTarget.is_anycast),
-      continent: readNullableString(rawTarget.continent),
-      country: readNullableString(rawTarget.country),
-      city: readNullableString(rawTarget.city),
-      carrier: readNullableString(rawTarget.carrier),
-    },
+    }),
     agent: rawAgent && agentUuid
       ? {
           agent_uuid: agentUuid,

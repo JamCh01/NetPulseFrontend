@@ -49,6 +49,7 @@ export const monitoringKeys = {
   all: ['monitoring'] as const,
   tasks: (params?: { page?: number; page_size?: number; target_uuid?: string }) =>
     [...monitoringKeys.all, 'tasks', params] as const,
+  target: (targetUuid: string) => [...monitoringKeys.all, 'target', targetUuid] as const,
   targetGeoTree: () => [...monitoringKeys.all, 'target-geo-tree'] as const,
   query: (params: {
     task_uuid: string

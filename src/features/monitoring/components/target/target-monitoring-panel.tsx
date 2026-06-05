@@ -5,6 +5,7 @@ import { ChevronDown, Gauge, MapPin, Radio, Server, ShieldCheck, Users, Waypoint
 import { useIperf3ListsForTasks } from '@/api/hooks/use-iperf3'
 import { useMtrDetail, useMtrListsForTasks } from '@/api/hooks/use-mtr'
 import { useTaskMonitoringSeries } from '@/api/hooks/use-monitoring'
+import { usePublicMonitoringTarget } from '@/api/hooks/use-public-monitoring-target'
 import { usePublicMonitoringTasks } from '@/api/hooks/use-public-monitoring-tasks'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -40,6 +41,7 @@ import {
   protocolLabel,
   type LatestResultState,
   type MonitoringProtocol,
+  type MonitoringTarget,
   type MonitoringTargetGroup,
   type MonitoringTask,
 } from '@/features/monitoring/lib/monitoring-models'
@@ -552,6 +554,19 @@ function TargetSummary({ group }: { group: MonitoringTargetGroup }) {
   )
 }
 
+function emptyTargetGroup(target: MonitoringTarget): MonitoringTargetGroup {
+  return {
+    target,
+    tasks: [],
+    agents: [],
+    protocols: [],
+    latest_sample_at: null,
+    has_missing_data: false,
+    has_failed_result: false,
+    status: 'unknown',
+  }
+}
+
 export function TargetMonitoringPanel({
   targetUuid,
   fallbackGroup,
@@ -565,6 +580,7 @@ export function TargetMonitoringPanel({
     pageSize: 100,
     targetUuid,
   })
+  const { data: targetDetail } = usePublicMonitoringTarget(targetUuid)
   const [icmpTimeRange, setIcmpTimeRange] = useState<MonitoringTimeRange>(() => createRelativeTimeRange())
   const [tcpTimeRange, setTcpTimeRange] = useState<MonitoringTimeRange>(() => createRelativeTimeRange())
   const [mtrTimeRange, setMtrTimeRange] = useState<MonitoringTimeRange>(() => createRelativeTimeRange())
@@ -580,7 +596,16 @@ export function TargetMonitoringPanel({
     return () => window.clearInterval(timer)
   }, [])
 
-  const group = data?.groups[0] ?? fallbackGroup
+  const taskGroup = data?.groups[0] ?? fallbackGroup
+  const group = useMemo(() => {
+    if (taskGroup && targetDetail) {
+      return {
+        ...taskGroup,
+        target: targetDetail,
+      }
+    }
+    return taskGroup ?? (targetDetail ? emptyTargetGroup(targetDetail) : undefined)
+  }, [targetDetail, taskGroup])
   const icmpTasks = useMemo(() => protocolTasks(group?.tasks ?? [], 'icmp'), [group?.tasks])
   const tcpTasks = useMemo(() => protocolTasks(group?.tasks ?? [], 'tcp'), [group?.tasks])
   const mtrTasks = useMemo(() => protocolTasks(group?.tasks ?? [], 'mtr'), [group?.tasks])
