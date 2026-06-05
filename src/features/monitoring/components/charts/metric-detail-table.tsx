@@ -2,7 +2,7 @@ import { memo, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { AgentSeriesData } from '@/features/monitoring/lib/build-multi-agent-option'
 import type { MonitoringMetricProtocol } from '@/features/monitoring/lib/monitoring-data-point'
-import { flattenAgentMetricRows, formatMetricValue, getMetricColumns, normalizeProtocol } from '@/features/monitoring/lib/protocol-metrics'
+import { formatMetricValue, getMetricColumns, normalizeProtocol, summarizeAgentMetricRows } from '@/features/monitoring/lib/protocol-metrics'
 import { cn } from '@/lib/utils'
 
 interface MetricDetailTableProps {
@@ -23,7 +23,7 @@ function MetricDetailTableInner({
   const { t } = useTranslation()
   const normalizedProtocol = normalizeProtocol(protocol)
   const columns = useMemo(() => getMetricColumns(normalizedProtocol), [normalizedProtocol])
-  const rows = useMemo(() => flattenAgentMetricRows(agentSeries, normalizedProtocol), [agentSeries, normalizedProtocol])
+  const rows = useMemo(() => summarizeAgentMetricRows(agentSeries, normalizedProtocol), [agentSeries, normalizedProtocol])
   const hasRows = rows.length > 0
   const title = t('monitoring.detailMetricsTitle', { protocol: normalizedProtocol.toUpperCase() })
 
@@ -67,7 +67,7 @@ function MetricDetailTableInner({
             </thead>
             <tbody>
               {rows.map((row) => (
-                <tr key={`${row.timestamp}-${row.agentUuid}`} className="border-b border-border/60 hover:bg-muted/30">
+                <tr key={row.agentUuid} className="border-b border-border/60 hover:bg-muted/30">
                   <td className="whitespace-nowrap px-3 py-2 text-text-primary">{row.agentName}</td>
                   {columns.map((column) => (
                     <td key={String(column.key)} className="whitespace-nowrap px-3 py-2 text-right font-[family-name:var(--font-mono)] text-text-secondary">

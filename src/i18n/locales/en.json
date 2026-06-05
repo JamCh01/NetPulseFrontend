@@ -934,7 +934,7 @@
     "metricSource": "Metric Source",
     "vmStepSource": "Data comes from VictoriaMetrics. Minimum step_sec is 60 seconds.",
     "detailMetricsTitle": "{{protocol}} Detail Metrics",
-    "detailMetricsDesc": "Shows per-Agent metrics for each step window in the current time range.",
+    "detailMetricsDesc": "Shows per-Agent metric summaries for the current time range.",
     "noDetailMetrics": "No detail metrics in the current time range.",
     "metrics": {
       "latency_avg_ms": "Avg Latency",

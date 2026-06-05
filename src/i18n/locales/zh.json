@@ -934,7 +934,7 @@
     "metricSource": "指标来源",
     "vmStepSource": "数据来自 VictoriaMetrics，最小 step_sec 为 60 秒。",
     "detailMetricsTitle": "{{protocol}} 明细指标",
-    "detailMetricsDesc": "当前时间范围内按 Agent 展示每个 step 窗口的明细指标。",
+    "detailMetricsDesc": "当前时间范围内按 Agent 汇总展示明细指标。",
     "noDetailMetrics": "当前时间范围内暂无明细指标。",
     "metrics": {
       "latency_avg_ms": "平均延迟",

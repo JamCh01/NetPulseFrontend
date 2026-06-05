@@ -167,6 +167,147 @@ export function flattenAgentMetricRows(
     })
 }
 
+export function summarizeAgentMetricRows(
+  agentSeries: AgentSeriesData[],
+  protocol?: MonitoringMetricProtocol,
+): AgentMetricRow[] {
+  const normalized = normalizeProtocol(protocol)
+  return agentSeries
+    .map((series) => {
+      if (series.data.length === 0) return null
+      const point = normalized === 'tcp'
+        ? summarizeTcpWindow(series.data, normalized)
+        : summarizeIcmpWindow(series.data, normalized)
+
+      return {
+        agentUuid: series.agentUuid,
+        agentName: series.agentName,
+        timestamp: latestTimestamp(series.data),
+        point,
+      }
+    })
+    .filter((row): row is AgentMetricRow => row !== null)
+    .sort((a, b) => a.agentName.localeCompare(b.agentName))
+}
+
+function summarizeIcmpWindow(points: MonitoringDataPoint[], protocol: string): MonitoringDataPoint {
+  const packetsSent = sumMetric(points, 'packets_sent')
+  const packetsReceived = sumMetric(points, 'packets_received')
+  const lossPct = packetsSent > 0
+    ? Math.max(0, ((packetsSent - packetsReceived) / packetsSent) * 100)
+    : weightedAverage(points, 'packet_loss_pct', 'packets_sent')
+  const avg = weightedAverage(points, 'latency_avg_ms', 'packets_received')
+  const min = minMetric(points, 'latency_min_ms') ?? avg
+  const max = maxMetric(points, 'latency_max_ms') ?? avg
+  const stddev = weightedAverage(points, 'latency_stddev_ms', 'packets_received')
+  const jitter = weightedAverage(points, 'latency_jitter_ms', 'packets_received')
+
+  return finalizePoint({
+    timestamp: latestTimestamp(points),
+    protocol,
+    avg_rtt: avg,
+    min_rtt: min,
+    max_rtt: max,
+    latency_avg_ms: avg,
+    latency_min_ms: min,
+    latency_max_ms: max,
+    latency_stddev_ms: stddev,
+    latency_jitter_ms: jitter,
+    packet_loss_pct: lossPct,
+    packets_sent: packetsSent,
+    packets_received: packetsReceived,
+  }, protocol)
+}
+
+function summarizeTcpWindow(points: MonitoringDataPoint[], protocol: string): MonitoringDataPoint {
+  const attempts = sumMetric(points, 'connect_attempts')
+  const successes = sumMetric(points, 'connect_successes')
+  const failures = sumMetric(points, 'connect_failures')
+  const failurePct = attempts > 0
+    ? Math.max(0, (failures / attempts) * 100)
+    : weightedAverage(points, 'connect_failure_pct', 'connect_attempts')
+  const avg = weightedAverage(points, 'connect_latency_avg_ms', 'connect_successes')
+  const min = minMetric(points, 'connect_latency_min_ms') ?? avg
+  const max = maxMetric(points, 'connect_latency_max_ms') ?? avg
+  const stddev = weightedAverage(points, 'connect_latency_stddev_ms', 'connect_successes')
+  const jitter = weightedAverage(points, 'connect_jitter_ms', 'connect_successes')
+
+  return finalizePoint({
+    timestamp: latestTimestamp(points),
+    protocol,
+    avg_rtt: avg,
+    min_rtt: min,
+    max_rtt: max,
+    packet_loss_pct: failurePct,
+    connect_latency_avg_ms: avg,
+    connect_latency_min_ms: min,
+    connect_latency_max_ms: max,
+    connect_latency_stddev_ms: stddev,
+    connect_jitter_ms: jitter,
+    connect_failure_pct: failurePct,
+    connect_attempts: attempts,
+    connect_successes: successes,
+    connect_failures: failures,
+  }, protocol)
+}
+
+function latestTimestamp(points: MonitoringDataPoint[]): number {
+  return points.reduce((latest, point) => Math.max(latest, point.timestamp), 0)
+}
+
+function finiteMetric(point: MonitoringDataPoint, key: keyof MonitoringDataPoint): number | null {
+  const value = point[key]
+  return typeof value === 'number' && Number.isFinite(value) ? value : null
+}
+
+function sumMetric(points: MonitoringDataPoint[], key: keyof MonitoringDataPoint): number {
+  return points.reduce((total, point) => total + (finiteMetric(point, key) ?? 0), 0)
+}
+
+function minMetric(points: MonitoringDataPoint[], key: keyof MonitoringDataPoint): number | null {
+  let min: number | null = null
+  for (const point of points) {
+    const value = finiteMetric(point, key)
+    if (value === null) continue
+    min = min === null ? value : Math.min(min, value)
+  }
+  return min
+}
+
+function maxMetric(points: MonitoringDataPoint[], key: keyof MonitoringDataPoint): number | null {
+  let max: number | null = null
+  for (const point of points) {
+    const value = finiteMetric(point, key)
+    if (value === null) continue
+    max = max === null ? value : Math.max(max, value)
+  }
+  return max
+}
+
+function weightedAverage(
+  points: MonitoringDataPoint[],
+  valueKey: keyof MonitoringDataPoint,
+  weightKey: keyof MonitoringDataPoint,
+): number {
+  let weightedTotal = 0
+  let weightTotal = 0
+  const fallbackValues: number[] = []
+
+  for (const point of points) {
+    const value = finiteMetric(point, valueKey)
+    if (value === null) continue
+    fallbackValues.push(value)
+    const weight = finiteMetric(point, weightKey)
+    if (weight === null || weight <= 0) continue
+    weightedTotal += value * weight
+    weightTotal += weight
+  }
+
+  if (weightTotal > 0) return weightedTotal / weightTotal
+  if (fallbackValues.length === 0) return 0
+  return fallbackValues.reduce((total, value) => total + value, 0) / fallbackValues.length
+}
+
 function assignMetric(row: Partial<MonitoringDataPoint>, metric: string, value: number) {
   switch (metric) {
     case 'latency_avg_ms':

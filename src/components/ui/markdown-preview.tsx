@@ -59,7 +59,7 @@ const markdownComponents = {
   },
   a: (componentProps: MarkdownComponentProps<'a'>) => {
     const { className, ...props } = cleanMarkdownProps(componentProps)
-    return <a className={cn('text-accent underline underline-offset-4 hover:text-accent-strong', className)} target="_blank" rel="noreferrer" {...props} />
+    return <a className={cn('font-medium text-accent-foreground underline decoration-accent-foreground/70 underline-offset-4 hover:text-accent-foreground/80', className)} target="_blank" rel="noreferrer" {...props} />
   },
   code: (componentProps: MarkdownComponentProps<'code'>) => {
     const { className, children, ...props } = cleanMarkdownProps(componentProps)

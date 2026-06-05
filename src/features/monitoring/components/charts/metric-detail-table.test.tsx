@@ -26,6 +26,24 @@ const icmpSeries: AgentSeriesData[] = [
         packets_sent: 8,
         packets_received: 7,
       },
+      {
+        timestamp: 1_700_000_060,
+        avg_rtt: 18,
+        min_rtt: 14,
+        max_rtt: 26,
+        median_rtt: 18,
+        p95_rtt: 18,
+        p99_rtt: 18,
+        packet_loss_pct: 20,
+        protocol: 'icmp',
+        latency_avg_ms: 18,
+        latency_min_ms: 14,
+        latency_max_ms: 26,
+        latency_stddev_ms: 4,
+        latency_jitter_ms: 2.5,
+        packets_sent: 10,
+        packets_received: 8,
+      },
     ],
   },
   {
@@ -79,12 +97,32 @@ const tcpSeries: AgentSeriesData[] = [
         connect_successes: 9,
         connect_failures: 1,
       },
+      {
+        timestamp: 1_700_000_060,
+        avg_rtt: 61,
+        min_rtt: 44,
+        max_rtt: 94,
+        median_rtt: 61,
+        p95_rtt: 61,
+        p99_rtt: 61,
+        packet_loss_pct: 20,
+        protocol: 'tcp',
+        connect_latency_avg_ms: 61,
+        connect_latency_min_ms: 44,
+        connect_latency_max_ms: 94,
+        connect_latency_stddev_ms: 7.4,
+        connect_jitter_ms: 6.2,
+        connect_failure_pct: 20,
+        connect_attempts: 5,
+        connect_successes: 4,
+        connect_failures: 1,
+      },
     ],
   },
 ]
 
 describe('MetricDetailTable', () => {
-  it('renders ICMP detail columns and rows for each agent sample', () => {
+  it('summarizes ICMP detail metrics by Agent across the current time window', () => {
     render(<MetricDetailTable protocol="icmp" agentSeries={icmpSeries} />)
 
     expect(screen.getByRole('table', { name: 'ICMP 明细指标' })).toBeInTheDocument()
@@ -100,10 +138,13 @@ describe('MetricDetailTable', () => {
     expect(within(rows[1]).getByText('Osaka')).toBeInTheDocument()
     expect(within(rows[1]).getByText('22.0ms')).toBeInTheDocument()
     expect(within(rows[2]).getByText('Tokyo')).toBeInTheDocument()
-    expect(within(rows[2]).getByText('7')).toBeInTheDocument()
+    expect(within(rows[2]).getByText('15.2ms')).toBeInTheDocument()
+    expect(within(rows[2]).getByText('16.7%')).toBeInTheDocument()
+    expect(within(rows[2]).getByText('18')).toBeInTheDocument()
+    expect(within(rows[2]).getByText('15')).toBeInTheDocument()
   })
 
-  it('renders TCP detail columns including attempts and failures', () => {
+  it('summarizes TCP detail metrics by Agent across the current time window', () => {
     render(<MetricDetailTable protocol="tcp" agentSeries={tcpSeries} />)
 
     expect(screen.getByRole('table', { name: 'TCP 明细指标' })).toBeInTheDocument()
@@ -112,9 +153,11 @@ describe('MetricDetailTable', () => {
     expect(screen.getByRole('columnheader', { name: '连接抖动' })).toBeInTheDocument()
     expect(screen.getByRole('columnheader', { name: '连接失败数' })).toBeInTheDocument()
     expect(screen.queryByRole('columnheader', { name: 'connect_latency_avg_ms' })).not.toBeInTheDocument()
-    expect(screen.getByText('10.0%')).toBeInTheDocument()
-    expect(screen.getByText('9')).toBeInTheDocument()
-    expect(screen.getByText('1')).toBeInTheDocument()
+    expect(screen.getByText('47.2ms')).toBeInTheDocument()
+    expect(screen.getByText('13.3%')).toBeInTheDocument()
+    expect(screen.getByText('15')).toBeInTheDocument()
+    expect(screen.getByText('13')).toBeInTheDocument()
+    expect(screen.getByText('2')).toBeInTheDocument()
   })
 
   it('uses translated empty state and update status', () => {
