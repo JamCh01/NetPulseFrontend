@@ -31,6 +31,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { MarkdownPreview } from '@/components/ui/markdown-preview'
 import { Textarea } from '@/components/ui/textarea'
 import { GeoInput } from '@/features/admin/geo-input'
 import { TagInput } from '@/features/admin/tag-input'
@@ -366,7 +367,25 @@ export default function TargetsPage() {
             </div>
 
             <TagInput label={t('targets.tags')} resourceType="target" value={form.tags} onChange={(tags) => setForm({ ...form, tags })} />
-            <Textarea placeholder={t('targets.commentPlaceholder')} value={form.comment} onChange={(event) => setForm({ ...form, comment: event.target.value })} />
+            <div className="grid gap-3 md:grid-cols-2">
+              <div>
+                <Label htmlFor="target-comment" className="mb-1.5 text-xs text-text-secondary">{t('common.comment')}</Label>
+                <Textarea
+                  id="target-comment"
+                  aria-label={t('common.comment')}
+                  placeholder={t('targets.commentPlaceholder')}
+                  value={form.comment}
+                  onChange={(event) => setForm({ ...form, comment: event.target.value })}
+                  className="min-h-[160px]"
+                />
+              </div>
+              <div>
+                <Label id="target-comment-preview-label" className="mb-1.5 text-xs text-text-secondary">Markdown 预览</Label>
+                <section aria-labelledby="target-comment-preview-label" className="h-full">
+                  <MarkdownPreview value={form.comment} className="h-full min-h-[160px]" />
+                </section>
+              </div>
+            </div>
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={closeTargetDialog}>{t('common.cancel')}</Button>

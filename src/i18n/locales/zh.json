@@ -902,6 +902,8 @@
     "statusLastUpdated": "上次更新时间",
     "statusFailed": "异常",
     "statusUnknown": "未知",
+    "targetDescription": "Target 描述",
+    "targetDescriptionEmpty": "暂无 Target 描述信息。",
     "currentTarget": "当前 Target：",
     "backToAllTargets": "返回所有 Target",
     "backToTargets": "返回监控目标",

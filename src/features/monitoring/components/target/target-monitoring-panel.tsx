@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { type TFunction } from 'i18next'
-import { Activity, ChevronDown, Gauge, MapPin, Radio, Server, ShieldCheck, Users, Waypoints, Wifi } from 'lucide-react'
+import { ChevronDown, Gauge, MapPin, Radio, Server, ShieldCheck, Users, Waypoints, Wifi } from 'lucide-react'
 import { useIperf3ListsForTasks } from '@/api/hooks/use-iperf3'
 import { useMtrDetail, useMtrListsForTasks } from '@/api/hooks/use-mtr'
 import { useTaskMonitoringSeries } from '@/api/hooks/use-monitoring'
@@ -517,8 +517,9 @@ function TargetSummary({ group }: { group: MonitoringTargetGroup }) {
   const statusLabel = group.status === 'missing'
     ? `${t('common.lastUpdated')} ${formatLatestSample(latestTaskUpdate(group.tasks), i18n.language, t('monitoring.noSample'))}`
     : status.label
+  const targetDescription = group.target.comment?.trim() || group.target.description?.trim() || t('monitoring.targetDescriptionEmpty')
   return (
-    <section className="rounded-xl border border-border bg-bg-surface">
+    <section aria-label={group.target.name} className="rounded-xl border border-border bg-bg-surface">
       <div className="flex flex-col gap-3 border-b border-border px-4 py-3 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
@@ -541,25 +542,13 @@ function TargetSummary({ group }: { group: MonitoringTargetGroup }) {
           </div>
         </div>
       </div>
-      <div className="grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-4">
-        <SummaryMetric label={t('monitoring.taskCount')} value={String(group.tasks.length)} />
-        <SummaryMetric label="Agent" value={String(group.agents.length)} />
-        <SummaryMetric label={t('monitoring.protocol')} value={group.protocols.map((item) => protocolLabel(item)).join(' / ') || '-'} />
-        <SummaryMetric label={t('common.latestSample')} value={formatLatestSample(group.latest_sample_at, i18n.language, t('monitoring.noSample'))} />
+      <div className="p-4">
+        <div className="rounded-lg border border-border bg-bg-surface-light px-3 py-2.5">
+          <div className="text-[10px] uppercase text-text-dim">{t('monitoring.targetDescription')}</div>
+          <div className="mt-1 whitespace-pre-wrap text-sm leading-6 text-text-secondary">{targetDescription}</div>
+        </div>
       </div>
     </section>
-  )
-}
-
-function SummaryMetric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg border border-border bg-bg-surface-light px-3 py-2">
-      <div className="text-[10px] uppercase text-text-dim">{label}</div>
-      <div className="mt-1 flex items-center gap-1 font-mono text-sm font-semibold text-text-primary">
-        <Activity className="h-3.5 w-3.5 text-accent-foreground" />
-        {value}
-      </div>
-    </div>
   )
 }
 

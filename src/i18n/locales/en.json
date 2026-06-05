@@ -902,6 +902,8 @@
     "statusLastUpdated": "Last updated",
     "statusFailed": "Failed",
     "statusUnknown": "Unknown",
+    "targetDescription": "Target Description",
+    "targetDescriptionEmpty": "No Target description.",
     "currentTarget": "Current Target:",
     "backToAllTargets": "Back to all Targets",
     "backToTargets": "Back to monitoring targets",

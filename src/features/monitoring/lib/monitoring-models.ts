@@ -8,6 +8,8 @@ export interface MonitoringTarget {
   target_uuid: string
   name: string
   target: string
+  comment?: string | null
+  description?: string | null
   target_type?: string | null
   ip_version?: string | null
   is_anycast: boolean
@@ -204,6 +206,8 @@ export function normalizeMonitoringTask(raw: unknown): MonitoringTask {
       target_uuid: targetUuid,
       name: targetName,
       target: targetValue,
+      comment: readNullableString(rawTarget.comment),
+      description: readNullableString(rawTarget.description),
       target_type: readNullableString(rawTarget.target_type),
       ip_version: readNullableString(rawTarget.ip_version),
       is_anycast: readBoolean(rawTarget.is_anycast),
