@@ -25,7 +25,7 @@ describe('MonitoringIndexPage', () => {
           country: 'Japan',
           city: 'Tokyo',
           carrier: 'Example IDC',
-          comment: 'Target 描述信息：东京边缘节点，承载公网连通性监控。',
+          comment: '# 东京边缘节点\n\n- 公网连通性监控\n- Anycast 入口\n\n[Runbook](https://example.com/runbook)',
         },
       })),
       http.get('*/api/v1/monitoring/tasks', () => HttpResponse.json({
@@ -47,7 +47,7 @@ describe('MonitoringIndexPage', () => {
               country: 'Japan',
               city: 'Tokyo',
               carrier: 'Example IDC',
-              comment: 'Target 描述信息：东京边缘节点，承载公网连通性监控。',
+              comment: '# 东京边缘节点\n\n- 公网连通性监控\n- Anycast 入口\n\n[Runbook](https://example.com/runbook)',
             },
             agent: {
               agent_uuid: 'agent-1',
@@ -73,7 +73,10 @@ describe('MonitoringIndexPage', () => {
 
     const summary = await screen.findByRole('region', { name: 'Tokyo Edge' })
     expect(within(summary).getByText('Target 描述')).toBeInTheDocument()
-    expect(within(summary).getByText('Target 描述信息：东京边缘节点，承载公网连通性监控。')).toBeInTheDocument()
+    expect(within(summary).getByRole('heading', { name: '东京边缘节点' })).toBeInTheDocument()
+    expect(within(summary).getByText('公网连通性监控')).toBeInTheDocument()
+    expect(within(summary).getByText('Anycast 入口')).toBeInTheDocument()
+    expect(within(summary).getByRole('link', { name: 'Runbook' })).toHaveAttribute('href', 'https://example.com/runbook')
     expect(within(summary).queryByText('任务数')).not.toBeInTheDocument()
     expect(within(summary).queryByText('Agent')).not.toBeInTheDocument()
   })

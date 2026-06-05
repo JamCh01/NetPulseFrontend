@@ -427,8 +427,8 @@ export default function TasksPage() {
   const [form, setForm] = useState<TaskFormState>(() => initialTaskForm())
 
   const tasksQuery = useTasks({ keyword, task_type: taskType, sort_by: 'name', sort_order: 'asc' })
-  const targetsQuery = useTargets({ page_size: 200, sort_by: 'name', sort_order: 'asc', is_enabled: true })
-  const agentsQuery = useAgents({ page_size: 200, sort_by: 'name', sort_order: 'asc', is_enabled: true })
+  const targetsQuery = useTargets({ page_size: 100, sort_by: 'name', sort_order: 'asc', is_enabled: true })
+  const agentsQuery = useAgents({ page_size: 100, sort_by: 'name', sort_order: 'asc', is_enabled: true })
   const createTask = useCreateTask()
   const updateTask = useUpdateTask()
   const setTaskEnabled = useSetTaskEnabled()

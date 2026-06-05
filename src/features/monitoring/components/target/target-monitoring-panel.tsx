@@ -9,6 +9,7 @@ import { usePublicMonitoringTarget } from '@/api/hooks/use-public-monitoring-tar
 import { usePublicMonitoringTasks } from '@/api/hooks/use-public-monitoring-tasks'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { MarkdownPreview } from '@/components/ui/markdown-preview'
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -547,7 +548,11 @@ function TargetSummary({ group }: { group: MonitoringTargetGroup }) {
       <div className="p-4">
         <div className="rounded-lg border border-border bg-bg-surface-light px-3 py-2.5">
           <div className="text-[10px] uppercase text-text-dim">{t('monitoring.targetDescription')}</div>
-          <div className="mt-1 whitespace-pre-wrap text-sm leading-6 text-text-secondary">{targetDescription}</div>
+          <MarkdownPreview
+            value={targetDescription}
+            emptyText={t('monitoring.targetDescriptionEmpty')}
+            className="mt-1 min-h-0 border-0 bg-transparent px-0 py-0"
+          />
         </div>
       </div>
     </section>

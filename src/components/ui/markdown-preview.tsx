@@ -1,121 +1,102 @@
-import type { ReactNode } from 'react'
+import type { ComponentProps, JSX } from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 import { cn } from '@/lib/utils'
 
-type InlineToken = {
-  type: 'text' | 'strong' | 'code'
+type MarkdownPreviewProps = {
   value: string
+  className?: string
+  emptyText?: string
 }
 
-function parseInline(text: string): InlineToken[] {
-  const tokens: InlineToken[] = []
-  let remaining = text
-
-  while (remaining.length > 0) {
-    const strongIndex = remaining.indexOf('**')
-    const codeIndex = remaining.indexOf('`')
-    const candidates = [strongIndex, codeIndex].filter((index) => index >= 0)
-    const nextIndex = candidates.length ? Math.min(...candidates) : -1
-
-    if (nextIndex < 0) {
-      tokens.push({ type: 'text', value: remaining })
-      break
-    }
-
-    if (nextIndex > 0) {
-      tokens.push({ type: 'text', value: remaining.slice(0, nextIndex) })
-      remaining = remaining.slice(nextIndex)
-      continue
-    }
-
-    if (remaining.startsWith('**')) {
-      const end = remaining.indexOf('**', 2)
-      if (end > 2) {
-        tokens.push({ type: 'strong', value: remaining.slice(2, end) })
-        remaining = remaining.slice(end + 2)
-        continue
-      }
-    }
-
-    if (remaining.startsWith('`')) {
-      const end = remaining.indexOf('`', 1)
-      if (end > 1) {
-        tokens.push({ type: 'code', value: remaining.slice(1, end) })
-        remaining = remaining.slice(end + 1)
-        continue
-      }
-    }
-
-    tokens.push({ type: 'text', value: remaining[0] })
-    remaining = remaining.slice(1)
-  }
-
-  return tokens
+type MarkdownComponentProps<K extends keyof JSX.IntrinsicElements> = ComponentProps<K> & {
+  node?: unknown
 }
 
-function renderInline(text: string): ReactNode[] {
-  return parseInline(text).map((token, index) => {
-    if (token.type === 'strong') return <strong key={index}>{token.value}</strong>
-    if (token.type === 'code') {
-      return (
-        <code key={index} className="rounded bg-muted px-1 py-0.5 font-[family-name:var(--font-mono)] text-[0.85em] text-text-primary">
-          {token.value}
-        </code>
-      )
-    }
-    return token.value
-  })
+function cleanMarkdownProps<K extends keyof JSX.IntrinsicElements>(props: MarkdownComponentProps<K>) {
+  const { node: _node, ...cleanProps } = props
+  void _node
+  return cleanProps
 }
 
-export function MarkdownPreview({ value, className }: { value: string; className?: string }) {
-  const lines = value.split(/\r?\n/)
-  const blocks: ReactNode[] = []
-  let index = 0
+const markdownComponents = {
+  h1: (componentProps: MarkdownComponentProps<'h1'>) => {
+    const { className, ...props } = cleanMarkdownProps(componentProps)
+    return <h2 className={cn('text-lg font-semibold leading-7 text-text-primary', className)} {...props} />
+  },
+  h2: (componentProps: MarkdownComponentProps<'h2'>) => {
+    const { className, ...props } = cleanMarkdownProps(componentProps)
+    return <h3 className={cn('text-base font-semibold leading-6 text-text-primary', className)} {...props} />
+  },
+  h3: (componentProps: MarkdownComponentProps<'h3'>) => {
+    const { className, ...props } = cleanMarkdownProps(componentProps)
+    return <h4 className={cn('text-sm font-semibold leading-6 text-text-primary', className)} {...props} />
+  },
+  h4: (componentProps: MarkdownComponentProps<'h4'>) => {
+    const { className, ...props } = cleanMarkdownProps(componentProps)
+    return <h5 className={cn('text-sm font-semibold leading-6 text-text-primary', className)} {...props} />
+  },
+  p: (componentProps: MarkdownComponentProps<'p'>) => {
+    const { className, ...props } = cleanMarkdownProps(componentProps)
+    return <p className={cn('leading-6', className)} {...props} />
+  },
+  ul: (componentProps: MarkdownComponentProps<'ul'>) => {
+    const { className, ...props } = cleanMarkdownProps(componentProps)
+    return <ul className={cn('list-disc space-y-1 pl-5', className)} {...props} />
+  },
+  ol: (componentProps: MarkdownComponentProps<'ol'>) => {
+    const { className, ...props } = cleanMarkdownProps(componentProps)
+    return <ol className={cn('list-decimal space-y-1 pl-5', className)} {...props} />
+  },
+  li: (componentProps: MarkdownComponentProps<'li'>) => {
+    const { className, ...props } = cleanMarkdownProps(componentProps)
+    return <li className={cn('pl-0.5', className)} {...props} />
+  },
+  blockquote: (componentProps: MarkdownComponentProps<'blockquote'>) => {
+    const { className, ...props } = cleanMarkdownProps(componentProps)
+    return <blockquote className={cn('border-l-2 border-accent-border pl-3 text-text-muted', className)} {...props} />
+  },
+  a: (componentProps: MarkdownComponentProps<'a'>) => {
+    const { className, ...props } = cleanMarkdownProps(componentProps)
+    return <a className={cn('text-accent underline underline-offset-4 hover:text-accent-strong', className)} target="_blank" rel="noreferrer" {...props} />
+  },
+  code: (componentProps: MarkdownComponentProps<'code'>) => {
+    const { className, children, ...props } = cleanMarkdownProps(componentProps)
+    return (
+      <code className={cn('rounded bg-muted px-1 py-0.5 font-[family-name:var(--font-mono)] text-[0.85em] text-text-primary', className)} {...props}>
+        {children}
+      </code>
+    )
+  },
+  pre: (componentProps: MarkdownComponentProps<'pre'>) => {
+    const { className, children, ...props } = cleanMarkdownProps(componentProps)
+    return (
+      <pre className={cn('overflow-x-auto rounded-lg border border-border bg-muted/40 px-3 py-2 font-[family-name:var(--font-mono)] text-xs leading-5 text-text-primary', className)} {...props}>
+        {children}
+      </pre>
+    )
+  },
+  table: (componentProps: MarkdownComponentProps<'table'>) => {
+    const { className, ...props } = cleanMarkdownProps(componentProps)
+    return (
+      <div className="overflow-x-auto">
+        <table className={cn('min-w-full border-collapse text-left text-xs', className)} {...props} />
+      </div>
+    )
+  },
+  th: (componentProps: MarkdownComponentProps<'th'>) => {
+    const { className, ...props } = cleanMarkdownProps(componentProps)
+    return <th className={cn('border border-border bg-muted/30 px-2 py-1 font-medium text-text-primary', className)} {...props} />
+  },
+  td: (componentProps: MarkdownComponentProps<'td'>) => {
+    const { className, ...props } = cleanMarkdownProps(componentProps)
+    return <td className={cn('border border-border px-2 py-1 text-text-secondary', className)} {...props} />
+  },
+}
 
-  while (index < lines.length) {
-    const line = lines[index]
-    const trimmed = line.trim()
-
-    if (!trimmed) {
-      index += 1
-      continue
-    }
-
-    if (trimmed.startsWith('- ')) {
-      const items: string[] = []
-      while (index < lines.length && lines[index].trim().startsWith('- ')) {
-        items.push(lines[index].trim().slice(2))
-        index += 1
-      }
-      blocks.push(
-        <ul key={`ul-${index}`} className="list-disc space-y-1 pl-5">
-          {items.map((item, itemIndex) => <li key={itemIndex}>{renderInline(item)}</li>)}
-        </ul>,
-      )
-      continue
-    }
-
-    if (trimmed.startsWith('### ')) {
-      blocks.push(<h4 key={index} className="text-sm font-semibold text-text-primary">{renderInline(trimmed.slice(4))}</h4>)
-      index += 1
-      continue
-    }
-
-    if (trimmed.startsWith('## ')) {
-      blocks.push(<h3 key={index} className="text-base font-semibold text-text-primary">{renderInline(trimmed.slice(3))}</h3>)
-      index += 1
-      continue
-    }
-
-    if (trimmed.startsWith('# ')) {
-      blocks.push(<h2 key={index} className="text-lg font-semibold text-text-primary">{renderInline(trimmed.slice(2))}</h2>)
-      index += 1
-      continue
-    }
-
-    blocks.push(<p key={index}>{renderInline(trimmed)}</p>)
-    index += 1
-  }
+export function MarkdownPreview({ value, className, emptyText = '暂无预览' }: MarkdownPreviewProps) {
+  const markdown = value.trim()
 
   return (
     <div
@@ -125,8 +106,13 @@ export function MarkdownPreview({ value, className }: { value: string; className
         className,
       )}
     >
-      {blocks.length ? blocks : <span className="text-text-muted">暂无预览</span>}
+      {markdown ? (
+        <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+          {markdown}
+        </ReactMarkdown>
+      ) : (
+        <span className="text-text-muted">{emptyText}</span>
+      )}
     </div>
   )
 }
-

@@ -65,7 +65,7 @@ export default function TargetsPage() {
   })
 
   const targetsQuery = useTargets({ page, page_size: PAGE_SIZE, keyword, sort_by: 'name', sort_order: 'asc' })
-  const agentsQuery = useAgents({ page_size: 200, sort_by: 'name', sort_order: 'asc', is_enabled: true })
+  const agentsQuery = useAgents({ page_size: 100, sort_by: 'name', sort_order: 'asc', is_enabled: true })
   const createTarget = useCreateTarget()
   const updateTarget = useUpdateTarget()
   const setTargetEnabled = useSetTargetEnabled()
@@ -75,6 +75,7 @@ export default function TargetsPage() {
   const targets = targetsQuery.data?.items ?? []
   const agents = agentsQuery.data?.items ?? []
   const pagination = targetsQuery.data?.pagination
+  const selectedAgent = agents.find((agent) => agent.agent_uuid === selectedAgentUuid) ?? null
 
   const resetForm = () => {
     setForm({
@@ -409,7 +410,11 @@ export default function TargetsPage() {
               <div>{associateTarget?.target}</div>
             </div>
             <Select value={selectedAgentUuid} onValueChange={(value) => setSelectedAgentUuid(value ?? '')}>
-              <SelectTrigger className="w-full"><SelectValue placeholder={t('targets.selectAgent')} /></SelectTrigger>
+              <SelectTrigger aria-label="Agent" className="w-full">
+                <SelectValue>
+                  {() => selectedAgent ? `${selectedAgent.name} - ${selectedAgent.city || selectedAgent.country}` : t('targets.selectAgent')}
+                </SelectValue>
+              </SelectTrigger>
               <SelectContent>
                 {agents.map((agent: AdminAgent) => (
                   <SelectItem key={agent.agent_uuid} value={agent.agent_uuid}>

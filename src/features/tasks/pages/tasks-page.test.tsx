@@ -77,6 +77,53 @@ const iperf3Task = {
 }
 
 describe('TasksPage', () => {
+  it('loads Target and Agent options for quick association with backend-compatible page sizes', async () => {
+    const user = userEvent.setup()
+    const targetPageSizes: string[] = []
+    const agentPageSizes: string[] = []
+    const quickAssociateRequests: unknown[] = []
+    server.use(
+      http.get('*/api/v1/tasks', () => HttpResponse.json({ items: [] })),
+      http.get('*/api/v1/targets', ({ request }) => {
+        targetPageSizes.push(new URL(request.url).searchParams.get('page_size') ?? '')
+        return HttpResponse.json({ items: [target] })
+      }),
+      http.get('*/api/v1/agents', ({ request }) => {
+        agentPageSizes.push(new URL(request.url).searchParams.get('page_size') ?? '')
+        return HttpResponse.json({ items: [agent] })
+      }),
+      http.post('*/api/v1/relations/quick-associate', async ({ request }) => {
+        quickAssociateRequests.push(await request.json())
+        return HttpResponse.json([iperf3Task])
+      }),
+    )
+
+    renderWithProviders(<TasksPage />)
+
+    await user.click(screen.getByRole('button', { name: '快速关联' }))
+    const dialog = await screen.findByRole('dialog', { name: '快速关联' })
+
+    await user.click(within(dialog).getByRole('combobox', { name: 'Target' }))
+    await user.click(await screen.findByRole('option', { name: /Tokyo iperf3 Target/ }))
+    await user.click(within(dialog).getByRole('combobox', { name: 'Agent' }))
+    await user.click(await screen.findByRole('option', { name: /Tokyo Agent/ }))
+
+    expect(within(dialog).getByRole('combobox', { name: 'Target' })).toHaveTextContent('Tokyo iperf3 Target')
+    expect(within(dialog).getByRole('combobox', { name: 'Agent' })).toHaveTextContent('Tokyo Agent')
+    expect(within(dialog).getByRole('button', { name: '关联' })).toBeEnabled()
+
+    await user.click(within(dialog).getByRole('button', { name: '关联' }))
+
+    expect(targetPageSizes).toContain('100')
+    expect(agentPageSizes).toContain('100')
+    expect(quickAssociateRequests).toEqual([
+      {
+        target_uuid: target.target_uuid,
+        agent_uuid: agent.agent_uuid,
+      },
+    ])
+  })
+
   it('shows only fields related to the selected protocol when creating tasks', async () => {
     const user = userEvent.setup()
     server.use(

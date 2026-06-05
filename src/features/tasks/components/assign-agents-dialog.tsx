@@ -18,7 +18,7 @@ interface AssignAgentsDialogProps {
 export function AssignAgentsDialog({ taskUuid, onClose }: AssignAgentsDialogProps) {
   const { t } = useTranslation()
   const { data: taskAgentsData, isLoading } = useTaskAgents(taskUuid ?? '')
-  const { data: allAgentsData } = useAgents({ page_size: 200 })
+  const { data: allAgentsData } = useAgents({ page_size: 100 })
   const assignAgents = useAssignAgents()
   const unassignAgent = useUnassignAgent()
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set())
