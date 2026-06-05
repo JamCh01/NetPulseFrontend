@@ -40,6 +40,7 @@ import { MONITORING_PROTOCOLS, PROTOCOL_COLORS, ipVersionLabel, protocolLabel } 
 
 const PAGE_SIZE = 100
 const PROTOCOLS: TargetProtocol[] = [...MONITORING_PROTOCOLS]
+const REDACTED_TARGET = '[Target]'
 
 export default function TargetsPage() {
   const { t } = useTranslation()
@@ -103,7 +104,7 @@ export default function TargetsPage() {
   const openEditTarget = (target: AdminTarget) => {
     setForm({
       name: target.name,
-      target: target.target,
+      target: target.target === REDACTED_TARGET ? '' : target.target,
       ip_version: target.ip_version,
       is_anycast: target.is_anycast,
       continent: target.continent ?? '',
@@ -143,12 +144,20 @@ export default function TargetsPage() {
     supported_protocols: form.supported_protocols,
   })
 
+  const updateTargetPayload = () => {
+    const payload = targetPayload() as Partial<ReturnType<typeof targetPayload>>
+    if (!form.target.trim()) {
+      delete payload.target
+    }
+    return payload
+  }
+
   const handleSubmitTarget = (event: React.FormEvent) => {
     event.preventDefault()
     if (editingTarget) {
       updateTarget.mutate({
         uuid: editingTarget.target_uuid,
-        data: targetPayload(),
+        data: updateTargetPayload(),
       }, {
         onSuccess: () => {
           toast.success(t('targets.updatedToast'))
@@ -238,7 +247,7 @@ export default function TargetsPage() {
                     <div>{target.name}</div>
                     <div className="text-xs text-text-muted">{target.is_anycast ? 'AnyCast' : target.target_type}</div>
                   </TableCell>
-                  <TableCell className="font-[family-name:var(--font-mono)] text-sm text-text-secondary">{target.target}</TableCell>
+                  <TableCell className="text-sm text-text-secondary">{target.target_type.toUpperCase()} · {target.ip_version}</TableCell>
                   <TableCell className="text-sm text-text-secondary">{joinLocation(target)}</TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
@@ -312,7 +321,12 @@ export default function TargetsPage() {
               </div>
               <div>
                 <Label className="mb-1.5 text-xs text-text-secondary">{t('targets.targetAddress')}</Label>
-                <Input value={form.target} onChange={(event) => setForm({ ...form, target: event.target.value })} required />
+                <Input
+                  value={form.target}
+                  onChange={(event) => setForm({ ...form, target: event.target.value })}
+                  placeholder={editingTarget ? t('targets.keepExistingAddress') : undefined}
+                  required={!editingTarget}
+                />
               </div>
               <div>
                 <Label className="mb-1.5 text-xs text-text-secondary">{t('targets.ipVersion')}</Label>

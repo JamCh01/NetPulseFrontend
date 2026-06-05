@@ -212,8 +212,8 @@ export default function MonitoringDetailPage() {
                 {task.target.is_anycast && <Badge variant="info">Anycast</Badge>}
               </div>
               <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-muted">
-                <span className="font-mono text-text-secondary">{task.target.target}{port}</span>
                 <span>{task.target.name}</span>
+                {port && <span>{port}</span>}
                 <span>{formatTargetLocation(task.target, t('monitoring.locationUnknown'))}</span>
                 {task.target.carrier && <span>{task.target.carrier}</span>}
               </div>

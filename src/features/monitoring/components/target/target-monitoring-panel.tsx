@@ -541,7 +541,6 @@ function TargetSummary({ group }: { group: MonitoringTargetGroup }) {
             {group.target.is_anycast && <Badge variant="info">Anycast</Badge>}
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-muted">
-            <span className="font-mono text-text-secondary">{group.target.target}</span>
             <span className="inline-flex items-center gap-1">
               <MapPin className="h-3.5 w-3.5" />
               {formatTargetLocation(group.target, t('monitoring.locationUnknown'))}

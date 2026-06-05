@@ -561,6 +561,7 @@
     "listFailed": "Target 列表加载失败",
     "emptyList": "暂无 Target",
     "targetAddress": "目标地址",
+    "keepExistingAddress": "留空保持现有目标地址",
     "location": "位置",
     "protocols": "协议",
     "updatedAt": "更新时间",

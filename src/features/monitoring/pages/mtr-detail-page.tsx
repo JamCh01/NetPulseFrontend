@@ -110,7 +110,6 @@ export default function MtrDetailPage() {
                 {task.target.is_anycast && <Badge variant="info">Anycast</Badge>}
               </div>
               <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-muted">
-                <span className="font-mono text-text-secondary">{task.target.target}</span>
                 <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{formatTargetLocation(task.target, t('monitoring.locationUnknown'))}</span>
                 <span className="inline-flex items-center gap-1"><Radio className="h-3.5 w-3.5" />{task.agent?.name ?? t('monitoring.agentUnassigned')}</span>
                 <span>{formatAgentLocation(task.agent, t('monitoring.locationUnknown'), t('monitoring.agentNotBound'))}</span>

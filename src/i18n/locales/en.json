@@ -561,6 +561,7 @@
     "listFailed": "Failed to load Target list",
     "emptyList": "No Targets",
     "targetAddress": "Target Address",
+    "keepExistingAddress": "Leave blank to keep the existing target address",
     "location": "Location",
     "protocols": "Protocols",
     "updatedAt": "Updated At",

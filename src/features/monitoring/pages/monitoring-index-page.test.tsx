@@ -72,6 +72,7 @@ describe('MonitoringIndexPage', () => {
     })
 
     const summary = await screen.findByRole('region', { name: 'Tokyo Edge' })
+    expect(screen.queryByText('example.com')).not.toBeInTheDocument()
     expect(within(summary).getByText('Target 描述')).toBeInTheDocument()
     expect(within(summary).getByRole('heading', { name: '东京边缘节点' })).toBeInTheDocument()
     expect(within(summary).getByText('公网连通性监控')).toBeInTheDocument()

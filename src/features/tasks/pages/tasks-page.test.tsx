@@ -124,6 +124,24 @@ describe('TasksPage', () => {
     ])
   })
 
+  it('does not render raw Target addresses in task target selectors', async () => {
+    const user = userEvent.setup()
+    server.use(
+      http.get('*/api/v1/tasks', () => HttpResponse.json({ items: [] })),
+      http.get('*/api/v1/targets', () => HttpResponse.json({ items: [target] })),
+      http.get('*/api/v1/agents', () => HttpResponse.json({ items: [agent] })),
+    )
+
+    renderWithProviders(<TasksPage />)
+
+    await user.click(screen.getByRole('button', { name: '新增 Task' }))
+    const dialog = await screen.findByRole('dialog', { name: '新增 Task' })
+    await user.click(within(dialog).getByRole('combobox', { name: 'Target' }))
+
+    expect(await screen.findByRole('option', { name: 'Tokyo iperf3 Target' })).toBeInTheDocument()
+    expect(screen.queryByText('iperf3.tokyo.example.com')).not.toBeInTheDocument()
+  })
+
   it('shows only fields related to the selected protocol when creating tasks', async () => {
     const user = userEvent.setup()
     server.use(

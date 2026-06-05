@@ -54,7 +54,7 @@ function protocolCoverage(group: MonitoringTargetGroup, protocol: MonitoringProt
 function TaskRow({ task, basePath, statusMap }: { task: MonitoringTask; basePath: string; statusMap: Record<LatestResultState, StatusUi> }) {
   const { t, i18n } = useTranslation()
   const status = statusMap[classifyTaskStatus(task)]
-  const port = typeof task.probe_config?.port === 'number' ? `:${task.probe_config.port}` : ''
+  const port = typeof task.probe_config?.port === 'number' ? ` · :${task.probe_config.port}` : ''
   return (
     <Link
       to={taskHref(basePath, task)}
@@ -68,7 +68,7 @@ function TaskRow({ task, basePath, statusMap }: { task: MonitoringTask; basePath
           <span className="truncate text-sm font-medium text-text-primary">{task.name}</span>
         </div>
         <div className="mt-1 truncate text-xs text-text-muted">
-          {task.agent?.name ?? t('monitoring.agentUnassigned')} · {formatAgentLocation(task.agent, t('monitoring.locationUnknown'), t('monitoring.agentNotBound'))} · {task.target.target}{port}
+          {task.agent?.name ?? t('monitoring.agentUnassigned')} · {formatAgentLocation(task.agent, t('monitoring.locationUnknown'), t('monitoring.agentNotBound'))}{port}
         </div>
       </div>
       <div className="flex items-center text-xs text-text-muted sm:justify-end">
@@ -104,7 +104,6 @@ function TargetGroupPanel({ group, basePath, statusMap }: { group: MonitoringTar
               {group.target.is_anycast && <Badge variant="info">Anycast</Badge>}
             </div>
             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-muted">
-              <span className="font-mono text-text-secondary">{group.target.target}</span>
               <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{formatTargetLocation(group.target, t('monitoring.locationUnknown'))}</span>
               {group.target.carrier && <span className="inline-flex items-center gap-1"><Server className="h-3.5 w-3.5" />{group.target.carrier}</span>}
             </div>
@@ -163,7 +162,6 @@ export default function MonitoringIndexPage() {
         if (!needle) return true
         return [
           group.target.name,
-          group.target.target,
           group.target.carrier ?? '',
           ...group.agents.map((agent) => agent.name),
           ...group.tasks.map((task) => task.name),

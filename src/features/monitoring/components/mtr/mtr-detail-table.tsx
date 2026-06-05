@@ -44,7 +44,7 @@ export function MtrDetailTable({ result, isLoading, showHeader = true }: MtrDeta
           <div className="flex flex-wrap items-center gap-3 text-xs text-text-muted">
             <span>{new Date(result.timestamp).toLocaleString()}</span>
             <span>{result.total_hops} hops</span>
-            {result.resolved_ip && <span>resolved {result.resolved_ip}</span>}
+            {result.resolved_ip === '[Target IP]' && <span>resolved {result.resolved_ip}</span>}
             {typeof result.duration_ms === 'number' && <span>{result.duration_ms}ms</span>}
           </div>
         </div>

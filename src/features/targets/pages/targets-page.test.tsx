@@ -58,6 +58,22 @@ describe('TargetsPage', () => {
     ])
   })
 
+  it('does not render raw Target addresses in the target list', async () => {
+    server.use(
+      http.get('*/api/v1/targets', () => HttpResponse.json(paginate([createMockTarget({
+        name: 'Tokyo Target',
+        target: 'secret-origin.example.com',
+        ip_version: '4',
+      })]))),
+      http.get('*/api/v1/agents', () => HttpResponse.json(paginate([createMockAgent()]))),
+    )
+
+    renderWithProviders(<TargetsPage />)
+
+    expect(await screen.findByText('Tokyo Target')).toBeInTheDocument()
+    expect(screen.queryByText('secret-origin.example.com')).not.toBeInTheDocument()
+  })
+
   it('renders a live Markdown preview for the target comment field', async () => {
     const user = userEvent.setup()
     server.use(

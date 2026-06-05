@@ -226,7 +226,6 @@ function Iperf3DetailPanel({
         <Iperf3DetailMetric label={t('monitoring.parallelThreads')} value={String(result.parallel)} icon={GitBranch} />
         <Iperf3DetailMetric label={t('monitoring.port')} value={String(result.port)} icon={RadioTower} />
         <Iperf3DetailMetric label={t('monitoring.duration')} value={`${result.duration_sec}s`} icon={Clock3} />
-        <Iperf3DetailMetric label="Resolved IP" value={result.resolved_ip ?? '-'} icon={Activity} />
         <Iperf3DetailMetric label={t('monitoring.runStatus')} value={result.latest_run_status || '-'} icon={Activity} />
       </div>
 

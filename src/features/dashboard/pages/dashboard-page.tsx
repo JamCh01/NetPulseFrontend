@@ -69,6 +69,7 @@ function StatTile({ label, value, icon: Icon, tone }: { label: string; value: st
 }
 
 function CoverageRow({ group, selected, onSelect, statusMap }: { group: MonitoringTargetGroup; selected: boolean; onSelect: () => void; statusMap: Record<LatestResultState, StatusUi> }) {
+  const { t } = useTranslation()
   const status = statusMap[group.status]
   return (
     <button
@@ -81,7 +82,7 @@ function CoverageRow({ group, selected, onSelect, statusMap }: { group: Monitori
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="truncate text-sm font-medium text-text-primary">{group.target.name}</div>
-          <div className="mt-1 truncate text-xs text-text-muted">{group.target.target}</div>
+          <div className="mt-1 truncate text-xs text-text-muted">{formatTargetLocation(group.target, t('monitoring.locationUnknown'))}</div>
         </div>
         <Badge variant={status.variant}>{status.label}</Badge>
       </div>
@@ -155,7 +156,7 @@ function EvidencePanel({ group }: { group?: MonitoringTargetGroup }) {
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="truncate text-base font-semibold text-text-primary">{group.target.name}</div>
-            <div className="mt-1 font-mono text-xs text-text-muted">{group.target.target}</div>
+            <div className="mt-1 text-xs text-text-muted">{formatTargetLocation(group.target, t('monitoring.locationUnknown'))}</div>
           </div>
           {group.target.is_anycast && <Badge variant="info">Anycast</Badge>}
         </div>

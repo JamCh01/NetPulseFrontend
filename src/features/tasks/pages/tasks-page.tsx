@@ -388,7 +388,7 @@ function iperf3ModeLabel(mode: Iperf3Mode, t: TFunction<'translation'>): string 
 
 function targetOptionLabel(target: TargetOptionSummary | null | undefined, placeholder: string, fallback?: string | null): string {
   if (!target) return fallback || placeholder
-  return `${target.name} - ${target.target}`
+  return target.name
 }
 
 function agentOptionLabel(agent: AgentOptionSummary | null | undefined, placeholder: string, fallback?: string | null): string {
@@ -752,7 +752,7 @@ export default function TasksPage() {
                   </SelectTrigger>
                   <SelectContent>
                     {targets.map((target) => (
-                      <SelectItem key={target.target_uuid} value={target.target_uuid}>{target.name} - {target.target}</SelectItem>
+                      <SelectItem key={target.target_uuid} value={target.target_uuid}>{target.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -826,7 +826,7 @@ export default function TasksPage() {
                 </SelectTrigger>
                 <SelectContent>
                   {targets.map((target) => (
-                    <SelectItem key={target.target_uuid} value={target.target_uuid}>{target.name} - {target.target}</SelectItem>
+                    <SelectItem key={target.target_uuid} value={target.target_uuid}>{target.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -876,7 +876,7 @@ export default function TasksPage() {
                     </SelectTrigger>
                     <SelectContent>
                       {targets.map((target) => (
-                        <SelectItem key={target.target_uuid} value={target.target_uuid}>{target.name} - {target.target}</SelectItem>
+                        <SelectItem key={target.target_uuid} value={target.target_uuid}>{target.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
