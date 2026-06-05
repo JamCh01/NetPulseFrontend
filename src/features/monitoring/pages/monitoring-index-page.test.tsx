@@ -146,4 +146,77 @@ describe('MonitoringIndexPage', () => {
     expect(await within(summary).findByText('后台刚更新的 Target 描述。')).toBeInTheDocument()
     expect(within(summary).queryByText('旧的任务列表 Target 描述。')).not.toBeInTheDocument()
   })
+
+  it('hides protocol sections when the selected Target has no tasks for that protocol', async () => {
+    server.use(
+      http.get('*/api/v1/monitoring/targets/target-1', () => HttpResponse.json({
+        data: {
+          target_uuid: 'target-1',
+          name: 'Tokyo Edge',
+          target: 'example.com',
+          target_type: 'domain',
+          ip_version: '4+6',
+          is_anycast: false,
+          continent: 'Asia',
+          country: 'Japan',
+          city: 'Tokyo',
+          carrier: 'Example IDC',
+          comment: 'Only ICMP is monitored.',
+        },
+      })),
+      http.get('*/api/v1/monitoring/tasks', () => HttpResponse.json({
+        data: {
+          items: [{
+            task_uuid: 'task-icmp-1',
+            name: 'Tokyo ICMP',
+            task_type: 'icmp',
+            interval_sec: 60,
+            is_enabled: true,
+            target: {
+              target_uuid: 'target-1',
+              name: 'Tokyo Edge',
+              target: 'example.com',
+              target_type: 'domain',
+              ip_version: '4+6',
+              is_anycast: false,
+              continent: 'Asia',
+              country: 'Japan',
+              city: 'Tokyo',
+              carrier: 'Example IDC',
+              comment: 'Only ICMP is monitored.',
+            },
+            agent: {
+              agent_uuid: 'agent-1',
+              name: 'Tokyo Agent',
+              city: 'Tokyo',
+              country: 'Japan',
+            },
+            latest_result: {
+              exists: true,
+              latest_sample_at: '2026-06-05T00:00:00Z',
+              latest_run_status: 'success',
+            },
+            created_at: '2026-06-05T00:00:00Z',
+            updated_at: '2026-06-05T00:00:00Z',
+          }],
+        },
+      })),
+      http.get('*/api/v1/monitoring/tasks/task-icmp-1/metrics', () => HttpResponse.json({
+        data: { series: [] },
+      })),
+    )
+
+    renderWithProviders(<MonitoringIndexPage />, {
+      initialEntries: ['/monitoring?target_uuid=target-1'],
+    })
+
+    await screen.findByRole('region', { name: 'Tokyo Edge' })
+    expect(screen.getByRole('heading', { name: 'ICMP' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'TCP' })).not.toBeInTheDocument()
+    expect(screen.queryByText('MTR 结果')).not.toBeInTheDocument()
+    expect(screen.queryByText('iperf3 结果')).not.toBeInTheDocument()
+    expect(screen.queryByText('当前 Target 没有 TCP 任务')).not.toBeInTheDocument()
+    expect(screen.queryByText('当前 Target 没有 MTR 任务')).not.toBeInTheDocument()
+    expect(screen.queryByText('当前 Target 没有 IPERF3 任务')).not.toBeInTheDocument()
+  })
 })

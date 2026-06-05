@@ -650,10 +650,18 @@ export function TargetMonitoringPanel({
   return (
     <div className="space-y-4">
       <TargetSummary group={group} />
-      <MetricsProtocolPanel protocol="icmp" tasks={icmpTasks} timeRange={icmpTimeRange} onTimeRangeChange={setIcmpTimeRange} />
-      <MetricsProtocolPanel protocol="tcp" tasks={tcpTasks} timeRange={tcpTimeRange} onTimeRangeChange={setTcpTimeRange} />
-      <MtrProtocolPanel tasks={mtrTasks} timeRange={mtrTimeRange} onTimeRangeChange={setMtrTimeRange} />
-      <Iperf3ProtocolPanel tasks={iperf3Tasks} timeRange={iperf3TimeRange} onTimeRangeChange={setIperf3TimeRange} />
+      {icmpTasks.length > 0 && (
+        <MetricsProtocolPanel protocol="icmp" tasks={icmpTasks} timeRange={icmpTimeRange} onTimeRangeChange={setIcmpTimeRange} />
+      )}
+      {tcpTasks.length > 0 && (
+        <MetricsProtocolPanel protocol="tcp" tasks={tcpTasks} timeRange={tcpTimeRange} onTimeRangeChange={setTcpTimeRange} />
+      )}
+      {mtrTasks.length > 0 && (
+        <MtrProtocolPanel tasks={mtrTasks} timeRange={mtrTimeRange} onTimeRangeChange={setMtrTimeRange} />
+      )}
+      {iperf3Tasks.length > 0 && (
+        <Iperf3ProtocolPanel tasks={iperf3Tasks} timeRange={iperf3TimeRange} onTimeRangeChange={setIperf3TimeRange} />
+      )}
     </div>
   )
 }
