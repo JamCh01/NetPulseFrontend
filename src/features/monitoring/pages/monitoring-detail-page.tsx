@@ -7,6 +7,7 @@ import { useMonitoringData, useMultiAgentMonitoringData } from '@/api/hooks/use-
 import { useMonitoringTaskDetail } from '@/api/hooks/use-monitoring-task-detail'
 import { SmokePingChart } from '@/features/monitoring/components/charts/smokeping-chart'
 import { MultiAgentChart } from '@/features/monitoring/components/charts/multi-agent-chart'
+import { MetricDetailTable } from '@/features/monitoring/components/charts/metric-detail-table'
 import { TimeRangeSelector } from '@/features/monitoring/components/time-range/time-range-selector'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -98,24 +99,28 @@ export default function MonitoringDetailPage() {
 
   const isMtr = task?.task_type === 'mtr'
   const isAllAgents = !selectedAgentUuid
+  const protocol = task?.task_type === 'tcp' ? 'tcp' : 'icmp'
 
   const {
     data: singleMonitoringData,
     isLoading: singleLoading,
+    isFetching: singleFetching,
     error: singleError,
   } = useMonitoringData(isMtr ? '' : (taskUuid ?? ''), selectedAgentUuid || undefined, {
     start: timeRange.start,
     end: timeRange.end,
-  })
+  }, protocol)
 
   const {
     agentSeries,
     isLoading: multiLoading,
+    isUpdating: multiUpdating,
     error: multiError,
   } = useMultiAgentMonitoringData(
     !isMtr && isAllAgents ? (taskUuid ?? '') : '',
     isAllAgents ? taskAgents : [],
     { start: timeRange.start, end: timeRange.end },
+    protocol,
   )
 
   const stats = useMemo(() => {
@@ -175,6 +180,14 @@ export default function MonitoringDetailPage() {
 
   const status = statusCopy(t)[classifyTaskStatus(task)]
   const port = typeof task.probe_config?.port === 'number' ? `:${task.probe_config.port}` : ''
+  const selectedAgentName = taskAgents.find((agent) => agent.agent_uuid === selectedAgentUuid)?.agent_name ?? task.agent?.name ?? 'Unknown'
+  const detailAgentSeries = isAllAgents
+    ? agentSeries
+    : [{
+      agentUuid: selectedAgentUuid || task.agent?.agent_uuid || task.task_uuid,
+      agentName: selectedAgentName,
+      data: singleMonitoringData?.data ?? [],
+    }]
 
   return (
     <div className="space-y-4">
@@ -285,17 +298,26 @@ export default function MonitoringDetailPage() {
           </div>
 
           {isAllAgents ? (
-            <MultiAgentChart agentSeries={agentSeries} isLoading={multiLoading} error={multiError} height={420} chartStyle={chartStyle} />
+            <MultiAgentChart agentSeries={agentSeries} isLoading={multiLoading} isUpdating={multiUpdating} error={multiError} height={420} chartStyle={chartStyle} protocol={protocol} />
           ) : (
             <SmokePingChart
               data={singleMonitoringData?.data}
               isLoading={singleLoading}
+              isUpdating={singleFetching && !singleLoading}
               error={singleError as Error | null}
-              agentName={taskAgents.find((agent) => agent.agent_uuid === selectedAgentUuid)?.agent_name}
+              agentName={selectedAgentName}
               height={420}
               chartStyle={chartStyle}
+              protocol={protocol}
             />
           )}
+
+          <MetricDetailTable
+            protocol={protocol}
+            agentSeries={detailAgentSeries}
+            isLoading={isAllAgents ? multiLoading : singleLoading}
+            isUpdating={isAllAgents ? multiUpdating : singleFetching && !singleLoading}
+          />
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             <StatItem label={t('monitoring.averageLatency')} value={stats ? `${stats.avg.toFixed(1)}ms` : '-'} />

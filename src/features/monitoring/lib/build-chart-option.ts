@@ -3,6 +3,7 @@ import type { MonitoringDataPoint } from '@/features/monitoring/lib/monitoring-d
 import type { ChartBandData } from './transform-chart-data'
 import type { ChartThemeConfig } from './chart-theme'
 import { buildDataIndex, createTooltipFormatter } from './tooltip-formatter'
+import type { MonitoringMetricProtocol } from './monitoring-data-point'
 
 type ChartStyle = 'basic' | 'smoke'
 
@@ -12,6 +13,7 @@ interface BuildOptionParams {
   agentName?: string
   rawPoints: MonitoringDataPoint[]
   chartStyle?: ChartStyle
+  protocol?: MonitoringMetricProtocol
 }
 
 /**
@@ -24,6 +26,7 @@ export function buildSmokePingOption({
   agentName,
   rawPoints,
   chartStyle = 'smoke',
+  protocol,
 }: BuildOptionParams): EChartsOption {
   if (data.timestamps.length === 0) {
     return { title: { text: 'No data', left: 'center', top: 'center', textStyle: { color: theme.axisLabelColor, fontSize: 14 } } }
@@ -175,7 +178,7 @@ export function buildSmokePingOption({
       backgroundColor: theme.tooltipBg,
       borderColor: theme.tooltipBorder,
       textStyle: { color: theme.tooltipTextColor },
-      formatter: createTooltipFormatter(dataIndex, agentName, theme) as never,
+      formatter: createTooltipFormatter(dataIndex, agentName, theme, protocol) as never,
     },
     dataZoom: [
       {

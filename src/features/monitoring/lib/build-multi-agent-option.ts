@@ -1,8 +1,9 @@
 import type { EChartsOption } from 'echarts'
-import type { MonitoringDataPoint } from '@/features/monitoring/lib/monitoring-data-point'
+import type { MonitoringDataPoint, MonitoringMetricProtocol } from '@/features/monitoring/lib/monitoring-data-point'
 import type { ChartThemeConfig } from './chart-theme'
 import { getAgentColor } from './agent-colors'
 import { formatChartTime } from '@/lib/format'
+import { formatMetricValue, normalizeProtocol } from './protocol-metrics'
 
 export interface AgentSeriesData {
   agentUuid: string
@@ -71,8 +72,11 @@ export function buildMultiAgentOption(
   agentSeries: AgentSeriesData[],
   theme: ChartThemeConfig,
   chartStyle: ChartStyle = 'smoke',
+  protocol?: MonitoringMetricProtocol,
 ): EChartsOption {
   const nonEmpty = agentSeries.filter((s) => s.data.length > 0)
+  const normalizedProtocol = normalizeProtocol(protocol ?? nonEmpty[0]?.data[0]?.protocol)
+  const lossSeriesName = normalizedProtocol === 'tcp' ? 'Connect Failure' : 'Packet Loss'
 
   if (nonEmpty.length === 0) {
     return {
@@ -134,9 +138,9 @@ export function buildMultiAgentOption(
       connectNulls: false,
     })
 
-    // Packet loss bars use the right axis.
+    // Loss/failure bars use the right axis.
     series.push({
-      name: `${agent.agentName} Packet Loss`,
+      name: `${agent.agentName} ${lossSeriesName}`,
       type: 'bar',
       yAxisIndex: 1,
       barMaxWidth: 8,
@@ -197,7 +201,7 @@ export function buildMultiAgentOption(
       itemWidth: 16,
       itemHeight: 2,
       itemGap: 16,
-      // Only show agent Avg lines in legend, not band/loss series
+      // Only show agent Avg lines in legend, not band/loss/failure series
       selector: false,
       data: processedAgents.map((pa, i) => ({
         name: pa.agent.agentName,
@@ -242,7 +246,7 @@ export function buildMultiAgentOption(
       },
       {
         type: 'value',
-        name: 'Loss',
+        name: normalizedProtocol === 'tcp' ? 'Failure' : 'Loss',
         nameTextStyle: { color: theme.axisLabelColor, fontSize: 10 },
         axisLabel: {
           color: theme.axisLabelColor,
@@ -274,13 +278,11 @@ export function buildMultiAgentOption(
         const visibleNames = new Set(
           rawItems
             .map((i) => i.seriesName)
-            .filter((n) => !n.includes('Min baseline') && !n.includes('Min-Max band') && !n.includes('Packet Loss')),
+            .filter((n) => !n.includes('Min baseline') && !n.includes('Min-Max band') && !n.includes('Packet Loss') && !n.includes('Connect Failure')),
         )
 
         const ts = rawItems[0].axisValue
         const timeStr = formatChartTime(ts)
-
-        const rtt = (v: number) => v.toFixed(1)
 
         const labelColor = theme.tooltipLabelColor
         const valueColor = theme.tooltipValueColor
@@ -304,23 +306,36 @@ export function buildMultiAgentOption(
         const mono = "font-family:'JetBrains Mono',monospace;font-weight:500;text-align:right"
         const th = `color:${labelColor};font-size:9px;text-align:right;padding:0 4px`
         const td = `font-size:10px;${mono};padding:1px 4px`
+        const headers = normalizedProtocol === 'tcp'
+          ? ['Avg', 'Min/Max', 'Jitter', 'Attempts', 'OK/Fail', 'Failure']
+          : ['Avg', 'Min/Max', 'Jitter', 'Sent/Recv', 'Loss']
 
         let html = `<div style="font-family:'Inter',sans-serif;font-size:11px;line-height:1.4">`
         html += `<div style="color:${labelColor};margin-bottom:4px">${timeStr}</div>`
         html += `<table style="border-collapse:collapse;width:100%">`
-        html += `<tr><td style="${th}"></td><td style="${th}">Avg</td><td style="${th}">Min</td><td style="${th}">Max</td><td style="${th}">P95</td><td style="${th}">P99</td><td style="${th}">Loss</td></tr>`
+        html += `<tr><td style="${th}"></td>${headers.map((label) => `<td style="${th}">${label}</td>`).join('')}</tr>`
 
         for (const row of rows) {
           const p = row.point
-          const lc = p.packet_loss_pct > 0 ? '#ff3250' : '#4ade80'
+          const failureOrLoss = normalizedProtocol === 'tcp' ? p.connect_failure_pct ?? p.packet_loss_pct : p.packet_loss_pct
+          const lc = failureOrLoss > 0 ? '#ff3250' : '#4ade80'
+          const avg = normalizedProtocol === 'tcp' ? p.connect_latency_avg_ms ?? p.avg_rtt : p.latency_avg_ms ?? p.avg_rtt
+          const min = normalizedProtocol === 'tcp' ? p.connect_latency_min_ms ?? p.min_rtt : p.latency_min_ms ?? p.min_rtt
+          const max = normalizedProtocol === 'tcp' ? p.connect_latency_max_ms ?? p.max_rtt : p.latency_max_ms ?? p.max_rtt
+          const jitter = normalizedProtocol === 'tcp' ? p.connect_jitter_ms : p.latency_jitter_ms
           html += `<tr>`
           html += `<td style="padding:1px 4px;white-space:nowrap"><span style="display:inline-block;width:8px;height:2px;border-radius:1px;background:${row.color};vertical-align:middle;margin-right:4px"></span><span style="color:${nameColor};font-size:10px">${row.name}</span></td>`
-          html += `<td style="${td};color:${row.color}">${rtt(p.avg_rtt)}</td>`
-          html += `<td style="${td};color:${valueColor}">${rtt(p.min_rtt)}</td>`
-          html += `<td style="${td};color:${valueColor}">${rtt(p.max_rtt)}</td>`
-          html += `<td style="${td};color:${valueColor}">${rtt(p.p95_rtt)}</td>`
-          html += `<td style="${td};color:${valueColor}">${rtt(p.p99_rtt)}</td>`
-          html += `<td style="${td};color:${lc}">${p.packet_loss_pct.toFixed(1)}%</td>`
+          html += `<td style="${td};color:${row.color}">${formatMetricValue(avg, 'ms').replace('ms', '')}</td>`
+          html += `<td style="${td};color:${valueColor}">${formatMetricValue(min, 'ms').replace('ms', '')}/${formatMetricValue(max, 'ms').replace('ms', '')}</td>`
+          html += `<td style="${td};color:${valueColor}">${formatMetricValue(jitter, 'ms').replace('ms', '')}</td>`
+          if (normalizedProtocol === 'tcp') {
+            html += `<td style="${td};color:${valueColor}">${formatMetricValue(p.connect_attempts, 'count')}</td>`
+            html += `<td style="${td};color:${valueColor}">${formatMetricValue(p.connect_successes, 'count')}/${formatMetricValue(p.connect_failures, 'count')}</td>`
+            html += `<td style="${td};color:${lc}">${formatMetricValue(failureOrLoss, 'percent')}</td>`
+          } else {
+            html += `<td style="${td};color:${valueColor}">${formatMetricValue(p.packets_sent, 'count')}/${formatMetricValue(p.packets_received, 'count')}</td>`
+            html += `<td style="${td};color:${lc}">${formatMetricValue(failureOrLoss, 'percent')}</td>`
+          }
           html += `</tr>`
         }
 

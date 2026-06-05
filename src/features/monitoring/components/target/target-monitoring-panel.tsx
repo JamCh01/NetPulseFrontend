@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Skeleton } from '@/components/ui/skeleton'
 import { MultiAgentChart } from '@/features/monitoring/components/charts/multi-agent-chart'
+import { MetricDetailTable } from '@/features/monitoring/components/charts/metric-detail-table'
 import { Iperf3ResultViews } from '@/features/monitoring/components/iperf3/iperf3-result-views'
 import { MtrResultViews } from '@/features/monitoring/components/mtr/mtr-result-views'
 import { GrafanaTimeRangeSelector } from '@/features/monitoring/components/time-range/time-range-selector'
@@ -349,7 +350,7 @@ function MetricsProtocolPanel({
     () => filterTasksBySelectedAgents(tasks, effectiveSelectedAgentUuids),
     [effectiveSelectedAgentUuids, tasks],
   )
-  const { agentSeries, isLoading, error } = useTaskMonitoringSeries(filteredTasks, timeRange)
+  const { agentSeries, isLoading, isUpdating, error } = useTaskMonitoringSeries(filteredTasks, timeRange)
 
   return (
     <section className="overflow-hidden rounded-xl border border-border bg-bg-surface">
@@ -375,9 +376,18 @@ function MetricsProtocolPanel({
           <MultiAgentChart
             agentSeries={agentSeries}
             isLoading={isLoading}
+            isUpdating={isUpdating}
             error={error}
             height={protocol === 'icmp' ? 340 : 320}
             chartStyle="smoke"
+            protocol={protocol}
+          />
+          <MetricDetailTable
+            protocol={protocol}
+            agentSeries={agentSeries}
+            isLoading={isLoading}
+            isUpdating={isUpdating}
+            className="mt-4"
           />
         </div>
       )}

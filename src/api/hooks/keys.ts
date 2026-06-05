@@ -58,6 +58,7 @@ export const monitoringKeys = {
     end: number
     granularity: string
     step_sec?: number
+    metrics?: string
   }) => [...monitoringKeys.all, 'query', params] as const,
   mtrList: (params: {
     task_uuid: string

@@ -6,11 +6,8 @@
 import type { MonitoringDataPoint } from '@/features/monitoring/lib/monitoring-data-point'
 import type { ChartThemeConfig } from './chart-theme'
 import { formatChartTime } from '@/lib/format'
-
-function rtt(val: number | undefined): string {
-  if (val === undefined || val === null) return '--'
-  return `${val.toFixed(1)}ms`
-}
+import { formatMetricValue, getMetricColumns, normalizeProtocol } from './protocol-metrics'
+import type { MonitoringMetricProtocol } from './monitoring-data-point'
 
 /**
  * Build a timestamp → MonitoringDataPoint index for O(1) lookup in tooltip.
@@ -34,6 +31,7 @@ export function createTooltipFormatter(
   dataIndex: Map<number, MonitoringDataPoint>,
   agentName?: string,
   theme?: ChartThemeConfig,
+  protocol?: MonitoringMetricProtocol,
 ) {
   const labelColor = theme?.tooltipLabelColor ?? '#9ca3af'
   const valueColor = theme?.tooltipValueColor ?? '#fff'
@@ -71,14 +69,13 @@ export function createTooltipFormatter(
       return html
     }
 
-    const rows = [
-      { label: 'Median', value: rtt(point.median_rtt), color: medianColor },
-      { label: 'Avg', value: rtt(point.avg_rtt) },
-      { label: 'Min', value: rtt(point.min_rtt) },
-      { label: 'Max', value: rtt(point.max_rtt) },
-      { label: 'P95', value: rtt(point.p95_rtt) },
-      { label: 'P99', value: rtt(point.p99_rtt) },
-    ]
+    const normalized = normalizeProtocol(protocol ?? point.protocol)
+    const columns = getMetricColumns(normalized)
+    const rows = columns.map((column) => ({
+      label: column.shortLabel,
+      value: formatMetricValue(point[column.key], column.kind),
+      color: column.key === 'latency_avg_ms' || column.key === 'connect_latency_avg_ms' ? medianColor : undefined,
+    }))
 
     for (const row of rows) {
       html += `<div style="display:flex;justify-content:space-between;gap:16px">`
@@ -86,14 +83,7 @@ export function createTooltipFormatter(
       html += `<span style="color:${row.color ?? valueColor};font-family:'JetBrains Mono',monospace;font-weight:500">${row.value}</span>`
       html += `</div>`
     }
-
-    // Packet loss row
-    const lossVal = point.packet_loss_pct
-    const lossColor = lossVal > 0 ? '#ff3250' : '#4ade80'
-    html += `<div style="display:flex;justify-content:space-between;gap:16px;margin-top:4px;padding-top:4px;border-top:1px solid ${dividerColor}">`
-    html += `<span style="color:${labelColor}">Loss</span>`
-    html += `<span style="color:${lossColor};font-family:'JetBrains Mono',monospace;font-weight:500">${lossVal.toFixed(1)}%</span>`
-    html += `</div>`
+    html += `<div style="margin-top:4px;padding-top:4px;border-top:1px solid ${dividerColor}"></div>`
 
     html += `</div>`
     return html

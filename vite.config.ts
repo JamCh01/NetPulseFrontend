@@ -31,6 +31,10 @@ export default defineConfig({
     include: ['src/**/*.test.{ts,tsx}'],
   },
   server: {
+    host: '0.0.0.0',
+    port: 51847,
+    strictPort: false,
+    allowedHosts: ['netpulse.lowendaff.com', '45.146.243.36'],
     proxy: {
       '/api': {
         target: 'http://127.0.0.1:8000',

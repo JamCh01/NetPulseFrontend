@@ -4,6 +4,7 @@ import { LazyECharts } from '@/components/charts/lazy-echarts'
 import { useChartTheme } from '../../lib/chart-theme'
 import { buildMultiAgentOption, type AgentSeriesData } from '../../lib/build-multi-agent-option'
 import { Skeleton } from '@/components/ui/skeleton'
+import type { MonitoringMetricProtocol } from '../../lib/monitoring-data-point'
 
 type ChartStyle = 'basic' | 'smoke'
 
@@ -11,23 +12,27 @@ export interface MultiAgentChartProps {
   agentSeries: AgentSeriesData[]
   isLoading?: boolean
   error?: Error | null
+  isUpdating?: boolean
   height?: number
   chartStyle?: ChartStyle
+  protocol?: MonitoringMetricProtocol
 }
 
 function MultiAgentChartInner({
   agentSeries,
   isLoading = false,
   error = null,
+  isUpdating = false,
   height = 400,
   chartStyle = 'smoke',
+  protocol,
 }: MultiAgentChartProps) {
   const { t } = useTranslation()
   const theme = useChartTheme()
 
   const option = useMemo(
-    () => buildMultiAgentOption(agentSeries, theme, chartStyle),
-    [agentSeries, theme, chartStyle],
+    () => buildMultiAgentOption(agentSeries, theme, chartStyle, protocol),
+    [agentSeries, theme, chartStyle, protocol],
   )
 
   const hasData = agentSeries.some((s) => s.data.length > 0)
@@ -44,7 +49,7 @@ function MultiAgentChartInner({
     )
   }
 
-  if (error) {
+  if (error && !hasData) {
     return (
       <div className="glass-light rounded-xl p-6 flex items-center justify-center" style={{ height }}>
         <div className="text-center">
@@ -67,7 +72,12 @@ function MultiAgentChartInner({
   }
 
   return (
-    <div className="glass-light rounded-xl p-4">
+    <div className="glass-light relative rounded-xl p-4">
+      {(isUpdating || error) && (
+        <div className="absolute right-5 top-5 z-10 rounded border border-border bg-bg-surface/90 px-2 py-1 text-[10px] font-medium text-text-muted shadow-sm">
+          {error ? t('monitoring.failedToLoad') : 'Updating'}
+        </div>
+      )}
       <LazyECharts
         option={option}
         style={{ height, width: '100%' }}
