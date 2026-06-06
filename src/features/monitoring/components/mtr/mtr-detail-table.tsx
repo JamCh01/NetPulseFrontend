@@ -53,24 +53,22 @@ export function MtrDetailTable({ result, isLoading, showHeader = true }: MtrDeta
       {result.as_path.length > 0 && (
         <div className="border-b border-border px-4 py-3">
           <div className="mb-2 text-[10px] font-medium uppercase text-text-dim">AS Path</div>
-          <div className="flex flex-wrap gap-1.5">
-            {result.as_path.map((asn, index) => (
-              <span key={`${asn}-${index}`} className="rounded-md border border-border bg-bg-surface-light px-2 py-1 font-mono text-xs text-text-secondary">
-                {asn}
-              </span>
-            ))}
+          <div className="font-mono text-xs text-text-secondary">
+            {result.as_path.join('->')}
           </div>
         </div>
       )}
 
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[760px]">
+        <table className="w-full min-w-[860px]">
           <thead>
             <tr className="border-b border-border bg-bg-surface-light">
               <th className="px-4 py-2.5 text-left text-[10px] font-medium uppercase text-text-muted">Hop</th>
               <th className="px-3 py-2.5 text-left text-[10px] font-medium uppercase text-text-muted">IP</th>
               <th className="px-3 py-2.5 text-left text-[10px] font-medium uppercase text-text-muted">Hostname</th>
               <th className="px-3 py-2.5 text-left text-[10px] font-medium uppercase text-text-muted">ASN</th>
+              <th className="px-3 py-2.5 text-right text-[10px] font-medium uppercase text-text-muted">{t('monitoring.sent')}</th>
+              <th className="px-3 py-2.5 text-right text-[10px] font-medium uppercase text-text-muted">{t('monitoring.received')}</th>
               <th className="px-3 py-2.5 text-right text-[10px] font-medium uppercase text-text-muted">Loss</th>
               <th className="px-3 py-2.5 text-right text-[10px] font-medium uppercase text-text-muted">Avg</th>
               <th className="px-3 py-2.5 text-right text-[10px] font-medium uppercase text-text-muted">Best</th>
@@ -84,6 +82,8 @@ export function MtrDetailTable({ result, isLoading, showHeader = true }: MtrDeta
                 <td className="px-3 py-2.5 font-mono text-xs text-text-primary">{hop.ip}</td>
                 <td className="px-3 py-2.5 font-mono text-xs text-text-secondary">{hop.hostname ?? '-'}</td>
                 <td className="px-3 py-2.5 font-mono text-xs text-text-secondary">{hop.asn ?? '-'}</td>
+                <td className="px-3 py-2.5 text-right font-mono text-xs text-text-secondary">{formatMtrCount(hop.packets_sent)}</td>
+                <td className="px-3 py-2.5 text-right font-mono text-xs text-text-secondary">{formatMtrCount(hop.packets_received)}</td>
                 <td className={`px-3 py-2.5 text-right font-mono text-xs ${hop.packet_loss_pct > 0 ? 'text-status-error-fg' : 'text-status-success-fg'}`}>
                   {hop.packet_loss_pct.toFixed(1)}%
                 </td>
@@ -97,4 +97,8 @@ export function MtrDetailTable({ result, isLoading, showHeader = true }: MtrDeta
       </div>
     </div>
   )
+}
+
+function formatMtrCount(value: number | null | undefined): string {
+  return typeof value === 'number' && Number.isFinite(value) ? String(value) : '-'
 }

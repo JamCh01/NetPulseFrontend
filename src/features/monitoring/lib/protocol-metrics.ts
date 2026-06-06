@@ -42,6 +42,7 @@ export interface MetricColumn {
 export interface AgentMetricRow {
   agentUuid: string
   agentName: string
+  ipFamily?: string | null
   timestamp: number
   point: MonitoringDataPoint
 }
@@ -158,6 +159,7 @@ export function flattenAgentMetricRows(
     .flatMap((series) => series.data.map((point) => ({
       agentUuid: series.agentUuid,
       agentName: series.agentName,
+      ipFamily: series.ipFamily,
       timestamp: point.timestamp,
       point: { ...point, protocol: point.protocol ?? normalized },
     })))
@@ -173,7 +175,7 @@ export function summarizeAgentMetricRows(
 ): AgentMetricRow[] {
   const normalized = normalizeProtocol(protocol)
   return agentSeries
-    .map((series) => {
+    .map((series): AgentMetricRow | null => {
       if (series.data.length === 0) return null
       const point = normalized === 'tcp'
         ? summarizeTcpWindow(series.data, normalized)
@@ -182,6 +184,7 @@ export function summarizeAgentMetricRows(
       return {
         agentUuid: series.agentUuid,
         agentName: series.agentName,
+        ipFamily: series.ipFamily,
         timestamp: latestTimestamp(series.data),
         point,
       }

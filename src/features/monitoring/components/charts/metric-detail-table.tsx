@@ -73,6 +73,7 @@ function MetricDetailTableInner({
             <thead className="sticky top-0 z-10 bg-bg-surface">
               <tr className="border-b border-border">
                 <th className="whitespace-nowrap px-3 py-2 font-medium text-text-muted">{t('monitoring.agent')}</th>
+                <th className="whitespace-nowrap px-3 py-2 font-medium text-text-muted">{t('tasks.ipFamily')}</th>
                 {columns.map((column) => (
                   <th key={String(column.key)} className="whitespace-nowrap px-3 py-2 text-right font-medium text-text-muted">
                     {t(column.labelKey)}
@@ -84,6 +85,7 @@ function MetricDetailTableInner({
               {displayRows.map((row) => (
                 <tr key={row.agentUuid} className="border-b border-border/60 hover:bg-muted/30">
                   <td className="whitespace-nowrap px-3 py-2 text-text-primary">{row.agentName}</td>
+                  <td className="whitespace-nowrap px-3 py-2 font-[family-name:var(--font-mono)] text-text-secondary">{formatIpFamily(row.ipFamily)}</td>
                   {columns.map((column) => (
                     <td key={String(column.key)} className="whitespace-nowrap px-3 py-2 text-right font-[family-name:var(--font-mono)] text-text-secondary">
                       {formatMetricValue(row.point[column.key], column.kind)}
@@ -101,3 +103,9 @@ function MetricDetailTableInner({
 
 export const MetricDetailTable = memo(MetricDetailTableInner)
 MetricDetailTable.displayName = 'MetricDetailTable'
+
+function formatIpFamily(ipFamily: string | null | undefined): string {
+  if (ipFamily === '4') return 'IPv4'
+  if (ipFamily === '6') return 'IPv6'
+  return '-'
+}

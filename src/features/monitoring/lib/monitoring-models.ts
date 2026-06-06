@@ -50,6 +50,7 @@ export interface MonitoringTask {
   name: string
   description?: string | null
   task_type: MonitoringProtocol
+  ip_family?: string | null
   interval_sec: number
   timeout_ms?: number | null
   packet_count?: number | null
@@ -140,6 +141,8 @@ export interface MtrHopAddressView {
   ip: string
   hostname?: string | null
   asn?: string | null
+  packets_sent?: number | null
+  packets_received?: number | null
   packet_loss_pct: number
   avg_ms: number
   best_ms: number
@@ -218,6 +221,7 @@ export function normalizeMonitoringTask(raw: unknown): MonitoringTask {
     name: readString(item.name, readString(item.task_uuid, 'Unnamed task')),
     description: readNullableString(item.description),
     task_type: readString(item.task_type, 'icmp').toLowerCase(),
+    ip_family: readNullableString(item.ip_family),
     interval_sec: readNumber(item.interval_sec, readNumber(item.interval, 60)),
     timeout_ms: typeof item.timeout_ms === 'number' ? item.timeout_ms : null,
     packet_count: typeof item.packet_count === 'number' ? item.packet_count : null,
@@ -456,6 +460,8 @@ export function normalizeMtrDetail(raw: unknown): MtrResultDetailView {
         ip: readString(rawAddress.ip, '*'),
         hostname: readNullableString(rawAddress.hostname) ?? readNullableString(rawAddress.ptr),
         asn: readNullableString(rawAddress.asn),
+        packets_sent: readFiniteNumber(rawAddress.packets_sent),
+        packets_received: readFiniteNumber(rawAddress.packets_received),
         packet_loss_pct: readNumber(rawAddress.packet_loss_pct),
         avg_ms: readNumber(rawAddress.avg_ms, readNumber(rawAddress.avg_rtt)),
         best_ms: readNumber(rawAddress.best_ms, readNumber(rawAddress.min_rtt)),

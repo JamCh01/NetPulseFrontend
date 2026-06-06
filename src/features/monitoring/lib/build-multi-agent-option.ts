@@ -8,6 +8,7 @@ import { formatMetricValue, normalizeProtocol } from './protocol-metrics'
 export interface AgentSeriesData {
   agentUuid: string
   agentName: string
+  ipFamily?: string | null
   data: MonitoringDataPoint[]
 }
 

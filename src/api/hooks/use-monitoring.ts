@@ -60,6 +60,7 @@ type MetricsEnvelope = {
 interface AgentMonitoringSeries {
   agentUuid: string
   agentName: string
+  ipFamily?: string | null
   data: MonitoringDataPoint[]
 }
 
@@ -212,6 +213,7 @@ export function useTaskMonitoringSeries(tasks: MonitoringTask[], timeRange: Time
           return {
             agentUuid: task.agent?.agent_uuid ?? task.task_uuid,
             agentName: monitoringTaskAgentDisplayName(task),
+            ipFamily: task.ip_family,
             data: normalizeMetricSeries(task.task_type, body.data?.series),
           }
         },

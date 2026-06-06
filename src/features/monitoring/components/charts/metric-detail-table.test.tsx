@@ -7,6 +7,7 @@ const icmpSeries: AgentSeriesData[] = [
   {
     agentUuid: 'agent-a',
     agentName: 'Tokyo',
+    ipFamily: '4',
     data: [
       {
         timestamp: 1_700_000_000,
@@ -49,6 +50,7 @@ const icmpSeries: AgentSeriesData[] = [
   {
     agentUuid: 'agent-b',
     agentName: 'Osaka',
+    ipFamily: '6',
     data: [
       {
         timestamp: 1_700_000_060,
@@ -76,6 +78,7 @@ const tcpSeries: AgentSeriesData[] = [
   {
     agentUuid: 'agent-a',
     agentName: 'Tokyo',
+    ipFamily: '4',
     data: [
       {
         timestamp: 1_700_000_000,
@@ -128,6 +131,7 @@ describe('MetricDetailTable', () => {
     expect(screen.getByRole('table', { name: 'ICMP 明细指标' })).toBeInTheDocument()
     expect(screen.queryByRole('columnheader', { name: '时间' })).not.toBeInTheDocument()
     expect(screen.getByRole('columnheader', { name: '探针' })).toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: 'IP 协议族' })).toBeInTheDocument()
     expect(screen.getByRole('columnheader', { name: '平均延迟' })).toBeInTheDocument()
     expect(screen.getByRole('columnheader', { name: '延迟抖动' })).toBeInTheDocument()
     expect(screen.getByRole('columnheader', { name: '接收包数' })).toBeInTheDocument()
@@ -136,8 +140,10 @@ describe('MetricDetailTable', () => {
     const rows = screen.getAllByRole('row')
     expect(rows).toHaveLength(3)
     expect(within(rows[1]).getByText('Osaka')).toBeInTheDocument()
+    expect(within(rows[1]).getByText('IPv6')).toBeInTheDocument()
     expect(within(rows[1]).getByText('22.0ms')).toBeInTheDocument()
     expect(within(rows[2]).getByText('Tokyo')).toBeInTheDocument()
+    expect(within(rows[2]).getByText('IPv4')).toBeInTheDocument()
     expect(within(rows[2]).getByText('15.2ms')).toBeInTheDocument()
     expect(within(rows[2]).getByText('16.7%')).toBeInTheDocument()
     expect(within(rows[2]).getByText('18')).toBeInTheDocument()
@@ -149,10 +155,12 @@ describe('MetricDetailTable', () => {
 
     expect(screen.getByRole('table', { name: 'TCP 明细指标' })).toBeInTheDocument()
     expect(screen.queryByRole('columnheader', { name: '时间' })).not.toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: 'IP 协议族' })).toBeInTheDocument()
     expect(screen.getByRole('columnheader', { name: '平均连接耗时' })).toBeInTheDocument()
     expect(screen.getByRole('columnheader', { name: '连接抖动' })).toBeInTheDocument()
     expect(screen.getByRole('columnheader', { name: '连接失败数' })).toBeInTheDocument()
     expect(screen.queryByRole('columnheader', { name: 'connect_latency_avg_ms' })).not.toBeInTheDocument()
+    expect(screen.getByText('IPv4')).toBeInTheDocument()
     expect(screen.getByText('47.2ms')).toBeInTheDocument()
     expect(screen.getByText('13.3%')).toBeInTheDocument()
     expect(screen.getByText('15')).toBeInTheDocument()
