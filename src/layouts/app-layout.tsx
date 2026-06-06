@@ -212,8 +212,10 @@ export function AppLayout() {
       {/* Main content */}
       <main
         className={cn(
-          'flex-1 transition-all duration-300 w-full',
-          collapsed ? 'md:ml-(--sidebar-collapsed-width)' : 'md:ml-(--sidebar-width)'
+          'min-w-0 flex-1 transition-all duration-300 w-full overflow-x-hidden',
+          collapsed
+            ? 'md:ml-(--sidebar-collapsed-width) md:w-[calc(100%-var(--sidebar-collapsed-width))]'
+            : 'md:ml-(--sidebar-width) md:w-[calc(100%-var(--sidebar-width))]'
         )}
       >
         {!hideHeader && (

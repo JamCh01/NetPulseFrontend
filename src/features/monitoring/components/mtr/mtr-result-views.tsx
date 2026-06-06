@@ -104,7 +104,7 @@ function MtrResultTimeline({
   }
 
   return (
-    <div className="rounded-xl border border-border bg-bg-surface">
+    <div className="min-w-0 overflow-hidden rounded-xl border border-border bg-bg-surface">
       <div className="flex flex-col gap-1 border-b border-border px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="text-xs font-semibold text-text-primary">{t('monitoring.resultTimeline', { name: 'MTR' })}</div>
         <div className="flex flex-wrap gap-3 text-[11px] text-text-muted">
@@ -123,8 +123,8 @@ function MtrResultTimeline({
       {items.length === 0 ? (
         <div className="px-3 py-6 text-center text-xs text-text-muted">{t('monitoring.noMtrResultInRange')}</div>
       ) : (
-        <div className="overflow-x-auto px-4 py-5">
-          <div className="relative flex min-w-max items-start gap-8">
+        <div data-testid="mtr-result-timeline-scroll" className="max-w-full overflow-x-auto px-4 py-5">
+          <div className="relative flex w-max min-w-full items-start gap-8">
             <div className="absolute left-0 right-0 top-[0.65rem] h-px bg-border" />
             {items.map((item) => {
               const active = item.resultUuid === selectedResultUuid

@@ -94,7 +94,7 @@ export function PublicLayout() {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 md:ml-(--sidebar-width)">
+      <main className="min-w-0 flex-1 overflow-x-hidden md:ml-(--sidebar-width) md:w-[calc(100%-var(--sidebar-width))]">
         {!hideHeader && (
           <header className="nav-blur sticky top-0 z-30 h-14 flex items-center justify-between px-4 md:px-6">
             <button
