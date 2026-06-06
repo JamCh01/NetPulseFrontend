@@ -20,12 +20,12 @@ import {
 } from '@/features/monitoring/lib/monitoring-models'
 import {
   AUTO_REFRESH_INTERVAL_MS,
+  MTR_RESULT_MIN_RANGE_MS,
   createRelativeTimeRange,
   refreshRelativeTimeRange,
   type MonitoringTimeRange,
 } from '@/features/monitoring/lib/time-range'
 
-const MTR_RESULT_MIN_RANGE_MS = 24 * 60 * 60 * 1000
 
 export default function MtrDetailPage() {
   const { t, i18n } = useTranslation()

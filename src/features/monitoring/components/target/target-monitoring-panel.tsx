@@ -32,6 +32,8 @@ import {
 } from '@/features/monitoring/lib/agent-filter'
 import {
   AUTO_REFRESH_INTERVAL_MS,
+  EVENT_RESULT_MIN_RANGE_MS,
+  MTR_RESULT_MIN_RANGE_MS,
   createRelativeTimeRange,
   refreshRelativeTimeRange,
   type MonitoringTimeRange,
@@ -50,7 +52,6 @@ import {
 
 type StatusUi = { label: string; variant: 'success' | 'warning' | 'error' | 'inactive' }
 
-const EVENT_RESULT_MIN_RANGE_MS = 24 * 60 * 60 * 1000
 
 function statusCopy(t: TFunction<'translation'>): Record<LatestResultState, StatusUi> {
   return {
@@ -600,7 +601,7 @@ export function TargetMonitoringPanel({
   const { data: targetDetail } = usePublicMonitoringTarget(targetUuid)
   const [icmpTimeRange, setIcmpTimeRange] = useState<MonitoringTimeRange>(() => createRelativeTimeRange())
   const [tcpTimeRange, setTcpTimeRange] = useState<MonitoringTimeRange>(() => createRelativeTimeRange())
-  const [mtrTimeRange, setMtrTimeRange] = useState<MonitoringTimeRange>(() => createRelativeTimeRange())
+  const [mtrTimeRange, setMtrTimeRange] = useState<MonitoringTimeRange>(() => createRelativeTimeRange(MTR_RESULT_MIN_RANGE_MS))
   const [iperf3TimeRange, setIperf3TimeRange] = useState<MonitoringTimeRange>(() => createRelativeTimeRange())
 
   useEffect(() => {

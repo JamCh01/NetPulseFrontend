@@ -71,9 +71,9 @@ export function MtrTimeline({
       animationDuration: 600,
       grid: {
         left: 56,
-        right: 16,
+        right: 20,
         top: 24,
-        bottom: 40,
+        bottom: 64,
         containLabel: false,
       },
       xAxis: {
@@ -134,6 +134,28 @@ export function MtrTimeline({
           `
         },
       },
+      dataZoom: [
+        {
+          type: 'inside',
+          xAxisIndex: 0,
+          filterMode: 'none',
+          zoomOnMouseWheel: true,
+          moveOnMouseMove: true,
+          moveOnMouseWheel: true,
+        },
+        {
+          type: 'slider',
+          xAxisIndex: 0,
+          filterMode: 'none',
+          height: 18,
+          bottom: 14,
+          borderColor: theme.gridLineColor,
+          backgroundColor: 'transparent',
+          fillerColor: 'rgba(56, 189, 248, 0.16)',
+          handleStyle: { color: theme.axisLabelColor, borderColor: theme.axisLabelColor },
+          textStyle: { color: theme.axisLabelColor, fontSize: 10 },
+        },
+      ],
       series: [
         {
           name: 'Success',
