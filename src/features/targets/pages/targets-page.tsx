@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { toast } from 'sonner'
@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import {
   type AdminAgent,
   type AdminTarget,
+  type IpFamily,
   type IpVersion,
   type TargetProtocol,
   useAgents,
@@ -34,6 +35,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { MarkdownPreview } from '@/components/ui/markdown-preview'
 import { Textarea } from '@/components/ui/textarea'
 import { GeoInput } from '@/features/admin/geo-input'
+import { QuickAssociateFields } from '@/features/admin/quick-associate-fields'
+import {
+  clampQuickAssociateIpFamilies,
+  clampQuickAssociateTaskTypes,
+  compatibleQuickAssociateIpFamilies,
+  quickAssociateTaskTypeOptions,
+  toggleQuickAssociateIpFamily,
+  toggleQuickAssociateTaskType,
+  type QuickAssociateTaskType,
+} from '@/features/admin/quick-associate-options'
 import { TagInput } from '@/features/admin/tag-input'
 import { csvToList, formatDateTime, joinLocation } from '@/features/admin/utils'
 import { MONITORING_PROTOCOLS, PROTOCOL_COLORS, ipVersionLabel, protocolLabel } from '@/lib/constants'
@@ -50,6 +61,8 @@ export default function TargetsPage() {
   const [editingTarget, setEditingTarget] = useState<AdminTarget | null>(null)
   const [associateTarget, setAssociateTarget] = useState<AdminTarget | null>(null)
   const [selectedAgentUuid, setSelectedAgentUuid] = useState('')
+  const [selectedQuickTaskTypes, setSelectedQuickTaskTypes] = useState<QuickAssociateTaskType[]>(['icmp'])
+  const [selectedQuickIpFamilies, setSelectedQuickIpFamilies] = useState<IpFamily[]>([])
   const [form, setForm] = useState({
     name: '',
     target: '',
@@ -77,6 +90,23 @@ export default function TargetsPage() {
   const agents = agentsQuery.data?.items ?? []
   const pagination = targetsQuery.data?.pagination
   const selectedAgent = agents.find((agent) => agent.agent_uuid === selectedAgentUuid) ?? null
+  const quickTaskTypeOptions = useMemo(
+    () => quickAssociateTaskTypeOptions(associateTarget),
+    [associateTarget],
+  )
+  const quickIpFamilyOptions = useMemo(
+    () => compatibleQuickAssociateIpFamilies(associateTarget, selectedAgent),
+    [associateTarget, selectedAgent],
+  )
+
+  const clampedQuickTaskTypes = useMemo(
+    () => clampQuickAssociateTaskTypes(selectedQuickTaskTypes, quickTaskTypeOptions),
+    [quickTaskTypeOptions, selectedQuickTaskTypes],
+  )
+  const clampedQuickIpFamilies = useMemo(
+    () => clampQuickAssociateIpFamilies(selectedQuickIpFamilies, quickIpFamilyOptions),
+    [quickIpFamilyOptions, selectedQuickIpFamilies],
+  )
 
   const resetForm = () => {
     setForm({
@@ -177,15 +207,19 @@ export default function TargetsPage() {
   }
 
   const handleAssociate = () => {
-    if (!associateTarget || !selectedAgentUuid) return
+    if (!associateTarget || !selectedAgentUuid || clampedQuickTaskTypes.length === 0 || clampedQuickIpFamilies.length === 0) return
     quickAssociate.mutate({
       target_uuid: associateTarget.target_uuid,
       agent_uuid: selectedAgentUuid,
+      task_types: clampedQuickTaskTypes,
+      ip_families: clampedQuickIpFamilies,
     }, {
       onSuccess: (tasks) => {
         toast.success(t('targets.quickAssociateSuccess', { count: tasks.length }))
         setAssociateTarget(null)
         setSelectedAgentUuid('')
+        setSelectedQuickTaskTypes(['icmp'])
+        setSelectedQuickIpFamilies([])
       },
       onError: (error) => toast.error(error.message || t('targets.quickAssociateError')),
     })
@@ -412,7 +446,14 @@ export default function TargetsPage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={!!associateTarget} onOpenChange={(open) => { if (!open) setAssociateTarget(null) }}>
+      <Dialog open={!!associateTarget} onOpenChange={(open) => {
+        if (!open) {
+          setAssociateTarget(null)
+          setSelectedAgentUuid('')
+          setSelectedQuickTaskTypes(['icmp'])
+          setSelectedQuickIpFamilies([])
+        }
+      }}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>{t('targets.quickAssociateTitle')}</DialogTitle>
@@ -437,10 +478,29 @@ export default function TargetsPage() {
                 ))}
               </SelectContent>
             </Select>
+            <QuickAssociateFields
+              taskTypesLabel={t('targets.quickTaskTypes')}
+              taskTypesDescription={t('targets.quickTaskTypesDesc')}
+              ipFamiliesLabel={t('targets.quickIpFamilies')}
+              ipFamiliesDescription={t('targets.quickIpFamiliesDesc')}
+              emptyTaskTypesMessage={t('targets.quickNoTaskTypes')}
+              emptyIpFamiliesMessage={t('targets.quickNoCompatibleIpFamilies')}
+              taskTypeOptions={quickTaskTypeOptions}
+              selectedTaskTypes={clampedQuickTaskTypes}
+              onToggleTaskType={(taskType) => setSelectedQuickTaskTypes(toggleQuickAssociateTaskType(clampedQuickTaskTypes, taskType, quickTaskTypeOptions))}
+              ipFamilyOptions={quickIpFamilyOptions}
+              selectedIpFamilies={clampedQuickIpFamilies}
+              onToggleIpFamily={(family) => setSelectedQuickIpFamilies(toggleQuickAssociateIpFamily(clampedQuickIpFamilies, family, quickIpFamilyOptions))}
+            />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setAssociateTarget(null)}>{t('common.cancel')}</Button>
-            <Button disabled={!selectedAgentUuid || quickAssociate.isPending} onClick={handleAssociate}>
+            <Button variant="outline" onClick={() => {
+              setAssociateTarget(null)
+              setSelectedAgentUuid('')
+              setSelectedQuickTaskTypes(['icmp'])
+              setSelectedQuickIpFamilies([])
+            }}>{t('common.cancel')}</Button>
+            <Button disabled={!selectedAgentUuid || clampedQuickTaskTypes.length === 0 || clampedQuickIpFamilies.length === 0 || quickAssociate.isPending} onClick={handleAssociate}>
               {quickAssociate.isPending ? t('targets.associating') : t('targets.quickAssociate')}
             </Button>
           </DialogFooter>

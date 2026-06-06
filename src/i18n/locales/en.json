@@ -407,6 +407,12 @@
     "packetCount": "Packet Count",
     "timeout": "Timeout",
     "assignedAgents": "Assigned Agents",
+    "quickTaskTypes": "Task Types",
+    "quickTaskTypesDesc": "Choose the default task types to create. Quick association does not create IPERF3 tasks.",
+    "quickIpFamilies": "IP Versions",
+    "quickIpFamiliesDesc": "Create tasks from the Target and Agent IP version intersection.",
+    "quickNoTaskTypes": "This Target has no task types available for quick association.",
+    "quickNoCompatibleIpFamilies": "The selected Target and Agent have no compatible IP version intersection.",
     "selectAgent": "Select Agent",
     "noAvailableAgents": "No available agents",
     "noAgentsAssigned": "No agents assigned to this task.",
@@ -591,7 +597,13 @@
     "associating": "Associating",
     "quickAssociate": "Quick Associate",
     "quickAssociateSuccess": "Quick association completed, created or reused {{count}} tasks",
-    "quickAssociateError": "Quick association failed"
+    "quickAssociateError": "Quick association failed",
+    "quickTaskTypes": "Task Types",
+    "quickTaskTypesDesc": "Choose the default task types to create. Quick association does not create IPERF3 tasks.",
+    "quickIpFamilies": "IP Versions",
+    "quickIpFamiliesDesc": "Create tasks from the Target and Agent IP version intersection.",
+    "quickNoTaskTypes": "This Target has no task types available for quick association.",
+    "quickNoCompatibleIpFamilies": "The selected Target and Agent have no compatible IP version intersection."
   },
   "results": {
     "title": "Result Ingestion Events",

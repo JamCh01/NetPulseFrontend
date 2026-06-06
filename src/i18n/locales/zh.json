@@ -407,6 +407,12 @@
     "packetCount": "数据包数",
     "timeout": "超时时间",
     "assignedAgents": "已分配探针",
+    "quickTaskTypes": "任务类型",
+    "quickTaskTypesDesc": "选择需要创建的默认任务类型；快速关联不创建 IPERF3。",
+    "quickIpFamilies": "IP 版本",
+    "quickIpFamiliesDesc": "按 Target 与 Agent 的 IP 版本交集创建任务。",
+    "quickNoTaskTypes": "当前 Target 没有可快速关联的任务类型。",
+    "quickNoCompatibleIpFamilies": "当前 Target 与 Agent 没有可用的 IP 版本交集。",
     "selectAgent": "选择 Agent",
     "noAvailableAgents": "无可用探针",
     "noAgentsAssigned": "此任务尚未分配探针。",
@@ -591,7 +597,13 @@
     "associating": "关联中",
     "quickAssociate": "快速关联",
     "quickAssociateSuccess": "已快速关联，创建或复用 {{count}} 个任务",
-    "quickAssociateError": "快速关联失败"
+    "quickAssociateError": "快速关联失败",
+    "quickTaskTypes": "任务类型",
+    "quickTaskTypesDesc": "选择需要创建的默认任务类型；快速关联不创建 IPERF3。",
+    "quickIpFamilies": "IP 版本",
+    "quickIpFamiliesDesc": "按 Target 与 Agent 的 IP 版本交集创建任务。",
+    "quickNoTaskTypes": "当前 Target 没有可快速关联的任务类型。",
+    "quickNoCompatibleIpFamilies": "当前 Target 与 Agent 没有可用的 IP 版本交集。"
   },
   "results": {
     "title": "结果入库事件",

@@ -82,15 +82,17 @@ describe('TasksPage', () => {
     const targetPageSizes: string[] = []
     const agentPageSizes: string[] = []
     const quickAssociateRequests: unknown[] = []
+    const quickTarget = { ...target, ip_version: '4+6' }
+    const quickAgent = { ...agent, ip_version: '6' }
     server.use(
       http.get('*/api/v1/tasks', () => HttpResponse.json({ items: [] })),
       http.get('*/api/v1/targets', ({ request }) => {
         targetPageSizes.push(new URL(request.url).searchParams.get('page_size') ?? '')
-        return HttpResponse.json({ items: [target] })
+        return HttpResponse.json({ items: [quickTarget] })
       }),
       http.get('*/api/v1/agents', ({ request }) => {
         agentPageSizes.push(new URL(request.url).searchParams.get('page_size') ?? '')
-        return HttpResponse.json({ items: [agent] })
+        return HttpResponse.json({ items: [quickAgent] })
       }),
       http.post('*/api/v1/relations/quick-associate', async ({ request }) => {
         quickAssociateRequests.push(await request.json())
@@ -111,6 +113,11 @@ describe('TasksPage', () => {
     expect(within(dialog).getByRole('combobox', { name: 'Target' })).toHaveTextContent('Tokyo iperf3 Target')
     expect(within(dialog).getByRole('combobox', { name: 'Agent' })).toHaveTextContent('Tokyo Agent')
     expect(within(dialog).getByRole('button', { name: '关联' })).toBeEnabled()
+    expect(within(dialog).getByText('任务类型')).toBeInTheDocument()
+    expect(within(dialog).getByText('IP 版本')).toBeInTheDocument()
+    expect(within(dialog).getByRole('option', { name: 'ICMP' })).toHaveAttribute('aria-selected', 'true')
+    await user.click(within(dialog).getByRole('option', { name: 'MTR' }))
+    expect(within(dialog).getByRole('option', { name: 'IPv6' })).toHaveAttribute('aria-selected', 'true')
 
     await user.click(within(dialog).getByRole('button', { name: '关联' }))
 
@@ -120,6 +127,8 @@ describe('TasksPage', () => {
       {
         target_uuid: target.target_uuid,
         agent_uuid: agent.agent_uuid,
+        task_types: ['icmp', 'mtr'],
+        ip_families: ['6'],
       },
     ])
   })

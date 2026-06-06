@@ -15,12 +15,14 @@ describe('TargetsPage', () => {
       target_uuid: 'target-tokyo',
       name: 'Tokyo Target',
       target: 'tokyo.example.com',
-      ip_version: '4',
+      ip_version: '4+6',
+      supported_protocols: ['icmp', 'tcp', 'mtr', 'iperf3'],
     })
     const agentItem = createMockAgent({
       agent_uuid: 'agent-tokyo',
       name: 'Tokyo Agent',
       agent_name: 'Tokyo Agent',
+      ip_version: '6',
       city: 'Tokyo',
     })
     const agentPageSizes: string[] = []
@@ -46,6 +48,11 @@ describe('TargetsPage', () => {
 
     expect(within(dialog).getByRole('combobox')).toHaveTextContent('Tokyo Agent')
     expect(within(dialog).getByRole('button', { name: '快速关联' })).toBeEnabled()
+    expect(within(dialog).getByText('任务类型')).toBeInTheDocument()
+    expect(within(dialog).getByText('IP 版本')).toBeInTheDocument()
+    expect(within(dialog).getByRole('option', { name: 'ICMP' })).toHaveAttribute('aria-selected', 'true')
+    await user.click(within(dialog).getByRole('option', { name: 'TCP' }))
+    expect(within(dialog).getByRole('option', { name: 'IPv6' })).toHaveAttribute('aria-selected', 'true')
 
     await user.click(within(dialog).getByRole('button', { name: '快速关联' }))
 
@@ -54,6 +61,8 @@ describe('TargetsPage', () => {
       {
         target_uuid: targetItem.target_uuid,
         agent_uuid: agentItem.agent_uuid,
+        task_types: ['icmp', 'tcp'],
+        ip_families: ['6'],
       },
     ])
   })

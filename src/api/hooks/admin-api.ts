@@ -8,6 +8,7 @@ export type IpVersion = '4' | '6' | '4+6'
 export type IpFamily = '4' | '6'
 export type TargetType = 'ip' | 'domain'
 export type TaskType = 'icmp' | 'tcp' | 'mtr' | 'iperf3'
+export type QuickAssociateTaskType = Exclude<TaskType, 'iperf3'>
 export type TargetProtocol = TaskType
 export type AgentStatus = 'online' | 'offline' | 'disabled'
 export type SortOrder = 'asc' | 'desc'
@@ -691,13 +692,20 @@ export function useDeleteTask() {
   })
 }
 
+export interface QuickAssociatePayload {
+  target_uuid: string
+  agent_uuid: string
+  task_types?: QuickAssociateTaskType[]
+  ip_families?: IpFamily[]
+}
+
 export function useQuickAssociate() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ target_uuid, agent_uuid }: { target_uuid: string; agent_uuid: string }) =>
+    mutationFn: (data: QuickAssociatePayload) =>
       adminRequest<AdminTask[]>('/api/v1/relations/quick-associate', {
         method: 'POST',
-        body: JSON.stringify({ target_uuid, agent_uuid }),
+        body: JSON.stringify(data),
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: targetKeys.all })

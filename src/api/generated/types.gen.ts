@@ -3952,6 +3952,18 @@ export type QuickAssociateRequest = {
      * 要关联的 Agent UUID。
      */
     agent_uuid: string;
+    /**
+     * Task Types
+     *
+     * 可选。限制快速关联创建的任务类型；省略时保持后端默认行为。
+     */
+    task_types?: Array<'icmp' | 'tcp' | 'mtr'> | null;
+    /**
+     * Ip Families
+     *
+     * 可选。限制快速关联创建的 IP 协议族；省略时使用 Target 与 Agent 的交集。
+     */
+    ip_families?: Array<'4' | '6'> | null;
 };
 
 /**
