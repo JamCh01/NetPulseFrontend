@@ -50,6 +50,8 @@ import {
 
 type StatusUi = { label: string; variant: 'success' | 'warning' | 'error' | 'inactive' }
 
+const EVENT_RESULT_MIN_RANGE_MS = 24 * 60 * 60 * 1000
+
 function statusCopy(t: TFunction<'translation'>): Record<LatestResultState, StatusUi> {
   return {
     ok: { label: t('monitoring.statusOk'), variant: 'success' },
@@ -286,6 +288,7 @@ function EvidenceToolbar({
             showStep={false}
             density="compact"
             className={filterButtonClass}
+            minPresetDurationMs={EVENT_RESULT_MIN_RANGE_MS}
           />
         </div>
       </div>

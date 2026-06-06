@@ -16,6 +16,7 @@ import {
 export interface TimeRangeSelectorProps {
   value: MonitoringTimeRange
   onChange: (range: MonitoringTimeRange) => void
+  minPresetDurationMs?: number
 }
 
 interface GrafanaTimeRangeSelectorProps extends TimeRangeSelectorProps {
@@ -57,12 +58,17 @@ const STEP_OPTIONS: ReadonlyArray<{ label: string; value: number | null }> = [
   { label: '1d', value: 86400 },
 ] as const
 
-function findActivePreset(value: MonitoringTimeRange): string | null {
+function visiblePresets(minPresetDurationMs?: number): readonly PresetConfig[] {
+  if (!minPresetDurationMs) return PRESETS
+  return PRESETS.filter((preset) => preset.durationMs >= minPresetDurationMs)
+}
+
+function findActivePreset(value: MonitoringTimeRange, presets: readonly PresetConfig[] = PRESETS): string | null {
   if (value.relativeDurationMs) {
-    return PRESETS.find((preset) => preset.durationMs === value.relativeDurationMs)?.label ?? null
+    return presets.find((preset) => preset.durationMs === value.relativeDurationMs)?.label ?? null
   }
   const duration = value.end - value.start
-  for (const preset of PRESETS) {
+  for (const preset of presets) {
     const tolerance = preset.durationMs * 0.05
     if (Math.abs(duration - preset.durationMs) < tolerance) {
       return preset.label
@@ -115,9 +121,10 @@ function parseDateTimeTextValue(value: string): number | null {
   return Number.isFinite(timestamp) ? timestamp : null
 }
 
-export function TimeRangeSelector({ value, onChange }: TimeRangeSelectorProps) {
+export function TimeRangeSelector({ value, onChange, minPresetDurationMs }: TimeRangeSelectorProps) {
   const { t } = useTranslation()
-  const activePreset = useMemo(() => findActivePreset(value), [value])
+  const presets = useMemo(() => visiblePresets(minPresetDurationMs), [minPresetDurationMs])
+  const activePreset = useMemo(() => findActivePreset(value, presets), [value, presets])
 
   const handlePresetClick = useCallback(
     (preset: PresetConfig) => {
@@ -129,7 +136,7 @@ export function TimeRangeSelector({ value, onChange }: TimeRangeSelectorProps) {
   return (
     <div className="glass-light rounded-lg px-3 py-2 flex items-center gap-2 flex-wrap">
       <div className="flex items-center gap-1">
-        {PRESETS.map((preset) => {
+        {presets.map((preset) => {
           const isActive = activePreset === preset.label
           return (
             <button
@@ -173,6 +180,7 @@ export function GrafanaTimeRangeSelector({
   showStep = true,
   density = 'default',
   className,
+  minPresetDurationMs,
 }: GrafanaTimeRangeSelectorProps) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
@@ -183,8 +191,9 @@ export function GrafanaTimeRangeSelector({
   const [absoluteEnd, setAbsoluteEnd] = useState(() => toDateTimeTextValue(value.end))
   const [stepValue, setStepValue] = useState<string>(() => String(value.stepSec ?? defaultStepForGranularity(value.granularity)))
   const [absoluteError, setAbsoluteError] = useState<string | null>(null)
-  const activePreset = useMemo(() => findActivePreset(value), [value])
-  const active = PRESETS.find((preset) => preset.label === activePreset)
+  const presets = useMemo(() => visiblePresets(minPresetDurationMs), [minPresetDurationMs])
+  const activePreset = useMemo(() => findActivePreset(value, presets), [presets, value])
+  const active = presets.find((preset) => preset.label === activePreset)
   const triggerLabel = active?.grafanaLabel ?? `${formatAbsoluteLabel(value.start)} - ${formatAbsoluteLabel(value.end)}`
 
   const updateDropdownPosition = useCallback(() => {
@@ -317,7 +326,7 @@ export function GrafanaTimeRangeSelector({
                 {t('timeRange.quickRanges')}
               </div>
               <div className="py-1">
-                {PRESETS.map((preset) => {
+                {presets.map((preset) => {
                   const isActive = activePreset === preset.label
                   return (
                     <button

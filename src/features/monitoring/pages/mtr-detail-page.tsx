@@ -25,6 +25,8 @@ import {
   type MonitoringTimeRange,
 } from '@/features/monitoring/lib/time-range'
 
+const MTR_RESULT_MIN_RANGE_MS = 24 * 60 * 60 * 1000
+
 export default function MtrDetailPage() {
   const { t, i18n } = useTranslation()
   const { taskUuid } = useParams()
@@ -38,7 +40,7 @@ export default function MtrDetailPage() {
 
   const [selectedAgentUuid, setSelectedAgentUuid] = useState<string>('')
   const [selectedResultUuid, setSelectedResultUuid] = useState<string | undefined>()
-  const [timeRange, setTimeRange] = useState<MonitoringTimeRange>(() => createRelativeTimeRange())
+  const [timeRange, setTimeRange] = useState<MonitoringTimeRange>(() => createRelativeTimeRange(MTR_RESULT_MIN_RANGE_MS))
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -137,7 +139,7 @@ export default function MtrDetailPage() {
       </div>
 
       <div className="flex flex-col gap-3 rounded-xl border border-border bg-bg-surface p-3 lg:flex-row lg:items-center lg:justify-between">
-        <TimeRangeSelector value={timeRange} onChange={(range) => {
+        <TimeRangeSelector value={timeRange} minPresetDurationMs={MTR_RESULT_MIN_RANGE_MS} onChange={(range) => {
           setTimeRange(range)
           setSelectedResultUuid(undefined)
         }} />
