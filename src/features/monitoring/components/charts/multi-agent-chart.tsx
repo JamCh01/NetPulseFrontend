@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react'
+import { memo, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LazyECharts } from '@/components/charts/lazy-echarts'
 import { useChartTheme } from '../../lib/chart-theme'
@@ -29,13 +29,32 @@ function MultiAgentChartInner({
 }: MultiAgentChartProps) {
   const { t } = useTranslation()
   const theme = useChartTheme()
+  const hasIncomingData = agentSeries.some((s) => s.data.length > 0)
+  const snapshotScope = `${protocol ?? 'auto'}:${chartStyle}`
+  const [seriesSnapshot, setSeriesSnapshot] = useState<{ scope: string; series: AgentSeriesData[] }>({
+    scope: snapshotScope,
+    series: agentSeries,
+  })
+  const displaySeries = useMemo(() => {
+    const snapshotHasData = seriesSnapshot.scope === snapshotScope && seriesSnapshot.series.some((s) => s.data.length > 0)
+    if ((isLoading || isUpdating) && !hasIncomingData && snapshotHasData) {
+      return seriesSnapshot.series
+    }
+    return agentSeries
+  }, [agentSeries, hasIncomingData, isLoading, isUpdating, seriesSnapshot, snapshotScope])
+
+  if (seriesSnapshot.scope !== snapshotScope) {
+    setSeriesSnapshot({ scope: snapshotScope, series: agentSeries })
+  } else if (!isLoading && !isUpdating && hasIncomingData && seriesSnapshot.series !== agentSeries) {
+    setSeriesSnapshot({ scope: snapshotScope, series: agentSeries })
+  }
 
   const option = useMemo(
-    () => buildMultiAgentOption(agentSeries, theme, chartStyle, protocol),
-    [agentSeries, theme, chartStyle, protocol],
+    () => buildMultiAgentOption(displaySeries, theme, chartStyle, protocol),
+    [displaySeries, theme, chartStyle, protocol],
   )
 
-  const hasData = agentSeries.some((s) => s.data.length > 0)
+  const hasData = displaySeries.some((s) => s.data.length > 0)
 
   if (isLoading && !hasData) {
     return (
@@ -73,9 +92,9 @@ function MultiAgentChartInner({
 
   return (
     <div className="glass-light relative rounded-xl p-4">
-      {(isUpdating || error) && (
+      {error && (
         <div className="absolute right-5 top-5 z-10 rounded border border-border bg-bg-surface/90 px-2 py-1 text-[10px] font-medium text-text-muted shadow-sm">
-          {error ? t('monitoring.failedToLoad') : 'Updating'}
+          {t('monitoring.failedToLoad')}
         </div>
       )}
       <LazyECharts

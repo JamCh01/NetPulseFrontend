@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react'
+import { memo, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { MonitoringDataPoint } from '@/features/monitoring/lib/monitoring-data-point'
 import { LazyECharts } from '@/components/charts/lazy-echarts'
@@ -33,14 +33,32 @@ function SmokePingChartInner({
 }: SmokePingChartProps) {
   const { t } = useTranslation()
   const theme = useChartTheme()
+  const hasIncomingData = Boolean(data?.length)
+  const snapshotScope = `${protocol ?? 'auto'}:${chartStyle}:${agentName ?? ''}`
+  const [dataSnapshot, setDataSnapshot] = useState<{ scope: string; data?: MonitoringDataPoint[] }>({
+    scope: snapshotScope,
+    data,
+  })
+  const displayData = useMemo(() => {
+    if ((isLoading || isUpdating) && !hasIncomingData && dataSnapshot.scope === snapshotScope && dataSnapshot.data?.length) {
+      return dataSnapshot.data
+    }
+    return data
+  }, [data, dataSnapshot, hasIncomingData, isLoading, isUpdating, snapshotScope])
+
+  if (dataSnapshot.scope !== snapshotScope) {
+    setDataSnapshot({ scope: snapshotScope, data })
+  } else if (!isLoading && !isUpdating && hasIncomingData && dataSnapshot.data !== data) {
+    setDataSnapshot({ scope: snapshotScope, data })
+  }
 
   const chartOption = useMemo(() => {
-    if (!data || data.length === 0) return null
-    const bandData = transformToChartData(data)
-    return buildSmokePingOption({ data: bandData, theme, agentName, rawPoints: data, chartStyle, protocol })
-  }, [data, theme, agentName, chartStyle, protocol])
+    if (!displayData || displayData.length === 0) return null
+    const bandData = transformToChartData(displayData)
+    return buildSmokePingOption({ data: bandData, theme, agentName, rawPoints: displayData, chartStyle, protocol })
+  }, [displayData, theme, agentName, chartStyle, protocol])
 
-  const hasData = Boolean(data?.length)
+  const hasData = Boolean(displayData?.length)
 
   if (isLoading && !hasData) {
     return (
@@ -88,9 +106,9 @@ function SmokePingChartInner({
 
   return (
     <div className="glass-light relative rounded-xl p-4">
-      {(isUpdating || error) && (
+      {error && (
         <div className="absolute right-5 top-5 z-10 rounded border border-border bg-bg-surface/90 px-2 py-1 text-[10px] font-medium text-text-muted shadow-sm">
-          {error ? t('monitoring.failedToLoad') : 'Updating'}
+          {t('monitoring.failedToLoad')}
         </div>
       )}
       <LazyECharts
