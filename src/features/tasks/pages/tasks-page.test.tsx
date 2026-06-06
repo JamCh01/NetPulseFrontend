@@ -76,6 +76,32 @@ const iperf3Task = {
   updated_at: '2026-01-01T00:00:00Z',
 }
 
+const tcpTask = {
+  task_uuid: 'task-tcp',
+  name: 'Tokyo TCP',
+  target_uuid: target.target_uuid,
+  agent_uuid: agent.agent_uuid,
+  target,
+  agent,
+  task_type: 'tcp',
+  ip_family: '4',
+  interval: 60,
+  timeout: 3000,
+  packet_count: 30,
+  probe_config: {
+    port: 22,
+    payload_size: 64,
+    packet_count: 30,
+    connect_interval_ms: 1500,
+  },
+  mtr_retry_config: null,
+  schedule_jitter_ms: 0,
+  is_enabled: true,
+  is_deleted: false,
+  created_at: '2026-01-01T00:00:00Z',
+  updated_at: '2026-01-01T00:00:00Z',
+}
+
 describe('TasksPage', () => {
   it('loads Target and Agent options for quick association with backend-compatible page sizes', async () => {
     const user = userEvent.setup()
@@ -181,7 +207,8 @@ describe('TasksPage', () => {
 
     expect(within(dialog).getByText('TCP 参数')).toBeInTheDocument()
     expect(within(dialog).getByLabelText('端口')).toBeInTheDocument()
-    expect(within(dialog).getByLabelText('端口')).toHaveValue(443)
+    expect(within(dialog).getByLabelText('端口')).toHaveValue(22)
+    expect(within(dialog).getByLabelText('连接间隔')).toHaveValue(1000)
     expect(within(dialog).getByLabelText('载荷大小')).toHaveValue(64)
     expect(within(dialog).queryByLabelText('iperf3 执行时长')).not.toBeInTheDocument()
 
@@ -318,5 +345,64 @@ describe('TasksPage', () => {
     await user.click(within(dialog).getByRole('combobox', { name: '协议类型' }))
 
     expect(await screen.findByRole('option', { name: 'IPERF3' })).toBeInTheDocument()
+  })
+
+  it('submits and edits TCP connect interval in probe config', async () => {
+    const user = userEvent.setup()
+    const createRequests: unknown[] = []
+    const updateRequests: unknown[] = []
+    server.use(
+      http.get('*/api/v1/tasks', () => HttpResponse.json({ items: [tcpTask] })),
+      http.get('*/api/v1/targets', () => HttpResponse.json({ items: [target] })),
+      http.get('*/api/v1/agents', () => HttpResponse.json({ items: [agent] })),
+      http.post('*/api/v1/tasks', async ({ request }) => {
+        createRequests.push(await request.json())
+        return HttpResponse.json(tcpTask, { status: 201 })
+      }),
+      http.patch('*/api/v1/tasks/:taskUuid', async ({ request }) => {
+        updateRequests.push(await request.json())
+        return HttpResponse.json({ ...tcpTask, probe_config: { ...tcpTask.probe_config, connect_interval_ms: 2000 } })
+      }),
+    )
+
+    renderWithProviders(<TasksPage />)
+
+    await user.click(screen.getByRole('button', { name: '新增 Task' }))
+    const createDialog = await screen.findByRole('dialog', { name: '新增 Task' })
+    await user.click(within(createDialog).getByRole('combobox', { name: 'Target' }))
+    await user.click(await screen.findByRole('option', { name: /Tokyo iperf3 Target/ }))
+    await user.click(within(createDialog).getByRole('combobox', { name: 'Agent' }))
+    await user.click(await screen.findByRole('option', { name: /Tokyo Agent/ }))
+    await user.click(within(createDialog).getByRole('combobox', { name: '协议类型' }))
+    await user.click(await screen.findByRole('option', { name: 'TCP' }))
+    await user.clear(within(createDialog).getByLabelText('连接间隔'))
+    await user.type(within(createDialog).getByLabelText('连接间隔'), '750')
+    await user.click(within(createDialog).getByRole('button', { name: '创建' }))
+
+    expect(createRequests).toHaveLength(1)
+    expect(createRequests[0]).toMatchObject({
+      task_type: 'tcp',
+      probe_config: {
+        port: 22,
+        payload_size: 64,
+        connect_interval_ms: 750,
+      },
+    })
+
+    await user.click(await screen.findByRole('button', { name: '编辑' }))
+    const editDialog = await screen.findByRole('dialog', { name: '编辑 Task' })
+    expect(within(editDialog).getByLabelText('连接间隔')).toHaveValue(1500)
+    await user.clear(within(editDialog).getByLabelText('连接间隔'))
+    await user.type(within(editDialog).getByLabelText('连接间隔'), '2000')
+    await user.click(within(editDialog).getByRole('button', { name: '保存' }))
+
+    expect(updateRequests).toHaveLength(1)
+    expect(updateRequests[0]).toMatchObject({
+      probe_config: {
+        port: 22,
+        payload_size: 64,
+        connect_interval_ms: 2000,
+      },
+    })
   })
 })

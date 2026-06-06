@@ -41,6 +41,7 @@ export function buildTaskPayload(input: {
   packet_count: number
   port?: number
   payloadSize?: number
+  connectIntervalMs?: number
   ttl?: number
   dontFragment?: boolean
   mtrProbeProtocol?: 'icmp_echo' | 'tcp' | 'udp'
@@ -67,8 +68,9 @@ export function buildTaskPayload(input: {
 
   if (input.task_type === 'tcp') {
     base.probe_config = {
-      port: input.port ?? 443,
+      port: input.port ?? 22,
       payload_size: input.payloadSize ?? 64,
+      connect_interval_ms: input.connectIntervalMs ?? 1000,
     }
   } else if (input.task_type === 'mtr') {
     const probeProtocol = input.mtrProbeProtocol ?? 'icmp_echo'

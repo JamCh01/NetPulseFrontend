@@ -74,6 +74,7 @@ interface TaskFormState {
   packet_count: string
   port: string
   payload_size: string
+  connect_interval_ms: string
   ttl: string
   dont_fragment: boolean
   mtr_probe_protocol: MtrProbeProtocol
@@ -99,6 +100,7 @@ function initialTaskForm(): TaskFormState {
     packet_count: '4',
     port: '443',
     payload_size: '64',
+    connect_interval_ms: '1000',
     ttl: '',
     dont_fragment: false,
     mtr_probe_protocol: 'icmp_echo',
@@ -115,7 +117,16 @@ function initialTaskForm(): TaskFormState {
 
 function formWithProtocolDefaults(current: TaskFormState, taskType: TaskType): TaskFormState {
   if (taskType === 'tcp') {
-    return { ...current, task_type: taskType, interval: '60', timeout: '3000', packet_count: '4', port: '443', payload_size: '64' }
+    return {
+      ...current,
+      task_type: taskType,
+      interval: '60',
+      timeout: '3000',
+      packet_count: '30',
+      port: '22',
+      payload_size: '64',
+      connect_interval_ms: current.connect_interval_ms || '1000',
+    }
   }
   if (taskType === 'iperf3') {
     return {
@@ -275,6 +286,9 @@ function ProtocolFields({
         </FieldRow>
         <FieldRow label={t('tasks.fieldPort')} description={t('tasks.fieldPortDescTcp')} htmlFor={`${prefix}-port`}>
           <Input id={`${prefix}-port`} aria-label={t('tasks.fieldPort')} type="number" min="1" max="65535" placeholder={t('tasks.fieldPort')} value={value.port} onChange={(event) => setValue({ port: event.target.value })} />
+        </FieldRow>
+        <FieldRow label={t('tasks.fieldTcpConnectInterval')} description={t('tasks.fieldTcpConnectIntervalDesc')} htmlFor={`${prefix}-connect-interval`}>
+          <Input id={`${prefix}-connect-interval`} aria-label={t('tasks.fieldTcpConnectInterval')} type="number" min="0" max="60000" placeholder={t('tasks.millisecondsPlaceholder')} value={value.connect_interval_ms} onChange={(event) => setValue({ connect_interval_ms: event.target.value })} />
         </FieldRow>
         <FieldRow label={t('tasks.fieldPayloadSize')} description={t('tasks.fieldPayloadSizeTcpDesc')} htmlFor={`${prefix}-payload-size`}>
           <Input id={`${prefix}-payload-size`} aria-label={t('tasks.fieldPayloadSize')} type="number" min="1" max="65507" placeholder={t('tasks.bytesPlaceholder')} value={value.payload_size} onChange={(event) => setValue({ payload_size: event.target.value })} />
@@ -515,6 +529,7 @@ export default function TasksPage() {
       packet_count: Number(form.packet_count),
       port: form.port ? Number(form.port) : undefined,
       payloadSize: Number(form.payload_size),
+      connectIntervalMs: form.connect_interval_ms ? Number(form.connect_interval_ms) : undefined,
       ttl: optionalNumber(form.ttl),
       dontFragment: form.dont_fragment,
       mtrProbeProtocol: form.mtr_probe_protocol,
@@ -557,6 +572,7 @@ export default function TasksPage() {
       packet_count: String(task.packet_count),
       port,
       payload_size: typeof probeConfig.payload_size === 'number' ? String(probeConfig.payload_size) : '64',
+      connect_interval_ms: typeof probeConfig.connect_interval_ms === 'number' ? String(probeConfig.connect_interval_ms) : '1000',
       ttl: typeof probeConfig.ttl === 'number' ? String(probeConfig.ttl) : '',
       dont_fragment: Boolean(probeConfig.dont_fragment),
       mtr_probe_protocol: mtrProtocol,
@@ -587,6 +603,7 @@ export default function TasksPage() {
       packet_count: Number(editForm.packet_count),
       port: editForm.port ? Number(editForm.port) : undefined,
       payloadSize: Number(editForm.payload_size),
+      connectIntervalMs: editForm.connect_interval_ms ? Number(editForm.connect_interval_ms) : undefined,
       ttl: optionalNumber(editForm.ttl),
       dontFragment: editForm.dont_fragment,
       mtrProbeProtocol: editForm.mtr_probe_protocol,
