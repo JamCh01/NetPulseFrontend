@@ -71,6 +71,10 @@ interface MonitoringSeriesResult {
   error: Error | null
 }
 
+export function monitoringTaskAgentDisplayName(task: MonitoringTask): string {
+  return task.agent?.name || task.name
+}
+
 export function useMonitoringData(
   taskUuid: string,
   agentUuid: string | undefined,
@@ -205,10 +209,9 @@ export function useTaskMonitoringSeries(tasks: MonitoringTask[], timeRange: Time
           const res = await fetch(buildApiUrl(`/api/v1/monitoring/tasks/${task.task_uuid}/metrics?${params.toString()}`))
           if (!res.ok) throw new Error(`Failed to load monitoring metrics: ${res.status}`)
           const body = (await res.json()) as MetricsEnvelope
-          const port = typeof task.probe_config?.port === 'number' ? `:${task.probe_config.port}` : ''
           return {
             agentUuid: task.agent?.agent_uuid ?? task.task_uuid,
-            agentName: task.agent?.name ? `${task.agent.name}${port}` : task.name,
+            agentName: monitoringTaskAgentDisplayName(task),
             data: normalizeMetricSeries(task.task_type, body.data?.series),
           }
         },
