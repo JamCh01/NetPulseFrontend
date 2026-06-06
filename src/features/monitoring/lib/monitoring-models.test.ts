@@ -54,4 +54,35 @@ describe('monitoring models', () => {
       packets_received: 8,
     }))
   })
+
+  it('keeps target IP redaction while preserving MTR ASN fields', () => {
+    const detail = normalizeMtrDetail({
+      result_uuid: 'result-1',
+      task_uuid: 'task-1',
+      latest_sample_at: '2026-06-06T01:00:00Z',
+      latest_run_status: 'ok',
+      resolved_ip: '[Target IP]',
+      as_path: ['24768', '15133'],
+      hops: [{
+        hop: 2,
+        addresses: [{
+          ip: '[Target IP]',
+          asn: '15133',
+          packets_sent: 50,
+          packets_received: 50,
+          packet_loss_pct: 0,
+          avg_ms: 20,
+          best_ms: 18,
+          worst_ms: 24,
+        }],
+      }],
+    })
+
+    expect(detail.resolved_ip).toBe('[Target IP]')
+    expect(detail.as_path).toEqual(['24768', '15133'])
+    expect(detail.hops[0]).toEqual(expect.objectContaining({
+      ip: '[Target IP]',
+      asn: '15133',
+    }))
+  })
 })
