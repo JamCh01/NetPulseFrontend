@@ -1,8 +1,8 @@
-import { memo, useMemo } from 'react'
+import { memo, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { AgentSeriesData } from '@/features/monitoring/lib/build-multi-agent-option'
 import type { MonitoringMetricProtocol } from '@/features/monitoring/lib/monitoring-data-point'
-import { formatMetricValue, getMetricColumns, normalizeProtocol, summarizeAgentMetricRows } from '@/features/monitoring/lib/protocol-metrics'
+import { formatMetricValue, getMetricColumns, normalizeProtocol, summarizeAgentMetricRows, type AgentMetricRow } from '@/features/monitoring/lib/protocol-metrics'
 import { cn } from '@/lib/utils'
 
 interface MetricDetailTableProps {
@@ -24,10 +24,30 @@ function MetricDetailTableInner({
   const normalizedProtocol = normalizeProtocol(protocol)
   const columns = useMemo(() => getMetricColumns(normalizedProtocol), [normalizedProtocol])
   const rows = useMemo(() => summarizeAgentMetricRows(agentSeries, normalizedProtocol), [agentSeries, normalizedProtocol])
-  const hasRows = rows.length > 0
+  const [rowSnapshot, setRowSnapshot] = useState<{ protocol: string; rows: AgentMetricRow[] }>({
+    protocol: normalizedProtocol,
+    rows,
+  })
+  const displayRows = useMemo(() => {
+    const snapshotRows = rowSnapshot.protocol === normalizedProtocol ? rowSnapshot.rows : []
+    if ((isLoading || isUpdating) && snapshotRows.length > 0) {
+      const mergedRows = new Map(snapshotRows.map((row) => [row.agentUuid, row]))
+      for (const row of rows) {
+        mergedRows.set(row.agentUuid, row)
+      }
+      return Array.from(mergedRows.values()).sort((a, b) => a.agentName.localeCompare(b.agentName))
+    }
+    return rows
+  }, [isLoading, isUpdating, normalizedProtocol, rowSnapshot, rows])
+  if (rowSnapshot.protocol !== normalizedProtocol) {
+    setRowSnapshot({ protocol: normalizedProtocol, rows })
+  } else if (!isLoading && !isUpdating && rows.length > 0 && rowSnapshot.rows !== rows) {
+    setRowSnapshot({ protocol: normalizedProtocol, rows })
+  }
+  const hasRows = displayRows.length > 0
   const title = t('monitoring.detailMetricsTitle', { protocol: normalizedProtocol.toUpperCase() })
 
-  if (isLoading && !hasRows) {
+  if (isLoading && !isUpdating && !hasRows) {
     return (
       <div className={cn('rounded-xl border border-border bg-bg-surface p-4', className)}>
         <div className="h-4 w-32 rounded bg-muted" />
@@ -43,11 +63,6 @@ function MetricDetailTableInner({
           <h3 className="text-sm font-semibold text-text-primary">{title}</h3>
           <p className="mt-0.5 text-xs text-text-muted">{t('monitoring.detailMetricsDesc')}</p>
         </div>
-        {isUpdating && hasRows && (
-          <span className="rounded border border-accent-border bg-accent/10 px-2 py-1 text-[10px] font-medium text-accent">
-            {t('common.loading')}
-          </span>
-        )}
       </div>
 
       {!hasRows ? (
@@ -66,7 +81,7 @@ function MetricDetailTableInner({
               </tr>
             </thead>
             <tbody>
-              {rows.map((row) => (
+              {displayRows.map((row) => (
                 <tr key={row.agentUuid} className="border-b border-border/60 hover:bg-muted/30">
                   <td className="whitespace-nowrap px-3 py-2 text-text-primary">{row.agentName}</td>
                   {columns.map((column) => (

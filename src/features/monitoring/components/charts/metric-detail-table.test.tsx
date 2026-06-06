@@ -167,4 +167,42 @@ describe('MetricDetailTable', () => {
     expect(screen.getByText('当前时间范围内暂无明细指标。')).toBeInTheDocument()
     expect(screen.queryByText('Updating')).not.toBeInTheDocument()
   })
+
+  it('keeps existing rows during background updates without showing a refresh label', () => {
+    render(<MetricDetailTable protocol="tcp" agentSeries={tcpSeries} isUpdating />)
+
+    expect(screen.getByRole('table', { name: 'TCP 明细指标' })).toBeInTheDocument()
+    expect(screen.getByText('Tokyo')).toBeInTheDocument()
+    expect(screen.getByText('47.2ms')).toBeInTheDocument()
+    expect(screen.queryByText('加载中…')).not.toBeInTheDocument()
+    expect(screen.queryByText('当前时间范围内暂无明细指标。')).not.toBeInTheDocument()
+  })
+
+  it('keeps the last non-empty rows when a background refresh briefly has no series', () => {
+    const { rerender } = render(<MetricDetailTable protocol="tcp" agentSeries={tcpSeries} />)
+
+    expect(screen.getByText('Tokyo')).toBeInTheDocument()
+    expect(screen.getByText('47.2ms')).toBeInTheDocument()
+
+    rerender(<MetricDetailTable protocol="tcp" agentSeries={[]} isUpdating />)
+
+    expect(screen.getByRole('table', { name: 'TCP 明细指标' })).toBeInTheDocument()
+    expect(screen.getByText('Tokyo')).toBeInTheDocument()
+    expect(screen.getByText('47.2ms')).toBeInTheDocument()
+    expect(screen.queryByText('加载中…')).not.toBeInTheDocument()
+    expect(screen.queryByText('当前时间范围内暂无明细指标。')).not.toBeInTheDocument()
+  })
+
+  it('merges partial background update rows into the previous table', () => {
+    const { rerender } = render(<MetricDetailTable protocol="icmp" agentSeries={icmpSeries} />)
+
+    expect(screen.getByText('Osaka')).toBeInTheDocument()
+    expect(screen.getByText('Tokyo')).toBeInTheDocument()
+
+    rerender(<MetricDetailTable protocol="icmp" agentSeries={[icmpSeries[0]]} isUpdating />)
+
+    expect(screen.getByText('Osaka')).toBeInTheDocument()
+    expect(screen.getByText('Tokyo')).toBeInTheDocument()
+    expect(screen.queryByText('加载中…')).not.toBeInTheDocument()
+  })
 })
