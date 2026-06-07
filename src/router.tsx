@@ -14,6 +14,7 @@ const RegisterPage = lazy(() => import('@/features/auth/pages/register-page'))
 // App pages
 const DashboardPage = lazy(() => import('@/features/dashboard/pages/dashboard-page'))
 const TargetsPage = lazy(() => import('@/features/targets/pages/targets-page'))
+const RouteTraceTargetsPage = lazy(() => import('@/features/route-trace/pages/route-trace-targets-page'))
 const TasksPage = lazy(() => import('@/features/tasks/pages/tasks-page'))
 const TaskDetailPage = lazy(() => import('@/features/tasks/pages/task-detail-page'))
 const AgentsPage = lazy(() => import('@/features/agents/pages/agents-page'))
@@ -61,6 +62,7 @@ export function AppRouter() {
             {/* Admin-only routes */}
             <Route element={<AdminGuard />}>
               <Route path="/targets" element={<TargetsPage />} />
+              <Route path="/route-trace-targets" element={<RouteTraceTargetsPage />} />
               <Route path="/agents" element={<AgentsPage />} />
               <Route path="/agents/releases" element={<ReleasesPage />} />
               <Route path="/agents/:agentUuid" element={<AgentDetailPage />} />

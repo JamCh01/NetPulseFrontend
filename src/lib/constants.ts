@@ -5,17 +5,19 @@ export const PROTOCOL_COLORS: Record<string, string> = {
   http: 'bg-proto-http text-proto-http-text border-proto-http-text/20 dark:border-proto-http-text/35',
   iperf3: 'bg-teal-500/10 text-teal-700 border-teal-500/25 dark:text-teal-300 dark:border-teal-400/30',
   mtr: 'bg-sky-500/10 text-sky-700 border-sky-500/25 dark:text-sky-300 dark:border-sky-400/30',
+  route_trace: 'bg-indigo-500/10 text-indigo-700 border-indigo-500/25 dark:text-indigo-300 dark:border-indigo-400/30',
 }
 
 export const MONITORING_PROTOCOLS = ['icmp', 'tcp', 'mtr', 'iperf3'] as const
 
 export type MonitoringProtocolName = (typeof MONITORING_PROTOCOLS)[number]
 
-export const PROTOCOL_LABELS: Record<MonitoringProtocolName, string> = {
+export const PROTOCOL_LABELS: Record<string, string> = {
   icmp: 'ICMP',
   tcp: 'TCP',
   mtr: 'MTR',
   iperf3: 'IPERF3',
+  route_trace: 'Route Trace',
 }
 
 export function protocolLabel(protocol: string): string {
@@ -43,6 +45,7 @@ export const PROTOCOL_ICON_COLORS: Record<string, string> = {
   udp: 'text-amber-600 dark:text-amber-400',
   iperf3: 'text-teal-600 dark:text-teal-400',
   mtr: 'text-sky-600 dark:text-sky-400',
+  route_trace: 'text-indigo-600 dark:text-indigo-400',
 }
 
 export const AGENT_STATUS_COLORS: Record<string, string> = {

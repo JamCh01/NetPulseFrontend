@@ -1,5 +1,6 @@
-import type { AdminAgent, AdminTarget, IpFamily, TaskCreatePayload, TaskType } from '@/api/hooks/admin-api'
-import { MONITORING_PROTOCOLS, type MonitoringProtocolName } from '@/lib/constants'
+import type { AdminAgent, AdminTarget, IpFamily, TaskCreatePayload, TaskType, TargetProtocol } from '@/api/hooks/admin-api'
+
+const TARGET_PROTOCOLS: TargetProtocol[] = ['icmp', 'tcp', 'mtr', 'iperf3']
 
 export function csvToList(value: string): string[] {
   return value
@@ -24,15 +25,16 @@ export function formatDateTime(value?: string | null) {
 }
 
 export function protocolOptionsForTarget(target?: AdminTarget | null): TaskType[] {
-  const supported = target?.supported_protocols?.length ? target.supported_protocols : [...MONITORING_PROTOCOLS]
-  return supported.filter((protocol): protocol is MonitoringProtocolName =>
-    MONITORING_PROTOCOLS.includes(protocol as MonitoringProtocolName),
+  const supported = target?.supported_protocols?.length ? target.supported_protocols : TARGET_PROTOCOLS
+  return supported.filter((protocol): protocol is TargetProtocol =>
+    TARGET_PROTOCOLS.includes(protocol as TargetProtocol),
   )
 }
 
 export function buildTaskPayload(input: {
   name: string
-  target_uuid: string
+  target_uuid?: string | null
+  route_trace_target_uuid?: string | null
   agent_uuid: string
   task_type: TaskType
   ip_family: IpFamily
@@ -56,7 +58,8 @@ export function buildTaskPayload(input: {
 }): TaskCreatePayload {
   const base: TaskCreatePayload = {
     name: input.name || null,
-    target_uuid: input.target_uuid,
+    target_uuid: input.task_type === 'route_trace' ? null : input.target_uuid ?? null,
+    route_trace_target_uuid: input.task_type === 'route_trace' ? input.route_trace_target_uuid ?? null : null,
     agent_uuid: input.agent_uuid,
     task_type: input.task_type,
     ip_family: input.ip_family,
@@ -66,7 +69,13 @@ export function buildTaskPayload(input: {
     probe_config: {},
   }
 
-  if (input.task_type === 'tcp') {
+  if (input.task_type === 'route_trace') {
+    base.probe_config = {
+      probe_protocol: 'icmp_echo',
+      payload_size: input.payloadSize ?? 64,
+      max_hops: input.mtrMaxHops ?? 30,
+    }
+  } else if (input.task_type === 'tcp') {
     base.probe_config = {
       port: input.port ?? 22,
       payload_size: input.payloadSize ?? 64,

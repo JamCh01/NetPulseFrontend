@@ -47,10 +47,10 @@ import {
 } from '@/features/admin/quick-associate-options'
 import { TagInput } from '@/features/admin/tag-input'
 import { csvToList, formatDateTime, joinLocation } from '@/features/admin/utils'
-import { MONITORING_PROTOCOLS, PROTOCOL_COLORS, ipVersionLabel, protocolLabel } from '@/lib/constants'
+import { PROTOCOL_COLORS, ipVersionLabel, protocolLabel } from '@/lib/constants'
 
 const PAGE_SIZE = 100
-const PROTOCOLS: TargetProtocol[] = [...MONITORING_PROTOCOLS]
+const PROTOCOLS: TargetProtocol[] = ['icmp', 'tcp', 'mtr', 'iperf3']
 const REDACTED_TARGET = '[Target]'
 
 export default function TargetsPage() {

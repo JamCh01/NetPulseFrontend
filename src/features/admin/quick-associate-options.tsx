@@ -1,6 +1,6 @@
-import type { AdminAgent, AdminTarget, IpFamily, IpVersion, TaskType } from '@/api/hooks/admin-api'
+import type { AdminAgent, AdminTarget, IpFamily, IpVersion, QuickAssociateTaskType } from '@/api/hooks/admin-api'
 
-export type QuickAssociateTaskType = Exclude<TaskType, 'iperf3'>
+export type { QuickAssociateTaskType } from '@/api/hooks/admin-api'
 
 export const QUICK_ASSOCIATE_TASK_TYPES: QuickAssociateTaskType[] = ['icmp', 'tcp', 'mtr']
 export const QUICK_ASSOCIATE_IP_FAMILIES: IpFamily[] = ['4', '6']

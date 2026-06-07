@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 
 import {
   type AdminTask,
+  type AdminRouteTraceTarget,
   type AdminTarget,
   type IpFamily,
   type TaskType,
@@ -13,6 +14,7 @@ import {
   useCreateTask,
   useDeleteTask,
   useQuickAssociate,
+  useRouteTraceTargets,
   useSetTaskEnabled,
   useTargets,
   useTasks,
@@ -66,6 +68,7 @@ interface AgentOptionSummary {
 interface TaskFormState {
   name: string
   target_uuid: string
+  route_trace_target_uuid: string
   agent_uuid: string
   task_type: TaskType
   ip_family: IpFamily
@@ -92,6 +95,7 @@ function initialTaskForm(): TaskFormState {
   return {
     name: '',
     target_uuid: '',
+    route_trace_target_uuid: '',
     agent_uuid: '',
     task_type: 'icmp',
     ip_family: '4',
@@ -155,6 +159,19 @@ function formWithProtocolDefaults(current: TaskFormState, taskType: TaskType): T
       mtr_loss_threshold_pct: '10',
       mtr_cooldown_duration_sec: '300',
       mtr_max_retry_count: '3',
+    }
+  }
+  if (taskType === 'route_trace') {
+    return {
+      ...current,
+      task_type: taskType,
+      target_uuid: '',
+      interval: '600',
+      timeout: '10000',
+      packet_count: '3',
+      port: '',
+      payload_size: '64',
+      mtr_max_hops: '30',
     }
   }
   return {
@@ -376,6 +393,34 @@ function ProtocolFields({
     )
   }
 
+  if (taskType === 'route_trace') {
+    return (
+      <>
+        <SectionHeader
+          title={t('tasks.protocolRouteTraceTitle')}
+          description={t('tasks.protocolRouteTraceDesc')}
+        />
+        <div className="grid gap-3 py-3 md:grid-cols-2">
+          <CompactField label={t('tasks.fieldScheduleInterval')} description={t('tasks.fieldScheduleIntervalCompactDesc')} htmlFor={`${prefix}-interval`}>
+            <Input id={`${prefix}-interval`} type="number" min="60" placeholder={t('tasks.intervalSecondsPlaceholder')} value={value.interval} onChange={(event) => setValue({ interval: event.target.value })} />
+          </CompactField>
+          <CompactField label={t('tasks.fieldTimeout')} description={t('tasks.fieldTimeoutRouteTraceDesc')} htmlFor={`${prefix}-timeout`}>
+            <Input id={`${prefix}-timeout`} type="number" min="1000" placeholder={t('tasks.timeoutMsPlaceholder')} value={value.timeout} onChange={(event) => setValue({ timeout: event.target.value })} />
+          </CompactField>
+          <CompactField label={t('tasks.fieldPacketCount')} description={t('tasks.fieldPacketCountRouteTraceDesc')} htmlFor={`${prefix}-packet-count`}>
+            <Input id={`${prefix}-packet-count`} type="number" min="1" placeholder={t('tasks.packetCountPlaceholder')} value={value.packet_count} onChange={(event) => setValue({ packet_count: event.target.value })} />
+          </CompactField>
+          <CompactField label={t('tasks.fieldRouteTraceMaxHops')} description={t('tasks.fieldRouteTraceMaxHopsDesc')} htmlFor={`${prefix}-route-trace-max-hops`}>
+            <Input id={`${prefix}-route-trace-max-hops`} aria-label={t('tasks.fieldRouteTraceMaxHops')} type="number" min="1" max="255" placeholder={t('tasks.maxHopsPlaceholder')} value={value.mtr_max_hops} onChange={(event) => setValue({ mtr_max_hops: event.target.value })} />
+          </CompactField>
+          <CompactField label={t('tasks.fieldPayloadSize')} description={t('tasks.fieldPayloadSizeRouteTraceDesc')} htmlFor={`${prefix}-payload-size`}>
+            <Input id={`${prefix}-payload-size`} aria-label={t('tasks.fieldPayloadSize')} type="number" min="1" max="65507" placeholder={t('tasks.bytesPlaceholder')} value={value.payload_size} onChange={(event) => setValue({ payload_size: event.target.value })} />
+          </CompactField>
+        </div>
+      </>
+    )
+  }
+
   return (
     <>
       <SectionHeader
@@ -419,6 +464,11 @@ function targetOptionLabel(target: TargetOptionSummary | null | undefined, place
   return target.name
 }
 
+function routeTraceTargetOptionLabel(target: AdminRouteTraceTarget | null | undefined, placeholder: string, fallback?: string | null): string {
+  if (!target) return fallback || placeholder
+  return `${target.name} - ${target.host}`
+}
+
 function agentOptionLabel(agent: AgentOptionSummary | null | undefined, placeholder: string, fallback?: string | null): string {
   if (!agent) return fallback || placeholder
   return `${agent.name}${agent.city ? ` - ${agent.city}` : ''}`
@@ -459,6 +509,7 @@ export default function TasksPage() {
 
   const tasksQuery = useTasks({ keyword, task_type: taskType, sort_by: 'name', sort_order: 'asc' })
   const targetsQuery = useTargets({ page_size: 100, sort_by: 'name', sort_order: 'asc', is_enabled: true })
+  const routeTraceTargetsQuery = useRouteTraceTargets({ page_size: 100, sort_by: 'name', sort_order: 'asc', is_enabled: true })
   const agentsQuery = useAgents({ page_size: 100, sort_by: 'name', sort_order: 'asc', is_enabled: true })
   const createTask = useCreateTask()
   const updateTask = useUpdateTask()
@@ -468,15 +519,31 @@ export default function TasksPage() {
 
   const tasks = useMemo(() => tasksQuery.data?.items ?? [], [tasksQuery.data?.items])
   const targets = useMemo(() => targetsQuery.data?.items ?? [], [targetsQuery.data?.items])
+  const routeTraceTargets = useMemo(() => routeTraceTargetsQuery.data?.items ?? [], [routeTraceTargetsQuery.data?.items])
   const agents = useMemo(() => agentsQuery.data?.items ?? [], [agentsQuery.data?.items])
   const selectedTarget = useMemo(
     () => targets.find((target) => target.target_uuid === form.target_uuid) ?? null,
     [form.target_uuid, targets],
   )
   const availableTaskTypes = protocolOptionsForTarget(selectedTarget)
+  const createTaskTypes = useMemo(() => {
+    const types = [...availableTaskTypes]
+    if (routeTraceTargets.length > 0 || form.task_type === 'route_trace') {
+      types.push('route_trace')
+    }
+    return types
+  }, [availableTaskTypes, form.task_type, routeTraceTargets.length])
+  const selectedRouteTraceTarget = useMemo(
+    () => routeTraceTargets.find((target) => target.route_trace_target_uuid === form.route_trace_target_uuid) ?? null,
+    [form.route_trace_target_uuid, routeTraceTargets],
+  )
   const selectedEditTarget = useMemo(
     () => targets.find((target) => target.target_uuid === editForm.target_uuid) ?? null,
     [editForm.target_uuid, targets],
+  )
+  const selectedEditRouteTraceTarget = useMemo(
+    () => routeTraceTargets.find((target) => target.route_trace_target_uuid === editForm.route_trace_target_uuid) ?? null,
+    [editForm.route_trace_target_uuid, routeTraceTargets],
   )
   const selectedAgent = useMemo(
     () => agents.find((agent) => agent.agent_uuid === form.agent_uuid) ?? null,
@@ -521,6 +588,7 @@ export default function TasksPage() {
     const payload = buildTaskPayload({
       name: form.name,
       target_uuid: form.target_uuid,
+      route_trace_target_uuid: form.route_trace_target_uuid,
       agent_uuid: form.agent_uuid,
       task_type: form.task_type,
       ip_family: form.ip_family,
@@ -564,7 +632,8 @@ export default function TasksPage() {
       : 'icmp_echo'
     setEditForm({
       name: task.name,
-      target_uuid: task.target_uuid,
+      target_uuid: task.target_uuid ?? '',
+      route_trace_target_uuid: task.route_trace_target_uuid ?? '',
       agent_uuid: task.agent_uuid,
       ip_family: task.ip_family,
       interval: String(task.interval),
@@ -595,6 +664,7 @@ export default function TasksPage() {
     const nextPayload = buildTaskPayload({
       name: editForm.name,
       target_uuid: editForm.target_uuid,
+      route_trace_target_uuid: editForm.route_trace_target_uuid,
       agent_uuid: editForm.agent_uuid,
       task_type: editTask.task_type,
       ip_family: editForm.ip_family,
@@ -621,6 +691,7 @@ export default function TasksPage() {
       data: {
         name: nextPayload.name,
         target_uuid: nextPayload.target_uuid,
+        route_trace_target_uuid: nextPayload.route_trace_target_uuid,
         agent_uuid: nextPayload.agent_uuid,
         ip_family: nextPayload.ip_family,
         interval: nextPayload.interval,
@@ -698,6 +769,7 @@ export default function TasksPage() {
               <SelectItem value="tcp">{protocolLabel('tcp')}</SelectItem>
               <SelectItem value="mtr">{protocolLabel('mtr')}</SelectItem>
               <SelectItem value="iperf3">{protocolLabel('iperf3')}</SelectItem>
+              <SelectItem value="route_trace">{protocolLabel('route_trace')}</SelectItem>
             </SelectContent>
           </Select>
           <Button variant="outline" onClick={() => void tasksQuery.refetch()}>{t('tasks.refresh')}</Button>
@@ -736,8 +808,10 @@ export default function TasksPage() {
                     <Badge className={`border ${PROTOCOL_COLORS[task.task_type] ?? ''}`}>{protocolLabel(task.task_type)}</Badge>
                   </TableCell>
                   <TableCell className="text-sm text-text-secondary">
-                    <div>{task.target?.name ?? task.target_uuid}</div>
-                    <div className="font-[family-name:var(--font-mono)] text-xs text-text-muted">{task.target?.target}</div>
+                    <div>{task.route_trace_target?.name ?? task.target?.name ?? task.target_uuid ?? task.route_trace_target_uuid}</div>
+                    <div className="font-[family-name:var(--font-mono)] text-xs text-text-muted">
+                      {task.route_trace_target?.host ?? task.target?.target ?? '-'}
+                    </div>
                   </TableCell>
                   <TableCell className="text-sm text-text-secondary">
                     <div>{task.agent?.name ?? task.agent_uuid}</div>
@@ -797,25 +871,42 @@ export default function TasksPage() {
               <FieldRow label={t('tasks.taskName')} description={t('tasks.nameOptionalDesc')} htmlFor="task-create-name">
                 <Input id="task-create-name" placeholder={t('tasks.nameOptionalPlaceholder')} value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} />
               </FieldRow>
-              <FieldRow label="Target" description={t('tasks.targetDesc')}>
-                <Select value={form.target_uuid} onValueChange={(value) => {
-                  const target = targets.find((item) => item.target_uuid === value)
-                  const nextTypes = protocolOptionsForTarget(target)
-                  const nextType = nextTypes.includes(form.task_type) ? form.task_type : nextTypes[0]
-                  setForm({ ...formWithProtocolDefaults(form, nextType), target_uuid: value ?? '' })
-                }}>
-                  <SelectTrigger aria-label="Target" className="w-full">
-                    <SelectValue>
-                      {() => targetOptionLabel(selectedTarget, t('tasks.selectTarget'), form.target_uuid)}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {targets.map((target) => (
-                      <SelectItem key={target.target_uuid} value={target.target_uuid}>{target.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FieldRow>
+              {form.task_type === 'route_trace' ? (
+                <FieldRow label={t('tasks.routeTraceTarget')} description={t('tasks.routeTraceTargetDesc')}>
+                  <Select value={form.route_trace_target_uuid} onValueChange={(value) => setForm({ ...form, route_trace_target_uuid: value ?? '' })}>
+                    <SelectTrigger aria-label={t('tasks.routeTraceTarget')} className="w-full">
+                      <SelectValue>
+                        {() => routeTraceTargetOptionLabel(selectedRouteTraceTarget, t('tasks.selectRouteTraceTarget'), form.route_trace_target_uuid)}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {routeTraceTargets.map((target) => (
+                        <SelectItem key={target.route_trace_target_uuid} value={target.route_trace_target_uuid}>{target.name} - {target.host}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FieldRow>
+              ) : (
+                <FieldRow label="Target" description={t('tasks.targetDesc')}>
+                  <Select value={form.target_uuid} onValueChange={(value) => {
+                    const target = targets.find((item) => item.target_uuid === value)
+                    const nextTypes = protocolOptionsForTarget(target)
+                    const nextType = nextTypes.includes(form.task_type) ? form.task_type : nextTypes[0]
+                    setForm({ ...formWithProtocolDefaults(form, nextType), target_uuid: value ?? '' })
+                  }}>
+                    <SelectTrigger aria-label="Target" className="w-full">
+                      <SelectValue>
+                        {() => targetOptionLabel(selectedTarget, t('tasks.selectTarget'), form.target_uuid)}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {targets.map((target) => (
+                        <SelectItem key={target.target_uuid} value={target.target_uuid}>{target.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FieldRow>
+              )}
               <FieldRow label="Agent" description={t('tasks.agentDesc')}>
                 <Select value={form.agent_uuid} onValueChange={(value) => setForm({ ...form, agent_uuid: value ?? '' })}>
                   <SelectTrigger aria-label="Agent" className="w-full">
@@ -838,7 +929,7 @@ export default function TasksPage() {
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
-                    {availableTaskTypes.map((type) => (
+                    {createTaskTypes.map((type) => (
                       <SelectItem key={type} value={type}>{protocolLabel(type)}</SelectItem>
                     ))}
                   </SelectContent>
@@ -861,7 +952,7 @@ export default function TasksPage() {
             </div>
             <DialogFooter className="mt-4">
               <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>{t('common.cancel')}</Button>
-              <Button type="submit" disabled={!form.target_uuid || !form.agent_uuid || createTask.isPending}>
+              <Button type="submit" disabled={(form.task_type === 'route_trace' ? !form.route_trace_target_uuid : !form.target_uuid) || !form.agent_uuid || createTask.isPending}>
                 {createTask.isPending ? t('tasks.creatingShort') : t('common.create')}
               </Button>
             </DialogFooter>
@@ -945,23 +1036,40 @@ export default function TasksPage() {
                 <FieldRow label={t('tasks.taskName')} description={t('tasks.nameEditDesc')} htmlFor="task-edit-name">
                   <Input id="task-edit-name" value={editForm.name} onChange={(event) => setEditForm({ ...editForm, name: event.target.value })} placeholder={t('tasks.taskName')} />
                 </FieldRow>
-                <FieldRow label="Target" description={t('tasks.targetDesc')}>
-                  <Select value={editForm.target_uuid} onValueChange={(value) => setEditForm({ ...editForm, target_uuid: value ?? '' })}>
-                    <SelectTrigger aria-label="Target" className="w-full">
-                      <SelectValue>
-                        {() => targetOptionLabel(selectedEditTarget, t('tasks.selectTarget'), editForm.target_uuid)}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {targets.map((target) => (
-                        <SelectItem key={target.target_uuid} value={target.target_uuid}>{target.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {selectedEditTarget && !protocolOptionsForTarget(selectedEditTarget).includes(editTask.task_type) && (
-                    <p className="mt-1 text-xs text-red-400">{t('tasks.targetUnsupported', { protocol: protocolLabel(editTask.task_type) })}</p>
-                  )}
-                </FieldRow>
+                {editTask.task_type === 'route_trace' ? (
+                  <FieldRow label={t('tasks.routeTraceTarget')} description={t('tasks.routeTraceTargetDesc')}>
+                    <Select value={editForm.route_trace_target_uuid} onValueChange={(value) => setEditForm({ ...editForm, route_trace_target_uuid: value ?? '' })}>
+                      <SelectTrigger aria-label={t('tasks.routeTraceTarget')} className="w-full">
+                        <SelectValue>
+                          {() => routeTraceTargetOptionLabel(selectedEditRouteTraceTarget, t('tasks.selectRouteTraceTarget'), editForm.route_trace_target_uuid)}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {routeTraceTargets.map((target) => (
+                          <SelectItem key={target.route_trace_target_uuid} value={target.route_trace_target_uuid}>{target.name} - {target.host}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FieldRow>
+                ) : (
+                  <FieldRow label="Target" description={t('tasks.targetDesc')}>
+                    <Select value={editForm.target_uuid} onValueChange={(value) => setEditForm({ ...editForm, target_uuid: value ?? '' })}>
+                      <SelectTrigger aria-label="Target" className="w-full">
+                        <SelectValue>
+                          {() => targetOptionLabel(selectedEditTarget, t('tasks.selectTarget'), editForm.target_uuid)}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {targets.map((target) => (
+                          <SelectItem key={target.target_uuid} value={target.target_uuid}>{target.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {selectedEditTarget && !protocolOptionsForTarget(selectedEditTarget).includes(editTask.task_type) && (
+                      <p className="mt-1 text-xs text-red-400">{t('tasks.targetUnsupported', { protocol: protocolLabel(editTask.task_type) })}</p>
+                    )}
+                  </FieldRow>
+                )}
                 <FieldRow label="Agent" description={t('tasks.agentDesc')}>
                   <Select value={editForm.agent_uuid} onValueChange={(value) => setEditForm({ ...editForm, agent_uuid: value ?? '' })}>
                     <SelectTrigger aria-label="Agent" className="w-full">
@@ -998,7 +1106,7 @@ export default function TasksPage() {
               </div>
               <DialogFooter className="mt-4">
                 <Button type="button" variant="outline" onClick={() => setEditTask(null)}>{t('common.cancel')}</Button>
-                <Button type="submit" disabled={!editForm.target_uuid || !editForm.agent_uuid || updateTask.isPending}>
+                <Button type="submit" disabled={(editTask.task_type === 'route_trace' ? !editForm.route_trace_target_uuid : !editForm.target_uuid) || !editForm.agent_uuid || updateTask.isPending}>
                   {updateTask.isPending ? t('tasks.savingShort') : t('common.save')}
                 </Button>
               </DialogFooter>

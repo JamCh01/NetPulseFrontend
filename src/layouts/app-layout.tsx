@@ -25,6 +25,7 @@ import {
   DatabaseZap,
   Map,
   Settings as SettingsIcon,
+  Route,
 } from 'lucide-react'
 
 import {
@@ -63,6 +64,7 @@ export function AppLayout() {
 
   const staticNavItems: NavItem[] = [
     { label: 'Targets', path: '/targets', icon: <Crosshair className="w-4 h-4" />, adminOnly: true },
+    { label: t('nav.routeTraceTargets'), path: '/route-trace-targets', icon: <Route className="w-4 h-4" />, adminOnly: true },
     { label: t('nav.agents'), path: '/agents', icon: <Radio className="w-4 h-4" />, adminOnly: true },
     { label: 'Tasks', path: '/tasks', icon: <ListChecks className="w-4 h-4" />, adminOnly: true },
     { label: 'GEO', path: '/geo', icon: <Map className="w-4 h-4" />, adminOnly: true },

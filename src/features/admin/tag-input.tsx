@@ -11,7 +11,7 @@ interface TagInputProps {
   label: string
   value: string
   onChange: (value: string) => void
-  resourceType: 'agent' | 'target'
+  resourceType: 'agent' | 'target' | 'route_trace_target'
 }
 
 function parseTags(value: string): string[] {
