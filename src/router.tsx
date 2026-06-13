@@ -26,6 +26,7 @@ const SettingsPage = lazy(() => import('@/features/admin/pages/settings-page'))
 const MonitoringIndexPage = lazy(() => import('@/features/monitoring/pages/monitoring-index-page'))
 const MonitoringDetailPage = lazy(() => import('@/features/monitoring/pages/monitoring-detail-page'))
 const MtrDetailPage = lazy(() => import('@/features/monitoring/pages/mtr-detail-page'))
+const RouteTraceDetailPage = lazy(() => import('@/features/monitoring/pages/route-trace-detail-page'))
 const NotFoundPage = lazy(() => import('@/features/system/pages/not-found-page'))
 
 function PageLoader() {
@@ -48,6 +49,7 @@ export function AppRouter() {
           <Route path="/monitoring" element={<MonitoringIndexPage />} />
           <Route path="/monitoring/:taskUuid" element={<MonitoringDetailPage />} />
           <Route path="/monitoring/:taskUuid/mtr" element={<MtrDetailPage />} />
+          <Route path="/monitoring/:taskUuid/route-trace" element={<RouteTraceDetailPage />} />
         </Route>
 
         {/* Protected routes */}
@@ -59,6 +61,7 @@ export function AppRouter() {
             <Route path="/app/monitoring" element={<MonitoringIndexPage />} />
             <Route path="/app/monitoring/:taskUuid" element={<MonitoringDetailPage />} />
             <Route path="/app/monitoring/:taskUuid/mtr" element={<MtrDetailPage />} />
+            <Route path="/app/monitoring/:taskUuid/route-trace" element={<RouteTraceDetailPage />} />
 
             {/* Admin-only routes */}
             <Route element={<AdminGuard />}>

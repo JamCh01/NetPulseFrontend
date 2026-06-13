@@ -112,6 +112,16 @@ const routeTraceCapableTarget = {
   supported_protocols: ['route_trace'],
 }
 
+const mixedRouteTraceTarget = {
+  ...target,
+  target_uuid: 'target-mixed-route-trace',
+  name: 'Mixed Route Trace Target',
+  target: 'example.com',
+  target_type: 'domain',
+  ip_version: '4',
+  supported_protocols: ['icmp', 'tcp', 'mtr', 'iperf3', 'route_trace'],
+}
+
 describe('TasksPage', () => {
   it('loads Target and Agent options for quick association with backend-compatible page sizes', async () => {
     const user = userEvent.setup()
@@ -266,7 +276,7 @@ describe('TasksPage', () => {
     expect(within(dialog).getByText('协议类型')).toBeInTheDocument()
     expect(within(dialog).getByText('IPERF3')).toBeInTheDocument()
     expect(within(dialog).queryByDisplayValue('IPERF3')).not.toBeInTheDocument()
-    expect(within(dialog).getByText('任务类型由创建时确定，IPERF3 每天定时执行一次。')).toBeInTheDocument()
+    expect(within(dialog).getByText('任务类型由创建时确定；只能修改绑定关系、IP 协议族、调度参数和对应协议的探测参数。')).toBeInTheDocument()
 
     expect(within(dialog).getByText('iperf3 线程模式')).toBeInTheDocument()
     expect(within(dialog).getByText('单线程用于基线测试，8 线程用于模拟多连接吞吐能力。')).toBeInTheDocument()
@@ -420,6 +430,27 @@ describe('TasksPage', () => {
         max_hops: 30,
       },
     })
+  })
+
+  it('offers route trace after both target and agent are selected', async () => {
+    const user = userEvent.setup()
+    server.use(
+      http.get('*/api/v1/tasks', () => HttpResponse.json({ items: [] })),
+      http.get('*/api/v1/targets', () => HttpResponse.json({ items: [mixedRouteTraceTarget] })),
+      http.get('*/api/v1/agents', () => HttpResponse.json({ items: [agent] })),
+    )
+
+    renderWithProviders(<TasksPage />)
+
+    await user.click(screen.getByRole('button', { name: '新增 Task' }))
+    const dialog = await screen.findByRole('dialog', { name: '新增 Task' })
+    await user.click(within(dialog).getByRole('combobox', { name: 'Target' }))
+    await user.click(await screen.findByRole('option', { name: /Mixed Route Trace Target/ }))
+    await user.click(within(dialog).getByRole('combobox', { name: 'Agent' }))
+    await user.click(await screen.findByRole('option', { name: /Tokyo Agent/ }))
+    await user.click(within(dialog).getByRole('combobox', { name: '协议类型' }))
+
+    expect(await screen.findByRole('option', { name: 'Route Trace' })).toBeInTheDocument()
   })
 
   it('submits and edits TCP connect interval in probe config', async () => {

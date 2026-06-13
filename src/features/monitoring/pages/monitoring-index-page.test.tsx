@@ -219,4 +219,167 @@ describe('MonitoringIndexPage', () => {
     expect(screen.queryByText('当前 Target 没有 MTR 任务')).not.toBeInTheDocument()
     expect(screen.queryByText('当前 Target 没有 IPERF3 任务')).not.toBeInTheDocument()
   })
+
+  it('links Route Trace tasks to the Route Trace result page', async () => {
+    server.use(
+      http.get('*/api/v1/monitoring/tasks', () => HttpResponse.json({
+        data: {
+          items: [{
+            task_uuid: 'task-route-trace-1',
+            name: 'Tokyo Route Trace',
+            task_type: 'route_trace',
+            interval_sec: 600,
+            is_enabled: true,
+            target: {
+              target_uuid: 'target-1',
+              name: 'Tokyo Edge',
+              target: '[Target]',
+              target_type: 'domain',
+              ip_version: '4',
+              is_anycast: false,
+              continent: 'Asia',
+              country: 'Japan',
+              city: 'Tokyo',
+              carrier: 'Example IDC',
+            },
+            agent: {
+              agent_uuid: 'agent-1',
+              name: 'Tokyo Agent',
+              city: 'Tokyo',
+              country: 'Japan',
+            },
+            latest_result: {
+              exists: true,
+              latest_sample_at: '2026-06-07T00:00:03Z',
+              latest_run_status: 'ok',
+            },
+            created_at: '2026-06-07T00:00:00Z',
+            updated_at: '2026-06-07T00:00:00Z',
+          }],
+        },
+      })),
+    )
+
+    renderWithProviders(<MonitoringIndexPage />, {
+      initialEntries: ['/app/monitoring'],
+    })
+
+    const taskLink = await screen.findByRole('link', { name: /Tokyo Route Trace/ })
+    expect(taskLink).toHaveAttribute('href', '/app/monitoring/task-route-trace-1/route-trace')
+  })
+
+  it('shows Route Trace results on the selected Target page', async () => {
+    server.use(
+      http.get('*/api/v1/monitoring/targets/target-1', () => HttpResponse.json({
+        data: {
+          target_uuid: 'target-1',
+          name: 'Tokyo Edge',
+          target: '[Target]',
+          target_type: 'domain',
+          ip_version: '4',
+          is_anycast: false,
+          continent: 'Asia',
+          country: 'Japan',
+          city: 'Tokyo',
+          carrier: 'Example IDC',
+          comment: 'Route Trace target.',
+        },
+      })),
+      http.get('*/api/v1/monitoring/tasks', () => HttpResponse.json({
+        data: {
+          items: [{
+            task_uuid: 'task-route-trace-1',
+            name: 'Tokyo Route Trace',
+            task_type: 'route_trace',
+            interval_sec: 600,
+            is_enabled: true,
+            target: {
+              target_uuid: 'target-1',
+              name: 'Tokyo Edge',
+              target: '[Target]',
+              target_type: 'domain',
+              ip_version: '4',
+              is_anycast: false,
+              continent: 'Asia',
+              country: 'Japan',
+              city: 'Tokyo',
+              carrier: 'Example IDC',
+            },
+            agent: {
+              agent_uuid: 'agent-1',
+              name: 'Tokyo Agent',
+              city: 'Tokyo',
+              country: 'Japan',
+            },
+            latest_result: {
+              exists: true,
+              latest_sample_at: '2026-06-07T00:00:03Z',
+              latest_run_status: 'ok',
+              hop_count: 5,
+            },
+            created_at: '2026-06-07T00:00:00Z',
+            updated_at: '2026-06-07T00:00:00Z',
+          }],
+        },
+      })),
+      http.get('*/api/v1/monitoring/tasks/task-route-trace-1/route-trace-results', () => HttpResponse.json({
+        data: {
+          task_uuid: 'task-route-trace-1',
+          items: [{
+            result_uuid: 'route-result-1',
+            task_uuid: 'task-route-trace-1',
+            agent_uuid: 'agent-1',
+            latest_sample_at: '2026-06-07T00:00:03Z',
+            latest_run_status: 'ok',
+            target_reached: true,
+            hop_count: 2,
+            duration_ms: 3000,
+            resolved_ip: '[Target IP]',
+            as_path: ['AS64512', 'AS13335'],
+            hops: [
+              {
+                hop: 1,
+                addresses: [{
+                  ip: '10.0.0.1',
+                  hostname: 'gateway.local',
+                  asn: 'AS64512',
+                  packet_loss_pct: 0,
+                  packets_sent: 3,
+                  packets_received: 3,
+                  avg_ms: 1.2,
+                  best_ms: 1,
+                  worst_ms: 1.5,
+                }],
+              },
+              {
+                hop: 2,
+                addresses: [{
+                  ip: '[Target IP]',
+                  hostname: null,
+                  asn: 'AS13335',
+                  packet_loss_pct: 0,
+                  packets_sent: 3,
+                  packets_received: 3,
+                  avg_ms: 8,
+                  best_ms: 7.5,
+                  worst_ms: 8.5,
+                }],
+              },
+            ],
+          }],
+        },
+      })),
+    )
+
+    renderWithProviders(<MonitoringIndexPage />, {
+      initialEntries: ['/monitoring?target_uuid=target-1'],
+    })
+
+    expect(await screen.findByRole('heading', { name: 'Route Trace 结果' })).toBeInTheDocument()
+    expect(screen.getByText('Route Trace Result 时间轴')).toBeInTheDocument()
+    expect(screen.queryByText('MTR Result 时间轴')).not.toBeInTheDocument()
+    expect(screen.getByText('AS64512->AS13335')).toBeInTheDocument()
+    expect(screen.getByRole('row', { name: /2 \[Target IP\] - AS13335 3 3 0.0% 8.0ms 7.5ms 8.5ms/ })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: '查看 Route Trace 结果' })).not.toBeInTheDocument()
+  })
 })

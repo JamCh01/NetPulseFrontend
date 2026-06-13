@@ -7,6 +7,7 @@ import { useMtrDetail, useMtrListsForTasks } from '@/api/hooks/use-mtr'
 import { useTaskMonitoringSeries } from '@/api/hooks/use-monitoring'
 import { usePublicMonitoringTarget } from '@/api/hooks/use-public-monitoring-target'
 import { usePublicMonitoringTasks } from '@/api/hooks/use-public-monitoring-tasks'
+import { useRouteTraceListsForTasks } from '@/api/hooks/use-route-trace'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { MarkdownPreview } from '@/components/ui/markdown-preview'
@@ -319,6 +320,17 @@ function Iperf3EvidenceToolbar(props: Omit<Parameters<typeof EvidenceToolbar>[0]
   )
 }
 
+function RouteTraceEvidenceToolbar(props: Omit<Parameters<typeof EvidenceToolbar>[0], 'protocol' | 'title' | 'icon'>) {
+  const { t } = useTranslation()
+  return (
+    <EvidenceToolbar
+      {...props}
+      title={t('monitoring.routeTraceResults')}
+      icon={<Waypoints className="h-4 w-4" />}
+    />
+  )
+}
+
 function EmptyProtocolState({ protocol }: { protocol: string }) {
   const { t } = useTranslation()
   return (
@@ -465,6 +477,76 @@ function MtrProtocolPanel({
   )
 }
 
+function RouteTraceProtocolPanel({
+  tasks,
+  timeRange,
+  onTimeRangeChange,
+}: {
+  tasks: MonitoringTask[]
+  timeRange: MonitoringTimeRange
+  onTimeRangeChange: (range: MonitoringTimeRange) => void
+}) {
+  const { t } = useTranslation()
+  const agentOptions = useMemo(() => buildAgentFilterOptions(tasks), [tasks])
+  const [selectedAgentUuids, setSelectedAgentUuids] = useState<string[] | null>(null)
+  const availableAgentUuids = useMemo(() => new Set(agentOptions.map((option) => option.agentUuid)), [agentOptions])
+  const allAgentUuids = useMemo(() => agentOptions.map((option) => option.agentUuid), [agentOptions])
+  const effectiveSelectedAgentUuids = useMemo(
+    () => (selectedAgentUuids ?? allAgentUuids).filter((agentUuid) => availableAgentUuids.has(agentUuid)),
+    [allAgentUuids, availableAgentUuids, selectedAgentUuids],
+  )
+  const filteredTasks = useMemo(
+    () => filterTasksBySelectedAgents(tasks, effectiveSelectedAgentUuids),
+    [effectiveSelectedAgentUuids, tasks],
+  )
+  const { combinedResults, total, isLoading, error } = useRouteTraceListsForTasks(filteredTasks, timeRange)
+  const [selectedResultUuid, setSelectedResultUuid] = useState<string>('')
+  const selectedResult = combinedResults.some((result) => result.result_uuid === selectedResultUuid)
+    ? selectedResultUuid
+    : combinedResults[0]?.result_uuid || ''
+  const activeResult = combinedResults.find((result) => result.result_uuid === selectedResult)
+
+  return (
+    <section className="overflow-hidden rounded-xl border border-border bg-bg-surface">
+      <RouteTraceEvidenceToolbar
+        tasks={tasks}
+        timeRange={timeRange}
+        onTimeRangeChange={onTimeRangeChange}
+        agentOptions={agentOptions}
+        selectedAgentUuids={effectiveSelectedAgentUuids}
+        onSelectedAgentUuidsChange={setSelectedAgentUuids}
+      />
+      {tasks.length === 0 ? (
+        <EmptyProtocolState protocol={protocolLabel('route_trace')} />
+      ) : filteredTasks.length === 0 ? (
+        <div className="p-8 text-center">
+          <Users className="mx-auto h-7 w-7 text-text-dim" />
+          <NoAgentSelectedText />
+        </div>
+      ) : error ? (
+        <div className="p-6 text-sm text-status-error-fg">{t('monitoring.routeTraceDataLoadFailed', { message: error.message })}</div>
+      ) : (
+        <div className="p-4">
+          <MtrResultViews
+            tasks={filteredTasks}
+            results={combinedResults}
+            total={total}
+            selectedResultUuid={selectedResult}
+            onSelectResult={setSelectedResultUuid}
+            selectedResult={activeResult}
+            detailLoading={false}
+            listLoading={isLoading}
+            resultName="Route Trace"
+            noResultText={t('monitoring.noRouteTraceResultInRange')}
+            selectResultTitle={t('monitoring.selectRouteTraceResult')}
+            selectResultDesc={t('monitoring.selectRouteTraceResultDesc')}
+          />
+        </div>
+      )}
+    </section>
+  )
+}
+
 function Iperf3ProtocolPanel({
   tasks,
   timeRange,
@@ -591,7 +673,6 @@ export function TargetMonitoringPanel({
 }: {
   targetUuid: string
   fallbackGroup?: MonitoringTargetGroup
-  basePath: '/monitoring' | '/app/monitoring'
 }) {
   const { t } = useTranslation()
   const { data, isLoading, error, refetch } = usePublicMonitoringTasks({
@@ -603,6 +684,7 @@ export function TargetMonitoringPanel({
   const [tcpTimeRange, setTcpTimeRange] = useState<MonitoringTimeRange>(() => createRelativeTimeRange())
   const [mtrTimeRange, setMtrTimeRange] = useState<MonitoringTimeRange>(() => createRelativeTimeRange(MTR_RESULT_MIN_RANGE_MS))
   const [iperf3TimeRange, setIperf3TimeRange] = useState<MonitoringTimeRange>(() => createRelativeTimeRange())
+  const [routeTraceTimeRange, setRouteTraceTimeRange] = useState<MonitoringTimeRange>(() => createRelativeTimeRange(MTR_RESULT_MIN_RANGE_MS))
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -610,6 +692,7 @@ export function TargetMonitoringPanel({
       setTcpTimeRange((current) => refreshRelativeTimeRange(current))
       setMtrTimeRange((current) => refreshRelativeTimeRange(current))
       setIperf3TimeRange((current) => refreshRelativeTimeRange(current))
+      setRouteTraceTimeRange((current) => refreshRelativeTimeRange(current))
     }, AUTO_REFRESH_INTERVAL_MS)
     return () => window.clearInterval(timer)
   }, [])
@@ -628,6 +711,7 @@ export function TargetMonitoringPanel({
   const tcpTasks = useMemo(() => protocolTasks(group?.tasks ?? [], 'tcp'), [group?.tasks])
   const mtrTasks = useMemo(() => protocolTasks(group?.tasks ?? [], 'mtr'), [group?.tasks])
   const iperf3Tasks = useMemo(() => protocolTasks(group?.tasks ?? [], 'iperf3'), [group?.tasks])
+  const routeTraceTasks = useMemo(() => protocolTasks(group?.tasks ?? [], 'route_trace'), [group?.tasks])
 
   if (isLoading && !group) {
     return (
@@ -665,6 +749,9 @@ export function TargetMonitoringPanel({
       )}
       {iperf3Tasks.length > 0 && (
         <Iperf3ProtocolPanel tasks={iperf3Tasks} timeRange={iperf3TimeRange} onTimeRangeChange={setIperf3TimeRange} />
+      )}
+      {routeTraceTasks.length > 0 && (
+        <RouteTraceProtocolPanel tasks={routeTraceTasks} timeRange={routeTraceTimeRange} onTimeRangeChange={setRouteTraceTimeRange} />
       )}
     </div>
   )

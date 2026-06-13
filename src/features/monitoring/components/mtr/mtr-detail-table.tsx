@@ -7,9 +7,11 @@ interface MtrDetailTableProps {
   result?: MtrResultDetailView
   isLoading?: boolean
   showHeader?: boolean
+  selectTitle?: string
+  selectDescription?: string
 }
 
-export function MtrDetailTable({ result, isLoading, showHeader = true }: MtrDetailTableProps) {
+export function MtrDetailTable({ result, isLoading, showHeader = true, selectTitle, selectDescription }: MtrDetailTableProps) {
   const { t } = useTranslation()
   if (isLoading && !result) {
     return (
@@ -25,8 +27,8 @@ export function MtrDetailTable({ result, isLoading, showHeader = true }: MtrDeta
   if (!result) {
     return (
       <div className="rounded-xl border border-border bg-bg-surface p-8 text-center">
-        <div className="text-sm font-medium text-text-primary">{t('monitoring.selectMtrResult')}</div>
-        <div className="mt-1 text-xs text-text-muted">{t('monitoring.selectMtrResultDesc')}</div>
+        <div className="text-sm font-medium text-text-primary">{selectTitle ?? t('monitoring.selectMtrResult')}</div>
+        <div className="mt-1 text-xs text-text-muted">{selectDescription ?? t('monitoring.selectMtrResultDesc')}</div>
       </div>
     )
   }

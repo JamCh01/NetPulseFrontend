@@ -22,7 +22,7 @@ import {
   type MonitoringTask,
 } from '@/features/monitoring/lib/monitoring-models'
 
-type ProtocolFilter = 'all' | 'icmp' | 'tcp' | 'mtr' | 'iperf3'
+type ProtocolFilter = 'all' | 'icmp' | 'tcp' | 'mtr' | 'iperf3' | 'route_trace'
 type StatusUi = { label: string; variant: 'success' | 'warning' | 'error' | 'inactive' }
 
 function statusCopy(t: TFunction<'translation'>): Record<LatestResultState, StatusUi> {
@@ -35,7 +35,9 @@ function statusCopy(t: TFunction<'translation'>): Record<LatestResultState, Stat
 }
 
 function taskHref(basePath: string, task: MonitoringTask) {
-  return task.task_type === 'mtr' ? `${basePath}/${task.task_uuid}/mtr` : `${basePath}/${task.task_uuid}`
+  if (task.task_type === 'mtr') return `${basePath}/${task.task_uuid}/mtr`
+  if (task.task_type === 'route_trace') return `${basePath}/${task.task_uuid}/route-trace`
+  return `${basePath}/${task.task_uuid}`
 }
 
 function protocolCoverage(group: MonitoringTargetGroup, protocol: MonitoringProtocol) {
@@ -89,7 +91,7 @@ function TargetGroupPanel({ group, basePath, statusMap }: { group: MonitoringTar
   const { t } = useTranslation()
   const status = statusMap[group.status]
   const sortedTasks = [...group.tasks].sort((a, b) => {
-    const order: Record<string, number> = { icmp: 0, tcp: 1, mtr: 2, iperf3: 3 }
+    const order: Record<string, number> = { icmp: 0, tcp: 1, mtr: 2, iperf3: 3, route_trace: 4 }
     return (order[a.task_type] ?? 10) - (order[b.task_type] ?? 10) || a.name.localeCompare(b.name)
   })
 
@@ -113,6 +115,7 @@ function TargetGroupPanel({ group, basePath, statusMap }: { group: MonitoringTar
             {protocolCoverage(group, 'tcp')}
             {protocolCoverage(group, 'mtr')}
             {protocolCoverage(group, 'iperf3')}
+            {protocolCoverage(group, 'route_trace')}
             <span className="inline-flex h-6 items-center rounded-md border border-border bg-muted/30 px-2 text-[11px] text-text-muted">
               {group.agents.length} Agent
             </span>
@@ -143,6 +146,7 @@ export default function MonitoringIndexPage() {
     { value: 'tcp', label: 'TCP' },
     { value: 'mtr', label: 'MTR' },
     { value: 'iperf3', label: 'IPERF3' },
+    { value: 'route_trace', label: 'Route Trace' },
   ]
 
   const groups = useMemo(() => data?.groups ?? [], [data?.groups])
@@ -217,7 +221,7 @@ export default function MonitoringIndexPage() {
       )}
 
       {selectedTargetUuid ? (
-        <TargetMonitoringPanel targetUuid={selectedTargetUuid} fallbackGroup={selectedGroup} basePath={basePath} />
+        <TargetMonitoringPanel targetUuid={selectedTargetUuid} fallbackGroup={selectedGroup} />
       ) : error ? (
         <div className="rounded-xl border border-status-error-border bg-status-error-bg p-5">
           <div className="text-sm font-medium text-status-error-fg">{t('monitoring.tasksLoadFailed')}</div>

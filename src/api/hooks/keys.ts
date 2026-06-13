@@ -74,6 +74,11 @@ export const monitoringKeys = {
     start: number
     end: number
   }) => [...monitoringKeys.all, 'iperf3', 'list', params] as const,
+  routeTraceList: (params: {
+    task_uuid: string
+    start: number
+    end: number
+  }) => [...monitoringKeys.all, 'route-trace', 'list', params] as const,
 }
 
 export const dashboardKeys = {

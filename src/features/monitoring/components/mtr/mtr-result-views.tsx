@@ -13,6 +13,10 @@ export function MtrResultViews({
   selectedResult,
   detailLoading,
   listLoading,
+  resultName = 'MTR',
+  noResultText,
+  selectResultTitle,
+  selectResultDesc,
 }: {
   tasks: MonitoringTask[]
   results: MtrResultSummaryView[]
@@ -22,6 +26,10 @@ export function MtrResultViews({
   selectedResult?: MtrResultDetailView
   detailLoading?: boolean
   listLoading?: boolean
+  resultName?: string
+  noResultText?: string
+  selectResultTitle?: string
+  selectResultDesc?: string
 }) {
   const { t, i18n } = useTranslation()
   const reachedCount = results.filter((result) => result.target_reached).length
@@ -47,12 +55,16 @@ export function MtrResultViews({
         selectedResultUuid={selectedResultUuid}
         onSelectResult={onSelectResult}
         isLoading={listLoading}
+        resultName={resultName}
+        noResultText={noResultText}
       />
 
       <MtrDetailTable
         result={selectedResultUuid ? selectedResult : undefined}
         isLoading={selectedResultUuid ? detailLoading : false}
         showHeader={false}
+        selectTitle={selectResultTitle}
+        selectDescription={selectResultDesc}
       />
     </div>
   )
@@ -87,12 +99,16 @@ function MtrResultTimeline({
   selectedResultUuid,
   onSelectResult,
   isLoading,
+  resultName,
+  noResultText,
 }: {
   items: ReturnType<typeof buildMtrTimelineItems>
   agents: Array<{ agentUuid: string; agentName: string; color: string }>
   selectedResultUuid: string
   onSelectResult: (resultUuid: string) => void
   isLoading?: boolean
+  resultName: string
+  noResultText?: string
 }) {
   const { t, i18n } = useTranslation()
   if (isLoading && items.length === 0) {
@@ -106,7 +122,7 @@ function MtrResultTimeline({
   return (
     <div className="min-w-0 overflow-hidden rounded-xl border border-border bg-bg-surface">
       <div className="flex flex-col gap-1 border-b border-border px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="text-xs font-semibold text-text-primary">{t('monitoring.resultTimeline', { name: 'MTR' })}</div>
+        <div className="text-xs font-semibold text-text-primary">{t('monitoring.resultTimeline', { name: resultName })}</div>
         <div className="flex flex-wrap gap-3 text-[11px] text-text-muted">
           {agents.map((agent) => (
             <span key={agent.agentUuid} className="inline-flex items-center gap-1">
@@ -121,7 +137,7 @@ function MtrResultTimeline({
         </div>
       </div>
       {items.length === 0 ? (
-        <div className="px-3 py-6 text-center text-xs text-text-muted">{t('monitoring.noMtrResultInRange')}</div>
+        <div className="px-3 py-6 text-center text-xs text-text-muted">{noResultText ?? t('monitoring.noMtrResultInRange')}</div>
       ) : (
         <div data-testid="mtr-result-timeline-scroll" className="max-w-full overflow-x-auto px-4 py-5">
           <div className="relative flex w-max min-w-full items-start gap-8">

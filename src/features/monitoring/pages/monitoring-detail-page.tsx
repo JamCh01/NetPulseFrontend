@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { type TFunction } from 'i18next'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
-import { ArrowLeft, Download, Radio, Server, Signal, Waypoints } from 'lucide-react'
+import { ArrowLeft, Download, Radio, Route, Server, Signal, Waypoints } from 'lucide-react'
 import { useMonitoringData, useMultiAgentMonitoringData } from '@/api/hooks/use-monitoring'
 import { useMonitoringTaskDetail } from '@/api/hooks/use-monitoring-task-detail'
 import { SmokePingChart } from '@/features/monitoring/components/charts/smokeping-chart'
@@ -98,6 +98,8 @@ export default function MonitoringDetailPage() {
   }, [])
 
   const isMtr = task?.task_type === 'mtr'
+  const isRouteTrace = task?.task_type === 'route_trace'
+  const isDatabaseResultTask = isMtr || isRouteTrace
   const isAllAgents = !selectedAgentUuid
   const protocol = task?.task_type === 'tcp' ? 'tcp' : 'icmp'
 
@@ -106,7 +108,7 @@ export default function MonitoringDetailPage() {
     isLoading: singleLoading,
     isFetching: singleFetching,
     error: singleError,
-  } = useMonitoringData(isMtr ? '' : (taskUuid ?? ''), selectedAgentUuid || undefined, {
+  } = useMonitoringData(isDatabaseResultTask ? '' : (taskUuid ?? ''), selectedAgentUuid || undefined, {
     start: timeRange.start,
     end: timeRange.end,
   }, protocol)
@@ -117,7 +119,7 @@ export default function MonitoringDetailPage() {
     isUpdating: multiUpdating,
     error: multiError,
   } = useMultiAgentMonitoringData(
-    !isMtr && isAllAgents ? (taskUuid ?? '') : '',
+    !isDatabaseResultTask && isAllAgents ? (taskUuid ?? '') : '',
     isAllAgents ? taskAgents : [],
     { start: timeRange.start, end: timeRange.end },
     protocol,
@@ -132,7 +134,7 @@ export default function MonitoringDetailPage() {
   }, [agentSeries, isAllAgents, singleMonitoringData?.data])
 
   const handleExportCsv = useCallback(() => {
-    if (!task || isMtr) return
+    if (!task || isDatabaseResultTask) return
     const rows = isAllAgents
       ? agentSeries.flatMap((series) => series.data.map((point) => ({ point, agent: series.agentName })))
       : (singleMonitoringData?.data ?? []).map((point) => ({ point, agent: task.agent?.name ?? 'Unknown' }))
@@ -156,7 +158,7 @@ export default function MonitoringDetailPage() {
     link.download = `netpulse_${task.name}_${new Date().toISOString().slice(0, 10)}.csv`
     link.click()
     URL.revokeObjectURL(link.href)
-  }, [agentSeries, isAllAgents, isMtr, singleMonitoringData?.data, task])
+  }, [agentSeries, isAllAgents, isDatabaseResultTask, singleMonitoringData?.data, task])
 
   if (taskLoading) {
     return (
@@ -219,18 +221,28 @@ export default function MonitoringDetailPage() {
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              {!isMtr && (
+              {!isDatabaseResultTask && (
                 <Button variant="outline" onClick={handleExportCsv}>
                   <Download className="h-4 w-4" />
                   {t('monitoring.exportCsv')}
                 </Button>
               )}
-              <Link to={`${monitoringBasePath}/${task.task_uuid}/mtr`}>
-                <Button variant={isMtr ? 'default' : 'outline'}>
-                  <Waypoints className="h-4 w-4" />
-                  {t('monitoring.mtrResults')}
-                </Button>
-              </Link>
+              {isMtr && (
+                <Link to={`${monitoringBasePath}/${task.task_uuid}/mtr`}>
+                  <Button variant="default">
+                    <Waypoints className="h-4 w-4" />
+                    {t('monitoring.mtrResults')}
+                  </Button>
+                </Link>
+              )}
+              {isRouteTrace && (
+                <Link to={`${monitoringBasePath}/${task.task_uuid}/route-trace`}>
+                  <Button variant="default">
+                    <Route className="h-4 w-4" />
+                    {t('monitoring.routeTraceResults')}
+                  </Button>
+                </Link>
+              )}
               {isAdmin && (
                 <Button onClick={() => navigate(`/tasks/${task.task_uuid}`)}>
                   {t('monitoring.manageTask')}
@@ -259,6 +271,21 @@ export default function MonitoringDetailPage() {
               </p>
               <Link to={`${monitoringBasePath}/${task.task_uuid}/mtr`}>
                 <Button className="mt-3" size="sm">{t('monitoring.viewMtrEvidence')}</Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      ) : isRouteTrace ? (
+        <div className="rounded-xl border border-status-info-border bg-status-info-bg p-5">
+          <div className="flex items-start gap-3">
+            <Route className="mt-0.5 h-5 w-5 text-status-info-fg" />
+            <div>
+              <div className="text-sm font-medium text-status-info-fg">{t('monitoring.routeTraceNoMetricsTitle')}</div>
+              <p className="mt-1 text-xs text-status-info-fg/80">
+                {t('monitoring.routeTraceNoMetricsDesc')}
+              </p>
+              <Link to={`${monitoringBasePath}/${task.task_uuid}/route-trace`}>
+                <Button className="mt-3" size="sm">{t('monitoring.viewRouteTraceEvidence')}</Button>
               </Link>
             </div>
           </div>

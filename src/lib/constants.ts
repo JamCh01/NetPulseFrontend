@@ -8,7 +8,7 @@ export const PROTOCOL_COLORS: Record<string, string> = {
   route_trace: 'bg-indigo-500/10 text-indigo-700 border-indigo-500/25 dark:text-indigo-300 dark:border-indigo-400/30',
 }
 
-export const MONITORING_PROTOCOLS = ['icmp', 'tcp', 'mtr', 'iperf3'] as const
+export const MONITORING_PROTOCOLS = ['icmp', 'tcp', 'mtr', 'iperf3', 'route_trace'] as const
 
 export type MonitoringProtocolName = (typeof MONITORING_PROTOCOLS)[number]
 

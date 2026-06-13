@@ -7,6 +7,21 @@ import { createRelativeTimeRange } from '@/features/monitoring/lib/time-range'
 const DAY_MS = 24 * 60 * 60 * 1000
 
 describe('GrafanaTimeRangeSelector', () => {
+  it('hides granularity from event result trigger labels', () => {
+    const value = createRelativeTimeRange(DAY_MS, Date.UTC(2026, 4, 23, 8, 0, 0))
+    render(
+      <GrafanaTimeRangeSelector
+        value={value}
+        onChange={vi.fn()}
+        minPresetDurationMs={DAY_MS}
+        showStep={false}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: /^Last 24 hours$/i })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Last 24 hours Raw/i })).not.toBeInTheDocument()
+  })
+
   it('can hide quick ranges shorter than the minimum duration', async () => {
     const user = userEvent.setup()
     render(

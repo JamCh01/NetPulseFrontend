@@ -298,9 +298,11 @@ export function GrafanaTimeRangeSelector({
       >
         <CalendarClock className="h-3.5 w-3.5 text-text-muted" />
         <span className="min-w-0 flex-1 truncate text-left font-[family-name:var(--font-mono)]">{triggerLabel}</span>
-        <span className="rounded border border-border bg-muted/60 px-1.5 py-0.5 text-[10px] uppercase text-text-dim">
-          {t(GRANULARITY_KEYS[value.granularity])}
-        </span>
+        {showStep && (
+          <span className="rounded border border-border bg-muted/60 px-1.5 py-0.5 text-[10px] uppercase text-text-dim">
+            {t(GRANULARITY_KEYS[value.granularity])}
+          </span>
+        )}
         {showStep && (
           <span className="rounded border border-border bg-muted/60 px-1.5 py-0.5 text-[10px] text-text-dim">
             step {displayStep(value)}

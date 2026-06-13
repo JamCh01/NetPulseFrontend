@@ -1,6 +1,6 @@
 import { MONITORING_PROTOCOLS, protocolLabel as formatProtocolLabel } from '@/lib/constants'
 
-export type MonitoringProtocol = 'icmp' | 'tcp' | 'mtr' | string
+export type MonitoringProtocol = 'icmp' | 'tcp' | 'mtr' | 'iperf3' | 'route_trace' | string
 
 export type LatestResultState = 'ok' | 'missing' | 'failed' | 'unknown'
 
@@ -160,6 +160,12 @@ export interface MtrResultDetailView {
   duration_ms?: number | null
   as_path: string[]
   hops: MtrHopAddressView[]
+}
+
+export interface RouteTraceResultListView {
+  task_uuid: string
+  total: number
+  results: MtrResultDetailView[]
 }
 
 type RawRecord = Record<string, unknown>
@@ -482,4 +488,8 @@ export function normalizeMtrDetail(raw: unknown): MtrResultDetailView {
     as_path: Array.isArray(item.as_path) ? item.as_path.filter((asn): asn is string => typeof asn === 'string') : [],
     hops,
   }
+}
+
+export function normalizeRouteTraceResult(raw: unknown): MtrResultDetailView {
+  return normalizeMtrDetail(raw)
 }

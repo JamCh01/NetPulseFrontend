@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { normalizeMonitoringTask, normalizeMtrDetail } from './monitoring-models'
+import { normalizeMonitoringTask, normalizeMtrDetail, normalizeRouteTraceResult } from './monitoring-models'
 
 describe('monitoring models', () => {
   it('normalizes task ip_family for monitoring metric tables', () => {
@@ -83,6 +83,42 @@ describe('monitoring models', () => {
     expect(detail.hops[0]).toEqual(expect.objectContaining({
       ip: '[Target IP]',
       asn: '15133',
+    }))
+  })
+
+  it('normalizes Route Trace results with hop packet counters', () => {
+    const detail = normalizeRouteTraceResult({
+      result_uuid: 'route-trace-result-1',
+      task_uuid: 'task-1',
+      latest_sample_at: '2026-06-07T00:00:03Z',
+      latest_run_status: 'ok',
+      resolved_ip: '[Target IP]',
+      as_path: ['15169'],
+      hops: [{
+        hop: 2,
+        addresses: [{
+          ip: '[Target IP]',
+          asn: '15169',
+          packets_sent: 3,
+          packets_received: 3,
+          packet_loss_pct: 0,
+          avg_ms: 8,
+          best_ms: 7.5,
+          worst_ms: 8.5,
+        }],
+      }],
+    })
+
+    expect(detail.result_uuid).toBe('route-trace-result-1')
+    expect(detail.target_reached).toBe(true)
+    expect(detail.resolved_ip).toBe('[Target IP]')
+    expect(detail.as_path).toEqual(['15169'])
+    expect(detail.hops[0]).toEqual(expect.objectContaining({
+      ip: '[Target IP]',
+      asn: '15169',
+      packets_sent: 3,
+      packets_received: 3,
+      avg_ms: 8,
     }))
   })
 })
