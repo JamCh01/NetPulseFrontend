@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router'
 import { lazy, Suspense } from 'react'
+import { useTranslation } from 'react-i18next'
 import { AppLayout } from '@/layouts/app-layout'
 import { AuthLayout } from '@/layouts/auth-layout'
 import { PublicLayout } from '@/layouts/public-layout'
@@ -14,7 +15,6 @@ const RegisterPage = lazy(() => import('@/features/auth/pages/register-page'))
 // App pages
 const DashboardPage = lazy(() => import('@/features/dashboard/pages/dashboard-page'))
 const TargetsPage = lazy(() => import('@/features/targets/pages/targets-page'))
-const RouteTraceTargetsPage = lazy(() => import('@/features/route-trace/pages/route-trace-targets-page'))
 const TasksPage = lazy(() => import('@/features/tasks/pages/tasks-page'))
 const TaskDetailPage = lazy(() => import('@/features/tasks/pages/task-detail-page'))
 const AgentsPage = lazy(() => import('@/features/agents/pages/agents-page'))
@@ -29,7 +29,8 @@ const MtrDetailPage = lazy(() => import('@/features/monitoring/pages/mtr-detail-
 const NotFoundPage = lazy(() => import('@/features/system/pages/not-found-page'))
 
 function PageLoader() {
-  return <LoadingState label="Loading page" hint="Fetching module and route data" />
+  const { t } = useTranslation()
+  return <LoadingState label={t('common.loadingPage')} hint={t('common.fetchingRouteData')} />
 }
 
 export function AppRouter() {
@@ -62,7 +63,6 @@ export function AppRouter() {
             {/* Admin-only routes */}
             <Route element={<AdminGuard />}>
               <Route path="/targets" element={<TargetsPage />} />
-              <Route path="/route-trace-targets" element={<RouteTraceTargetsPage />} />
               <Route path="/agents" element={<AgentsPage />} />
               <Route path="/agents/releases" element={<ReleasesPage />} />
               <Route path="/agents/:agentUuid" element={<AgentDetailPage />} />

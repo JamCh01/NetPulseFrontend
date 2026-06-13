@@ -25,11 +25,6 @@ export const targetKeys = {
   detail: (uuid: string) => [...targetKeys.all, 'detail', uuid] as const,
 }
 
-export const routeTraceTargetKeys = {
-  all: ['route-trace-targets'] as const,
-  list: (params?: unknown) => [...routeTraceTargetKeys.all, 'list', params] as const,
-  detail: (uuid: string) => [...routeTraceTargetKeys.all, 'detail', uuid] as const,
-}
 
 export const taskKeys = {
   all: ['tasks'] as const,

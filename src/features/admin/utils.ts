@@ -1,6 +1,6 @@
 import type { AdminAgent, AdminTarget, IpFamily, TaskCreatePayload, TaskType, TargetProtocol } from '@/api/hooks/admin-api'
 
-const TARGET_PROTOCOLS: TargetProtocol[] = ['icmp', 'tcp', 'mtr', 'iperf3']
+const TARGET_PROTOCOLS: TargetProtocol[] = ['icmp', 'tcp', 'mtr', 'iperf3', 'route_trace']
 
 export function csvToList(value: string): string[] {
   return value
@@ -34,7 +34,6 @@ export function protocolOptionsForTarget(target?: AdminTarget | null): TaskType[
 export function buildTaskPayload(input: {
   name: string
   target_uuid?: string | null
-  route_trace_target_uuid?: string | null
   agent_uuid: string
   task_type: TaskType
   ip_family: IpFamily
@@ -58,8 +57,7 @@ export function buildTaskPayload(input: {
 }): TaskCreatePayload {
   const base: TaskCreatePayload = {
     name: input.name || null,
-    target_uuid: input.task_type === 'route_trace' ? null : input.target_uuid ?? null,
-    route_trace_target_uuid: input.task_type === 'route_trace' ? input.route_trace_target_uuid ?? null : null,
+    target_uuid: input.target_uuid ?? '',
     agent_uuid: input.agent_uuid,
     task_type: input.task_type,
     ip_family: input.ip_family,

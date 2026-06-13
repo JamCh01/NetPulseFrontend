@@ -6,7 +6,6 @@ import { monitoringHandlers } from './handlers/monitoring'
 import { userHandlers } from './handlers/users'
 import { dashboardHandlers } from './handlers/dashboard'
 import { releaseHandlers } from './handlers/releases'
-import { routeTraceTargetHandlers } from './handlers/route-trace-targets'
 
 export const server = setupServer(
   ...authHandlers,
@@ -16,5 +15,4 @@ export const server = setupServer(
   ...userHandlers,
   ...dashboardHandlers,
   ...releaseHandlers,
-  ...routeTraceTargetHandlers,
 )

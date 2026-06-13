@@ -50,7 +50,7 @@ import { csvToList, formatDateTime, joinLocation } from '@/features/admin/utils'
 import { PROTOCOL_COLORS, ipVersionLabel, protocolLabel } from '@/lib/constants'
 
 const PAGE_SIZE = 100
-const PROTOCOLS: TargetProtocol[] = ['icmp', 'tcp', 'mtr', 'iperf3']
+const PROTOCOLS: TargetProtocol[] = ['icmp', 'tcp', 'mtr', 'iperf3', 'route_trace']
 const REDACTED_TARGET = '[Target]'
 
 export default function TargetsPage() {

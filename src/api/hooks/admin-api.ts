@@ -2,14 +2,14 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { buildApiUrl } from '@/api/base-url'
 import { useAuthStore } from '@/stores/auth-store'
-import { agentKeys, geoKeys, resultKeys, routeTraceTargetKeys, targetKeys, taskKeys } from './keys'
+import { agentKeys, geoKeys, resultKeys, targetKeys, taskKeys } from './keys'
 
 export type IpVersion = '4' | '6' | '4+6'
 export type IpFamily = '4' | '6'
 export type TargetType = 'ip' | 'domain'
 export type TaskType = 'icmp' | 'tcp' | 'mtr' | 'iperf3' | 'route_trace'
 export type QuickAssociateTaskType = Exclude<TaskType, 'iperf3' | 'route_trace'>
-export type TargetProtocol = Exclude<TaskType, 'route_trace'>
+export type TargetProtocol = TaskType
 export type AgentStatus = 'online' | 'offline' | 'disabled'
 export type SortOrder = 'asc' | 'desc'
 
@@ -104,8 +104,7 @@ export interface AdminTask {
   task_uuid: string
   name: string
   description?: string | null
-  target_uuid: string | null
-  route_trace_target_uuid?: string | null
+  target_uuid: string
   agent_uuid: string
   target?: {
     target_uuid: string
@@ -113,12 +112,6 @@ export interface AdminTask {
     target: string
     target_type: TargetType
     is_anycast: boolean
-  } | null
-  route_trace_target?: {
-    route_trace_target_uuid: string
-    name: string
-    host: string
-    target_type: TargetType
   } | null
   agent?: {
     agent_uuid: string
@@ -147,21 +140,6 @@ export interface AdminTask {
   target_label: string
   port?: number | null
   is_active: boolean
-}
-
-export interface AdminRouteTraceTarget {
-  route_trace_target_uuid: string
-  name: string
-  host: string
-  target_type: TargetType
-  ip_version: IpVersion
-  description?: string | null
-  tags: string[]
-  is_enabled: boolean
-  is_deleted: boolean
-  created_at: string
-  updated_at: string
-  deleted_at?: string | null
 }
 
 export interface ResultIngestionEvent {
@@ -295,8 +273,7 @@ export type AgentUpdatePayload = Partial<AgentCreatePayload>
 export interface TaskCreatePayload {
   name?: string | null
   description?: string | null
-  target_uuid: string | null
-  route_trace_target_uuid?: string | null
+  target_uuid: string
   agent_uuid: string
   task_type: TaskType
   ip_family: IpFamily
@@ -321,25 +298,6 @@ export interface ListTargetsParams {
   sort_order?: SortOrder
 }
 
-export interface RouteTraceTargetPayload {
-  name: string
-  host: string
-  ip_version: IpVersion
-  description?: string | null
-  tags?: string[]
-}
-
-export type RouteTraceTargetUpdatePayload = Partial<RouteTraceTargetPayload & { is_enabled: boolean }>
-
-export interface ListRouteTraceTargetsParams {
-  page?: number
-  page_size?: number
-  keyword?: string
-  target_type?: TargetType | 'all'
-  is_enabled?: boolean | null
-  sort_by?: string
-  sort_order?: SortOrder
-}
 
 export interface ListAgentsParams {
   page?: number
@@ -374,7 +332,7 @@ export interface ListResultEventsParams {
 }
 
 export interface ListTagsParams {
-  resource_type?: 'agent' | 'target' | 'route_trace_target'
+  resource_type?: 'agent' | 'target'
   keyword?: string
   limit?: number
 }
@@ -506,7 +464,7 @@ export function normalizeAgent(raw: AdminAgent): AdminAgent {
 export function normalizeTask(raw: AdminTask): AdminTask {
   const probeConfig = raw.probe_config ?? {}
   const port = typeof probeConfig.port === 'number' ? probeConfig.port : raw.port
-  const targetLabel = raw.route_trace_target?.host ?? raw.target?.target ?? raw.target_uuid ?? raw.route_trace_target_uuid ?? ''
+  const targetLabel = raw.target?.target ?? raw.target_uuid ?? ''
   return {
     ...raw,
     task_name: raw.task_name ?? raw.name,
@@ -584,72 +542,6 @@ export function useDeleteTarget() {
   })
 }
 
-export function useRouteTraceTargets(params?: ListRouteTraceTargetsParams) {
-  return useQuery({
-    queryKey: routeTraceTargetKeys.list(params),
-    queryFn: () => adminRequest<AdminListResponse<AdminRouteTraceTarget>>(`/api/v1/route-trace-targets${buildQuery(params)}`),
-  })
-}
-
-export function useRouteTraceTarget(uuid: string) {
-  return useQuery({
-    queryKey: routeTraceTargetKeys.detail(uuid),
-    queryFn: () => adminRequest<AdminRouteTraceTarget>(`/api/v1/route-trace-targets/${uuid}`),
-    enabled: !!uuid,
-  })
-}
-
-export function useCreateRouteTraceTarget() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: (body: RouteTraceTargetPayload) => adminRequest<AdminRouteTraceTarget>('/api/v1/route-trace-targets', {
-      method: 'POST',
-      body: JSON.stringify(body),
-    }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: routeTraceTargetKeys.all })
-      queryClient.invalidateQueries({ queryKey: taskKeys.all })
-    },
-  })
-}
-
-export function useUpdateRouteTraceTarget() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: ({ uuid, data }: { uuid: string; data: RouteTraceTargetUpdatePayload }) =>
-      adminRequest<AdminRouteTraceTarget>(`/api/v1/route-trace-targets/${uuid}`, {
-        method: 'PATCH',
-        body: JSON.stringify(data),
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: routeTraceTargetKeys.all })
-      queryClient.invalidateQueries({ queryKey: taskKeys.all })
-    },
-  })
-}
-
-export function useSetRouteTraceTargetEnabled() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: ({ uuid, enabled }: { uuid: string; enabled: boolean }) =>
-      adminRequest<AdminRouteTraceTarget>(`/api/v1/route-trace-targets/${uuid}/${enabled ? 'enable' : 'disable'}`, { method: 'POST' }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: routeTraceTargetKeys.all })
-      queryClient.invalidateQueries({ queryKey: taskKeys.all })
-    },
-  })
-}
-
-export function useDeleteRouteTraceTarget() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: (uuid: string) => adminRequest<AdminRouteTraceTarget>(`/api/v1/route-trace-targets/${uuid}`, { method: 'DELETE' }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: routeTraceTargetKeys.all })
-      queryClient.invalidateQueries({ queryKey: taskKeys.all })
-    },
-  })
-}
 
 export function useAgents(params?: ListAgentsParams) {
   const queryParams = params

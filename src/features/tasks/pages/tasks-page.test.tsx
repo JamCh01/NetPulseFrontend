@@ -102,18 +102,14 @@ const tcpTask = {
   updated_at: '2026-01-01T00:00:00Z',
 }
 
-const routeTraceTarget = {
-  route_trace_target_uuid: 'route-trace-target-cloudflare',
+const routeTraceCapableTarget = {
+  ...target,
+  target_uuid: 'target-route-trace',
   name: 'Cloudflare Route Trace',
-  host: '1.1.1.1',
+  target: '1.1.1.1',
   target_type: 'ip',
-  ip_version: '4+6',
-  description: null,
-  tags: ['global'],
-  is_enabled: true,
-  is_deleted: false,
-  created_at: '2026-01-01T00:00:00Z',
-  updated_at: '2026-01-01T00:00:00Z',
+  ip_version: '4',
+  supported_protocols: ['route_trace'],
 }
 
 describe('TasksPage', () => {
@@ -361,22 +357,20 @@ describe('TasksPage', () => {
     expect(await screen.findByRole('option', { name: 'IPERF3' })).toBeInTheDocument()
   })
 
-  it('creates route trace tasks against a route trace target without binding a normal Target', async () => {
+  it('creates route trace tasks against a normal Target that supports route_trace', async () => {
     const user = userEvent.setup()
     const createRequests: unknown[] = []
     server.use(
       http.get('*/api/v1/tasks', () => HttpResponse.json({ items: [] })),
-      http.get('*/api/v1/targets', () => HttpResponse.json({ items: [target] })),
-      http.get('*/api/v1/route-trace-targets', () => HttpResponse.json({ items: [routeTraceTarget] })),
+      http.get('*/api/v1/targets', () => HttpResponse.json({ items: [routeTraceCapableTarget] })),
       http.get('*/api/v1/agents', () => HttpResponse.json({ items: [agent] })),
       http.post('*/api/v1/tasks', async ({ request }) => {
         createRequests.push(await request.json())
         return HttpResponse.json({
           task_uuid: 'task-route-trace',
           name: 'Cloudflare Route Trace',
-          target_uuid: null,
-          route_trace_target_uuid: routeTraceTarget.route_trace_target_uuid,
-          route_trace_target: routeTraceTarget,
+          target_uuid: routeTraceCapableTarget.target_uuid,
+          target: routeTraceCapableTarget,
           agent_uuid: agent.agent_uuid,
           agent,
           task_type: 'route_trace',
@@ -403,18 +397,17 @@ describe('TasksPage', () => {
 
     await user.click(screen.getByRole('button', { name: '新增 Task' }))
     const dialog = await screen.findByRole('dialog', { name: '新增 Task' })
+    await user.click(within(dialog).getByRole('combobox', { name: 'Target' }))
+    await user.click(await screen.findByRole('option', { name: /Cloudflare Route Trace/ }))
     await user.click(within(dialog).getByRole('combobox', { name: '协议类型' }))
     await user.click(await screen.findByRole('option', { name: 'Route Trace' }))
-    await user.click(within(dialog).getByRole('combobox', { name: '路由追踪目标' }))
-    await user.click(await screen.findByRole('option', { name: /Cloudflare Route Trace/ }))
     await user.click(within(dialog).getByRole('combobox', { name: 'Agent' }))
     await user.click(await screen.findByRole('option', { name: /Tokyo Agent/ }))
     await user.click(within(dialog).getByRole('button', { name: '创建' }))
 
     expect(createRequests).toHaveLength(1)
     expect(createRequests[0]).toMatchObject({
-      target_uuid: null,
-      route_trace_target_uuid: routeTraceTarget.route_trace_target_uuid,
+      target_uuid: routeTraceCapableTarget.target_uuid,
       agent_uuid: agent.agent_uuid,
       task_type: 'route_trace',
       ip_family: '4',

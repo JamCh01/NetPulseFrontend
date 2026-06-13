@@ -1,7 +1,7 @@
 import type {
   AgentArtifactResponse,
 } from '@/api/generated/types.gen'
-import type { AdminAgent, AdminRouteTraceTarget, AdminTarget, AdminTask } from '@/api/hooks/admin-api'
+import type { AdminAgent, AdminTarget, AdminTask } from '@/api/hooks/admin-api'
 import type { MonitoringDataPoint } from '@/features/monitoring/lib/monitoring-data-point'
 import type { DashboardStats } from '@/api/types'
 
@@ -101,23 +101,6 @@ export function createMockTarget(overrides?: Partial<AdminTarget>): AdminTarget 
   }
 }
 
-export function createMockRouteTraceTarget(overrides?: Partial<AdminRouteTraceTarget>): AdminRouteTraceTarget {
-  return {
-    route_trace_target_uuid: uuid(),
-    name: `route-trace-target-${counter}`,
-    host: '1.1.1.1',
-    target_type: 'ip',
-    ip_version: '4+6',
-    description: null,
-    tags: ['global'],
-    is_enabled: true,
-    is_deleted: false,
-    created_at: '2026-01-01T00:00:00Z',
-    updated_at: '2026-01-01T00:00:00Z',
-    deleted_at: null,
-    ...overrides,
-  }
-}
 
 export function createMockTask(overrides?: Partial<AdminTask>): AdminTask {
   return {

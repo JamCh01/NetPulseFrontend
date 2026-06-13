@@ -25,7 +25,6 @@ import {
   DatabaseZap,
   Map,
   Settings as SettingsIcon,
-  Route,
 } from 'lucide-react'
 
 import {
@@ -63,13 +62,12 @@ export function AppLayout() {
   const hideHeader = location.pathname.startsWith('/app/monitoring')
 
   const staticNavItems: NavItem[] = [
-    { label: 'Targets', path: '/targets', icon: <Crosshair className="w-4 h-4" />, adminOnly: true },
-    { label: t('nav.routeTraceTargets'), path: '/route-trace-targets', icon: <Route className="w-4 h-4" />, adminOnly: true },
+    { label: t('nav.targets'), path: '/targets', icon: <Crosshair className="w-4 h-4" />, adminOnly: true },
     { label: t('nav.agents'), path: '/agents', icon: <Radio className="w-4 h-4" />, adminOnly: true },
-    { label: 'Tasks', path: '/tasks', icon: <ListChecks className="w-4 h-4" />, adminOnly: true },
+    { label: t('nav.tasks'), path: '/tasks', icon: <ListChecks className="w-4 h-4" />, adminOnly: true },
     { label: 'GEO', path: '/geo', icon: <Map className="w-4 h-4" />, adminOnly: true },
-    { label: 'Results', path: '/results/ingestion-events', icon: <DatabaseZap className="w-4 h-4" />, adminOnly: true },
-    { label: 'Settings', path: '/settings', icon: <SettingsIcon className="w-4 h-4" />, adminOnly: true },
+    { label: t('nav.results'), path: '/results/ingestion-events', icon: <DatabaseZap className="w-4 h-4" />, adminOnly: true },
+    { label: t('nav.settings'), path: '/settings', icon: <SettingsIcon className="w-4 h-4" />, adminOnly: true },
   ]
 
   const handleLogout = () => {
@@ -110,7 +108,7 @@ export function AppLayout() {
           )}
           {/* Close button for mobile */}
           <button 
-            aria-label="Close menu"
+            aria-label={t('nav.closeMenu')}
             className="absolute right-3 p-1.5 md:hidden text-text-muted hover:text-text-primary"
             onClick={() => setMobileMenuAnchorPath(null)}
           >
@@ -133,7 +131,7 @@ export function AppLayout() {
             }
           >
             <LayoutDashboard className="w-4 h-4" />
-            {!collapsed && <span>Network Health</span>}
+            {!collapsed && <span>{t('dashboard.healthEyebrow')}</span>}
           </NavLink>
 
           <NavLink
@@ -148,7 +146,7 @@ export function AppLayout() {
             }
           >
             <Crosshair className="w-4 h-4" />
-            {!collapsed && <span>Monitoring</span>}
+            {!collapsed && <span>{t('nav.monitoring')}</span>}
           </NavLink>
 
           {!collapsed && (
@@ -203,7 +201,7 @@ export function AppLayout() {
 
         {/* Collapse toggle (desktop only) */}
         <button
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          aria-label={collapsed ? t('nav.expandSidebar') : t('nav.collapseSidebar')}
           onClick={() => setCollapsed(!collapsed)}
           className="absolute -right-3 top-20 w-6 h-6 rounded-full glass hidden md:flex items-center justify-center text-text-muted hover:text-text-secondary transition-colors"
         >
@@ -224,17 +222,17 @@ export function AppLayout() {
           <header className="nav-blur sticky top-0 z-30 h-14 flex items-center justify-between px-4 md:px-6">
             <div className="flex items-center gap-3">
               <button
-                aria-label="Open menu"
+                aria-label={t('nav.openMenu')}
                 className="p-1.5 md:hidden text-text-muted hover:text-text-primary rounded-md hover:bg-muted"
                 onClick={() => setMobileMenuAnchorPath(location.pathname)}
               >
                 <Menu className="w-5 h-5" aria-hidden="true" />
               </button>
               <div className="hidden lg:flex items-center gap-1.5 text-xs text-text-muted/80 select-none">
-                <span className="uppercase tracking-wide">Tips</span>
-                <span>Tab / Shift+Tab</span>
+                <span className="uppercase tracking-wide">{t('nav.tips')}</span>
+                <span>{t('nav.tabNavigation')}</span>
                 <span>·</span>
-                <span>Enter</span>
+                <span>{t('nav.enter')}</span>
               </div>
             </div>
             <div className="flex items-center gap-2.5">
@@ -243,7 +241,7 @@ export function AppLayout() {
                 size="icon-sm"
                 onClick={toggleTheme}
                 className="text-text-muted hover:text-text-primary rounded-lg cursor-pointer"
-                aria-label="Toggle theme"
+                aria-label={t('nav.toggleTheme')}
               >
                 {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
               </Button>
@@ -267,12 +265,12 @@ export function AppLayout() {
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem className="cursor-pointer" onClick={() => setPasswordDialogOpen(true)}>
-                      {t('users.changePassword') || 'Change Password'}
+                      {t('users.changePassword')}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem className="cursor-pointer" variant="destructive" onClick={handleLogout}>
                       <LogOut className="w-4 h-4 mr-2" />
-                      {t('common.logout') || 'Log out'}
+                      {t('common.logout')}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
