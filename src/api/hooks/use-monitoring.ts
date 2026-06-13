@@ -76,6 +76,32 @@ export function monitoringTaskAgentDisplayName(task: MonitoringTask): string {
   return task.agent?.name || task.name
 }
 
+function buildMetricQueryParams(startSec: number, endSec: number, stepSec: number, metrics?: string, agentUuid?: string) {
+  const params = new URLSearchParams({
+    start: new Date(startSec * 1000).toISOString(),
+    end: new Date(endSec * 1000).toISOString(),
+    step_sec: String(stepSec),
+  })
+
+  if (metrics) params.set('metrics', metrics)
+  if (agentUuid) params.set('agent_uuid', agentUuid)
+
+  return params
+}
+
+async function fetchTaskMetrics(
+  taskUuid: string,
+  params: URLSearchParams,
+  protocol?: MonitoringMetricProtocol,
+): Promise<MonitoringDataPoint[]> {
+  const res = await fetch(buildApiUrl(`/api/v1/monitoring/tasks/${taskUuid}/metrics?${params.toString()}`))
+  if (!res.ok) {
+    throw new Error(`Failed to load monitoring metrics: ${res.status}`)
+  }
+  const body = (await res.json()) as MetricsEnvelope
+  return normalizeMetricSeries(protocol, body.data?.series)
+}
+
 export function useMonitoringData(
   taskUuid: string,
   agentUuid: string | undefined,
@@ -100,21 +126,8 @@ export function useMonitoringData(
       metrics,
     }),
     queryFn: async () => {
-      const startIso = new Date(startSec * 1000).toISOString()
-      const endIso = new Date(endSec * 1000).toISOString()
-      const params = new URLSearchParams({
-        start: startIso,
-        end: endIso,
-        step_sec: String(config.stepSec),
-      })
-      if (metrics) params.set('metrics', metrics)
-      if (agentUuid) params.set('agent_uuid', agentUuid)
-      const res = await fetch(buildApiUrl(`/api/v1/monitoring/tasks/${taskUuid}/metrics?${params.toString()}`))
-      if (!res.ok) {
-        throw new Error(`Failed to load monitoring metrics: ${res.status}`)
-      }
-      const body = (await res.json()) as MetricsEnvelope
-      return { data: normalizeMetricSeries(protocol, body.data?.series) }
+      const params = buildMetricQueryParams(startSec, endSec, config.stepSec, metrics, agentUuid)
+      return { data: await fetchTaskMetrics(taskUuid, params, protocol) }
     },
     enabled: !!taskUuid,
     placeholderData: keepPreviousData,
@@ -149,33 +162,35 @@ export function useMultiAgentMonitoringData(
         metrics,
       }),
       queryFn: async () => {
-        const startIso = new Date(startSec * 1000).toISOString()
-        const endIso = new Date(endSec * 1000).toISOString()
-        const params = new URLSearchParams({
-          start: startIso,
-          end: endIso,
-          step_sec: String(config.stepSec),
-        })
-        if (metrics) params.set('metrics', metrics)
-        params.set('agent_uuid', agent.agent_uuid)
-        const res = await fetch(buildApiUrl(`/api/v1/monitoring/tasks/${taskUuid}/metrics?${params.toString()}`))
-        if (!res.ok) throw new Error(`Failed to load monitoring metrics: ${res.status}`)
-        const body = (await res.json()) as MetricsEnvelope
-        return { agentUuid: agent.agent_uuid, agentName: agent.agent_name, data: normalizeMetricSeries(protocol, body.data?.series) }
+        const params = buildMetricQueryParams(startSec, endSec, config.stepSec, metrics, agent.agent_uuid)
+        return {
+          agentUuid: agent.agent_uuid,
+          agentName: agent.agent_name,
+          data: await fetchTaskMetrics(taskUuid, params, protocol),
+        }
       },
       enabled: !!taskUuid && agents.length > 0,
       placeholderData: keepPreviousData,
       staleTime: config.staleTime,
     })),
-    combine: (results): MonitoringSeriesResult => ({
-      isLoading: results.some((result) => result.isLoading),
-      isFetching: results.some((result) => result.isFetching),
-      isUpdating: results.some((result) => result.isFetching && !result.isLoading),
-      error: results.find((result) => result.error)?.error as Error | null,
-      agentSeries: results
-        .filter((result) => result.data)
-        .map((result) => result.data!),
-    }),
+    combine: (results): MonitoringSeriesResult => {
+      const seriesByAgent = new Map(results.map((result) => [result.data?.agentUuid, result.data]))
+
+      return {
+        isLoading: results.some((result) => result.isLoading),
+        isFetching: results.some((result) => result.isFetching),
+        isUpdating: results.some((result) => result.isFetching && !result.isLoading),
+        error: results.find((result) => result.error)?.error as Error | null,
+        agentSeries: agents.map((agent) => {
+          const series = seriesByAgent.get(agent.agent_uuid)
+          return series ?? {
+            agentUuid: agent.agent_uuid,
+            agentName: agent.agent_name,
+            data: [],
+          }
+        }),
+      }
+    },
   })
 }
 
@@ -198,23 +213,12 @@ export function useTaskMonitoringSeries(tasks: MonitoringTask[], timeRange: Time
           metrics,
         }),
         queryFn: async () => {
-          const startIso = new Date(startSec * 1000).toISOString()
-          const endIso = new Date(endSec * 1000).toISOString()
-          const params = new URLSearchParams({
-            start: startIso,
-            end: endIso,
-            step_sec: String(config.stepSec),
-          })
-          if (metrics) params.set('metrics', metrics)
-          if (task.agent?.agent_uuid) params.set('agent_uuid', task.agent.agent_uuid)
-          const res = await fetch(buildApiUrl(`/api/v1/monitoring/tasks/${task.task_uuid}/metrics?${params.toString()}`))
-          if (!res.ok) throw new Error(`Failed to load monitoring metrics: ${res.status}`)
-          const body = (await res.json()) as MetricsEnvelope
+          const params = buildMetricQueryParams(startSec, endSec, config.stepSec, metrics, task.agent?.agent_uuid)
           return {
             agentUuid: task.agent?.agent_uuid ?? task.task_uuid,
             agentName: monitoringTaskAgentDisplayName(task),
             ipFamily: task.ip_family,
-            data: normalizeMetricSeries(task.task_type, body.data?.series),
+            data: await fetchTaskMetrics(task.task_uuid, params, task.task_type),
           }
         },
         enabled: !!task.task_uuid,
@@ -222,14 +226,22 @@ export function useTaskMonitoringSeries(tasks: MonitoringTask[], timeRange: Time
         staleTime: config.staleTime,
       }
     }),
-    combine: (results): MonitoringSeriesResult => ({
-      isLoading: results.some((result) => result.isLoading),
-      isFetching: results.some((result) => result.isFetching),
-      isUpdating: results.some((result) => result.isFetching && !result.isLoading),
-      error: results.find((result) => result.error)?.error as Error | null,
-      agentSeries: results
-        .filter((result) => result.data)
-        .map((result) => result.data!),
-    }),
+    combine: (results): MonitoringSeriesResult => {
+      return {
+        isLoading: results.some((result) => result.isLoading),
+        isFetching: results.some((result) => result.isFetching),
+        isUpdating: results.some((result) => result.isFetching && !result.isLoading),
+        error: results.find((result) => result.error)?.error as Error | null,
+        agentSeries: tasks.map((task, index) => {
+          const series = results[index]?.data
+          return series ?? {
+            agentUuid: task.agent?.agent_uuid ?? task.task_uuid,
+            agentName: monitoringTaskAgentDisplayName(task),
+            ipFamily: task.ip_family,
+            data: [],
+          }
+        }),
+      }
+    },
   })
 }

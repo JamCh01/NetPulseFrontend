@@ -1,9 +1,10 @@
-import { memo, useMemo, useState } from 'react'
+import { memo, useId, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LazyECharts } from '@/components/charts/lazy-echarts'
 import { useChartTheme } from '../../lib/chart-theme'
 import { buildMultiAgentOption, type AgentSeriesData } from '../../lib/build-multi-agent-option'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useStableSnapshot } from '@/hooks/use-stable-snapshot'
 import type { MonitoringMetricProtocol } from '../../lib/monitoring-data-point'
 
 type ChartStyle = 'basic' | 'smoke'
@@ -30,24 +31,14 @@ function MultiAgentChartInner({
   const { t } = useTranslation()
   const theme = useChartTheme()
   const hasIncomingData = agentSeries.some((s) => s.data.length > 0)
-  const snapshotScope = `${protocol ?? 'auto'}:${chartStyle}`
-  const [seriesSnapshot, setSeriesSnapshot] = useState<{ scope: string; series: AgentSeriesData[] }>({
+  const stableScope = useId()
+  const snapshotScope = `multi-agent:${protocol ?? 'auto'}:${chartStyle}:${stableScope}`
+  const displaySeries = useStableSnapshot({
     scope: snapshotScope,
-    series: agentSeries,
+    value: agentSeries,
+    hasValue: hasIncomingData,
+    isUpdating: isLoading || isUpdating,
   })
-  const displaySeries = useMemo(() => {
-    const snapshotHasData = seriesSnapshot.scope === snapshotScope && seriesSnapshot.series.some((s) => s.data.length > 0)
-    if ((isLoading || isUpdating) && !hasIncomingData && snapshotHasData) {
-      return seriesSnapshot.series
-    }
-    return agentSeries
-  }, [agentSeries, hasIncomingData, isLoading, isUpdating, seriesSnapshot, snapshotScope])
-
-  if (seriesSnapshot.scope !== snapshotScope) {
-    setSeriesSnapshot({ scope: snapshotScope, series: agentSeries })
-  } else if (!isLoading && !isUpdating && hasIncomingData && seriesSnapshot.series !== agentSeries) {
-    setSeriesSnapshot({ scope: snapshotScope, series: agentSeries })
-  }
 
   const option = useMemo(
     () => buildMultiAgentOption(displaySeries, theme, chartStyle, protocol),

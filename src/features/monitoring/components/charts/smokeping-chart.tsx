@@ -1,10 +1,11 @@
-import { memo, useMemo, useState } from 'react'
+import { memo, useId, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { MonitoringDataPoint } from '@/features/monitoring/lib/monitoring-data-point'
 import { LazyECharts } from '@/components/charts/lazy-echarts'
 import { transformToChartData } from '../../lib/transform-chart-data'
 import { useChartTheme } from '../../lib/chart-theme'
 import { buildSmokePingOption } from '../../lib/build-chart-option'
+import { useStableSnapshot } from '@/hooks/use-stable-snapshot'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { MonitoringMetricProtocol } from '../../lib/monitoring-data-point'
 
@@ -34,23 +35,14 @@ function SmokePingChartInner({
   const { t } = useTranslation()
   const theme = useChartTheme()
   const hasIncomingData = Boolean(data?.length)
-  const snapshotScope = `${protocol ?? 'auto'}:${chartStyle}:${agentName ?? ''}`
-  const [dataSnapshot, setDataSnapshot] = useState<{ scope: string; data?: MonitoringDataPoint[] }>({
+  const stableScope = useId()
+  const snapshotScope = `smokeping:${protocol ?? 'auto'}:${chartStyle}:${agentName ?? 'default'}:${stableScope}`
+  const displayData = useStableSnapshot({
     scope: snapshotScope,
-    data,
+    value: data,
+    hasValue: hasIncomingData,
+    isUpdating: isLoading || isUpdating,
   })
-  const displayData = useMemo(() => {
-    if ((isLoading || isUpdating) && !hasIncomingData && dataSnapshot.scope === snapshotScope && dataSnapshot.data?.length) {
-      return dataSnapshot.data
-    }
-    return data
-  }, [data, dataSnapshot, hasIncomingData, isLoading, isUpdating, snapshotScope])
-
-  if (dataSnapshot.scope !== snapshotScope) {
-    setDataSnapshot({ scope: snapshotScope, data })
-  } else if (!isLoading && !isUpdating && hasIncomingData && dataSnapshot.data !== data) {
-    setDataSnapshot({ scope: snapshotScope, data })
-  }
 
   const chartOption = useMemo(() => {
     if (!displayData || displayData.length === 0) return null

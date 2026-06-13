@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter } from 'react-router'
+import { useTranslation } from 'react-i18next'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
 import { queryClient } from '@/lib/query-client'
@@ -17,13 +18,14 @@ export default function App() {
   const initFromStorage = useAuthStore((s) => s.initFromStorage)
   const initialized = useAuthStore((s) => s.initialized)
   const theme = useThemeStore((s) => s.theme)
+  const { t } = useTranslation()
 
   useEffect(() => {
     initFromStorage()
   }, [initFromStorage])
 
   if (!initialized) {
-    return <LoadingState fullscreen label="Preparing workspace" hint="Syncing local session" />
+    return <LoadingState fullscreen label={t('common.preparingWorkspace')} hint={t('common.syncingSession')} />
   }
 
   return (

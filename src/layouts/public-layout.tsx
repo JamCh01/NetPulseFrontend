@@ -45,7 +45,7 @@ export function PublicLayout() {
           </div>
           <span className="text-sm font-bold text-text-primary tracking-tight">{t('nav.brand')}</span>
           <button
-            aria-label="Close menu"
+            aria-label={t('nav.closeMenu')}
             className="absolute right-3 p-1.5 md:hidden text-text-muted hover:text-text-primary"
             onClick={() => setMobileMenuAnchorPath(null)}
           >
@@ -98,17 +98,17 @@ export function PublicLayout() {
         {!hideHeader && (
           <header className="nav-blur sticky top-0 z-30 h-14 flex items-center justify-between px-4 md:px-6">
             <button
-              aria-label="Open menu"
+              aria-label={t('nav.openMenu')}
               className="p-1.5 md:hidden text-text-muted hover:text-text-primary rounded-md hover:bg-muted"
               onClick={() => setMobileMenuAnchorPath(location.pathname)}
             >
               <Menu className="w-5 h-5" aria-hidden="true" />
             </button>
             <div className="hidden lg:flex items-center gap-1.5 text-[10px] text-text-dim/70 select-none">
-              <span className="uppercase tracking-wide">Tips</span>
-              <span>Tab / Shift+Tab</span>
+              <span className="uppercase tracking-wide">{t('nav.tips')}</span>
+              <span>{t('nav.tabNavigation')}</span>
               <span>·</span>
-              <span>Enter</span>
+              <span>{t('nav.enter')}</span>
             </div>
             <div />
           </header>

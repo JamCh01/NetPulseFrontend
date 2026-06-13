@@ -1,9 +1,10 @@
-import { memo, useMemo, useState } from 'react'
+import { memo, useId, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { AgentSeriesData } from '@/features/monitoring/lib/build-multi-agent-option'
 import type { MonitoringMetricProtocol } from '@/features/monitoring/lib/monitoring-data-point'
-import { formatMetricValue, getMetricColumns, normalizeProtocol, summarizeAgentMetricRows, type AgentMetricRow } from '@/features/monitoring/lib/protocol-metrics'
+import { formatMetricValue, getMetricColumns, normalizeProtocol, summarizeAgentMetricRows } from '@/features/monitoring/lib/protocol-metrics'
 import { cn } from '@/lib/utils'
+import { useStableSnapshot } from '@/hooks/use-stable-snapshot'
 
 interface MetricDetailTableProps {
   protocol: MonitoringMetricProtocol
@@ -24,12 +25,14 @@ function MetricDetailTableInner({
   const normalizedProtocol = normalizeProtocol(protocol)
   const columns = useMemo(() => getMetricColumns(normalizedProtocol), [normalizedProtocol])
   const rows = useMemo(() => summarizeAgentMetricRows(agentSeries, normalizedProtocol), [agentSeries, normalizedProtocol])
-  const [rowSnapshot, setRowSnapshot] = useState<{ protocol: string; rows: AgentMetricRow[] }>({
-    protocol: normalizedProtocol,
-    rows,
+  const stableScope = useId()
+  const snapshotRows = useStableSnapshot({
+    scope: `metric-detail-table:${normalizedProtocol}:${stableScope}`,
+    value: rows,
+    hasValue: rows.length > 0 && !isLoading && !isUpdating,
+    isUpdating: isLoading || isUpdating,
   })
   const displayRows = useMemo(() => {
-    const snapshotRows = rowSnapshot.protocol === normalizedProtocol ? rowSnapshot.rows : []
     if ((isLoading || isUpdating) && snapshotRows.length > 0) {
       const mergedRows = new Map(snapshotRows.map((row) => [row.agentUuid, row]))
       for (const row of rows) {
@@ -38,12 +41,7 @@ function MetricDetailTableInner({
       return Array.from(mergedRows.values()).sort((a, b) => a.agentName.localeCompare(b.agentName))
     }
     return rows
-  }, [isLoading, isUpdating, normalizedProtocol, rowSnapshot, rows])
-  if (rowSnapshot.protocol !== normalizedProtocol) {
-    setRowSnapshot({ protocol: normalizedProtocol, rows })
-  } else if (!isLoading && !isUpdating && rows.length > 0 && rowSnapshot.rows !== rows) {
-    setRowSnapshot({ protocol: normalizedProtocol, rows })
-  }
+  }, [isLoading, isUpdating, rows, snapshotRows])
   const hasRows = displayRows.length > 0
   const title = t('monitoring.detailMetricsTitle', { protocol: normalizedProtocol.toUpperCase() })
 

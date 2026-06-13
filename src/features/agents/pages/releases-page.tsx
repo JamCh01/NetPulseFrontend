@@ -111,7 +111,7 @@ export default function ReleasesPage() {
   }), [activeFilter, archFilter, osFilter, versionFilter])
 
   const { data, isLoading, error } = useAgentArtifacts(queryFilters)
-  const artifacts = (data?.data.items ?? []) as AgentArtifactResponse[]
+  const artifacts = useMemo(() => (data?.data.items ?? []) as AgentArtifactResponse[], [data?.data.items])
   const artifactsByUuid = useMemo(
     () => new Map(artifacts.map((artifact) => [artifact.artifact_uuid, artifact])),
     [artifacts],
@@ -250,7 +250,7 @@ export default function ReleasesPage() {
           >
             Agents /
           </button>
-          <h1 className="text-2xl font-semibold text-text-primary">Agent Artifacts</h1>
+          <h1 className="text-2xl font-semibold text-text-primary">{t('artifacts.title')}</h1>
           <p className="mt-1 text-sm text-text-muted">{t('artifacts.description')}</p>
         </div>
         <Button onClick={() => setUploadOpen(true)}>
